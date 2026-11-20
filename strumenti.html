@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Strumenti">
+<title>Mixando Lab · Strumenti, Calcolatori rapidi</title>
+<style>
+:root{
+  --mx-accent:#16a085; --mx-accent-soft:rgba(22,160,133,.12);
+  --bg:#f5f1e8; --paper:#fff; --ink:#2c1810; --ink-soft:#6b5c4c; --ink-mute:#8b7355;
+  --line:#e6e0d2; --r:14px;
+  --ff-serif:Georgia,"Cambria","Times New Roman",serif;
+  --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:48px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--paper);border-bottom:3px solid var(--mx-accent);box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.mx-bar .em{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--mx-accent);color:#fff}
+.mx-bar .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mx-accent);line-height:1}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:14px;color:var(--ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:6px 12px;border:1px solid var(--mx-accent);border-radius:8px}
+.mx-bar a.back:hover{background:var(--mx-accent);color:#fff}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 22px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:680px;color:var(--ink-soft);font-size:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card>h3{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),var(--paper));display:flex;align-items:center;gap:10px}
+.card>h3 .num{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:var(--ff-sans)}
+.card .body{padding:16px 18px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em}
+.field .row{display:flex;align-items:stretch}
+.field input,.field select{flex:1;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:14px;background:#fff;outline:none;-moz-appearance:textfield;min-width:0;width:100%}
+.field input.with-unit{border-right:0;border-radius:9px 0 0 9px}
+.field .unit{display:inline-flex;align-items:center;padding:0 11px;border:1px solid var(--line);border-radius:0 9px 9px 0;background:#faf8f3;color:var(--ink-mute);font-size:12px;font-weight:600;white-space:nowrap}
+.field input:focus,.field select:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.result{margin-top:10px;padding:12px 14px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--mx-accent);border-radius:9px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.result .l{font-size:11px;letter-spacing:.10em;text-transform:uppercase;color:var(--ink-mute);font-weight:700}
+.result .v{font-family:var(--ff-serif);font-size:22px;font-weight:700;color:var(--mx-accent)}
+.note{margin-top:10px;padding:10px 14px;border-radius:9px;background:#fafaf3;border-left:3px solid var(--mx-accent);font-size:12px;color:var(--ink-soft);line-height:1.5;font-family:"JetBrains Mono","Courier New",monospace}
+.note strong{color:var(--ink);font-family:var(--ff-sans)}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+@media (max-width:600px){ .row3,.row2{grid-template-columns:1fr} }
+
+.mx-bar{position:relative}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}}
+
+/* Anagrafica perito+committente, pattern Mixando standard */
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto 8px;max-width:1080px}
+.ana-strip .pc{padding:10px 12px;background:#fff;border:1px solid #e6e0d2;border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6b5c4c;margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700;color:#2c1810}
+.ana-strip .pc .m{font-size:11.5px;color:#8b7355;margin-top:2px}
+.ana-actions{text-align:center;margin:0 auto 16px;max-width:1080px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ana-actions a,.ana-actions button{font-size:12px;font-weight:700;text-decoration:none;padding:6px 13px;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;border:1px solid currentColor}
+.ana-actions a{color:var(--mx-accent,#2c5d7c)}
+.ana-actions button.mx-reload{background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);color:#fff;border:0;box-shadow:0 3px 10px rgba(46,125,50,.42)}
+@media (max-width:760px){.ana-strip{grid-template-columns:1fr}}
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:0 !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:50px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab">
+  <div class="meta"><span class="tag">Strumenti</span><h1 class="ti">Calcolatori rapidi</h1></div>
+  <a class="back" href="suite.html">&larr; Suite</a>
+</header>
+
+<main>
+  
+
+  <section class="hero">
+    <h2>Calcolatori <em>tecnici di servizio</em></h2>
+    <p>Una raccolta di calcolatori brevi: conversioni di unità, U e R, sd, contenuto d'acqua, ricambio d'aria, punto di rugiada, fRsi, dose da radon, Karsten. Tutte le formule sono standard e citate.</p>
+  </section>
+
+  <article class="card">
+    <h3><span class="num">1</span> Conversione U ↔ R (resistenza termica)</h3>
+    <div class="body">
+      <div class="row2">
+        <div class="field"><label>Trasmittanza U</label><div class="row"><input type="number" step="0.001" id="cU" class="with-unit" placeholder="es. 0.30"><span class="unit">W/m²K</span></div></div>
+        <div class="field"><label>Resistenza R</label><div class="row"><input type="number" step="0.01" id="cR" class="with-unit" placeholder="es. 3.33"><span class="unit">m²K/W</span></div></div>
+      </div>
+      <div class="note"><strong>R = 1 / U</strong> &middot; UNI EN ISO 6946:2018</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">2</span> Resistenza termica strato (R = s / λ)</h3>
+    <div class="body">
+      <div class="row3">
+        <div class="field"><label>Spessore s</label><div class="row"><input type="number" step="0.001" id="cS" class="with-unit" placeholder="0.10"><span class="unit">m</span></div></div>
+        <div class="field"><label>Conducibilità λ</label><div class="row"><input type="number" step="0.001" id="cL" class="with-unit" placeholder="0.04"><span class="unit">W/mK</span></div></div>
+        <div class="field"><label>Resistenza R</label><div class="row"><input type="number" step="0.01" id="cRs" class="with-unit" placeholder="2.50" readonly><span class="unit">m²K/W</span></div></div>
+      </div>
+      <div class="note"><strong>R = s / λ</strong> &middot; UNI EN ISO 6946:2018</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">3</span> Resistenza al vapore sd (sd = μ × s)</h3>
+    <div class="body">
+      <div class="row3">
+        <div class="field"><label>Spessore s</label><div class="row"><input type="number" step="0.001" id="vS" class="with-unit" placeholder="0.02"><span class="unit">m</span></div></div>
+        <div class="field"><label>μ (fattore resistenza)</label><div class="row"><input type="number" step="0.1" id="vMu" placeholder="10"></div></div>
+        <div class="field"><label>sd equivalente</label><div class="row"><input type="number" step="0.01" id="vSd" class="with-unit" placeholder="0.20" readonly><span class="unit">m</span></div></div>
+      </div>
+      <div class="note"><strong>sd = μ · s</strong> &middot; UNI EN ISO 12572:2024</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">4</span> Contenuto d'acqua (gravimetrico)</h3>
+    <div class="body">
+      <div class="row3">
+        <div class="field"><label>Massa umida</label><div class="row"><input type="number" step="0.01" id="wMu" class="with-unit" placeholder="120.50"><span class="unit">g</span></div></div>
+        <div class="field"><label>Massa secca (105°C)</label><div class="row"><input type="number" step="0.01" id="wMs" class="with-unit" placeholder="115.20"><span class="unit">g</span></div></div>
+        <div class="field"><label>Contenuto d'acqua w</label><div class="row"><input type="number" step="0.01" id="wW" class="with-unit" placeholder="4.60" readonly><span class="unit">%</span></div></div>
+      </div>
+      <div class="note"><strong>w% = (M<sub>umida</sub> − M<sub>secca</sub>) / M<sub>secca</sub> × 100</strong> &middot; UNI 11085:2003</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">5</span> Ricambio aria orario (n = portata / volume)</h3>
+    <div class="body">
+      <div class="row3">
+        <div class="field"><label>Portata aria</label><div class="row"><input type="number" step="1" id="aQ" class="with-unit" placeholder="120"><span class="unit">m³/h</span></div></div>
+        <div class="field"><label>Volume ambiente</label><div class="row"><input type="number" step="0.1" id="aV" class="with-unit" placeholder="40"><span class="unit">m³</span></div></div>
+        <div class="field"><label>Ricambi orari n</label><div class="row"><input type="number" step="0.1" id="aN" class="with-unit" placeholder="3.0" readonly><span class="unit">vol/h</span></div></div>
+      </div>
+      <div class="note"><strong>n = Q / V</strong> &middot; UNI EN 16798-1:2019 (cat. II abitazione: n ≥ 0,5 vol/h)</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">6</span> Conversione T °C ↔ °F ↔ K</h3>
+    <div class="body">
+      <div class="row3">
+        <div class="field"><label>Celsius</label><div class="row"><input type="number" step="0.1" id="tC" class="with-unit" placeholder="20"><span class="unit">°C</span></div></div>
+        <div class="field"><label>Fahrenheit</label><div class="row"><input type="number" step="0.1" id="tF" class="with-unit" placeholder="68"><span class="unit">°F</span></div></div>
+        <div class="field"><label>Kelvin</label><div class="row"><input type="number" step="0.1" id="tK" class="with-unit" placeholder="293.15"><span class="unit">K</span></div></div>
+      </div>
+      <div class="note"><strong>°F = °C × 9/5 + 32  &middot;  K = °C + 273,15</strong></div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">7</span> Punto di rugiada Magnus-Tetens (UNI EN ISO 13788:2013 App. E)</h3>
+    <div class="body">
+      <div class="row3">
+        <div class="field"><label>T aria</label><div class="row"><input type="number" step="0.1" id="dT" class="with-unit" placeholder="20"><span class="unit">°C</span></div></div>
+        <div class="field"><label>UR aria</label><div class="row"><input type="number" step="0.1" id="dRH" class="with-unit" placeholder="65"><span class="unit">%</span></div></div>
+        <div class="field"><label>Punto di rugiada Td</label><div class="row"><input type="number" step="0.01" id="dTd" class="with-unit" placeholder="13.20" readonly><span class="unit">°C</span></div></div>
+      </div>
+      <div class="note"><strong>α = ln(UR/100) + a·T/(b+T); Td = b·α/(a−α)</strong> con a=17,269 · b=237,3 °C · e<sub>0</sub>=610,5 Pa (acqua, T ≥ 0 °C) &middot; <strong>UNI EN ISO 13788:2013 App. E</strong>, gli stessi coefficienti di condensa-glaser.html e termoigrometria.html &middot; forma alternativa di uso meteorologico: Alduchov &amp; Eskridge (1996), a=17,625 · b=243,04</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">8</span> Pressione saturazione e UR-superficie</h3>
+    <div class="body">
+      <div class="row3">
+        <div class="field"><label>T superficie</label><div class="row"><input type="number" step="0.1" id="pT" class="with-unit" placeholder="14"><span class="unit">°C</span></div></div>
+        <div class="field"><label>T aria interna</label><div class="row"><input type="number" step="0.1" id="pTa" class="with-unit" placeholder="20"><span class="unit">°C</span></div></div>
+        <div class="field"><label>UR aria interna</label><div class="row"><input type="number" step="0.1" id="pRHa" class="with-unit" placeholder="65"><span class="unit">%</span></div></div>
+      </div>
+      <div class="row3" style="margin-top:8px">
+        <div class="field"><label>Psat(T_aria)</label><div class="row"><input type="text" id="pPsatA" class="with-unit" placeholder="2339" readonly><span class="unit">Pa</span></div></div>
+        <div class="field"><label>Pv (vapore reale)</label><div class="row"><input type="text" id="pPv" class="with-unit" placeholder="1520" readonly><span class="unit">Pa</span></div></div>
+        <div class="field"><label>UR superficie (sui muri)</label><div class="row"><input type="text" id="pRHs" class="with-unit" placeholder="93" readonly><span class="unit">%</span></div></div>
+      </div>
+      <div class="note"><strong>Psat = 610,5·exp(17,269·T/(237,3+T)) [Pa]</strong> &middot; UR_superficie = Pv/Psat(T_superficie) × 100 &middot; LIM Sedlbauer (2001): <strong>muffa se UR_si ≥ 80%</strong> &middot; UNI EN ISO 13788:2013 §5</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">9</span> Fattore di temperatura f<sub>Rsi</sub> (UNI EN ISO 13788)</h3>
+    <div class="body">
+      <div class="row3">
+        <div class="field"><label>T superficie interna</label><div class="row"><input type="number" step="0.1" id="fTsi" class="with-unit" placeholder="14"><span class="unit">°C</span></div></div>
+        <div class="field"><label>T aria interna</label><div class="row"><input type="number" step="0.1" id="fTi" class="with-unit" placeholder="20"><span class="unit">°C</span></div></div>
+        <div class="field"><label>T aria esterna</label><div class="row"><input type="number" step="0.1" id="fTe" class="with-unit" placeholder="0"><span class="unit">°C</span></div></div>
+      </div>
+      <div class="row3" style="margin-top:8px">
+        <div class="field" style="grid-column:span 3"><label>Fattore f<sub>Rsi</sub></label><div class="row"><input type="text" id="fOut" class="with-unit" placeholder="0,70" readonly><span class="unit">n.d.</span></div></div>
+      </div>
+      <div class="note"><strong>f<sub>Rsi</sub> = (T<sub>si</sub> − T<sub>e</sub>) / (T<sub>i</sub> − T<sub>e</sub>)</strong> &middot; Verifica DM 26/06/2015: <strong>f<sub>Rsi</sub> ≥ 0,72</strong> per zona E (UR_si limite 80%) &middot; UNI EN ISO 13788:2013 §5.3 + UNI EN ISO 14683:2018 (ponti termici)</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">10</span> Stratigrafia: trasmittanza U totale</h3>
+    <div class="body">
+      <div class="row3">
+        <div class="field"><label>R_si (interno)</label><div class="row"><input type="number" step="0.01" id="uRsi" class="with-unit" value="0.13"><span class="unit">m²K/W</span></div></div>
+        <div class="field"><label>R strati (somma)</label><div class="row"><input type="number" step="0.01" id="uRs" class="with-unit" placeholder="2.50"><span class="unit">m²K/W</span></div></div>
+        <div class="field"><label>R_se (esterno)</label><div class="row"><input type="number" step="0.01" id="uRse" class="with-unit" value="0.04"><span class="unit">m²K/W</span></div></div>
+      </div>
+      <div class="row3" style="margin-top:8px">
+        <div class="field" style="grid-column:span 3"><label>Trasmittanza U risultante</label><div class="row"><input type="text" id="uU" class="with-unit" placeholder="0.37" readonly><span class="unit">W/m²K</span></div></div>
+      </div>
+      <div class="note"><strong>U = 1 / (R<sub>si</sub> + ΣR<sub>n</sub> + R<sub>se</sub>)</strong> &middot; R<sub>si</sub> = 0,13 e R<sub>se</sub> = 0,04 (flusso orizzontale, UNI EN ISO 6946:2018) &middot; pareti verticali</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">11</span> Radon: dose efficace annua (ICRP 137)</h3>
+    <div class="body">
+      <div class="row3">
+        <div class="field"><label>Conc. Rn-222</label><div class="row"><input type="number" step="1" id="rConc" class="with-unit" placeholder="200"><span class="unit">Bq/m³</span></div></div>
+        <div class="field"><label>Occupazione</label><div class="row"><input type="number" step="1" id="rH" class="with-unit" value="7000"><span class="unit">h/anno</span></div></div>
+        <div class="field"><label>Dose efficace</label><div class="row"><input type="text" id="rD" class="with-unit" placeholder="9.66" readonly><span class="unit">mSv/anno</span></div></div>
+      </div>
+      <div class="note"><strong>Dose = Conc × Ore × 6,7·10⁻⁶ mSv/(Bq·h/m³)</strong> per abitazioni &middot; <strong>ICRP Publication 137 (2017)</strong> § 5 &middot; D.Lgs 101/2020 Art. 12: livello riferimento <b>300 Bq/m³</b> esistenti, <b>200 Bq/m³</b> nuove (dal 01/01/2025) · Art. 17 luoghi lavoro 300 Bq/m³</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">12</span> Karsten EN 16302: coefficiente assorbimento A<sub>w</sub></h3>
+    <div class="body">
+      <div class="row3">
+        <div class="field"><label>Volume assorbito</label><div class="row"><input type="number" step="0.1" id="kV" class="with-unit" placeholder="3.5"><span class="unit">ml</span></div></div>
+        <div class="field"><label>Tempo</label><div class="row"><input type="number" step="0.1" id="kT" class="with-unit" placeholder="10"><span class="unit">min</span></div></div>
+        <div class="field"><label>Area Karsten</label><div class="row"><input type="number" step="0.1" id="kA" class="with-unit" value="5.7"><span class="unit">cm²</span></div></div>
+      </div>
+      <div class="row3" style="margin-top:8px">
+        <div class="field" style="grid-column:span 3"><label>A<sub>w</sub> (assorbimento)</label><div class="row"><input type="text" id="kAw" class="with-unit" placeholder="n.d." readonly><span class="unit">kg/(m²·min<sup>0,5</sup>)</span></div></div>
+      </div>
+      <div class="note"><strong>A<sub>w</sub> = (V·ρ) / (A·√t)</strong> con ρ=1 g/ml &middot; <strong>UNI EN 16302:2013</strong> Karsten Pipe (tubo a pressione 1 cm H₂O) &middot; Misura riferita alla durata standard di prova (assorbimento a 60 min; prassi RILEM/EN 16302) &middot; Soglie orientative (default ingegneristico/letteratura di settore, lettura a 60 min): muratura sana A<sub>w</sub> &lt; 0,5; muratura bagnata A<sub>w</sub> &gt; 2,0</div>
+    </div>
+  </article>
+
+  <footer class="ft"><strong>Mixando · Strumenti v1</strong> &middot; Calcolatori didattici basati su norme europee e ISO</footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  function n(v){var x=parseFloat(v);return isNaN(x)?null:x;}
+  /* 20/11/2026: limiti dei dati. Prima i calcolatori prendevano per buoni valori impossibili (massa umida minore
+     della secca: «-10.00 %»; spessori negativi; umidità del 150 %). Con un dato fuori dai limiti il campo lo dice
+     e il risultato resta vuoto. */
+  var LIM = {
+    cU:[0,null], cR:[0,null], cS:[0,null], cL:[0,null], vS:[0,null], vMu:[0,null],
+    wMu:[0,null], wMs:[0,null], aQ:[0,null], aV:[0,null],
+    tC:[-273.15,null], tF:[-459.67,null], tK:[0,null],
+    dT:[-60,100], dRH:[0,100], pT:[-60,100], pTa:[-60,100], pRHa:[0,100],
+    fTsi:[-60,100], fTi:[-60,100], fTe:[-60,100],
+    uRsi:[0,null], uRs:[0,null], uRse:[0,null],
+    rConc:[0,null], rH:[0,8784],
+    kV:[0,null], kT:[0,null], kA:[0,null]
+  };
+  function avviso(el, msg){
+    var campo = el.closest('.field') || el.parentNode;
+    var box = campo.querySelector('.mx-fuori');
+    if(!box && msg){ box = document.createElement('small'); box.className = 'mx-fuori'; box.style.cssText = 'display:block;color:#b3261e;font-weight:700;font-size:11.5px;margin-top:3px'; campo.appendChild(box); }
+    if(box){ box.textContent = msg; box.style.display = msg ? 'block' : 'none'; }
+    el.style.borderColor = msg ? '#b3261e' : ''; el.style.background = msg ? '#fdeceb' : '';
+  }
+  function fuori(ids){
+    var male = false;
+    ids.forEach(function(id){
+      var el = document.getElementById(id), L = LIM[id], v = n(el.value), msg = '';
+      if(L && v != null && ((L[0] != null && v < L[0]) || (L[1] != null && v > L[1]))){
+        msg = (L[1] != null) ? ('Fuori dai limiti: da ' + L[0] + ' a ' + L[1] + '.') : ('Non può essere minore di ' + L[0] + '.');
+      }
+      avviso(el, msg); if(msg) male = true;
+    });
+    return male;
+  }
+  function svuota(ids, src){
+    var el = document.getElementById(src), card = el.closest('article') || document;
+    var ris = card.querySelectorAll('input[readonly]');
+    if(ris.length){ [].forEach.call(ris, function(r){ r.value = ''; }); }
+    else ids.forEach(function(id){ if(id !== src) document.getElementById(id).value = ''; });
+  }
+  function bind(ids, fn){ids.forEach(function(id){var el=document.getElementById(id);el.addEventListener('input',function(){
+    var card = el.closest('article') || document, haUscite = card.querySelectorAll('input[readonly]').length > 0;
+    if(!haUscite) ids.forEach(function(x){ if(x !== el.id) avviso(document.getElementById(x), ''); });   /* conversioni a doppio senso: conta solo il campo in cui si scrive */
+    if(fuori(haUscite ? ids : [el.id])){ svuota(ids, el.id); return; }   /* un dato impossibile: niente risultato */
+    fn(el.id);
+  });});}
+
+  /* 1. U ↔ R */
+  bind(['cU','cR'], function(src){
+    if(src==='cU'){var v=n(document.getElementById('cU').value);document.getElementById('cR').value=v?(1/v).toFixed(2):'';}
+    else{var v=n(document.getElementById('cR').value);document.getElementById('cU').value=v?(1/v).toFixed(3):'';}
+  });
+  /* 2. R = s/λ */
+  bind(['cS','cL'], function(){
+    var s=n(document.getElementById('cS').value),l=n(document.getElementById('cL').value);
+    document.getElementById('cRs').value=(s&&l)?(s/l).toFixed(2):'';
+  });
+  /* 3. sd = μ·s */
+  bind(['vS','vMu'], function(){
+    var s=n(document.getElementById('vS').value),mu=n(document.getElementById('vMu').value);
+    document.getElementById('vSd').value=(s&&mu!=null)?(s*mu).toFixed(2):'';
+  });
+  /* 4. contenuto acqua */
+  bind(['wMu','wMs'], function(){
+    var u=n(document.getElementById('wMu').value),s=n(document.getElementById('wMs').value);
+    /* 20/11/2026: la massa umida non può essere minore della secca (prima usciva un contenuto d'acqua negativo) */
+    if(u!=null && s!=null && s>0 && u<s){ avviso(document.getElementById('wMu'), 'La massa umida non può essere minore della massa secca.'); document.getElementById('wW').value=''; return; }
+    document.getElementById('wW').value=(u&&s&&s>0)?(((u-s)/s)*100).toFixed(2):'';
+  });
+  /* 5. ricambi aria */
+  bind(['aQ','aV'], function(){
+    var q=n(document.getElementById('aQ').value),v=n(document.getElementById('aV').value);
+    document.getElementById('aN').value=(q&&v&&v>0)?(q/v).toFixed(2):'';
+  });
+  /* 6. temperature */
+  bind(['tC','tF','tK'], function(src){
+    var c;
+    if(src==='tC'){c=n(document.getElementById('tC').value);}
+    else if(src==='tF'){var f=n(document.getElementById('tF').value);c=f!=null?(f-32)*5/9:null;}
+    else{var k=n(document.getElementById('tK').value);c=k!=null?k-273.15:null;}
+    if(c==null){if(src!=='tC')document.getElementById('tC').value='';if(src!=='tF')document.getElementById('tF').value='';if(src!=='tK')document.getElementById('tK').value='';return;}
+    if(src!=='tC')document.getElementById('tC').value=c.toFixed(2);
+    if(src!=='tF')document.getElementById('tF').value=(c*9/5+32).toFixed(2);
+    if(src!=='tK')document.getElementById('tK').value=(c+273.15).toFixed(2);
+  });
+
+  /* === Helper Magnus, coefficienti UNI EN ISO 13788:2013 App. E (allineati alla suite) === */
+  function _psat(T){ /* Pa */ return 610.5 * Math.exp(17.269*T/(237.3+T)); }
+  function _dewpoint(T, RH){ if(T==null||RH==null||RH<=0||RH>100) return null; var a=17.269,b=237.3; var alpha = Math.log(RH/100) + (a*T)/(b+T); return (b*alpha)/(a-alpha); }
+
+  /* 7. Punto di rugiada */
+  bind(['dT','dRH'], function(){
+    var T=n(document.getElementById('dT').value), RH=n(document.getElementById('dRH').value);
+    var td = _dewpoint(T,RH);
+    document.getElementById('dTd').value = (td!=null && isFinite(td)) ? td.toFixed(2) : '';
+  });
+
+  /* 8. Pressione saturazione + UR superficie */
+  bind(['pT','pTa','pRHa'], function(){
+    var Ts=n(document.getElementById('pT').value), Ta=n(document.getElementById('pTa').value), RHa=n(document.getElementById('pRHa').value);
+    /* 19/11/2026: tolto un dato, il risultato si svuota (prima restava quello vecchio) */
+    document.getElementById('pPsatA').value = (Ta!=null) ? _psat(Ta).toFixed(0) : '';
+    document.getElementById('pPv').value = (Ta!=null && RHa!=null) ? (_psat(Ta)*RHa/100).toFixed(0) : '';
+    document.getElementById('pRHs').value = (Ts!=null && Ta!=null && RHa!=null) ? ((_psat(Ta)*RHa/100)/_psat(Ts)*100).toFixed(1) : '';
+  });
+
+  /* 9. fRsi */
+  bind(['fTsi','fTi','fTe'], function(){
+    var Tsi=n(document.getElementById('fTsi').value), Ti=n(document.getElementById('fTi').value), Te=n(document.getElementById('fTe').value);
+    if(Tsi!=null && Ti!=null && Te!=null && (Ti-Te)!==0){ document.getElementById('fOut').value = ((Tsi-Te)/(Ti-Te)).toFixed(3); }
+    else { document.getElementById('fOut').value=''; }
+  });
+
+  /* 10. Stratigrafia U */
+  bind(['uRsi','uRs','uRse'], function(){
+    var Rsi=n(document.getElementById('uRsi').value), Rs=n(document.getElementById('uRs').value), Rse=n(document.getElementById('uRse').value);
+    if(Rsi!=null && Rs!=null && Rse!=null){ var Rtot = Rsi+Rs+Rse; document.getElementById('uU').value = Rtot>0 ? (1/Rtot).toFixed(3) : ''; }
+    else { document.getElementById('uU').value = ''; }   /* 19/11/2026 */
+  });
+
+  /* 11. Radon dose ICRP 137 */
+  bind(['rConc','rH'], function(){
+    var c=n(document.getElementById('rConc').value), h=n(document.getElementById('rH').value);
+    if(c!=null && h!=null){ var dose = c*h*6.7e-6; document.getElementById('rD').value = dose.toFixed(2); }
+    else { document.getElementById('rD').value = ''; }   /* 19/11/2026 */
+  });
+
+  /* 12. Karsten Aw */
+  bind(['kV','kT','kA'], function(){
+    var V=n(document.getElementById('kV').value), t=n(document.getElementById('kT').value), A=n(document.getElementById('kA').value);
+    if(V!=null && t!=null && A!=null && t>0 && A>0){
+      var Vm3 = V*1e-6; var Acm2 = A; var sqrtT = Math.sqrt(t);
+      var Aw = (V*1.0) / (Acm2 * sqrtT); /* g/(cm²·min^0.5) */
+      var Aw_SI = Aw * 10; /* g/cm² = 10 kg/m² (con ρ=1 g/cm³) */
+      document.getElementById('kAw').value = Aw_SI.toFixed(2);
+    } else { document.getElementById('kAw').value = ''; }   /* 19/11/2026 */
+  });
+})();
+</script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Risanamento">
+<title>Mixando Lab · Sapere, Soluzioni di Risanamento</title>
+<style>
+:root{
+  --mx-accent:#2e7d52; --mx-accent-strong:#1b5532; --mx-accent-soft:rgba(46,125,82,.12);
+  --bg:#f5f1e8; --paper:#fff; --ink:#2c1810; --ink-soft:#6b5c4c; --ink-mute:#8b7355;
+  --line:#e6e0d2; --r:14px;
+  --ff-serif:Georgia,"Cambria","Times New Roman",serif;
+  --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:0}
+
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:56px;display:flex;align-items:center;gap:14px;padding:0 20px;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%);border-bottom:3px solid var(--mx-accent);box-shadow:0 2px 12px rgba(20,20,40,.08)}
+.mx-bar .em{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong) 100%);color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12);position:relative}
+.mx-bar .em svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mx-bar .meta{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--mx-accent-strong);line-height:1.2;display:inline-flex;align-items:center;gap:6px}
+.mx-bar .tag::before,.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:16px;color:#1a1410;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:7px 14px;border:1.5px solid var(--mx-accent);border-radius:9px;background:rgba(255,255,255,.65)}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));color:#fff;transform:translateY(-1px)}
+.mx-bar{position:relative !important}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}.mx-bar{height:50px;padding:0 14px;gap:10px}body{padding-top:50px}.mx-bar .em{width:32px;height:32px}.mx-bar .em svg{width:17px;height:17px}.mx-bar .ti{font-size:13.5px}}
+
+main{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 14px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto 6px;max-width:760px;color:var(--ink-soft);font-size:14px}
+
+.intro1{background:linear-gradient(180deg,var(--mx-accent-soft),#fff);border:1px solid var(--line);border-left:4px solid var(--mx-accent);border-radius:10px;padding:13px 18px;margin-bottom:14px;font-size:13.5px;color:var(--ink-soft);line-height:1.55}
+.intro1 strong{color:var(--ink)}
+
+.pat-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 3px rgba(20,20,40,.05);margin-bottom:14px;overflow:hidden}
+.pat-card>h3{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),var(--paper));display:flex;align-items:center;gap:10px}
+.pat-card>h3 .num{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+.pat-card .body{padding:16px 18px}
+
+.pat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.pat-it{position:relative;padding:14px 12px 12px;border:1.5px solid var(--line);border-left:5px solid var(--pat-color, var(--mx-accent));border-radius:11px;background:#fff;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);text-align:left;font-family:inherit;color:var(--ink);overflow:hidden}
+.pat-it::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.45) 48%,rgba(255,255,255,.45) 52%,transparent 75%);transform:translateX(-140%);transition:transform .6s ease;pointer-events:none}
+.pat-it:hover{border-color:var(--pat-color, var(--mx-accent));background:linear-gradient(180deg,#fff,color-mix(in srgb, var(--pat-color, var(--mx-accent)) 9%, #fff));transform:translateY(-2px);box-shadow:0 6px 18px color-mix(in srgb, var(--pat-color, var(--mx-accent)) 22%, transparent)}
+.pat-it:hover::before{transform:translateX(140%)}
+.pat-it.on{background:linear-gradient(135deg,var(--pat-color, var(--mx-accent)),var(--pat-color-strong, var(--mx-accent-strong)));border-left-color:var(--pat-color-strong, var(--mx-accent-strong));border-color:var(--pat-color-strong, var(--mx-accent-strong));color:#fff;box-shadow:0 7px 22px color-mix(in srgb, var(--pat-color, var(--mx-accent)) 40%, transparent),inset 0 1px 0 rgba(255,255,255,.30)}
+.pat-it .pi{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:11px;background:linear-gradient(180deg,#fff,color-mix(in srgb, var(--pat-color, var(--mx-accent)) 14%, #fff));margin-bottom:8px;color:var(--pat-color-strong, var(--mx-accent-strong));box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--pat-color, var(--mx-accent)) 24%, transparent),0 1px 3px rgba(0,0,0,.05);transition:all .2s}
+.pat-it .pi svg{width:30px;height:30px}
+.pat-it:hover .pi{background:linear-gradient(180deg,#fff,#fff);box-shadow:inset 0 0 0 1.5px var(--pat-color, var(--mx-accent)),0 3px 8px color-mix(in srgb, var(--pat-color, var(--mx-accent)) 28%, transparent)}
+.pat-it.on .pi{background:rgba(255,255,255,.97);color:var(--pat-color-strong, var(--mx-accent-strong));box-shadow:inset 0 0 0 1px rgba(255,255,255,.6),0 3px 10px rgba(0,0,0,.22)}
+.pat-it .pl{font-family:var(--ff-serif);font-weight:700;font-size:14px;line-height:1.25;margin-bottom:3px}
+.pat-it .ps{font-size:11.5px;opacity:.78;line-height:1.35}
+.pat-it.on .ps{opacity:.92}
+.pat-it .pcheck{position:absolute;top:9px;right:10px;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.pat-it .pcheck svg{display:none;width:13px;height:13px;color:var(--pat-color-strong, var(--mx-accent-strong))}
+.pat-it.on .pcheck{background:#fff;border-color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.pat-it.on .pcheck svg{display:block}
+
+.pat-actions{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;font-size:12.5px;color:var(--ink-mute)}
+.pat-actions .cnt{font-weight:700;color:var(--mx-accent-strong);background:var(--mx-accent-soft);padding:2px 9px;border-radius:11px;font-size:12px}
+.btn-shiny{position:relative;overflow:hidden;padding:9px 16px;border-radius:10px;font:inherit;font-size:12.5px;font-weight:800;letter-spacing:.06em;border:0;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));box-shadow:0 4px 12px rgba(46,125,82,.32),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .15s,box-shadow .2s,filter .15s;text-transform:uppercase;display:inline-flex;align-items:center;gap:7px}
+.btn-shiny svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-shiny::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-140%);transition:transform .65s ease;pointer-events:none}
+.btn-shiny:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(46,125,82,.42);filter:brightness(1.08)}
+.btn-shiny:hover::before{transform:translateX(140%)}
+.btn-shiny.alt{background:linear-gradient(135deg,#9aa0a6,#5c6168);box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.btn-shiny.save{background:linear-gradient(135deg,#1976d2,#0d47a1);box-shadow:0 4px 12px rgba(13,71,161,.32)}
+.btn-shiny.pdf{background:linear-gradient(135deg,#c0392b,#7f1d1d);box-shadow:0 4px 12px rgba(192,57,43,.32)}
+
+/* OUTPUT */
+#solOut{margin-top:14px}
+.sol-empty{padding:30px 24px;text-align:center;color:var(--ink-mute);border:1px dashed var(--line);border-radius:12px;background:#fff;font-style:italic;font-size:14px}
+.sol-stats{display:flex;flex-wrap:wrap;gap:10px;padding:10px 14px;background:linear-gradient(180deg,#eef9f1,#f3fdf6);border:1px solid #bce5c8;border-radius:10px;margin-bottom:14px;font-size:13px;color:#1b5532}
+.sol-stats span{display:inline-flex;align-items:center;gap:5px}
+.sol-stats strong{color:#0f3a1f;font-size:14.5px;font-family:var(--ff-serif)}
+
+.sol-pat-block{background:#fff;border:1px solid var(--line);border-left:5px solid var(--block-color, var(--mx-accent));border-radius:12px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 4px rgba(20,20,40,.04)}
+.sol-pat-head{display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(180deg,color-mix(in srgb, var(--block-color, var(--mx-accent)) 16%, #fff),#fff);border-bottom:1px solid var(--line)}
+.sol-pat-head .kpi{width:44px;height:44px;border-radius:11px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--block-color, var(--mx-accent-strong));box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--block-color, var(--mx-accent)) 28%, transparent),0 2px 5px rgba(0,0,0,.05);flex-shrink:0}
+.sol-pat-head .kpi svg{width:28px;height:28px}
+.sol-pat-head .kpl{flex:1;font-family:var(--ff-serif);font-size:18px;font-weight:700;color:var(--ink);line-height:1.2}
+.sol-pat-head .kpx{font-size:11.5px;color:var(--ink-mute);margin-top:2px;display:block;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.sol-pat-body{padding:14px 16px}
+
+.sol-card{padding:14px 16px;border:1px solid var(--line);border-radius:11px;background:#fff;margin-bottom:10px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.sol-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--cat-color, var(--mx-accent))}
+.sol-card:hover{border-color:var(--cat-color, var(--mx-accent));box-shadow:0 4px 14px rgba(0,0,0,.08);transform:translateX(2px)}
+.sol-card .sc-head{padding-left:8px;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.sol-card .sc-n{font-family:var(--ff-serif);font-weight:700;font-size:15px;color:var(--ink);line-height:1.25;flex:1;min-width:220px}
+.sol-card .sc-tags{display:flex;gap:6px;flex-wrap:wrap}
+.sol-card .pill{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:11px;color:#fff;display:inline-flex;align-items:center;gap:4px;line-height:1.2}
+.sol-card .pill.cat{background:var(--cat-color, var(--mx-accent))}
+.sol-card .pill.inv-bassa{background:#16a34a}
+.sol-card .pill.inv-media{background:#ea580c}
+.sol-card .pill.inv-alta{background:#dc2626}
+.sol-card .pill.tmp{background:#475569;color:#fff;font-family:"JetBrains Mono","Courier New",monospace;letter-spacing:.02em;text-transform:none}
+.sol-card .sc-princ{padding-left:8px;font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.sol-card .sc-norma{padding-left:8px;font-family:"JetBrains Mono","Courier New",monospace;font-size:11.5px;color:var(--mx-accent-strong);background:var(--mx-accent-soft);padding:4px 9px;border-radius:9px;display:inline-block;font-weight:600;margin-left:8px}
+
+/* NORME aggregate */
+.sol-sec{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.sol-sec>h4{margin:0;padding:12px 16px;font-family:var(--ff-serif);font-size:14.5px;color:var(--ink);font-weight:700;background:#faf8f3;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.sol-sec>h4 .hi{width:28px;height:28px;border-radius:8px;background:var(--mx-accent-soft);color:var(--mx-accent-strong);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.sol-sec>h4 .hi svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sol-sec>h4 .badge{margin-left:auto;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:11px;background:var(--mx-accent-soft);color:var(--mx-accent-strong);letter-spacing:.06em}
+.sol-sec .ksbody{padding:10px 14px}
+
+.norme-list{margin:0;padding:0;list-style:none}
+.norme-list li{padding:7px 11px;border:1px solid var(--line);background:#fff;border-radius:8px;margin-bottom:5px;font-family:"JetBrains Mono","Courier New",monospace;font-size:12px;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.norme-list li .nb-tools{font-family:var(--ff-sans);font-size:10.5px;color:var(--ink-mute);font-weight:400;background:#faf8f3;padding:2px 8px;border-radius:9px}
+
+.mod-link{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:linear-gradient(180deg,#fff,var(--mx-accent-soft));color:var(--mx-accent-strong);border:1px solid rgba(46,125,82,.22);border-radius:9px;text-decoration:none;font-size:13px;font-weight:700;margin:3px;transition:all .15s}
+.mod-link:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(46,125,82,.28);transform:translateY(-1px)}
+.mod-link svg{width:18px;height:18px;flex-shrink:0}
+.mod-link .ar{font-size:11px;opacity:.7}
+
+.sol-export{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+
+/* Modal */
+.modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);display:none;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto}
+.modal.show{display:flex}
+.modal .panel{background:var(--paper);border-radius:16px;max-width:880px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);overflow:hidden;border:1px solid var(--line)}
+.modal .head{padding:18px 22px;background:linear-gradient(180deg,var(--mx-accent-soft),#fff);border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:14px}
+.modal .head .h{flex:1;min-width:0}
+.modal .head h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:20px;font-weight:700;color:var(--ink);line-height:1.25}
+.modal .head .sub{font-size:11.5px;color:var(--ink-mute);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+.modal .head .tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.modal .head .x{background:#fff;border:1px solid var(--line);width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;color:var(--ink-mute);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal .head .x:hover{background:#fee;color:#c0392b;border-color:#fdd}
+.modal .body{padding:20px 24px;max-height:70vh;overflow:auto;line-height:1.65;font-size:14px}
+.modal .body h3{font-family:var(--ff-serif);font-size:15px;color:var(--mx-accent-strong);margin:16px 0 6px;border-bottom:1px solid var(--line);padding-bottom:4px;display:flex;align-items:center;gap:7px}
+.modal .body h3:first-child{margin-top:0}
+.modal .body h3 svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.modal .body p{margin:0 0 8px;color:var(--ink)}
+.modal .body ul{padding-left:22px;margin:0 0 10px}
+.modal .body li{margin-bottom:4px;font-size:13.5px;color:var(--ink-soft)}
+.modal .body code{font-family:"JetBrains Mono","Courier New",monospace;background:var(--mx-accent-soft);color:var(--mx-accent-strong);padding:2px 6px;border-radius:5px;font-size:12px;font-weight:600}
+.modal .body .alert{padding:10px 13px;background:#fff5f3;border-left:3px solid #c0392b;font-size:13px;border-radius:7px;color:#5d1a14;margin:8px 0}
+.modal .body .alert strong{color:#7f1d1d}
+.modal .foot{padding:12px 22px;border-top:1px solid var(--line);background:#faf8f3;font-size:11.5px;color:var(--ink-mute);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+
+@media (max-width:760px){.pat-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.pat-grid{grid-template-columns:1fr}}
+
+/* === MX-TOOLBAR STANDARD MIXANDO (replicato da risalita.html) === */
+.mx-toolbar{background:#fff;border:1px solid #e6e0d2;border-radius:14px;box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden;margin-top:18px}
+.mx-toolbar-head{margin:0;padding:13px 18px;font-family:Georgia,serif;font-size:15px;color:#2c1810;font-weight:700;border-bottom:1px solid #e6e0d2;background:linear-gradient(180deg,rgba(25,118,210,.10),#fff);display:flex;align-items:center;gap:10px}
+.mx-toolbar-head .ico-wrap{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.mx-toolbar-head .title{flex:1}
+.mx-toolbar-head .title small{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-style:italic;font-size:11.5px;color:#8b7355;font-weight:500;letter-spacing:0;margin-top:2px}
+.mx-toolbar-body{padding:14px 18px 16px}
+.mx-toolbar.needs-result .mx-tb-btn[data-needs="result"]{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
+.mx-toolbar-hint{text-align:center;font-size:12px;color:#8b7355;font-style:italic;margin-bottom:10px;padding:6px 10px;background:#fffbef;border-radius:7px;border:1px dashed #e0d7b8}
+.mx-toolbar.is-active .mx-toolbar-hint{display:none}
+.mx-toolbar-inner{max-width:1080px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.mx-tb-btn{appearance:none;border:0;color:#fff;font:inherit;font-size:13px;font-weight:700;letter-spacing:.02em;padding:12px 18px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);box-shadow:0 3px 8px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.12);transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background-position .35s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap;min-width:0}
+.mx-tb-btn::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-tb-btn:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-tb-btn:hover::before{transform:translateX(130%)}
+.mx-tb-btn:active{transform:translateY(0) scale(.98);transition-duration:.05s}
+.mx-tb-btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.6)}
+.mx-tb-btn .ico{font-size:16px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.mx-tb-btn.tb-save{background-image:linear-gradient(135deg,#64b5f6 0%,#1976d2 45%,#0d47a1 100%);box-shadow:0 3px 10px rgba(25,118,210,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-load{background-image:linear-gradient(135deg,#ffb74d 0%,#f57c00 45%,#bf360c 100%);box-shadow:0 3px 10px rgba(245,124,0,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-compare{background-image:linear-gradient(135deg,#ba68c8 0%,#7b1fa2 45%,#311b92 100%);box-shadow:0 3px 10px rgba(123,31,162,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-word{background-image:linear-gradient(135deg,#5a9bd8 0%,#2b579a 45%,#0c2e5e 100%);box-shadow:0 3px 10px rgba(43,87,154,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-pdf{background-image:linear-gradient(135deg,#ef5350 0%,#c62828 45%,#7f0000 100%);box-shadow:0 3px 10px rgba(198,40,40,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-report{background-image:linear-gradient(135deg,#ffd54f 0%,#f9a825 45%,#e65100 100%);color:#3e2e00;text-shadow:0 1px 0 rgba(255,255,255,.45);box-shadow:0 3px 10px rgba(249,168,37,.50),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -2px 4px rgba(0,0,0,.10)}
+.mx-tb-btn.tb-reset{background-image:linear-gradient(135deg,#9e9e9e 0%,#616161 45%,#212121 100%);box-shadow:0 3px 10px rgba(97,97,97,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+@media (max-width:680px){.mx-tb-btn{padding:11px 13px;font-size:12px}.mx-tb-btn .label{display:none}.mx-tb-btn .ico{font-size:17px}}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<defs>
+<linearGradient id="g-mattone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d2674a"/><stop offset="1" stop-color="#8b3a1f"/></linearGradient>
+<linearGradient id="g-malta" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8dcc4"/><stop offset="1" stop-color="#a89978"/></linearGradient>
+<linearGradient id="g-cls" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a909b"/><stop offset="1" stop-color="#3f4751"/></linearGradient>
+<linearGradient id="g-armatura" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4b740"/><stop offset="1" stop-color="#c97a16"/></linearGradient>
+<linearGradient id="g-legno" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b8814f"/><stop offset="0.6" stop-color="#7c4e25"/><stop offset="1" stop-color="#5a371a"/></linearGradient>
+<linearGradient id="g-cristallo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bae6fd"/><stop offset="0.5" stop-color="#38bdf8"/><stop offset="1" stop-color="#0369a1"/></linearGradient>
+<linearGradient id="g-terra1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c4a574"/><stop offset="1" stop-color="#8b6c43"/></linearGradient>
+<linearGradient id="g-terra2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9c7146"/><stop offset="1" stop-color="#5f4423"/></linearGradient>
+<linearGradient id="g-terra3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b4423"/><stop offset="1" stop-color="#3e2a14"/></linearGradient>
+<linearGradient id="g-marmo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0e9d8"/><stop offset="1" stop-color="#b09e7a"/></linearGradient>
+
+<symbol id="i-risalita" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21 L4 16"/><path d="M9 21 L9 12"/><path d="M14 21 L14 8"/><path d="M19 21 L19 4"/><path d="M4 21 L20 21"/><path d="M19 4 L17 6 M19 4 L21 6"/></symbol>
+<symbol id="i-infiltraz" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7 L21 7"/><path d="M7 11 C7 13, 5 14, 5 16 C5 17.5, 6 18, 7 18 C8 18, 9 17.5, 9 16 C9 14, 7 13, 7 11 Z"/><path d="M12 11 C12 13, 10 14, 10 16 C10 17.5, 11 18, 12 18 C13 18, 14 17.5, 14 16 C14 14, 12 13, 12 11 Z"/><path d="M17 11 C17 13, 15 14, 15 16 C15 17.5, 16 18, 17 18 C18 18, 19 17.5, 19 16 C19 14, 17 13, 17 11 Z"/></symbol>
+<symbol id="i-muffe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><circle cx="5.5" cy="6" r="2"/><circle cx="18.5" cy="6" r="2"/><circle cx="5.5" cy="18" r="2"/><circle cx="18.5" cy="18" r="2"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></symbol>
+<symbol id="i-condensa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 L10 15"/><circle cx="10" cy="18" r="3"/><path d="M10 6 L10 13" stroke-width="2.4"/><path d="M17 8 C17 10, 15 11, 15 13 C15 14.5, 16 15, 17 15 C18 15, 19 14.5, 19 13 C19 11, 17 10, 17 8 Z"/></symbol>
+<symbol id="i-termigro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12 C5 7, 7 7, 9 12 S 13 17, 15 12 S 19 7, 21 12"/><path d="M3 18 L21 18"/><circle cx="6" cy="9.5" r="0.6" fill="currentColor"/><circle cx="18" cy="9.5" r="0.6" fill="currentColor"/></symbol>
+<symbol id="i-radon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 4 A 6 6 0 0 1 17.2 7 L 14.4 9 A 3 3 0 0 0 12 8 Z" fill="currentColor"/><path d="M17.2 17 A 6 6 0 0 1 6.8 17 L 9.6 15 A 3 3 0 0 0 14.4 15 Z" fill="currentColor"/><path d="M6.8 7 A 6 6 0 0 1 12 4 L 12 8 A 3 3 0 0 0 9.6 9 Z" fill="currentColor"/></symbol>
+<symbol id="i-iaq" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8 C6 8, 9 10, 13 8 C16 6, 19 7, 21 9"/><path d="M3 13 C6 13, 9 15, 13 13 C16 11, 19 12, 21 14"/><path d="M3 18 C6 18, 9 20, 13 18 C16 16, 19 17, 21 19"/><circle cx="8" cy="8" r="0.7" fill="currentColor"/><circle cx="16" cy="13" r="0.7" fill="currentColor"/><circle cx="10" cy="18" r="0.7" fill="currentColor"/></symbol>
+<symbol id="i-tenuta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 L12 4 L20 11 L20 20 L4 20 Z"/><path d="M9 20 L9 14 L15 14 L15 20"/><path d="M12 8 C8 10, 8 14, 12 14 C16 14, 16 10, 12 8"/><path d="M14 11 L12 9 L14 11 L12 13"/></symbol>
+<symbol id="i-sali" viewBox="0 0 24 24"><path d="M12 3 L19 12 L12 21 L5 12 Z" fill="url(#g-cristallo)" stroke="#0369a1" stroke-width="1"/><path d="M12 3 L8.5 7.5 L8.5 12 L12 21" fill="rgba(255,255,255,.18)"/><path d="M8.5 12 L15.5 12" stroke="#fff" stroke-width="1.2" stroke-opacity=".7"/><path d="M12 3 L12 21" stroke="#fff" stroke-width="1.2" stroke-opacity=".55"/></symbol>
+<symbol id="i-mbc" viewBox="0 0 24 24"><rect x="4" y="20" width="16" height="1.6" fill="url(#g-marmo)" stroke="#a39580" stroke-width="0.6"/><rect x="4" y="16" width="16" height="2.2" fill="url(#g-marmo)" stroke="#a39580" stroke-width="0.6"/><rect x="6.5" y="6.5" width="2.3" height="9.5" fill="url(#g-marmo)" stroke="#a39580" stroke-width="0.5"/><rect x="10.85" y="6.5" width="2.3" height="9.5" fill="url(#g-marmo)" stroke="#a39580" stroke-width="0.5"/><rect x="15.2" y="6.5" width="2.3" height="9.5" fill="url(#g-marmo)" stroke="#a39580" stroke-width="0.5"/><rect x="4" y="4" width="16" height="2.5" fill="url(#g-marmo)" stroke="#a39580" stroke-width="0.6"/><polygon points="4,4 12,1.5 20,4" fill="url(#g-marmo)" stroke="#8a7a5e" stroke-width="0.6"/></symbol>
+<symbol id="i-cls" viewBox="0 0 24 24"><polygon points="4,8 12,4 20,8 20,17 12,21 4,17" fill="url(#g-cls)" stroke="#374151" stroke-width="1"/><polyline points="4,8 12,12 20,8" fill="none" stroke="#1f2937" stroke-width="1"/><line x1="12" y1="12" x2="12" y2="21" stroke="#1f2937" stroke-width="1"/><line x1="8" y1="10" x2="8" y2="14" stroke="url(#g-armatura)" stroke-width="2.2" stroke-linecap="round"/><line x1="16" y1="10" x2="16" y2="14" stroke="url(#g-armatura)" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="i-mur" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="0.5" fill="url(#g-mattone)" stroke="#5e2412" stroke-width="0.8"/><line x1="3" y1="10" x2="21" y2="10" stroke="url(#g-malta)" stroke-width="1.6"/><line x1="3" y1="14" x2="21" y2="14" stroke="url(#g-malta)" stroke-width="1.6"/><line x1="9" y1="5" x2="9" y2="10" stroke="url(#g-malta)" stroke-width="1.4"/><line x1="15" y1="5" x2="15" y2="10" stroke="url(#g-malta)" stroke-width="1.4"/><line x1="6" y1="10" x2="6" y2="14" stroke="url(#g-malta)" stroke-width="1.4"/><line x1="12" y1="10" x2="12" y2="14" stroke="url(#g-malta)" stroke-width="1.4"/><line x1="18" y1="10" x2="18" y2="14" stroke="url(#g-malta)" stroke-width="1.4"/><line x1="9" y1="14" x2="9" y2="19" stroke="url(#g-malta)" stroke-width="1.4"/><line x1="15" y1="14" x2="15" y2="19" stroke="url(#g-malta)" stroke-width="1.4"/></symbol>
+<symbol id="i-legno" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="url(#g-legno)" stroke="#3e2a14" stroke-width="0.8"/><circle cx="12" cy="12" r="6" fill="none" stroke="#3e2a14" stroke-width="0.7" stroke-opacity=".55"/><circle cx="12" cy="12" r="3" fill="none" stroke="#3e2a14" stroke-width="0.7" stroke-opacity=".55"/><circle cx="12" cy="12" r="0.9" fill="#3e2a14"/></symbol>
+<symbol id="i-geo" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="4" fill="url(#g-terra1)" stroke="#8b6c43" stroke-width="0.5"/><rect x="3" y="11" width="18" height="4" fill="url(#g-terra2)" stroke="#5f4423" stroke-width="0.5"/><rect x="3" y="15" width="18" height="4" fill="url(#g-terra3)" stroke="#3e2a14" stroke-width="0.5"/><circle cx="6.5" cy="9" r="0.7" fill="#5f4423" fill-opacity=".7"/><circle cx="13" cy="9" r="0.6" fill="#5f4423" fill-opacity=".7"/><path d="M5 13 L6.5 13 M10 13 L13 13 M16.5 13 L19 13" stroke="#3e2a14" stroke-width="0.8" stroke-opacity=".7"/><path d="M5 17 L6 17 M9 17 L11 17 M14 17 L16 17 M18 17 L19 17" stroke="#1d130a" stroke-width="0.8" stroke-opacity=".75"/></symbol>
+
+<symbol id="i-acustica" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 L4 15 L8 15 L13 19 L13 5 L8 9 Z"/><path d="M16 9.5 C17.4 11, 17.4 13, 16 14.5"/><path d="M18.6 7.5 C21 10, 21 14, 18.6 16.5"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 L10 17 L19 7"/></symbol>
+<symbol id="i-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L22 20 L2 20 Z"/><path d="M12 10 L12 14"/><circle cx="12" cy="17" r="0.7" fill="currentColor"/></symbol>
+<symbol id="i-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3 L17.3 8.9 L21 5.2 C21.5 6.5, 21.3 8, 20.3 9 L13 16.3 L7.7 21.6 C6.8 22.5, 5.4 22.5, 4.5 21.6 L2.4 19.5 C1.5 18.6, 1.5 17.2, 2.4 16.3 L7.7 11 L15 3.7 C16 2.7, 17.5 2.5, 18.8 3 Z"/></symbol>
+</defs>
+</svg>
+<header class="mx-bar">
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab">
+  <div class="meta">
+    <span class="tag">Sapere</span>
+    <span class="ti">Soluzioni di Risanamento per Patologie Edilizie</span>
+  </div>
+  <div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <a class="back" href="suite.html">← Suite</a>
+</header>
+
+<main>
+  <section class="hero">
+    <h2>Soluzioni di <em>risanamento</em></h2>
+    <p>Seleziona le patologie da risanare → il sistema propone le <strong>tecniche normate</strong> raggruppate per patologia, con categoria, invasività, tempistica, norma cardine, indicazioni e limitazioni. Tutte le tecniche verificate su <strong>fonti istituzionali</strong> (WTA · UNI · ISO · ASTM · BS · ANSI/AARST · IICRC · CIE · CNR).</p>
+  </section>
+
+  <div class="banner red" style="background:#fff5f3;border:1px solid #fdd;border-left:4px solid #c0392b;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12.5px;color:#5d1a14"><strong>&#9888; Avvertenza generale per restauro umidità:</strong> il paper di Gonçalves-Pel-Rodrigues (LNEC Lisboa + TU Eindhoven, 2006/2007, case study EU) ha documentato che <strong>l'uso di materiali a base di cemento Portland su murature umide è causa ricorrente di peggioramento dei danni da sali</strong> (3 di 5 casi di studio). Gli idrossidi alcalini del cemento reagiscono con CO₂ atmosferica formando carbonati/bicarbonati alcalini. <strong>Preferire sempre malte a base calce idraulica naturale (NHL) e sistemi WTA</strong> (intonaco macroporoso WTA 2-9-20:2020-03).</div>
+
+  <div class="intro1">
+    <strong>Come funziona.</strong> Clicca le patologie diagnosticate. Per ognuna ottieni le <strong>tecniche di risanamento applicabili</strong> con principio operativo, norme cardine, indicazioni ("quando applicarla") e <strong>limitazioni</strong> ("quando NON applicarla"). Le 59 tecniche del catalogo coprono 15 patologie con 166 norme uniche citate.
+  </div>
+
+  <div class="pat-card">
+    <h3><span class="num">1</span> Quali patologie devi risanare?</h3>
+    <div class="body">
+      <div class="pat-grid" id="patGrid"></div>
+      <div class="pat-actions">
+        <span>Selezionate: <span class="cnt" id="selCnt">0</span></span>
+        <button class="btn-shiny alt" type="button" onclick="resetSel()">Reset</button>
+        <button class="btn-shiny" type="button" onclick="selectAll()">Seleziona tutte</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="solOut"></div>
+  <div class="mx-toolbar needs-selection" id="mxToolbar">
+    <h3 class="mx-toolbar-head">
+      <span class="ico-wrap">&#128190;</span>
+      <span class="title">Salvataggio &amp; esportazione<small>Salva l'analisi, ricarica un'analisi precedente o esporta in Word/PDF per la relazione tecnica</small></span>
+    </h3>
+    <div class="mx-toolbar-body">
+      <div class="mx-toolbar-hint">&#9432; Seleziona almeno una patologia per attivare i pulsanti di salvataggio ed esportazione</div>
+      <div class="mx-toolbar-inner">
+        <button type="button" class="mx-tb-btn tb-save"    id="btnSave"    data-needs="selection" onclick="tbSave()"><span class="ico">&#128190;</span><span class="label">Salva</span></button>
+        <button type="button" class="mx-tb-btn tb-load"    id="btnLoad"    onclick="tbLoad()" title="Riapre una selezione salvata"><span class="ico">&#128194;</span><span class="label">Carica</span></button>
+        <button type="button" class="mx-tb-btn tb-word"    id="btnWord"    data-needs="selection" onclick="exportSol()"><span class="ico">&#128221;</span><span class="label">Salva Word</span></button>
+        <button type="button" class="mx-tb-btn tb-pdf"     id="btnPDF"     data-needs="selection" onclick="exportPDF()"><span class="ico">&#128196;</span><span class="label">Stampa / PDF</span></button>
+        <button type="button" class="mx-tb-btn tb-report"  id="btnReport"  data-needs="selection" onclick="saveSnapshot()"><span class="ico">&#128230;</span><span class="label">Al report</span></button>
+        <button type="button" class="mx-tb-btn tb-reset"   id="btnReset"   onclick="tbReset()"><span class="ico">&#10005;</span><span class="label">Reset</span></button>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="ft">
+    <strong>Mixando v3</strong> · Soluzioni di Risanamento · 59 tecniche su 15 patologie · 166 norme verificate.
+  </footer>
+</main>
+
+<div class="modal" id="md" onclick="if(event.target===this)mxCloseModal()">
+  <div class="panel">
+    <div class="head">
+      <div class="h">
+        <h2 id="md-title"></h2>
+        <div class="sub" id="md-sub"></div>
+        <div class="tag-row" id="md-tags"></div>
+      </div>
+      <button class="x" onclick="mxCloseModal()" title="Chiudi">✕</button>
+    </div>
+    <div class="body" id="md-body"></div>
+    <div class="foot"><div>Fonte: verifica su WTA Merkblätter, UNI Store, ISO, ASTM, BSI, ANSI/AARST, IICRC, CIE, CNR-DT</div></div>
+  </div>
+</div>
+
+<script>
+window.SOLUZIONI = {"risalita": [{"nome": "Barriera chimica per iniezione idrofobante", "categoria": "Barriera orizzontale", "invasivita": "media", "tempistica": "2-3 giorni", "principio": "Foratura della muratura a quota 15-20 cm dal pavimento (Ø 12-20 mm, interasse 10-12 cm, inclinazione 15-30°) e iniezione a pressione (>3 bar) o gravità di soluzione idrofobante (silani, silossani, alchilsilossani). I principi attivi reagiscono con la matrice cementizia/calcica formando una barriera continua impermeabile al risalimento capillare ma traspirante al vapore.", "norme_cardine": "WTA Merkblatt 4-10-24/D (già 4-4-04/D)", "norme_secondarie": ["UNI EN 16085:2012"], "indicazioni": "Muratura con spessore ≤60 cm, contenuto d'acqua <80% saturazione capillare (UNI 11085:2003 gravimetrico obbligatorio per pre-test), accesso bilaterale per fori passanti.", "limitazioni": "Inefficace su murature con UR di saturazione (>95% Cmax), pre-asciugatura con bocche d'aria o iniezione ad alta pressione necessarie. Non applicabile su pareti con lesioni passanti o forte presenza di cavità."}, {"nome": "Barriera meccanica (taglio della muratura + isolante)", "categoria": "Barriera orizzontale", "invasivita": "alta", "tempistica": "2-4 settimane", "principio": "Taglio orizzontale a tratte alternate della muratura (60-100 cm/tratta) con sega circolare diamantata o filo diamantato, inserimento di lastra impermeabile rigida (PVC ad alta densità, ardesia, acciaio inox) e ripristino con malta espansiva non ritirabile.", "norme_cardine": "WTA Merkblatt 4-7-02/D", "norme_secondarie": ["UNI EN 16085:2012", "NTC 2018 §8 (esistenti)"], "indicazioni": "Murature non vincolate strutturalmente, spessore ≤80 cm, accesso bilaterale. È l'intervento più definitivo e duraturo.", "limitazioni": "INVASIVO, sospensione carichi mediante tratte. Non applicabile su murature portanti senza progetto strutturale firmato (D.M. 17/01/2018). Costi elevati. Non utilizzabile su beni vincolati senza autorizzazione MiC (D.Lgs 42/2004 art. 21)."}, {"nome": "Intonaco macroporoso da risanamento (sistema WTA)", "categoria": "Intonaco di sacrificio", "invasivita": "bassa", "tempistica": "15-30 giorni", "principio": "Rimozione dell'intonaco esistente fino a circa 80 cm sopra la massima altezza visibile di umidità, applicazione di un sistema WTA: scratch coat + intonaco macroporoso 2-3 cm (porosità >40%, ws <5%, capillarità W>0,3 kg/m²·√h). L'evaporazione avviene all'interfaccia intonaco-aria sopra il livello di risalita, i sali cristallizzano all'interno della porosità senza danneggiare l'intonaco finale.", "norme_cardine": "WTA Merkblatt 2-9-20/D:2020-03", "norme_secondarie": ["UNI EN 998-1:2016", "EN 1015 serie"], "indicazioni": "Murature con altezza di risalita ≤1,5 m, carico salino moderato-alto. Compatibile con beni vincolati e patrimoniali.", "limitazioni": "NON elimina la causa, la risalita continua sotto l'intonaco. Va abbinato a barriera chimica/meccanica se l'umidità prosegue. Va rinnovato ogni 15-25 anni a saturazione."}, {"nome": "Elettro-osmosi attiva (pulsata)", "categoria": "Barriera elettrofisica", "invasivita": "bassa", "tempistica": "3-6 mesi (efficacia)", "principio": "Inserimento di elettrodi anodici nella muratura (a quota 30-50 cm) collegati a un'unità di controllo che genera un campo elettrico pulsato di polarità invertibile. Il campo respinge l'acqua verso il basso/esterno per effetto elettro-cinetico. Sistema certificato CE.", "norme_cardine": "UNI EN 16682:2017 (misura prestazioni)", "norme_secondarie": ["WTA Merkblatt 4-10-24/D"], "indicazioni": "Murature con vincolo storico-artistico, dove i metodi invasivi non sono ammessi. Monitoraggio mediante prelievi gravimetrici UNI 11085:2003 obbligatorio post-installazione (controllo efficacia).", "limitazioni": "Efficacia variabile e da verificare caso per caso (controversa su murature in tufo o pietre cristalline). Richiede corrente continua e manutenzione periodica delle apparecchiature."}, {"nome": "Aerazione muraria (lama d'aria perimetrale / vespaio)", "categoria": "Aerazione", "invasivita": "media", "tempistica": "3-7 giorni", "principio": "Realizzazione di intercapedine ventilata sul perimetro esterno (lama d'aria 5-10 cm con griglie alto/basso) o nel piano di fondazione (vespaio aerato con casseri a perdere) che intercetta l'umidità di risalita e la espelle con flusso d'aria naturale o forzato.", "norme_cardine": "UNI EN ISO 13370:2018", "norme_secondarie": ["Reg.Igiene Lombardia DGR 25/07/1989 n. 4/45266"], "indicazioni": "Edifici controterra con pavimento sopra terreno umido. Effetto sinergico con barriera chimica.", "limitazioni": "Richiede scavo perimetrale (3,5-6 m³/m lineare), non applicabile in contesti urbani con marciapiede pubblico/sottoservizi."}], "infiltraz": [{"nome": "Impermeabilizzazione esterna in pressione positiva (BS 8102 Type A)", "categoria": "Impermeabilizzazione", "invasivita": "alta", "tempistica": "2-4 settimane", "principio": "Applicazione esterna di sistema barriera continuo (membrana PE/PEX/EPDM, bitume polimero APP/SBS, resine poliuretaniche o cementizio osmotico). Lo strato è in pressione positiva sul lato d'ingresso dell'acqua (situato esternamente alla struttura).", "norme_cardine": "BS 8102:2022 Type A", "norme_secondarie": ["UNI 11470:2015", "UNI EN 13967:2017", "UNI EN 1504-2:2005 metodo MC"], "indicazioni": "Coperture, terrazzi, pareti contro-terra accessibili dall'esterno. Da Grade 1 BS 8102:2022 (non residenziale, perdite limitate ammesse).", "limitazioni": "Per Grade 3 (residenziale, asciutto) richiede sistema combinato Type A+B o A+C (BS 8102:2022 obbliga specialist designer). Su murature di pregio: compatibilità chimica da verificare."}, {"nome": "Calcestruzzo strutturalmente integrale Watertight (BS 8102 Type B)", "categoria": "Struttura impermeabile", "invasivita": "alta (nuovo) / non applicabile (esistente)", "tempistica": "fase costruttiva", "principio": "Progettazione del calcestruzzo stesso come barriera idrica permanente: rapporto a/c ≤0,45, classe XC4/XD3 (UNI 11104:2025), additivi cristallizzanti, water-stop nei riprese di getto, dettagli costruttivi cura giunti (BS 8102:2022 cl.6).", "norme_cardine": "BS 8102:2022 Type B", "norme_secondarie": ["UNI 11104:2025", "UNI EN 206:2021"], "indicazioni": "Nuove costruzioni interrate residenziali/commerciali (Grade 2-3 BS 8102:2022).", "limitazioni": "Solo per opere nuove. Per esistenti, non applicabile. Per Grade 4 (museale/archivi) BS 8102:2022 richiede Type B+A o B+C combinati."}, {"nome": "Cavity drain system - canalizzazione interna (BS 8102 Type C)", "categoria": "Drenaggio cavity", "invasivita": "media", "tempistica": "1-2 settimane", "principio": "Accettazione che l'acqua entri nella struttura ma raccolta e drenaggio mediante membrana di cavity (HDPE bugne) + canalette perimetrali + pozzetto + pompa di sollevamento. L'acqua viene gestita anziché esclusa.", "norme_cardine": "BS 8102:2022 Type C", "norme_secondarie": ["BS 8485:2015", "UNI EN 13252:2016 (geotessili)"], "indicazioni": "Refurbishment di interrati esistenti dove Type A esterno non è praticabile. Spesso scelta più economica e affidabile per Grade 3 residenziale (BS 8102:2022 Annex A).", "limitazioni": "Richiede manutenzione delle pompe (vita 8-12 anni), accesso permanente al pozzetto. Riduce volume utile dei locali (5-10 cm sulle pareti)."}, {"nome": "Iniezione resine poliuretaniche/acriliche su lesioni", "categoria": "Sigillatura selettiva", "invasivita": "bassa", "tempistica": "1-2 giorni", "principio": "Iniezione tramite pacchera a pressione (50-200 bar) di resine espandenti (PU mono-componente) o gel acrilici elastici in lesioni e giunti permeabili. La resina espande in contatto con l'acqua sigillando il percorso preferenziale.", "norme_cardine": "UNI EN 1504-5:2013", "norme_secondarie": ["UNI EN 12715:2021 (jet grouting)"], "indicazioni": "Infiltrazioni puntuali su crepe attive in calcestruzzo o murature, infiltrazioni in pozzetti, tunnel, giunti.", "limitazioni": "NON è una soluzione definitiva su murature umide diffuse. Verificare compatibilità chimica del substrato (sali, gel acrilici possono ritirarsi in ciclo bagnato/asciutto)."}, {"nome": "Manto impermeabile rifacimento copertura/terrazzo", "categoria": "Rifacimento manto", "invasivita": "alta", "tempistica": "1-3 settimane", "principio": "Rimozione del manto esistente, ispezione e ripristino del massetto pendenza (≥1,5%), applicazione di nuovo manto impermeabile sintetico (TPO, PVC, EPDM saldato) o bituminoso polimero (APP/SBS doppio strato). Risvolti verticali ≥15 cm.", "norme_cardine": "UNI 11470:2015", "norme_secondarie": ["UNI EN 13956:2013 (manti sintetici)", "UNI EN 13707:2013 (manti bituminosi)", "BS 8102:2022 Type A"], "indicazioni": "Coperture piane o a debole pendenza con infiltrazioni diffuse o manto esistente >20 anni di età.", "limitazioni": "Per coperture vincolate richiede compatibilità estetica/storica. Non applicabile sopra coibente bagnato, verifica preliminare con prelievi gravimetrici."}], "sali": [{"nome": "Poultice / impacchi adsorbenti per desalinizzazione", "categoria": "Desalinizzazione passiva", "invasivita": "bassa", "tempistica": "3-21 giorni", "principio": "Applicazione di impacchi di materiali adsorbenti (argilla bentonitica, sepiolite, polpa di cellulosa) saturati con acqua deionizzata sulla superficie muraria. Per gradiente osmotico i sali migrano dalla muratura all'impacco, che viene poi rimosso e smaltito. Cicli ripetuti fino a riduzione conducibilità <500 µS/cm sull'estratto acquoso (NormaL 13/83 ICR).", "norme_cardine": "WTA Merkblatt 3-13-20/D (desalinizzazione)", "norme_secondarie": ["NORMAL 13/83 ICR", "UNI 11176:2025"], "indicazioni": "Beni culturali vincolati, intonaci storici dove non si può rimuovere il substrato. Solfati, cloruri, nitrati.", "limitazioni": "Cicli lunghi (settimane) per concentrazioni elevate. Non rimuove la causa della contaminazione salina (umidità di risalita): da abbinare a barriera capillare."}, {"nome": "Rimozione meccanica intonaco contaminato + intonaco WTA macroporoso", "categoria": "Sostituzione strato di sacrificio", "invasivita": "media", "tempistica": "10-25 giorni", "principio": "Rimozione dell'intonaco contaminato fino a 80 cm sopra l'altezza max di sali visibili + spazzolatura/aspirazione del supporto. Applicazione di scratch coat + intonaco WTA macroporoso che intrappola i sali nella propria porosità senza danneggiare la finitura.", "norme_cardine": "WTA Merkblatt 2-9-20/D:2020-03", "norme_secondarie": ["UNI EN 998-1:2016", "UNI 11176:2025"], "indicazioni": "Murature non vincolate, alto carico salino, intonaco esistente in fase di distacco/sfogliamento.", "limitazioni": "Non rimuove la causa, abbinare a intervento sulla risalita o infiltrazione. Va rinnovato a saturazione (15-25 anni)."}, {"nome": "Desalinizzazione elettrocinetica (metodo Maréchal/Friese)", "categoria": "Desalinizzazione attiva", "invasivita": "media", "tempistica": "2-6 settimane", "principio": "Applicazione di un campo elettrico a corrente continua tra elettrodo positivo (nella muratura) ed elettrodo negativo (a contatto con acqua deionizzata in impacco esterno). Gli ioni Na⁺, Cl⁻, SO₄²⁻ migrano per elettro-migrazione verso gli elettrodi e vengono rimossi col bagno elettrolitico.", "norme_cardine": "WTA Merkblatt 3-13-20/D", "norme_secondarie": ["UNI 11176:2025 (campionamento sali)"], "indicazioni": "Beni vincolati con elevato carico salino dove i poultice tradizionali sono inefficaci. Sostituisce gli impacchi multipli.", "limitazioni": "Elevati costi attrezzatura. Richiede tecnico specializzato. Monitoraggio gravimetrico/cromatografico (UNI EN 16455:2014) obbligatorio per validare efficacia."}, {"nome": "Biocida-inibitore di cristallizzazione", "categoria": "Inibizione chimica", "invasivita": "bassa", "tempistica": "1 giorno applicazione", "principio": "Applicazione di inibitori di cristallizzazione (ferrocianuri, additivi anti-crystallization) che bloccano la crescita dei cristalli salini, limitando il danno meccanico da pressione di cristallizzazione (Doehne-Price 2010).", "norme_cardine": "WTA Merkblatt 3-13-20/D", "norme_secondarie": ["ICOMOS-ISCS Glossary 2008"], "indicazioni": "Trattamento temporaneo, complementare a desalinizzazione. Manufatti lapidei storici.", "limitazioni": "Non rimuove i sali, solo ne modifica la dinamica di cristallizzazione. Durata limitata (1-3 anni)."}], "muffe": [{"nome": "Bonifica IICRC S520 Condition 2 (settoriale)", "categoria": "Rimozione fisica", "invasivita": "media", "tempistica": "3-7 giorni", "principio": "Containment fisico (telo PE 6 mil) dell'area contaminata, pressione negativa interna mediante air scrubber HEPA H13 (≥4 air changes/h), rimozione fisica dei materiali porosi contaminati (cartongesso, isolanti, moquette), pulizia con HEPA vacuum + panni umidi su materiali non porosi, biocidi UNI EN 14885:2023-conformi solo se necessari.", "norme_cardine": "ANSI/IICRC S520-2024 4ª ed.", "norme_secondarie": ["EPA Mold Remediation 2008", "UNI EN 14885:2023", "D.Lgs 81/2008 Titolo X (agenti biologici)"], "indicazioni": "Contaminazione fungina visibile in area >0,9 m² e ≤9 m² (S520 Condition 2). Stachybotrys e Aspergillus fumigatus.", "limitazioni": "Richiede DPI livello B (FFP3, tuta cat.III tipo 5/6, guanti EN ISO 374-5). Per Condition 3 (>9 m²) si passa a procedura full-containment con anteroom."}, {"nome": "Bonifica IICRC S520 Condition 3 (full containment)", "categoria": "Rimozione fisica intensiva", "invasivita": "alta", "tempistica": "1-3 settimane", "principio": "Doppia barriera con anteroom decontaminazione, pressione negativa permanente (-5 Pa), HEPA H13/H14 con flusso ≥6 ach, smaltimento materiali contaminati come rifiuti speciali, decontaminazione completa operatori in uscita, post-remediation verification con campionamento aria + superfici.", "norme_cardine": "ANSI/IICRC S520-2024 4ª ed.", "norme_secondarie": ["ISO 16000-19:2012 (campionamento post)", "UNI EN 1822:2019 (filtri HEPA)", "D.Lgs 81/2008 art.272-275"], "indicazioni": "Contaminazione fungina >9 m² o presenza di muffe altamente patogene (Stachybotrys, Aspergillus fumigatus, Fusarium) in ambienti residenziali/sanitari.", "limitazioni": "Costi elevati. Sgombero locale obbligatorio. Verifica post-remediation è obbligatoria (ISO 16000-19:2012 outdoor reference + indoor)."}, {"nome": "Eliminazione fonte di umidità + RH<60%", "categoria": "Causa-effetto", "invasivita": "variabile", "tempistica": "7-30 giorni", "principio": "Identificazione e rimozione della causa primaria della contaminazione (risalita capillare, infiltrazione attiva, ponte termico con condensa) + mantenimento di umidità relativa <60% (Sedlbauer LIM) attraverso VMC con flusso minimo 0,5 vol/h o deumidificatore attivo. La crescita fungina si arresta sotto questa soglia.", "norme_cardine": "WHO Indoor Air Quality 2009 + Sedlbauer 2001", "norme_secondarie": ["UNI EN 16798-1:2019", "VTT Mould Index Hukka-Viitanen 1999"], "indicazioni": "Prerequisito per OGNI bonifica, senza eliminare la fonte, la muffa ricresce in 2-4 settimane.", "limitazioni": "Non è da sola sufficiente: richiede comunque rimozione fisica del materiale contaminato già colonizzato."}, {"nome": "Materiali finitura biocidi-resistenti per ricostruzione", "categoria": "Prevenzione recidiva", "invasivita": "bassa", "tempistica": "5-10 giorni", "principio": "Ricostruzione delle pareti bonificate con materiali a bassa idrofilia e biocidi (intonaci a base calce con additivi biocidi, pitture al silicato/silossanico con biocidi EN 14885:2022, pannelli isolanti in calcio silicato traspirante).", "norme_cardine": "UNI EN 14885:2023", "norme_secondarie": ["IICRC S520-2024"], "indicazioni": "Step finale post-bonifica per prevenire recidive. Ambienti con elevata UR difficilmente controllabile.", "limitazioni": "Biocidi nei materiali edili hanno durata limitata (5-10 anni). Non sostituiscono il controllo dell'umidità."}], "condensa": [{"nome": "Cappotto termico esterno (isolamento ETICS)", "categoria": "Isolamento esterno", "invasivita": "alta", "tempistica": "2-6 settimane", "principio": "Applicazione esterna di pannelli isolanti (EPS, XPS, lana minerale, sughero) con sistema a colla+tasselli + rasante armato + finitura coloratacon λ tipico 0,030-0,045 W/mK. La temperatura superficiale interna si alza sopra il punto di rugiada eliminando condensa superficiale e capillare nei ponti termici.", "norme_cardine": "UNI EN 13499:2005 (sistemi ETICS EPS) + UNI EN 13500:2005 (lana minerale)", "norme_secondarie": ["UNI EN ISO 13788:2013 (verifica Glaser)", "UNI EN ISO 6946:2018", "D.M. 26/06/2015 trasmittanze"], "indicazioni": "Edifici esistenti con prestazione termica scadente (U>1,0 W/m²K), condensa superficiale invernale, ponti termici significativi.", "limitazioni": "Spessori 8-16 cm modificano l'aspetto facciata: incompatibile con vincoli D.Lgs 42/2004."}, {"nome": "Isolamento capillare-attivo interno (calcio silicato)", "categoria": "Isolamento interno", "invasivita": "media", "tempistica": "10-20 giorni", "principio": "Applicazione interna di pannelli in calcio silicato (lambda 0,065 W/mK, alta capillarità W>20 kg/m²·√h, µ=5-6) incollati con malta calce idraulica. Materiale capillare-attivo: trasporta l'umidità di condensa interstiziale verso l'interno dove evapora, anziché farla accumulare. Evita la barriera al vapore.", "norme_cardine": "WTA Merkblatt 6-5-14/D", "norme_secondarie": ["UNI EN ISO 13788:2013 (verifica Glaser obbligatoria)", "UNI EN 12667:2002"], "indicazioni": "Edifici storici/vincolati dove il cappotto esterno è inammissibile. Spessori 5-10 cm sufficienti per condensa moderata.", "limitazioni": "Verifica Glaser preventiva obbligatoria, non risolve condensa interstiziale in tutte le stratigrafie. Riduce volume utile interno."}, {"nome": "Barriera al vapore lato caldo (sd≥1500 m)", "categoria": "Controllo vapore", "invasivita": "media", "tempistica": "5-15 giorni", "principio": "Applicazione di freno-vapore o barriera al vapore (PE, PVB, alluminio) lato caldo della stratigrafia per ridurre il flusso di vapore acqueo che raggiunge il punto di rugiada interno. Spessore equivalente d'aria sd≥1500 m per barriere totali, sd 2-100 m per freno-vapore variabile.", "norme_cardine": "UNI EN ISO 13788:2013", "norme_secondarie": ["UNI EN 13984:2013 (membrane plastiche)", "UNI EN ISO 12572:2024"], "indicazioni": "Coperture in legno con condensa interstiziale, pareti con isolamento esterno + interno (intercapedine umida).", "limitazioni": "Una rottura/lacerazione anche puntuale compromette TUTTO il sistema. Difficile applicare su finestrature/passaggi impianti senza ponti acustici e termici."}, {"nome": "Eliminazione ponti termici localizzati", "categoria": "Correzione puntuale", "invasivita": "media", "tempistica": "5-15 giorni", "principio": "Individuazione termografica dei ponti termici (UNI EN ISO 6781-1:2023) e intervento mirato: isolamento spalle finestre, cordoli, attacchi balconi, attraversamenti impianti. Riduzione del fattore lineico ψ secondo UNI EN ISO 14683:2018.", "norme_cardine": "UNI EN ISO 14683:2018", "norme_secondarie": ["UNI EN ISO 6781-1:2023 (termografia)", "UNI EN ISO 10211:2018 (calcolo)"], "indicazioni": "Edifici recenti con isolamento globale buono ma muffe localizzate su angoli, infissi, cassonetti.", "limitazioni": "Non risolve problemi di stratigrafia globalmente carente, è intervento complementare."}], "termigro": [{"nome": "VMC con recuperatore di calore", "categoria": "Ventilazione meccanica", "invasivita": "media", "tempistica": "5-15 giorni", "principio": "Installazione di unità VMC centralizzata o decentralizzata con scambiatore aria-aria (rendimento η≥75%). Garantisce ricambio aria minimo 0,5 vol/h (UNI EN 16798-1 cat.II) con recupero del 70-90% dell'energia termica. Riduce l'umidità interna e mantiene cat.II UNI 16798-1 (CO₂<950 ppm).", "norme_cardine": "UNI EN 16798-1:2019", "norme_secondarie": ["UNI EN ISO 7730:2026 (comfort)", "UNI EN 13141 serie (componenti VMC)", "UNI 10339:1995 ritirata 2024, rif. UNI EN 16798-1:2019 (qualità aria)"], "indicazioni": "Edifici a tenuta aerea n50<3 vol/h (post-cappotto, NZEB), ambienti scolastici/uffici con elevato carico antropico.", "limitazioni": "Manutenzione filtri F7/F9 annuale obbligatoria. Possibili rumorosità >35 dB(A) se mal dimensionata."}, {"nome": "Deumidificazione attiva localizzata", "categoria": "Controllo UR", "invasivita": "bassa", "tempistica": "1 giorno installazione", "principio": "Installazione di deumidificatori a condensazione (a compressore) o a desiccante (rotori entalpici) per mantenere UR<60% in locali critici. Capacità tipica 10-30 L/giorno per residenze, 50-200 L/giorno per archivi/musei.", "norme_cardine": "UNI EN 60335-2-40:2022", "norme_secondarie": ["UNI EN 16798-1:2019"], "indicazioni": "Cantine, scantinati, archivi, locali con elevata produzione di umidità interna (cucine, lavanderie). Asciugatura post-allagamento.", "limitazioni": "Consumi energetici 250-600 W. Le unità a condensazione non lavorano sotto 15°C. Soluzione palliativa se non si rimuove la fonte."}, {"nome": "Schermature solari estive + controllo apporti termici", "categoria": "Mitigazione stress termico estivo", "invasivita": "media", "tempistica": "5-30 giorni", "principio": "Installazione di schermature solari mobili esterne (frangisole, tende a rullo, persiane orientabili) con fattore solare g<0,35 (calcolo UNI EN ISO 52022-3; soglia DM 26/06/2015) per ridurre gli apporti termici estivi. Combinata con ventilazione notturna (free-cooling).", "norme_cardine": "UNI EN 14501:2025", "norme_secondarie": ["UNI EN ISO 52016-1:2018 (calcolo energetico)", "D.M. 26/06/2015"], "indicazioni": "Locali sud/ovest con surriscaldamento estivo > 28°C operativi. Edifici a vetro singolo o con basso isolamento estivo.", "limitazioni": "Schermature esterne richiedono compatibilità estetica + autorizzazione comunale per facciate vincolate."}], "radon": [{"nome": "Soil Suction Depressurization (SSD) - aspirazione sotto pavimento", "categoria": "Mitigazione attiva", "invasivita": "media", "tempistica": "1-3 giorni", "principio": "Realizzazione di un pozzetto di aspirazione (Ø 15-25 cm) sotto la soletta di base + ventilatore in linea (50-150 m³/h, prevalenza 100-300 Pa) + tubazione di scarico fuori dall'edificio sopra colmo. Crea depressione sotto il pavimento (-5/-10 Pa) intercettando il gas radon prima dell'ingresso. È la tecnica di prima scelta in 80% dei casi.", "norme_cardine": "ANSI/AARST SGM-SF-2023", "norme_secondarie": ["D.Lgs 101/2020 art.12 + art.17", "WHO Handbook Indoor Radon 2009 §5"], "indicazioni": "Edifici esistenti con concentrazione radon indoor >300 Bq/m³ (livello riferimento D.Lgs 101/2020). Pavimento su soletta o vespaio non aerato.", "limitazioni": "Efficacia 70-95% se ben installato. Richiede misura post-mitigation con monitor attivo continuo (UNI ISO 11665-5:2020) per verifica."}, {"nome": "Vespaio aerato attivo / passivo", "categoria": "Mitigazione strutturale", "invasivita": "alta (nuovo) / media (esistente)", "tempistica": "fase costruttiva o 2-4 settimane", "principio": "Vespaio ventilato (casseri a perdere) sotto il piano di posa, con bocchette di aerazione perimetrali (1500 mm²/m secondo ARPAT-Reg.Lombardia DGR 25/07/1989 n. 4/45266) oppure aspirazione meccanica forzata. Il gas radon viene diluito e espulso prima di raggiungere l'involucro abitato.", "norme_cardine": "UNI EN ISO 13370:2018", "norme_secondarie": ["ANSI/AARST CCAH-2020 Rev.5/23 (nuove costr.)", "D.Lgs 101/2020 art.19"], "indicazioni": "Nuove costruzioni in aree prioritarie radon (mappa Regione). Ristrutturazioni totali con sostituzione pavimento.", "limitazioni": "Su edificio esistente richiede demolizione pavimento (per esecuzione). Costo elevato. Necessaria verifica post-installazione."}, {"nome": "Sigillatura crepe e penetrazioni", "categoria": "Mitigazione passiva", "invasivita": "bassa", "tempistica": "1-3 giorni", "principio": "Identificazione e sigillatura di tutte le crepe pavimento-parete, giunzioni tubazioni, scarichi, ingressi cavi con sigillanti elastomerici classe BG (UNI EN ISO 11600:2011) + membrane radon-resistant in LDPE (sd>1500 m) sotto la soletta.", "norme_cardine": "ANSI/AARST SGM-SF-2023 §5", "norme_secondarie": ["BS 8485:2015 (gas dal suolo CH4/CO2)", "UNI EN ISO 11600:2011"], "indicazioni": "Tecnica preliminare/complementare all'SSD. Da sola in edifici con concentrazioni 200-400 Bq/m³.", "limitazioni": "Efficacia limitata (30-60%) se applicata da sola. Va sempre verificata post-intervento."}, {"nome": "Ventilazione meccanica aumentata (sovrappressione)", "categoria": "Diluizione", "invasivita": "bassa", "tempistica": "5-15 giorni", "principio": "Aumento del ricambio d'aria mediante VMC con immissione in sovrappressione (+5/+10 Pa) per inibire l'ingresso del radon dal sottosuolo. Combinato con monitoraggio continuo CO₂ NDIR per garantire ricambio adeguato senza sovraconsumo energetico.", "norme_cardine": "D.Lgs 101/2020 art.18", "norme_secondarie": ["UNI EN 16798-1:2019", "ANSI/AARST SGM-SF-2023"], "indicazioni": "Edifici dove SSD non è applicabile (locali sopra cantina ventilata). Concentrazioni moderate 300-500 Bq/m³.", "limitazioni": "Costi energetici elevati. Non è sempre efficace su concentrazioni alte (>1000 Bq/m³)."}], "iaq": [{"nome": "Rimozione/sostituzione della fonte emissiva", "categoria": "Causa-effetto", "invasivita": "variabile", "tempistica": "1-15 giorni", "principio": "Identificazione della fonte primaria (mobili nuovi, pannelli truciolare urea-formaldeide, tappeti VOC, pitture solventi residui) e sua rimozione/sostituzione con prodotti certificati low-emission (LEED IEQc4, A+/A French Label, AgBB tedesco, GreenGuard).", "norme_cardine": "UNI EN 16516:2017", "norme_secondarie": ["ISO 16000-9:2024 (camera test)", "UNI EN ISO 16000-6:2021", "WHO IAQ 2010"], "indicazioni": "Edifici nuovi o ristrutturati con SBS dichiarato, scuole/uffici con presenza di formaldeide >100 µg/m³.", "limitazioni": "Non sempre identificabile la fonte unica. Costi elevati per sostituzione arredi completi."}, {"nome": "Ventilazione meccanica con filtrazione F7/F9/HEPA", "categoria": "Filtrazione + diluizione", "invasivita": "media", "tempistica": "7-21 giorni", "principio": "VMC dimensionata per UNI EN 16798-1 cat.I-II con filtri ePM1 ≥80% (F9 secondo EN 779:2012, ora ISO 16890:2016) per PM2.5/PM10 + filtri a carbone attivo per VOC + HEPA H13 per ambienti sensibili (asili, RSA).", "norme_cardine": "UNI EN 16798-1:2019", "norme_secondarie": ["UNI EN ISO 16890-1:2017 (filtri)", "UNI EN 1822:2019 (HEPA)", "UNI 11254:2007 (HVAC)"], "indicazioni": "Edifici ad alto carico antropico (scuole, uffici, sanitari). Ambienti adiacenti a strade trafficate (PM>15 µg/m³).", "limitazioni": "Consumi energetici elevati. Manutenzione filtri obbligatoria (UNI EN 16798-3:2025): F7 6 mesi, HEPA 12 mesi."}, {"nome": "Abbattimento HCHO con sigillanti specifici", "categoria": "Abbattimento chimico", "invasivita": "bassa", "tempistica": "1-3 giorni", "principio": "Applicazione di sigillanti a base di urea reagente o ossido di titanio (TiO₂) fotocatalitico su pannelli emissivi (MDF, truciolato) per ridurre l'emissione di HCHO. Riduzione tipica 50-80% verificata in camera test UNI EN ISO 16000-9.", "norme_cardine": "UNI EN 16516:2017", "norme_secondarie": ["ISO 16000-3:2022 (misura HCHO)", "UNI EN 717-1:2004 (emissione pannelli)"], "indicazioni": "Quando la sostituzione totale dei pannelli è impraticabile. Cucine componibili, mobili integrati.", "limitazioni": "Durata efficacia limitata (3-7 anni). Verifica obbligatoria con campionamento DNPH-HPLC post-trattamento."}], "tenuta": [{"nome": "Sigillatura giunti involucro con nastri butilici/EPDM", "categoria": "Tenuta giunti", "invasivita": "media", "tempistica": "5-15 giorni", "principio": "Sigillatura sistematica dei punti critici dell'involucro (giunzione serramento-muratura, attraversamenti impianti, cordoli, cassonetti) con nastri butilici autoadesivi, guarnizioni EPDM, schiume PU espandenti a celle chiuse. Riduzione progressiva di n50.", "norme_cardine": "UNI EN ISO 9972:2015", "norme_secondarie": ["UNI 11673-1:2017 (posa serramenti)", "UNI EN ISO 6946:2018"], "indicazioni": "Edifici con n50>3 vol/h (livello base D.M. 26/06/2015), NZEB target <1 vol/h.", "limitazioni": "Non sempre individuabili tutti i punti critici senza Blower Door + termografia + fumogeni. Verifica post-intervento obbligatoria."}, {"nome": "Sostituzione serramenti con classe permeabilità 4", "categoria": "Sostituzione componenti", "invasivita": "alta", "tempistica": "10-30 giorni", "principio": "Sostituzione di serramenti vecchi con nuovi a triplo vetro Uw≤1,0 W/m²K, classe permeabilità all'aria 4 (UNI EN 12207:2017, q<0,75 m³/h·m a 100 Pa), posa secondo nodo termo-igrometrico UNI 11673.", "norme_cardine": "UNI EN 12207:2017", "norme_secondarie": ["UNI EN 14351-1:2016 (CE marking)", "UNI 11673-1:2017", "D.M. 26/06/2015"], "indicazioni": "Serramenti >20 anni con permeabilità >3 m³/h·m. Combinato con ETICS per NZEB.", "limitazioni": "Costi elevati. Per beni vincolati richiede repliche custom o autorizzazione."}, {"nome": "Vespaio aerato per controllo umidità da terra", "categoria": "Aerazione fondazione", "invasivita": "alta (nuovo)", "tempistica": "fase costruttiva", "principio": "Realizzazione di vespaio ventilato (casseri a perdere, h≥30 cm) sotto piano terra con bocchette di aerazione perimetrali calcolate per ricambio aria ≥1 vol/h. Effetto duale: controllo umidità + diluizione radon.", "norme_cardine": "UNI EN ISO 13370:2018", "norme_secondarie": ["Reg.Igiene Lombardia DGR 25/07/1989 n. 4/45266", "ARPAT 800-1500 mm²/m", "D.Lgs 101/2020 (radon)"], "indicazioni": "Nuove costruzioni in aree con falda alta o area prioritaria radon.", "limitazioni": "Costo aggiuntivo su piano terra. Manutenzione bocchette periodica."}], "mbc": [{"nome": "HVAC dedicato con setpoint UNI 10829", "categoria": "Climatizzazione conservativa", "invasivita": "alta", "tempistica": "4-12 settimane", "principio": "Sistema HVAC con controllo separato di T, UR, qualità aria e illuminamento. Setpoint per categoria UNI 10829:1999 (Cat.A: T 19-24°C ±1,5°C, UR 50-60% ±5%; Cat.B-C più stringenti). Filtri ePM1 + carbone attivo + HEPA H13 + lampade UV-C per sterilizzazione condotte.", "norme_cardine": "UNI 10829:1999", "norme_secondarie": ["UNI EN 15757:2010", "UNI EN 16242:2013", "ASHRAE Handbook Applications ch.23", "Bizot Green Protocol 2014"], "indicazioni": "Sale espositive musei, archivi storici, biblioteche con collezioni di Cat.A (Cat.A include carta, fotografie, tessuti, acquarelli).", "limitazioni": "Costi installazione elevatissimi. Consumi energetici significativi. Manutenzione specialistica obbligatoria."}, {"nome": "Controllo passivo (capacitanza igroscopica)", "categoria": "Climatizzazione passiva", "invasivita": "media", "tempistica": "2-6 settimane", "principio": "Sfruttamento della massa termica/igroscopica dell'edificio storico (murature pietra, intonaci calce) per attenuazione naturale delle escursioni T/UR. Integrato con ricambio aria controllato (VMC dimensionata o ventilazione meccanica notturna).", "norme_cardine": "UNI EN 15757:2010 (Historic Climate)", "norme_secondarie": ["UNI 10829:1999", "Bizot Green Protocol 2014", "ISO 21110:2019"], "indicazioni": "Edifici storici dove l'HVAC è impraticabile (vincoli). Collezioni di Cat.B-C. Climatizzazione minima invasiva.", "limitazioni": "Efficacia limitata a escursioni di breve periodo. Per Cat.A serve comunque controllo attivo."}, {"nome": "Illuminazione conservativa LED filtrata", "categoria": "Controllo fotodegrado", "invasivita": "media", "tempistica": "2-4 settimane", "principio": "Sostituzione lampade alogene/incandescenza con LED a spettro filtrato (UV cut-off <380 nm, IR cut-off >700 nm), controllo dimming + on/off temporizzato, calcolo dose conservativa (CIE 157:2004): Cat.1 max 15.000 lux·h/anno, Cat.2 max 100.000, Cat.3 max 480.000.", "norme_cardine": "UNI 10829:1999", "norme_secondarie": ["CIE 157:2004", "UNI EN 16163:2025", "D.Lgs 42/2004 (autorizzazione MiC)"], "indicazioni": "Tutti i musei, archivi, biblioteche con materiali fotosensibili.", "limitazioni": "Per beni vincolati MiC richiede progetto illuminotecnico approvato. Verifiche periodiche con luxmetro+radiometro UV."}], "cls": [{"nome": "Ripristino corticale con malta R3/R4 (UNI EN 1504-3)", "categoria": "Ripristino strutturale", "invasivita": "media", "tempistica": "7-21 giorni", "principio": "Rimozione cls degradato/disgregato + spazzolatura armature corrose + applicazione di passivante (UNI EN 1504-7) + ripristino con malta cementizia fibrorinforzata Classe R3 (Rc 28gg ≥25 MPa) o R4 (Rc ≥45 MPa) marchiata CE UNI EN 1504-3.", "norme_cardine": "UNI EN 1504-3:2006", "norme_secondarie": ["UNI EN 1504-1:2008 (generale)", "UNI EN 1504-9:2008 (principi)", "UNI EN 1504-7:2007 (armature)", "D.M. 17/01/2018 NTC"], "indicazioni": "Solai, travi, pilastri con copriferro espulso, armature scoperte ma sezione resistente conservata >70%.", "limitazioni": "Se la perdita di sezione armatura è >25%, richiede integrazione strutturale (FRP o ricoltura sezione). Progetto strutturale firmato obbligatorio per elementi portanti."}, {"nome": "Protezione superficiale impregnante idrofobante (UNI EN 1504-2)", "categoria": "Protezione preventiva", "invasivita": "bassa", "tempistica": "3-7 giorni", "principio": "Applicazione superficiale di prodotti silani/silossani impregnanti idrofobi (sd<5 m, CE UNI EN 1504-2 metodo PI/H) che riducono assorbimento d'acqua e penetrazione di Cl⁻/SO₄²⁻ senza occludere i pori (traspirabilità preservata).", "norme_cardine": "UNI EN 1504-2:2005 metodo PI/H", "norme_secondarie": ["UNI EN 1504-9:2008", "UNI 11104:2025"], "indicazioni": "Strutture nuove o appena ripristinate in classe XC4-XS3-XD3 (esposizione cloruri/cicli umido-secco).", "limitazioni": "Non ripristina cls degradato, è solo PREVENTIVO. Va riapplicato ogni 10-15 anni."}, {"nome": "Rinforzo strutturale con FRP/FRCM", "categoria": "Rinforzo strutturale", "invasivita": "media", "tempistica": "10-30 giorni", "principio": "Applicazione di fasciature/lamine in fibra di carbonio FRP (CFRP) o fibra di vetro FRCM (matrice cementizia) per incrementare resistenza a flessione/taglio/torsione/compressione confinata di elementi strutturali. Calcolo CNR-DT 200 R1:2013 (FRP) o CNR-DT 215:2018 (FRCM).", "norme_cardine": "CNR-DT 200 R1:2013", "norme_secondarie": ["CNR-DT 215:2018 (FRCM)", "UNI EN 1504-9 principio 7", "NTC 2018 §8.7"], "indicazioni": "Elementi strutturali con perdita di sezione armatura >25%, adeguamento sismico, aumento carichi.", "limitazioni": "Progettazione strutturale obbligatoria. CFRP sensibile a UV/temperature elevate (incendio). Costo elevato."}, {"nome": "Realcalinizzazione / estrazione cloruri (elettrochimica)", "categoria": "Trattamento elettrochimico", "invasivita": "alta", "tempistica": "1-3 settimane", "principio": "Applicazione di corrente continua tra anodo esterno (rete metallica con elettrolita Na₂CO₃ o Ca(OH)₂) e catodo (armature interne). La realcalinizzazione ripristina pH>11,5 attorno alle armature; l'estrazione cloruri rimuove Cl⁻ per migrazione elettrica.", "norme_cardine": "UNI EN 14038-1:2016 (realcalinizzazione) + UNI EN 14038-2:2020 (estrazione Cl)", "norme_secondarie": ["UNI EN 1504-9 principio 7-8"], "indicazioni": "Strutture marine, garage, parcheggi con elevata contaminazione da cloruri (Cl⁻>0,4% peso cemento) ma armature ancora integre.", "limitazioni": "Procedimento delicato, possibili effetti collaterali (alkali-silica reaction, idrogeno gassoso, dealloying). Specialistico, costo elevato."}], "mur": [{"nome": "Scuci-cuci della muratura degradata", "categoria": "Ricostruzione locale", "invasivita": "alta", "tempistica": "5-20 giorni", "principio": "Tecnica di sostituzione locale: rimozione a tratte alternate dei mattoni/pietre degradati (max 60 cm/tratta) + sostituzione con elementi nuovi compatibili (resistenza, modulo elastico, capillarità ravvicinati). Malta di allettamento compatibile (calce idraulica naturale NHL).", "norme_cardine": "UNI 11138:2004", "norme_secondarie": ["UNI EN 998-2:2016 (malte da murature)", "NTC 2018 §8.7.2"], "indicazioni": "Murature storiche con elementi marciti, sfaldati, decoesi. Tratti localizzati di degrado <30% della superficie muraria.", "limitazioni": "Strutturalmente delicato, richiede progetto strutturale per elementi portanti. Per beni vincolati MiC obbligatoria."}, {"nome": "Iniezione di consolidamento (lattice di calce o resine epossidiche)", "categoria": "Consolidamento volumetrico", "invasivita": "media", "tempistica": "5-15 giorni", "principio": "Iniezione a bassa pressione (1-3 bar) di boiacche a base di calce idraulica + microsilica + fluidificanti (compatibilità storica) o resine epossidiche bicomponenti (più rigide ma chimicamente moderne) nelle fessure e vuoti murari. Ripristina la continuità strutturale.", "norme_cardine": "UNI 11138:2004", "norme_secondarie": ["UNI EN 1504-5:2013", "NTC 2018 §8.7"], "indicazioni": "Murature con vuoti interni rilevati con georadar/ultrasuoni, fessure passanti, decoesione interna.", "limitazioni": "Per beni storici preferire boiacca calce (compatibilità). Resine epossidiche irreversibili e chimicamente incompatibili con strutture lapidee."}, {"nome": "Intonaco armato CRM (Composite Reinforced Mortar)", "categoria": "Rinforzo strutturale", "invasivita": "media", "tempistica": "10-25 giorni", "principio": "Applicazione di intonaco strutturale 30-50 mm armato con rete in fibra di vetro AR o acciaio inox 304L, ancorato alla muratura con connettori chimici. Incrementa resistenza a taglio e azioni cicliche sismiche.", "norme_cardine": "CNR-DT 215:2018", "norme_secondarie": ["NTC 2018 §8.7.4", "UNI EN 998-2:2016"], "indicazioni": "Adeguamento sismico edifici esistenti in muratura. Pareti perimetrali con basso indice di taglio.", "limitazioni": "Aumento spessori (5 cm/lato) modifica geometria, incompatibile con vincoli stretti."}, {"nome": "Tiranti / catene di catena perimetrali", "categoria": "Rinforzo strutturale antisismico", "invasivita": "media", "tempistica": "7-20 giorni", "principio": "Installazione di catene/tiranti orizzontali (acciaio armonico tirantato + capo-chiave esterno) a livello di solaio o gronda per contrastare ribaltamento delle pareti perimetrali sotto sisma. Pre-tensione 30-50% snervamento.", "norme_cardine": "NTC 2018 §8.7.5", "norme_secondarie": ["UNI EN ISO 12944 (protezione acciaio)", "UNI EN 10025-2:2019"], "indicazioni": "Edifici in muratura ad alta vulnerabilità sismica, presenza di solai sfilati o pareti libere in sommità.", "limitazioni": "Capo-chiave esterno modifica facciata, per beni vincolati richiede capo-chiave interno o nascosto."}, {"nome": "Protezione acciaio: pittura epossidica + sacrificale Zn", "categoria": "Protezione corrosione", "invasivita": "bassa", "tempistica": "5-15 giorni", "principio": "Sistema multi-strato di protezione su acciaio strutturale: sabbiatura Sa 2,5 (UNI EN ISO 8501-1:2007), primer epossidico-zincante (30-50 µm sec), pittura intermedia epossidica (80-150 µm), finitura poliuretanica alifatica (50-80 µm). Categoria di corrosività C3-C5-Im (UNI EN ISO 12944-2).", "norme_cardine": "UNI EN ISO 12944 serie", "norme_secondarie": ["UNI EN ISO 8501-1:2007 (preparazione)", "UNI EN ISO 12944-9:2018 (offshore)"], "indicazioni": "Strutture acciaio con corrosione superficiale, ambienti corrosivi marini/industriali, manutenzione strutture esistenti.", "limitazioni": "Durata ciclo varia per categoria corrosività (10-25 anni). Manutenzione periodica obbligatoria. Per zone saldate verificare cricche pre-trattamento."}], "legno": [{"nome": "Trattamento preservante con boro / sali metallici", "categoria": "Protezione chimica", "invasivita": "bassa", "tempistica": "3-7 giorni", "principio": "Applicazione superficiale (pennellatura/spray) o impregnazione sottovuoto con preservanti a base di sali di boro (acido borico/borato), alchilammonio quaternari (AAC), microemulsioni di rame (Cu HDO/Cu Az) certificati UNI EN 599-1:2014. Penetrazione 5-30 mm a seconda essenza e metodo.", "norme_cardine": "UNI EN 599-1:2014", "norme_secondarie": ["UNI EN 335:2013 (classi rischio)", "UNI EN 351-1:2008", "UNI 11161:2005 (manufatti BC)"], "indicazioni": "Travature lignee in classe di rischio 2-4 (UNI EN 335: umidità episodica/persistente). Prevenzione xilofagi (Cerambicidi, Anobi, Termiti).", "limitazioni": "Il boro è dilavabile in classe 4 (contatto suolo/acqua), combinare con barriera meccanica. Trattamenti chimici incompatibili con vincoli su beni di pregio (D.Lgs 42/2004)."}, {"nome": "Trattamento termico ad alta temperatura (>56°C cuore)", "categoria": "Disinfestazione fisica", "invasivita": "media", "tempistica": "2-5 giorni", "principio": "Riscaldamento controllato della massa lignea a >56°C nel cuore per >60 minuti (LD100 per tutti gli stadi di Cerambicidi/Anobiidae secondo criterio termico letale, UNI 11161:2005). Tecniche: aria calda generata in camera/tenda termica, microonde, infrarossi.", "norme_cardine": "UNI 11161:2005 (manufatti lignei)", "norme_secondarie": [], "indicazioni": "Beni vincolati dove il trattamento chimico è inammissibile. Elementi smontabili o capannoni con tenda termica perimetrale.", "limitazioni": "Stress termico su elementi storici (verifiche FAS preliminari). Costi elevati. Inefficace se l'infestazione ritorna dopo trattamento (richiede prevenzione separata)."}, {"nome": "Sostituzione con protesi lignee (scuci-cuci ligneo)", "categoria": "Ricostruzione locale", "invasivita": "alta", "tempistica": "7-21 giorni", "principio": "Rimozione delle porzioni di legno irrecuperabilmente compromesse (degrado fungino/insetti) e sostituzione con protesi lignee della stessa essenza, profilo e umidità di equilibrio. Connessione con epossi-fibra di vetro o con incastri tradizionali (chiave a cuneo).", "norme_cardine": "UNI 11161:2005", "norme_secondarie": ["UNI EN 14081-1:2016 (legno strutturale)", "UNI 11035-1:2022"], "indicazioni": "Travature lignee storiche con porzioni terminali (appoggi) marcite. Restauro conservativo.", "limitazioni": "Richiede competenze specialistiche e progetto strutturale. Per beni vincolati MiC obbligatorio."}, {"nome": "Consolidamento epossidico (Beta system)", "categoria": "Consolidamento volumetrico", "invasivita": "media", "tempistica": "5-15 giorni", "principio": "Iniezione di resine epossidiche bi-componente (modulo elastico calibrato sulla essenza lignea) in zone consolidate. Ricostituzione della sezione efficace. Spesso combinato con barre in vetroresina (Beta system).", "norme_cardine": "UNI 11161:2005", "norme_secondarie": ["EN 14080:2013", "UNI EN 1995-1-1:2014 (Eurocodice 5)"], "indicazioni": "Travi/capriate con perdita locale di sezione resistente. Quando la sostituzione è impraticabile (lunghezza, accessibilità).", "limitazioni": "Irreversibile chimicamente. Comportamento sotto incendio peggiore del legno puro. Costi elevati."}], "geo": [{"nome": "Drenaggio perimetrale + pozzetto raccolta", "categoria": "Controllo idraulico", "invasivita": "alta", "tempistica": "1-3 settimane", "principio": "Realizzazione di scavo perimetrale fino a quota fondazione + posa di dreno francese (tubo in PVC microforato + ghiaia 16-32 mm + geotessile non tessuto + sabbia) + pozzetti di ispezione a 25-30 m + scarico in fognatura/dispersione.", "norme_cardine": "UNI EN 752:2017 (sistemi drenaggio)", "norme_secondarie": ["NTC 2018 §6.2", "UNI EN 1610:2015 (posa)", "UNI EN 13252:2016 (geotessili)"], "indicazioni": "Edifici controterra con falda alta o terreni a bassa permeabilità (k<10⁻⁶ m/s). Pre-requisito per la maggior parte degli interventi su risalita.", "limitazioni": "Non applicabile in contesti urbani con marciapiede pubblico/sottoservizi senza autorizzazioni. Manutenzione obbligatoria."}, {"nome": "Sottofondazione con micropali Ø150-300 mm", "categoria": "Consolidamento fondale", "invasivita": "alta", "tempistica": "3-8 settimane", "principio": "Inserimento di pali strutturali (Ø150-300 mm, L 8-25 m) tirantati al sistema fondazionale esistente. Trasferiscono i carichi a strati profondi competenti. Iniezione di malta cementizia in pressione.", "norme_cardine": "NTC 2018 §6.6", "norme_secondarie": ["UNI EN 14199:2015", "UNI EN 1997-1:2013 (Eurocodice 7)"], "indicazioni": "Cedimenti differenziali fondazionali, ampliamenti su edifici esistenti, adeguamento sismico fondazioni.", "limitazioni": "Costo elevato. Progetto strutturale + geotecnico obbligatorio. Indagini preliminari estensive."}, {"nome": "Jet grouting per consolidamento terreni", "categoria": "Consolidamento terreno", "invasivita": "media", "tempistica": "2-6 settimane", "principio": "Iniezione ad altissima pressione (300-600 bar) di boiacca cementizia mediante ugelli rotanti. Formazione in situ di colonne consolidate (Ø 60-200 cm) che migliorano la portanza e impermeabilizzano. Tecniche: monofluido, bifluido, trifluido.", "norme_cardine": "UNI EN 12716:2018", "norme_secondarie": ["NTC 2018 §6", "UNI EN 1997-1:2013"], "indicazioni": "Sottofondazioni profonde di edifici monumentali, tenuta idraulica scavi, consolidamento di terreni alluvionali.", "limitazioni": "Vibrazioni medie, verifica strutture limitrofe. Pre-prova obbligatoria per validare parametri operativi."}], "acustica": [{"nome": "Sostituzione dei serramenti con vetrazione stratificata asimmetrica e bonifica dei punti deboli di facciata (guarnizioni, bocchette, cassonetti)", "categoria": "Isolamento di facciata", "invasivita": "media", "tempistica": "Indicativa: rilievo e progetto acustico circa 1-2 settimane, fornitura serramenti circa 4-8 settimane, posa per singolo alloggio circa 2-5 giorni; collaudo in opera a fine cantiere (mezza giornata per ambiente).", "principio": "Il descrittore di facciata e l'isolamento acustico normalizzato rispetto al tempo di riverberazione, D2m,nT,w (dB): piu alto e il valore, migliore e la protezione dal rumore esterno (DPCM 5/12/1997, valori limite per categoria, ad esempio 40 dB per la categoria A residenze e assimilabili; lo stesso limite di 40 dB vale per la categoria C, alberghi e pensioni). La facciata si comporta come una serie di elementi in parallelo (parete opaca, serramento, cassonetto, bocchette): l'isolamento globale e governato dall'elemento piu debole e dalla sua area, quindi non basta un buon vetro se restano spifferi o un cassonetto leaky. Intervento: 1) vetrocamera con vetro stratificato asimmetrico, ad esempio 33.1/16/44.2 o 10/12/44.2, dove lastre di spessore diverso piu il PVB acustico spostano e smorzano la frequenza critica di coincidenza, evitando il calo del doppio vetro simmetrico; Rw del serramento tipico da 38 a 45 dB (valore dichiarato in marcatura CE secondo UNI EN 14351-1). 2) Guarnizioni a tenuta su tutto il perimetro e battuta doppia o tripla per eliminare le vie d'aria (una fessura sottile abbatte di vari dB il risultato in opera). 3) Bocchette o aeratori fonoisolanti per il ricambio d'aria con attenuazione acustica dichiarata (Dn,e,w), che mantengono la ventilazione senza degradare la facciata. 4) Cassonetto degli avvolgibili coibentato e sigillato, oppure sua eliminazione, perche e un classico ponte acustico. Posa eseguita secondo UNI 11296:2024 (nodo serramento/vano murario sigillato), poi verifica in opera del D2m,nT,w secondo UNI EN ISO 16283-3:2016 con indice di valutazione da UNI EN ISO 717-1:2021.", "norme_cardine": "DPCM 5/12/1997", "norme_secondarie": ["UNI EN ISO 16283-3:2016", "UNI EN ISO 717-1:2021", "UNI EN 14351-1:2016", "UNI 11296:2024", "UNI EN ISO 12354-3:2017", "Legge 447/1995", "DPCM 14/11/1997"], "indicazioni": "Edifici esposti a rumore da traffico stradale, ferroviario o aeroportuale con D2m,nT,w in opera inferiore al limite di categoria del DPCM 5/12/1997; alloggi con disturbo del sonno o lamentele da rumore esterno; ristrutturazioni e cambi di destinazione d'uso che riattivano i requisiti passivi; situazioni in cui la parete opaca e gia adeguata e il serramento, le bocchette o il cassonetto sono il punto debole della facciata.", "limitazioni": "Non risolve se la parete opaca o la copertura sono il vero punto debole (in tal caso il vetro performante e sprecato). Senza ventilazione fonoisolante adeguata, finestre molto serrate possono peggiorare il ricambio d'aria, l'umidita e la qualita dell'aria interna: vanno previste bocchette con Dn,e,w dichiarato o VMC. Il valore Rw dichiarato in laboratorio (UNI EN 14351-1) non coincide con il D2m,nT,w in opera: la posa scadente (nodo non sigillato, cassonetto, spifferi) puo vanificare la prestazione, da cui l'obbligo di posa secondo UNI 11296:2024 e collaudo secondo UNI EN ISO 16283-3:2016. Su edifici vincolati o storici la sostituzione dei serramenti puo essere limitata dalla tutela; in tal caso valutare controfinestre o vetri di restauro. Il vetro stratificato asimmetrico aumenta peso e costo e richiede verifica di telaio e cerniere."}, {"nome": "Massetto galleggiante su materassino resiliente anticalpestio", "categoria": "Isolamento al calpestio", "invasivita": "alta", "tempistica": "Da 3 a 10 giorni a vani per i lavori (rimozione pavimento esistente fino al solaio grezzo, posa strato resiliente, getto del massetto, stagionatura del massetto cementizio circa 28 giorni prima della posa del pavimento, ridotta con massetti a rapida essiccazione), cantiere a secco con vincoli logistici (svuotamento locali, innalzamento delle quote di pavimento, raccordo con soglie e porte)", "principio": "Sistema massa, molla, massa applicato al solaio: tra il solaio portante e il massetto di ripartizione (la massa che riceve il calpestio) si interpone uno strato resiliente (la molla) che disaccoppia dinamicamente le due masse e abbatte la trasmissione dell'energia vibratoria d'impatto. Il materiale resiliente (polietilene espanso reticolato, fibra di poliestere, gomma riciclata, sughero, lana minerale ad alta densita) si caratterizza per la rigidita dinamica s' misurata in MN/m3 secondo UNI EN 29052-1:1993 (carico di prova circa 200 kg/m2): valori tipici da 5 a 50 MN/m3, dove valori piu bassi danno frequenza di risonanza f0 piu bassa e quindi maggiore attenuazione alle frequenze udibili. Requisito essenziale della posa: completa desolidarizzazione del massetto galleggiante da pareti, pilastri e impianti passanti tramite fascia perimetrale resiliente (risvolto verticale) e telo separatore (foglio in PE) sopra il resiliente, per evitare ponti acustici rigidi che vanificano la prestazione. Il descrittore di prestazione in opera e il livello di rumore di calpestio normalizzato L'n,w (dB), limite DPCM 5/12/1997 pari a 63 dB per gli edifici nuovi nelle categorie residenziali; il contributo del rivestimento si esprime come riduzione del livello di calpestio deltaLw (dB) determinata in laboratorio (UNI EN ISO 10140) e valutata con indice unico secondo UNI EN ISO 717-2:2021, con valori tipici di deltaLw da 18 a 30 dB a seconda dello spessore e della rigidita dinamica. Spessori del resiliente da circa 5 a 20 mm, massetto sovrastante di norma da 5 a 8 cm; la previsione del L'n,w in opera (incluse le trasmissioni laterali, flanking) si esegue con UNI EN ISO 12354-2:2017 e UNI/TR 11175, la misura di collaudo in opera con UNI EN ISO 16283-2:2020", "norme_cardine": "DPCM 5/12/1997", "norme_secondarie": ["UNI EN ISO 717-2:2021", "UNI EN 29052-1:1993", "UNI EN ISO 10140-3", "UNI EN ISO 16283-2:2020", "UNI EN ISO 12354-2:2017", "UNI 11367:2023", "Legge 447/1995", "CAM DM MASE 24/11/2025"], "indicazioni": "Da prevedere su solai sovrapposti tra unita immobiliari diverse o tra ambienti con esigenze di quiete (camere, soggiorni), sia in nuove costruzioni sia in ristrutturazioni che gia prevedono il rifacimento del pavimento e degli impianti a pavimento. Idonea quando il L'n,w di progetto o misurato eccede il limite di 63 dB del DPCM 5/12/1997, o quando si vuole raggiungere una classe acustica superiore secondo UNI 11367:2023. E la soluzione di riferimento, piu efficace e duratura, per il rumore impattivo strutturale", "limitazioni": "Da NON adottare quando non e possibile rimuovere il pavimento esistente o quando l'innalzamento di quota (resiliente piu massetto, di norma da 6 a 10 cm) e incompatibile con altezze utili, soglie o porte (in tal caso valutare sistemi anticalpestio a basso spessore posati sotto la pavimentazione). Inefficace se la posa non garantisce la desolidarizzazione perimetrale: anche un solo ponte rigido (massetto a contatto con la parete, tubazione passante non disaccoppiata) annulla il beneficio. Il deltaLw da laboratorio non e la prestazione in opera: il L'n,w reale e penalizzato dalle trasmissioni laterali (flanking) e va previsto con UNI EN ISO 12354-2:2017 e verificato in opera con UNI EN ISO 16283-2:2020. Attenzione ai carichi (la rigidita dinamica dipende dal carico applicato) e al rischio di fessurazione del massetto se troppo sottile o mal armato; richiede corretta stagionatura prima della posa del pavimento"}, {"nome": "Controparete in lastre di gesso rivestito su orditura metallica desolidarizzata con lana minerale in intercapedine", "categoria": "Isolamento aereo tra ambienti", "invasivita": "media", "tempistica": "da 2 a 5 giorni lavorativi per parete in un alloggio medio (montaggio orditura, posa lana, doppia lastra, stuccatura e finitura), esclusi tinteggiatura e ripristino impianti", "principio": "Si applica al lato della parete divisoria una controparete a secco: orditura metallica (montanti e guide) staccata dalla muratura esistente e, dove possibile, anche dal pavimento e dal soffitto con bandella resiliente perimetrale, intercapedine d'aria riempita con lana minerale (densita tipica 30/70 kg/m3, spessore 40/60 mm), e una o due lastre di gesso rivestito (12,5 mm cadauna). Il sistema si comporta come massa molla massa: la massa aggiunta (lastre piu eventuale incremento sulla parete base) e l'intercapedine smorzata dalla lana minerale alzano l'isolamento alle medie e alte frequenze. La desolidarizzazione dell'orditura riduce i ponti acustici rigidi che cortocircuitano il sistema. Incrementi tipici dell'indice di valutazione del potere fonoisolante (delta Rw) dell'ordine di 8/15 dB a parete (valore di laboratorio, da declassare in opera). La grandezza di progetto e collaudo e il potere fonoisolante apparente R'w, che include la trasmissione laterale (fiancheggiamento) lungo solai e pareti continue.", "norme_cardine": "DPCM 5/12/1997", "norme_secondarie": ["UNI EN ISO 16283-1:2018", "UNI EN ISO 717-1:2021", "UNI EN ISO 12354-1:2017", "UNI EN ISO 10140-2", "UNI 11367:2023", "Legge 447/1995", "CAM DM MASE 24/11/2025"], "indicazioni": "Quando il rumore tra unita immobiliari adiacenti (orizzontalmente o tra alloggi affiancati) e di tipo aereo (voci, TV, musica) e la parete divisoria esistente non soddisfa il limite di R'w prescritto, o la classe acustica obiettivo secondo UNI 11367:2023. Indicata quando non e possibile sostituire la parete e si interviene da un solo lato. Particolarmente efficace su pareti monostrato leggere o forate, dove l'incremento di massa e l'effetto massa molla massa danno il maggiore beneficio.", "limitazioni": "Riduce lo spazio utile (spessore tipico 5/8 cm per lato). L'efficacia in opera e limitata dalla trasmissione laterale di fiancheggiamento: se i solai e le pareti continue trasmettono il rumore lungo i giunti rigidi, il guadagno reale su R'w resta molto inferiore al delta Rw di laboratorio (un solo lato trattato spesso non basta). Va curata la tenuta all'aria di prese, scatole elettriche, passaggi impiantistici e giunti perimetrali, pena il decadimento delle prestazioni. Non risolve il rumore impiantistico ne quello da calpestio (descrittori e tecniche diversi). I valori di delta Rw dichiarati sono di laboratorio e non sono direttamente sommabili al R'w di progetto: serve verifica previsionale secondo UNI EN ISO 12354-1:2017."}, {"nome": "Trattamento fonoassorbente interno (pannelli a parete/soffitto, baffles e controsoffitti) per il controllo del tempo di riverberazione", "categoria": "Correzione acustica interna", "invasivita": "media", "tempistica": "Da 1 a 3 settimane per un ambiente tipo (aula, ufficio open space, mensa), comprensive di rilievo iniziale del tempo di riverberazione, dimensionamento dell'area equivalente di assorbimento, posa e collaudo. Tempi minori (pochi giorni) per soli pannelli a parete o baffles sospesi, maggiori per controsoffitti fonoassorbenti integrali.", "principio": "Si aumenta l'assorbimento acustico dell'ambiente per ridurre il campo riverberato e accorciare il tempo di riverberazione T (in particolare T20 o T30), migliorando l'intelligibilita del parlato (indice STI) e la chiarezza (C50). Il legame e dato dalla formula di Sabine, T = 0,161 V / A, dove V e il volume in metri cubi e A l'area di assorbimento equivalente in metri quadrati sabin, somma dei prodotti tra superfici e relativi coefficienti di assorbimento alfa(s) per banda di frequenza. Si applicano materiali porosi fonoassorbenti (lana minerale, fibra di poliestere, pannelli melamminici, schiume) con alfa(w) tipico da 0,6 a 1,0 alle medie e alte frequenze, sotto forma di pannelli a parete, controsoffitti fonoassorbenti continui o a isole, e baffles (elementi sospesi verticali) dove il soffitto non e disponibile. Valori di riferimento: nelle aule scolastiche la UNI 11532-2:2020 fissa tempi di riverberazione ottimali in funzione del volume (formula tipo Tott = 0,32 log V meno 0,17), che per aule ordinarie cadono indicativamente tra 0,5 e 0,8 secondi, con STI desiderabile non inferiore a circa 0,60 (soglia inferiore della fascia di intelligibilita buona secondo IEC 60268-16). Il coefficiente di assorbimento dei materiali si determina in camera riverberante secondo UNI EN ISO 354:2003; T e STI si misurano in opera secondo UNI EN ISO 3382-2:2008.", "norme_cardine": "UNI 11532-2:2020", "norme_secondarie": ["UNI 11532-1:2018", "UNI EN ISO 3382-2:2008", "UNI EN ISO 354:2003", "CAM DM MASE 24/11/2025"], "indicazioni": "Da applicare in ambienti destinati alla comunicazione verbale o all'ascolto (aule e palestre scolastiche, uffici e open space, mense, sale riunioni, sale conferenze, refettori, ambienti collettivi) dove il tempo di riverberazione misurato risulta eccessivo rispetto ai valori ottimali, con conseguente cattiva intelligibilita del parlato, effetto Lombard (alzare la voce) e affaticamento. Indicata quando il problema e il campo sonoro riverberato interno e non la trasmissione del rumore tra ambienti. Negli edifici scolastici oggetto di affidamento pubblico e prescritta dai CAM Edilizia (DM MASE 24/11/2025), che richiamano la verifica dei requisiti di acustica interna secondo UNI 11532.", "limitazioni": "Non e una soluzione di isolamento acustico: non riduce la trasmissione del rumore tra ambienti contigui (per cui servono interventi sulle partizioni verificati secondo DPCM 5/12/1997 e UNI 11367:2023) ne il rumore degli impianti (UNI EN ISO 16032). L'aggiunta di assorbimento abbassa il livello del riverbero ma non aumenta il potere fonoisolante delle pareti. Efficacia limitata alle medie e alte frequenze: i materiali porosi sottili sono poco efficaci alle basse frequenze, dove possono servire risonatori o pannelli vibranti dedicati. Un eccesso di assorbimento puo rendere l'ambiente acusticamente troppo secco e ridurre il livello utile della voce a distanza. Vincoli da verificare: ingombri e altezze (controsoffitti e baffles riducono l'altezza libera), reazione al fuoco dei materiali, compatibilita con impianti, illuminazione e norme igieniche (mense, ambienti sanitari, pulibilita). La posa e la quantita di materiale vanno dimensionate sull'area di assorbimento mancante, non a stima."}, {"nome": "Desolidarizzazione e supporti antivibranti per impianti, con silenziatori e incapsulamento delle sorgenti rumorose", "categoria": "Rumore degli impianti", "invasivita": "media", "tempistica": "2, 5 giorni per singolo impianto (centrale termica, gruppo idrico, UTA, ascensore), in funzione del numero di sorgenti e dei collegamenti da disaccoppiare; intervento in opera senza demolizioni strutturali se gli impianti sono accessibili", "principio": "Si agisce sulla catena sorgente, trasmissione, ricevente per i due percorsi del rumore impiantistico: il rumore aereo (mandata, ventilatori, bruciatori) e il rumore strutturale o solid borne (vibrazioni trasmesse a solai e pareti da pompe, compressori, UTA, ascensori). Quattro azioni combinate: (1) supporti antivibranti, molle in acciaio o tasselli elastomerici, dimensionati in base alla frequenza di disturbo della macchina f, in modo che la frequenza propria del supporto f0 sia molto inferiore (rapporto f/f0 indicativamente maggiore di 3, tipicamente 4, 5, isolamento dal 70 al 90 per cento), con verifica dello smorzamento per evitare amplificazioni alla risonanza in avvio e arresto; (2) desolidarizzazione delle tubazioni e dei canali dalle strutture con giunti antivibranti flessibili, collari elastomerici e manicotti, e passaggi murari riempiti con materiale elastico, per interrompere i ponti acustici verso i locali abitati; (3) silenziatori a setti o dissipativi sui canali aeraulici e attenuatori sulle bocchette, per abbattere il rumore aereo della ventilazione (riduzioni tipiche da 10 a 25 dB per banda d'ottava nelle medie frequenze); (4) incapsulamento o cabinatura delle sorgenti, cofani fonoisolanti e fonoassorbenti su pompe, bruciatori e gruppi frigo, con pareti a doppio strato (massa piu materiale poroso) per attenuazioni dell'ordine di 10, 20 dB. I descrittori di controllo sono LAeq per gli impianti a funzionamento continuo (ventilazione meccanica, aerazione) e LASmax per quelli a funzionamento discontinuo (scarichi, ascensori, rubinetteria, servizi igienici), come distingue il DPCM 5/12/1997, con verifica in opera del rumore residuo e correzione per il rumore di fondo", "norme_cardine": "DPCM 5/12/1997", "norme_secondarie": ["UNI EN ISO 16032:2024", "UNI EN ISO 10052:2021", "UNI EN 12354-5:2023", "UNI EN ISO 717-2:2021", "DPCM 14/11/1997", "Legge 447/1995", "UNI 11367:2023", "CAM DM MASE 24/11/2025"], "indicazioni": "Quando in opera si superano LAeq 25 dB(A) (impianti continui) o LASmax 35 dB(A) (impianti discontinui) e la causa e identificata in vibrazioni trasmesse alle strutture o in rumore aereo della ventilazione: centrali termiche e idriche, UTA e ventilazione meccanica, gruppi frigo e pompe di calore, ascensori, autoclavi, scarichi e rubinetteria. Indicata sia in nuove installazioni (progettazione preventiva con previsione secondo UNI EN 12354-5) sia in adeguamento di impianti esistenti rumorosi, perche agisce alla sorgente senza intervenire sulle partizioni edilizie", "limitazioni": "Non risolve da sola se il problema dominante e l'isolamento insufficiente delle partizioni (in quel caso serve agire su pareti, solai o serramenti). I supporti antivibranti vanno dimensionati per la frequenza specifica della macchina: un supporto troppo rigido o sottodimensionato puo amplificare alla risonanza, soprattutto nei transitori di avvio e arresto, peggiorando la situazione. I silenziatori introducono perdite di carico che vanno verificate con il progetto aeraulico. L'incapsulamento richiede attenzione allo smaltimento del calore delle macchine e all'accessibilita per la manutenzione. La verifica strumentale va eseguita nell'ambiente disturbato, non in quello in cui il rumore si origina, con corretta correzione per il rumore residuo e di fondo: misure non conformi alla UNI EN ISO 16032 non sono confrontabili con i limiti di legge"}]};
+window.PATOLOGIE_UI = [{"id": "risalita", "svg": "risalita", "label": "Umidità di risalita", "sub": "Barriere chimiche, meccaniche, elettrofisiche", "color": "#2980b9", "colorStrong": "#1f5980"}, {"id": "infiltraz", "svg": "infiltraz", "label": "Infiltrazioni d'acqua", "sub": "Type A/B/C BS 8102:2022, sigillanti", "color": "#1f4e79", "colorStrong": "#143552"}, {"id": "sali", "svg": "sali", "label": "Sali nelle murature", "sub": "Poultice, desalinizzazione, WTA", "color": "#d4a017", "colorStrong": "#8c6a0f"}, {"id": "muffe", "svg": "muffe", "label": "Muffe / Biodeteriogeni", "sub": "IICRC S520-2024 Condition 2/3", "color": "#558b2f", "colorStrong": "#33691e"}, {"id": "condensa", "svg": "condensa", "label": "Condensa (Glaser + sup.)", "sub": "Cappotto, calcio silicato, freno vapore", "color": "#6a3d8c", "colorStrong": "#4a2766"}, {"id": "termigro", "svg": "termigro", "label": "Escursioni termoigrometriche", "sub": "VMC, deumidificazione, schermature", "color": "#c0392b", "colorStrong": "#922e23"}, {"id": "radon", "svg": "radon", "label": "Gas Radon", "sub": "SSD, vespaio, sigillatura crepe", "color": "#7b1fa2", "colorStrong": "#4a148c"}, {"id": "iaq", "svg": "iaq", "label": "Qualità aria indoor (IAQ)", "sub": "Rimozione fonte, filtri F7/F9/HEPA", "color": "#1f8aa8", "colorStrong": "#15637a"}, {"id": "tenuta", "svg": "tenuta", "label": "Tenuta aria / Vespai", "sub": "Nastri butilici, sostituzione serramenti", "color": "#5c4128", "colorStrong": "#3e2a17"}, {"id": "mbc", "svg": "mbc", "label": "Microclima beni culturali", "sub": "HVAC dedicato, capacitanza igroscopica", "color": "#693c7a", "colorStrong": "#48285a"}, {"id": "cls", "svg": "cls", "label": "Prove calcestruzzo armato", "sub": "UNI EN 1504, FRP, realcalinizzazione", "color": "#475569", "colorStrong": "#2e3a4c"}, {"id": "mur", "svg": "mur", "label": "Murature / Acciaio", "sub": "Scuci-cuci, CRM, tiranti, EN 12944", "color": "#a85332", "colorStrong": "#7c3a20"}, {"id": "legno", "svg": "legno", "label": "Degrado legno", "sub": "Preservanti EN 599-1, termo-trattamento", "color": "#7c4e25", "colorStrong": "#5a371a"}, {"id": "geo", "svg": "geo", "label": "Geotecnica / Falda", "sub": "Drenaggio, micropali, jet grouting", "color": "#6b4423", "colorStrong": "#3e2a14"}, {"id": "acustica", "svg": "acustica", "label": "Acustica in edilizia", "sub": "Facciata, calpestio, aereo, riverbero, impianti", "color": "#34699e", "colorStrong": "#234a6b"}];
+window.MODULO_LINKS = {"risalita": "risalita.html", "infiltraz": "infiltrazioni.html", "sali": "sali.html", "muffe": "biodeteriogeni.html", "condensa": "condensa-glaser.html", "termigro": "termoigrometria.html", "radon": "radon.html", "iaq": "iaq.html", "tenuta": "vespai.html", "mbc": "microclima-bc.html", "cls": null, "mur": null, "legno": null, "geo": null, "acustica": "acustica.html"};
+window.CAT_COLOR = {"Barriera orizzontale": "#7c3aed", "Intonaco di sacrificio": "#0891b2", "Barriera elettrofisica": "#ea580c", "Aerazione": "#0e7c87", "Impermeabilizzazione": "#2563eb", "Struttura impermeabile": "#1e40af", "Drenaggio cavity": "#0369a1", "Sigillatura selettiva": "#7c2d12", "Rifacimento manto": "#b45309", "Desalinizzazione passiva": "#0891b2", "Sostituzione strato di sacrificio": "#0e7c87", "Desalinizzazione attiva": "#ea580c", "Inibizione chimica": "#9333ea", "Rimozione fisica": "#dc2626", "Rimozione fisica intensiva": "#991b1b", "Causa-effetto": "#16a34a", "Prevenzione recidiva": "#15803d", "Isolamento esterno": "#0e7c87", "Isolamento interno": "#0891b2", "Controllo vapore": "#2563eb", "Correzione puntuale": "#7c3aed", "Ventilazione meccanica": "#16a34a", "Controllo UR": "#0891b2", "Mitigazione stress termico estivo": "#ea580c", "Mitigazione attiva": "#dc2626", "Mitigazione strutturale": "#7c2d12", "Mitigazione passiva": "#16a34a", "Diluizione": "#0891b2", "Filtrazione + diluizione": "#0e7c87", "Abbattimento chimico": "#9333ea", "Tenuta giunti": "#2563eb", "Sostituzione componenti": "#7c3aed", "Aerazione fondazione": "#0e7c87", "Climatizzazione conservativa": "#1e40af", "Climatizzazione passiva": "#16a34a", "Controllo fotodegrado": "#b45309", "Ripristino strutturale": "#7c2d12", "Protezione preventiva": "#16a34a", "Rinforzo strutturale": "#dc2626", "Trattamento elettrochimico": "#9333ea", "Rinforzo strutturale antisismico": "#dc2626", "Ricostruzione locale": "#7c2d12", "Consolidamento volumetrico": "#0891b2", "Protezione corrosione": "#0e7c87", "Protezione chimica": "#9333ea", "Disinfestazione fisica": "#ea580c", "Controllo idraulico": "#0369a1", "Consolidamento fondale": "#7c2d12", "Consolidamento terreno": "#7c3aed", "Isolamento di facciata": "#34699e", "Isolamento al calpestio": "#2e6da4", "Isolamento aereo tra ambienti": "#3a7bb0", "Correzione acustica interna": "#4a86bf", "Rumore degli impianti": "#274d78"};
+window.INV_COLOR = {"bassa": "#16a34a", "media": "#ea580c", "alta": "#dc2626", "media (esistente)": "#ea580c", "alta (nuovo)": "#dc2626", "alta (nuovo) / non applicabile (esistente)": "#991b1b", "variabile": "#6b7280", "media (nuovo)": "#ea580c", "media (esistente) / non applicabile (esistente)": "#ea580c", "alta (nuovo) / media (esistente)": "#dc2626"};
+
+const ESC = (s)=>String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const selPat = new Set();
+const PAT_SVG = (id)=>`<svg viewBox="0 0 24 24"><use href="#i-${id}"/></svg>`;
+const HI = {
+  norme:'<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8 7 L16 7 M8 11 L16 11 M8 15 L13 15"/>',
+  mod:'<path d="M9 4 L4 4 L4 20 L9 20"/><path d="M15 4 L20 4 L20 20 L15 20"/><path d="M12 8 L12 16"/><path d="M9 12 L15 12"/>'
+};
+
+
+// === MX-TOOLBAR STANDARD: handlers ===
+const _SAVES_KEY = 'mx2::sol-saves-v1';
+function _updateToolbarState(){
+  const tb = document.getElementById('mxToolbar');
+  if(!tb) return;
+  if(selPat.size > 0){
+    tb.classList.remove('needs-selection');
+    tb.classList.add('is-active');
+  } else {
+    tb.classList.add('needs-selection');
+    tb.classList.remove('is-active');
+  }
+}
+function _listSaves(){
+  try{ return JSON.parse(localStorage.getItem(_SAVES_KEY)||'[]'); } catch(e){ return []; }
+}
+function _writeSaves(arr){
+  localStorage.setItem(_SAVES_KEY, JSON.stringify(arr));
+}
+/* 20/11/2026: le domande si fanno in una finestra dentro la pagina (window.mxChiedi, nel file condiviso
+   _shared/mx-switcher.js) e non più nelle finestrelle del browser. Se quel file non fosse stato caricato si torna
+   alle finestrelle di prima. _mxChiedi risponde con una promessa; _mxTesto chiede un solo testo. */
+function _mxChiedi(titolo, cfg){
+  if(window.mxChiedi) return window.mxChiedi(titolo, cfg);
+  cfg = cfg || {};
+  if(cfg.scelte){
+    var buone = cfg.scelte.filter(function(s){ return !s[2]; });
+    var r = prompt(titolo + '\n\n' + buone.map(function(s, i){ return (i+1) + '. ' + s[1]; }).join('\n') + '\n\nScrivi il numero:', '1');
+    var k = parseInt(r, 10) - 1;
+    return Promise.resolve(buone[k] ? buone[k][0] : null);
+  }
+  var out = [], campi = cfg.campi || [];
+  for(var i = 0; i < campi.length; i++){
+    var v = prompt(titolo + (campi[i][0] ? ('\n' + campi[i][0]) : ''), campi[i][1] == null ? '' : campi[i][1]);
+    if(v === null) return Promise.resolve(null);
+    out.push(v);
+  }
+  return Promise.resolve(out);
+}
+function _mxTesto(titolo, pre){ return _mxChiedi(titolo, {campi:[['', pre]]}).then(function(r){ return r ? r[0] : null; }); }
+async function tbSave(){
+  if(!selPat.size){ alert('Seleziona almeno una patologia.'); return; }
+  const name = await _mxTesto('Nome di questa selezione (la ritrovi col tasto «Carica»)', 'Selezione ' + new Date().toLocaleDateString('it-IT'));   /* 20/11/2026: finestra dentro la pagina */
+  if(!name) return;
+  const saves = _listSaves();
+  saves.push({
+    id: 'sv_' + Date.now(),
+    name: name,
+    savedAt: new Date().toISOString(),
+    selPat: [...selPat]
+  });
+  _writeSaves(saves);
+  alert('Selezione salvata.\nPuoi riaprirla col tasto «Carica».');
+}
+/* 19/11/2026: tasto «Carica». «Salva» c'era già, ma mancava il modo di riaprire una selezione salvata
+   (il messaggio rimandava a un «Apri snapshot» che in questo modulo non esiste). */
+function tbLoad(){
+  const saves=_listSaves();
+  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  document.getElementById('md-title').textContent='Selezioni salvate';
+  document.getElementById('md-sub').textContent=saves.length?'Scegli quella da riaprire':'Nessuna selezione salvata';
+  ['md-tags','md-stat'].forEach(id=>{ const e=document.getElementById(id); if(e) e.innerHTML=''; });
+  let h='';
+  if(!saves.length){
+    h='<p style="margin:0">Scegli le patologie e premi «Salva»: la selezione comparirà qui.</p>';
+  } else {
+    h='<div style="display:flex;flex-direction:column;gap:8px">'+saves.slice().reverse().map(sv=>{
+      const n=(sv.selPat||[]).length;
+      const d=sv.savedAt?new Date(sv.savedAt).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+      return '<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff">'
+        +'<div style="flex:1;min-width:0"><b>'+esc(sv.name)+'</b><div style="font-size:12px;color:var(--ink-mute)">'+esc(d)+' · '+n+(n===1?' patologia':' patologie')+'</div></div>'
+        +'<button type="button" data-apri="'+esc(sv.id)+'" style="font:inherit;font-weight:700;padding:7px 14px;border-radius:8px;border:1px solid var(--mx-accent,#1976d2);background:var(--mx-accent,#1976d2);color:#fff;cursor:pointer">Apri</button>'
+        +'<button type="button" data-elimina="'+esc(sv.id)+'" style="font:inherit;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer">Elimina</button>'
+        +'</div>';
+    }).join('')+'</div>';
+  }
+  const b=document.getElementById('md-body'); b.innerHTML=h;
+  b.querySelectorAll('[data-apri]').forEach(x=>x.onclick=()=>tbLoadApply(x.dataset.apri));
+  b.querySelectorAll('[data-elimina]').forEach(x=>x.onclick=()=>tbLoadDelete(x.dataset.elimina));
+  document.getElementById('md').classList.add('show');
+}
+function tbLoadApply(id){
+  const sv=_listSaves().find(x=>x.id===id); if(!sv) return;
+  selPat.clear(); (sv.selPat||[]).forEach(p=>{ if(PATOLOGIE_UI.some(u=>u.id===p)) selPat.add(p); });
+  renderPatGrid(); renderSol(); mxCloseModal();
+}
+function tbLoadDelete(id){
+  const sv=_listSaves().find(x=>x.id===id); if(!sv) return;
+  if(!confirm('Eliminare la selezione «'+sv.name+'»?')) return;
+  _writeSaves(_listSaves().filter(x=>x.id!==id)); tbLoad();
+}
+function tbReset(){
+  // Azzera istantaneamente come pulsante AZZERA in alto (stessa linea)
+  resetSel();
+}
+
+function renderPatGrid(){
+  _updateToolbarState();
+  const g = document.getElementById('patGrid');
+  g.innerHTML = '';
+  PATOLOGIE_UI.forEach(p=>{
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pat-it' + (selPat.has(p.id)?' on':'');
+    if(p.color)  btn.style.setProperty('--pat-color', p.color);
+    if(p.colorStrong) btn.style.setProperty('--pat-color-strong', p.colorStrong);
+    btn.innerHTML = `
+      <span class="pcheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 L10 17 L19 7"/></svg></span>
+      <span class="pi">${PAT_SVG(p.svg)}</span>
+      <span class="pl">${ESC(p.label)}</span>
+      <span class="ps">${ESC(p.sub)}</span>`;
+    btn.addEventListener('click',()=>{
+      if(selPat.has(p.id)) selPat.delete(p.id); else selPat.add(p.id);
+      renderPatGrid(); renderSol();
+    });
+    g.appendChild(btn);
+  });
+  document.getElementById('selCnt').textContent = selPat.size;
+}
+function resetSel(){ selPat.clear(); renderPatGrid(); renderSol(); }
+function selectAll(){ PATOLOGIE_UI.forEach(p=>selPat.add(p.id)); renderPatGrid(); renderSol(); }
+
+function invShort(inv){
+  if(/bassa/i.test(inv) && !/media|alta/i.test(inv)) return 'bassa';
+  if(/alta/i.test(inv)) return 'alta';
+  if(/media/i.test(inv)) return 'media';
+  return 'variabile';
+}
+
+function renderSol(){
+  const out = document.getElementById('solOut');
+  if(!selPat.size){
+    out.innerHTML = '<div class="sol-empty">👆 Seleziona una o più patologie qui sopra per ottenere le tecniche di risanamento normate.</div>';
+    return;
+  }
+
+  // Calcola gruppi e norme aggregate
+  const groups = [];
+  const normeMap = new Map();
+  selPat.forEach(pid=>{
+    const p = PATOLOGIE_UI.find(x=>x.id===pid);
+    const sols = SOLUZIONI[pid]||[];
+    sols.forEach(s=>{
+      const n = s.norme_cardine;
+      if(!normeMap.has(n)) normeMap.set(n, new Set());
+      normeMap.get(n).add(p.label + ' · ' + s.nome);
+      (s.norme_secondarie||[]).forEach(n2=>{
+        if(!normeMap.has(n2)) normeMap.set(n2, new Set());
+        normeMap.get(n2).add(p.label + ' · ' + s.nome);
+      });
+    });
+    if(sols.length) groups.push({pid, label:p.label, svg:p.svg, sub:p.sub, sols});
+  });
+  const norme = [...normeMap.entries()].map(([n,set])=>({norma:n, ctx:[...set]}));
+  norme.sort((a,b)=>a.norma.localeCompare(b.norma));
+  const totSol = groups.reduce((a,g)=>a+g.sols.length,0);
+
+  if(!totSol){
+    out.innerHTML = '<div class="sol-empty">Nessuna soluzione mappata per le patologie selezionate.</div>';
+    return;
+  }
+
+  let html = '<div class="sol-stats">';
+  html += `<span><strong>${totSol}</strong> tecniche di risanamento</span>`;
+  html += `<span><strong>${groups.length}</strong> patologie</span>`;
+  html += `<span><strong>${norme.length}</strong> norme citate</span>`;
+  html += '</div>';
+
+  groups.forEach(g=>{
+    html += `<div class="sol-pat-block" data-pat="${g.pid}" data-pat-label="${ESC(g.label)}"${(function(){var col=PATOLOGIE_UI.find(x=>x.id===g.pid);return col&&col.color?` style="--block-color:${col.color}"`:""})()}>
+      <div class="sol-pat-head">
+        <span class="kpi">${PAT_SVG(g.svg)}</span>
+        <div style="flex:1;min-width:0">
+          <div class="kpl">Come risanare: ${ESC(g.label)}</div>
+          <span class="kpx">${g.sols.length} tecniche normate disponibili</span>
+        </div>
+      </div>
+      <div class="sol-pat-body">`;
+    g.sols.forEach((s, idx)=>{
+      const color = CAT_COLOR[s.categoria] || '#475569';
+      const inv = invShort(s.invasivita);
+      html += `<div class="sol-card" style="--cat-color:${color}" onclick="openSol('${g.pid}',${idx})">
+        <div class="sc-head">
+          <div class="sc-n">${ESC(s.nome)}</div>
+          <div class="sc-tags">
+            <span class="pill cat">${ESC(s.categoria)}</span>
+            <span class="pill inv-${inv}">Invasività ${ESC(s.invasivita)}</span>
+            <span class="pill tmp">${ESC(s.tempistica)}</span>
+          </div>
+        </div>
+        <div class="sc-princ">${ESC(s.principio)}</div>
+        <div style="padding-left:8px"><span class="sc-norma" style="margin-left:0">${ESC(s.norme_cardine)}</span>${(s.norme_secondarie||[]).length?` <span style="font-size:11px;color:#888;margin-left:6px">+ ${s.norme_secondarie.length} norme secondarie</span>`:''}</div>
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+
+  if(norme.length){
+    html += `<div class="sol-sec"><h4><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${HI.norme}</svg></span>Norme di risanamento aggregate<span class="badge">${norme.length} NORME</span></h4><div class="ksbody"><ul class="norme-list">`;
+    norme.forEach(o=>{
+      const n = o.ctx.length;
+      html += `<li><span>${ESC(o.norma)}</span><span class="nb-tools">${n} ${n===1?'tecnica':'tecniche'}</span></li>`;
+    });
+    html += '</ul></div></div>';
+  }
+
+  // Moduli wizard correlati
+  const moduli = [];
+  selPat.forEach(pid=>{
+    const f = MODULO_LINKS[pid];
+    if(f){ const p = PATOLOGIE_UI.find(x=>x.id===pid); moduli.push({label:p.label, file:f, svg:p.svg}); }
+  });
+  if(moduli.length){
+    html += `<div class="sol-sec"><h4><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${HI.mod}</svg></span>Diagnosi correlate (moduli wizard)</h4><div class="ksbody">`;
+    moduli.forEach(m=>{
+      html += `<a class="mod-link" href="${m.file}">${PAT_SVG(m.svg)} ${ESC(m.label)} <span class="ar">→</span></a>`;
+    });
+    html += '</div></div>';
+  }
+
+  // (Pulsanti spostati nella toolbar standard fissa)
+
+  out.innerHTML = html;
+}
+
+function openSol(pid, idx){
+  const s = SOLUZIONI[pid][idx];
+  const p = PATOLOGIE_UI.find(x=>x.id===pid);
+  const color = CAT_COLOR[s.categoria] || '#475569';
+  const inv = invShort(s.invasivita);
+  const md = document.getElementById('md');
+  md.classList.add('show');
+  document.getElementById('md-title').textContent = s.nome;
+  document.getElementById('md-sub').textContent = p.label + ' · Risanamento';
+  document.getElementById('md-tags').innerHTML = `
+    <span class="pill cat" style="background:${color};font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:11px;color:#fff">${ESC(s.categoria)}</span>
+    <span class="pill inv-${inv}" style="font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:11px;color:#fff;background:${INV_COLOR[s.invasivita]||'#6b7280'}">Invasività ${ESC(s.invasivita)}</span>
+    <span style="font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:11px;color:#fff;background:#475569;font-family:JetBrains Mono,monospace">${ESC(s.tempistica)}</span>`;
+  const norme2 = (s.norme_secondarie||[]).length ? '<ul>' + s.norme_secondarie.map(n=>`<li><code>${ESC(n)}</code></li>`).join('') + '</ul>' : '<p style="color:#888;font-style:italic;font-size:12px">Nessuna norma secondaria.</p>';
+  document.getElementById('md-body').innerHTML = `
+    <h3><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7 L12 13"/><circle cx="12" cy="16" r="0.8" fill="currentColor"/></svg>Principio operativo</h3>
+    <p>${ESC(s.principio)}</p>
+    <h3><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8 7 L16 7 M8 11 L16 11 M8 15 L13 15"/></svg>Norme tecniche</h3>
+    <p><strong>Cardine:</strong> <code>${ESC(s.norme_cardine)}</code></p>
+    <p><strong>Secondarie:</strong></p>${norme2}
+    <h3><svg viewBox="0 0 24 24"><path d="M5 12 L10 17 L19 7"/></svg>Indicazioni, quando applicarla</h3>
+    <p>${ESC(s.indicazioni)}</p>
+    <div class="alert">
+      <strong>⚠ Limitazioni, quando NON applicarla.</strong><br>
+      ${ESC(s.limitazioni)}
+    </div>`;
+  document.getElementById('md-body').scrollTop=0;
+}
+function mxCloseModal(){ document.getElementById('md').classList.remove('show'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') mxCloseModal(); });
+
+function exportSol(){
+  const groups = [];
+  const normeMap = new Map();
+  selPat.forEach(pid=>{
+    const p = PATOLOGIE_UI.find(x=>x.id===pid);
+    const sols = SOLUZIONI[pid]||[];
+    if(sols.length) groups.push({label:p.label, sols});
+    sols.forEach(s=>{
+      const n = s.norme_cardine;
+      if(!normeMap.has(n)) normeMap.set(n, 0);
+      normeMap.set(n, normeMap.get(n)+1);
+      (s.norme_secondarie||[]).forEach(n2=>{
+        if(!normeMap.has(n2)) normeMap.set(n2, 0);
+        normeMap.set(n2, normeMap.get(n2)+1);
+      });
+    });
+  });
+  const dt = new Date().toLocaleDateString('it-IT');
+  let h = '<!doctype html><html><head><meta charset="utf-8"><title>Piano di Risanamento Mixando</title></head><body style="font-family:Georgia,serif;max-width:800px;margin:0 auto;padding:20px;color:#2c1810">';
+  h += '<h1 style="border-bottom:3px solid #2e7d52;padding-bottom:8px;color:#1b5532">Piano di Risanamento</h1>';
+  h += '<p style="font-size:12px;color:#888">Mixando v3 · Soluzioni di Risanamento · ' + dt + '</p>';
+  groups.forEach(g=>{
+    h += '<h2 style="background:#eef9f1;color:#1b5532;padding:10px 14px;border-radius:6px;border-left:5px solid #2e7d52">Risanamento: ' + g.label + '</h2>';
+    g.sols.forEach(s=>{
+      h += '<div style="border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:10px;page-break-inside:avoid">';
+      h += '<h3 style="color:#1b5532;margin:0 0 6px">' + s.nome + '</h3>';
+      h += '<p style="font-size:11px;color:#666;margin:0 0 8px"><b>Categoria:</b> ' + s.categoria + ' · <b>Invasività:</b> ' + s.invasivita + ' · <b>Tempistica:</b> ' + s.tempistica + '</p>';
+      h += '<p style="margin:0 0 6px"><b>Principio:</b> ' + s.principio + '</p>';
+      h += '<p style="margin:0 0 6px;font-family:monospace;font-size:11px;color:#1b5532"><b>Norma cardine:</b> ' + s.norme_cardine + '</p>';
+      if((s.norme_secondarie||[]).length) h += '<p style="margin:0 0 6px;font-family:monospace;font-size:11px;color:#666"><b>Norme secondarie:</b> ' + s.norme_secondarie.join(' · ') + '</p>';
+      h += '<p style="margin:0 0 6px"><b>Indicazioni:</b> ' + s.indicazioni + '</p>';
+      h += '<p style="margin:0 0 6px;background:#fff5f3;padding:6px 9px;border-left:3px solid #c0392b;border-radius:5px"><b style="color:#7f1d1d">⚠ Limitazioni:</b> ' + s.limitazioni + '</p>';
+      h += '</div>';
+    });
+  });
+  h += '<h2 style="color:#1b5532;border-top:2px solid #2e7d52;padding-top:12px">Norme aggregate</h2><ul style="font-family:monospace;font-size:12px">';
+  [...normeMap.entries()].sort().forEach(([n,c])=>h += '<li>' + n + ' <span style="color:#888">(' + c + ' tecnica/he)</span></li>');
+  h += '</ul>';
+  h += '<hr><p style="font-size:10px;color:#aaa">Mixando v3 · Renzo ArtHome · Norme verificate su fonti istituzionali (WTA · UNI · ISO · ASTM · BS · ANSI/AARST · IICRC · CIE · CNR-DT)</p>';
+  h += '</body></html>';
+  const blob = new Blob(['﻿'+h], {type:'application/msword'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'piano-risanamento-mixando-' + new Date().toISOString().slice(0,10) + '.doc';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
+}
+function copyJSON(){
+  const out = {};
+  selPat.forEach(pid=>{
+    const p = PATOLOGIE_UI.find(x=>x.id===pid);
+    out[p.label] = SOLUZIONI[pid]||[];
+  });
+  const txt = JSON.stringify(out, null, 2);
+  navigator.clipboard.writeText(txt).then(()=>alert('Copiato JSON ('+txt.length+' bytes)')).catch(()=>{
+    const t = document.createElement('textarea'); t.value=txt; document.body.appendChild(t); t.select();
+    try{document.execCommand('copy');alert('JSON copiato');}catch(e){alert('Errore copia');} finally{document.body.removeChild(t);}
+  });
+}
+
+
+// === SNAPSHOT REPORT BUILDER (esclusione granulare via data-pat) ===
+function buildSnapshotHTML(){
+  const groups = [];
+  const normeMap = new Map();
+  selPat.forEach(pid=>{
+    const p = PATOLOGIE_UI.find(x=>x.id===pid);
+    const sols = SOLUZIONI[pid]||[];
+    if(sols.length) groups.push({pid, label:p.label, color:p.color||'#2e7d52', sols});
+    sols.forEach(s=>{
+      const n = s.norme_cardine;
+      if(!normeMap.has(n)) normeMap.set(n,0);
+      normeMap.set(n, normeMap.get(n)+1);
+      (s.norme_secondarie||[]).forEach(n2=>{
+        if(!normeMap.has(n2)) normeMap.set(n2,0);
+        normeMap.set(n2, normeMap.get(n2)+1);
+      });
+    });
+  });
+  const dt = new Date().toLocaleDateString('it-IT');
+  let html = '<div class="mx-snapshot" data-module="soluzioni-risanamento">';
+  html += '<h2 style="color:#1b5532;border-bottom:2px solid #2e7d52;padding-bottom:6px">Piano di Risanamento</h2>';
+  html += '<p style="font-size:11px;color:#888">Mixando v3 · Soluzioni · '+dt+'</p>';
+  groups.forEach(g=>{
+    html += '<section data-pat="'+g.pid+'" data-pat-label="'+ESC(g.label)+'" data-sec="solutions" style="border-left:5px solid '+g.color+';padding-left:12px;margin:14px 0">';
+    html += '<h3 style="color:#1b5532">Risanamento: '+ESC(g.label)+'</h3>';
+    g.sols.forEach(s=>{
+      html += '<div data-sol="'+s.norme_cardine.replace(/[^a-z0-9]/gi,"_")+'" style="margin-bottom:10px;padding:10px;background:#fafafa;border-radius:6px">';
+      html += '<b>'+ESC(s.nome)+'</b><br>';
+      html += '<small style="color:#666">'+ESC(s.categoria)+' · Invasività '+ESC(s.invasivita)+' · '+ESC(s.tempistica)+'</small>';
+      html += '<p style="margin:6px 0">'+ESC(s.principio)+'</p>';
+      html += '<p style="font-family:monospace;font-size:11px;color:#1b5532"><b>Norma cardine:</b> '+ESC(s.norme_cardine)+'</p>';
+      if((s.norme_secondarie||[]).length) html += '<p style="font-family:monospace;font-size:11px;color:#666"><b>Secondarie:</b> '+s.norme_secondarie.map(ESC).join(' · ')+'</p>';
+      html += '<p><b>Indicazioni:</b> '+ESC(s.indicazioni)+'</p>';
+      html += '<p style="background:#fff5f3;padding:6px 9px;border-left:3px solid #c0392b;border-radius:5px"><b style="color:#7f1d1d">⚠ Limitazioni:</b> '+ESC(s.limitazioni)+'</p>';
+      html += '</div>';
+    });
+    html += '</section>';
+  });
+  if(normeMap.size){
+    html += '<section data-sec="norme-aggregate" style="margin-top:18px"><h3 style="color:#1b5532">Norme aggregate</h3><ul style="font-family:monospace;font-size:11px">';
+    [...normeMap.entries()].sort().forEach(([n,c])=>html += '<li>'+ESC(n)+' <span style="color:#888">('+c+' tecnica/he)</span></li>');
+    html += '</ul></section>';
+  }
+  html += '</div>';
+  return html;
+}
+function saveSnapshot(){
+  if(!selPat.size){ alert('Seleziona prima almeno una patologia.'); return; }
+  try{
+    const r = JSON.parse(localStorage.getItem('mx2::reports')||'[]');
+    const labels = [...selPat].map(pid=>PATOLOGIE_UI.find(x=>x.id===pid).label).join(' + ');
+    r.push({
+      id: 'sol_' + Date.now(),
+      module: 'soluzioni-risanamento',
+      moduleName: 'Soluzioni di Risanamento',
+      version: 'v1.0',
+      createdAt: new Date().toISOString(),
+      summary: 'Piano risanamento per: ' + labels,
+      patologie: [...selPat],
+      htmlSnippet: buildSnapshotHTML()
+    });
+    localStorage.setItem('mx2::reports', JSON.stringify(r));
+    alert('Aggiunto al Report Builder.\nApri il modulo "Relazione finale" per costruire la relazione tecnica con esclusione granulare per patologia.');
+  } catch(e){ alert('Errore salvataggio: '+e.message); }
+}
+function exportPDF(){
+  if(!selPat.size){ alert('Seleziona prima almeno una patologia.'); return; }
+  const w = window.open('', '_blank');
+  w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Piano Risanamento, Stampa PDF</title><style>body{font-family:Georgia,serif;max-width:900px;margin:0 auto;padding:20px;color:#2c1810}h2,h3{color:#1b5532}@media print{body{padding:10px}}</style></head><body>');
+  w.document.write(buildSnapshotHTML());
+  w.document.write('<hr><p style="font-size:10px;color:#aaa">Mixando v3 · Renzo ArtHome</p></body></html>');
+  w.document.close();
+  setTimeout(()=>{ w.print(); }, 500);
+}
+
+renderPatGrid();
+renderSol();
+_updateToolbarState();
+</script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

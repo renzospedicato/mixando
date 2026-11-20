@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mixando Lab · Diagnosi Biodeteriogeni v4.0</title>
+<style>
+:root{--mx-accent:#2e7d32;--mx-accent-strong:#1b5e20;--mx-accent-soft:rgba(46,125,50,.12);
+--bg:#f5f1e8;--paper:#fff;--ink:#2c1810;--ink-soft:#6b5c4c;--ink-mute:#8b7355;
+--line:#e6e0d2;--ok:#1f7a4d;--warn:#b07820;--err:#a83232;--r:14px;
+--ff-serif:Georgia,"Cambria",serif;--ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+--ff-mono:ui-monospace,"SF Mono",Consolas,monospace;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:0px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--paper);border-bottom:3px solid var(--mx-accent);box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.mx-bar .em{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--mx-accent);color:#fff}
+.mx-bar .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mx-accent);line-height:1}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:14px;color:var(--ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:6px 12px;border:1px solid var(--mx-accent);border-radius:8px}
+.mx-bar a.back:hover{background:var(--mx-accent);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 22px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:720px;color:var(--ink-soft);font-size:14px}
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
+.ana-strip .pc{padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700;color:var(--ink)}
+.ana-strip .pc .m{font-size:11.5px;color:var(--ink-mute);margin-top:2px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card .body{padding:16px 18px}
+.stepper{display:flex;flex-wrap:wrap;gap:5px;padding:10px;background:#fafaf6;border:1px solid var(--line);border-radius:10px;margin-bottom:14px}
+.step-chip{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink-mute);padding:6px 11px;border-radius:14px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .15s}
+.step-chip.done{border-color:var(--ok);color:var(--ok);background:#e8f5e9}
+.step-chip.active{color:#fff;border-color:#0a5b64;background:linear-gradient(180deg,#18a4b0,#0e7c87 55%,#0a5b64);box-shadow:0 2px 7px rgba(14,124,135,.34),inset 0 1px 0 rgba(255,255,255,.34);text-shadow:0 1px 1px rgba(0,0,0,.22)}
+.step-chip:hover:not(.active){border-color:var(--mx-accent);color:var(--mx-accent-strong);background:var(--mx-accent-soft)}
+.banner{margin:8px 0 14px;padding:10px 14px;border-radius:9px;font-size:12.5px;line-height:1.55}
+.banner.blue{background:#e3f2fd;border-left:4px solid #1976d2;color:#0d47a1}
+.banner.yellow{background:#fff8e1;border-left:4px solid #f9a825;color:#7d5a1f}
+.banner.green{background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20}
+.banner.red{background:#ffebee;border-left:4px solid var(--err);color:#7f0000}
+.banner strong{font-weight:800}
+.step-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.step-head h4{margin:0;font-family:var(--ff-serif);font-size:18px;color:var(--ink);font-weight:700}
+.step-head .ref{font-size:11px;color:var(--ink-mute);font-style:italic;background:#faf8f3;padding:4px 10px;border-radius:7px;border:1px solid var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em}
+.fld label .opz{font-weight:400;color:var(--ink-mute);font-size:10.5px}
+.fld input,.fld select,.fld textarea{padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13.5px;background:#fff;outline:none;width:100%;color:var(--ink)}
+.fld input[type=number]{font-family:var(--ff-mono)}
+.fld textarea{min-height:60px;resize:vertical;font-family:inherit}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.fld .calc{background:#faf8f3 !important;font-family:var(--ff-mono);font-weight:700}
+.chkgrp{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.chkgrp label{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border:1px solid var(--line);border-radius:18px;font-size:12px;cursor:pointer;background:#fff;font-weight:600;color:var(--ink-soft);transition:all .15s}
+.chkgrp label:has(input:checked){border-color:var(--mx-accent);background:var(--mx-accent-soft);color:var(--mx-accent-strong)}
+.chkgrp input{margin:0}
+.radio-row{display:flex;flex-wrap:wrap;gap:6px}
+.radio-row label{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;cursor:pointer;background:#fff;font-weight:700;color:var(--ink-soft);transition:all .15s}
+.radio-row label:has(input:checked){border-color:var(--mx-accent);background:var(--mx-accent);color:#fff}
+.radio-row input{display:none}
+.step-nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+.mx-shiny{appearance:none;border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;letter-spacing:.04em;padding:11px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap}
+.mx-shiny::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-shiny:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-shiny:hover::before{transform:translateX(130%)}
+.s-blue{background-image:linear-gradient(135deg,#42a5f5,#1565c0 45%,#0d47a1);box-shadow:0 3px 10px rgba(21,101,192,.42)}
+.s-gray{background-image:linear-gradient(135deg,#bdbdbd,#757575 45%,#424242);box-shadow:0 3px 10px rgba(97,97,97,.42)}
+.s-violet{background-image:linear-gradient(135deg,#ab47bc,#6a1b9a 45%,#3e0a5b);box-shadow:0 3px 10px rgba(106,27,154,.42)}
+.s-green{background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);box-shadow:0 3px 10px rgba(46,125,50,.42)}
+.mx-toolbar{background:#fff;border:1px solid #e6e0d2;border-radius:14px;box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin:18px 0 14px;overflow:hidden}
+.mx-toolbar-head{margin:0;padding:13px 18px;font-family:Georgia,serif;font-size:15px;color:#2c1810;font-weight:700;border-bottom:1px solid #e6e0d2;background:linear-gradient(180deg,rgba(46,125,50,.10),#fff);display:flex;align-items:center;gap:10px}
+.mx-toolbar-head .ico-wrap{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.mx-toolbar-head .title{flex:1}
+.mx-toolbar-head .title small{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-style:italic;font-size:11.5px;color:#8b7355;font-weight:500;letter-spacing:0;margin-top:2px}
+.mx-toolbar-body{padding:14px 18px 16px}
+.mx-toolbar-inner{max-width:1080px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.mx-tb-btn{appearance:none;border:0;color:#fff;font:inherit;font-size:13px;font-weight:700;letter-spacing:.02em;padding:12px 18px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.12);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease,background-position .35s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap}
+.mx-tb-btn::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-tb-btn:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-tb-btn:hover::before{transform:translateX(130%)}
+.mx-tb-btn .ico{font-size:16px;line-height:1}
+.mx-tb-btn.tb-save{background-image:linear-gradient(135deg,#64b5f6,#1976d2 45%,#0d47a1);box-shadow:0 3px 10px rgba(25,118,210,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-load{background-image:linear-gradient(135deg,#ffb74d,#f57c00 45%,#bf360c);box-shadow:0 3px 10px rgba(245,124,0,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-compare{background-image:linear-gradient(135deg,#ba68c8,#7b1fa2 45%,#311b92);box-shadow:0 3px 10px rgba(123,31,162,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-word{background-image:linear-gradient(135deg,#5a9bd8,#2b579a 45%,#0c2e5e);box-shadow:0 3px 10px rgba(43,87,154,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-pdf{background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000);box-shadow:0 3px 10px rgba(198,40,40,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-report{background-image:linear-gradient(135deg,#ffd54f,#f9a825 45%,#e65100);color:#3e2e00;box-shadow:0 3px 10px rgba(249,168,37,.50),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -2px 4px rgba(0,0,0,.10)}
+.mx-tb-btn.tb-reset{background-image:linear-gradient(135deg,#9e9e9e,#616161 45%,#212121);box-shadow:0 3px 10px rgba(97,97,97,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.verdict{padding:18px;border-radius:12px;margin-top:14px;border:2px solid;text-align:center}
+.verdict.ok{background:#e8f5e9;border-color:var(--ok);color:#1b5e20}
+.verdict.warn{background:#fff8e1;border-color:#f9a825;color:#7d5a1f}
+.verdict.err{background:#ffebee;border-color:var(--err);color:#7f0000}
+.verdict .lbl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.verdict .v{font-family:var(--ff-serif);font-style:italic;font-size:22px;font-weight:700;margin-bottom:4px}
+.verdict .s{font-size:12.5px;line-height:1.55}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:28px 12px}
+.modal.show{display:flex}
+.modal-paper{background:#fff;max-width:840px;width:100%;border-radius:12px;box-shadow:0 18px 60px rgba(0,0,0,.4);overflow:hidden}
+.modal-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.modal-head h3{margin:0;font-family:var(--ff-serif);font-size:16px;color:var(--ink)}
+.modal-close{appearance:none;border:0;background:#f5f1e8;color:var(--ink);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:17px;font-weight:800}
+.modal-body{padding:24px 28px;font-family:Georgia,serif;color:var(--ink);font-size:13px;line-height:1.6}
+.modal-body h1{font-size:22px;margin:0 0 12px;font-weight:700;font-style:italic}
+.modal-body h2{font-size:15px;margin:22px 0 8px;color:var(--mx-accent-strong);border-bottom:1px solid #d8d3c4;padding-bottom:4px}
+.modal-body table{width:100%;border-collapse:collapse;margin:10px 0;font-size:11.5px}
+.modal-body table th,.modal-body table td{padding:5px 7px;border-bottom:1px solid var(--line);text-align:left}
+.modal-body table th{background:#faf8f3;font-weight:700;text-transform:uppercase;font-size:10.5px}
+.modal-actions{padding:12px 18px;border-top:1px solid var(--line);background:#faf8f3;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.dlg-list{max-height:50vh;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:#faf8f3}
+.dlg-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px}
+.dlg-empty{padding:30px;text-align:center;color:var(--ink-mute);font-style:italic;font-size:13px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:10px;font-size:13.5px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.32);z-index:300;opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);max-width:88vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:var(--ok)}.toast.err{background:var(--err)}.toast.warn{background:var(--warn)}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+@media (max-width:760px){.grid2,.grid3,.grid4,.ana-strip{grid-template-columns:1fr}}
+@media print{body * {visibility:hidden !important}.mx-print, .mx-print * {visibility:visible !important}.mx-print{position:absolute;left:0;top:0;width:100%}}
+.mx-logo-mini{height:32px;width:32px;border-radius:8px;background:#fff;padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.12);object-fit:contain;flex-shrink:0;display:none;border:1px solid var(--line,#e6e0d2)}
+.mx-bar.has-logo .em{display:none}
+
+.mx-bar{position:relative}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}}
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:0px !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:0px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab"><img id="mxLogoPerito" class="mx-logo-mini" alt="Logo perito">
+  <div class="meta"><span class="tag">Patologia · Bio</span><h1 class="ti">Diagnosi Biodeteriogeni · v3.0</h1></div>
+  <a class="back" href="suite.html">← Suite</a>
+</header>
+<main>
+  <section class="hero">
+    <h2>Diagnosi <em>Biodeteriogeni</em></h2>
+    <p>Wizard 6 step per identificare e classificare muffe, alghe, licheni, batteri su superfici edilizie e beni culturali. UNI 11182:2006 · WHO 2009 · UNI EN 16085:2012.</p>
+    <div style="margin-top:14px"><a href="assistente.html?skill=biodeteriogeni" target="_blank" rel="noopener" style="display:inline-block;background-image:linear-gradient(135deg,#6aa84f,#3d8b37 55%,#1e5e1a);color:#fff;font-weight:800;font-size:13.5px;text-decoration:none;padding:11px 18px;border-radius:10px;box-shadow:0 3px 10px rgba(61,139,55,.34)">💬 Assistente muffe: 4 dati, livello di rischio e bonifica</a></div>
+  </section>
+  <div class="ana-strip">
+    <div class="pc" id="anaPerito"><div class="h">Perito / tecnico</div><div class="n">n.d.</div><div class="m"></div></div>
+    <div class="pc" id="anaCliente"><div class="h">Committente / immobile</div><div class="n">n.d.</div><div class="m"></div></div>
+  </div>
+  <div style="text-align:center;margin-bottom:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+    <a href="locali-cantiere.html" target="_blank" style="font-size:12px;color:var(--mx-accent-strong);font-weight:700;text-decoration:none;border:1px solid var(--mx-accent);padding:6px 13px;border-radius:8px">⚙ Modifica in Locali-Cantiere</a>
+    <button type="button" class="mx-shiny s-green" id="btnReloadAna" style="padding:6px 13px;font-size:11.5px">↻ Ricarica anagrafica</button>
+  </div>
+  <article class="card">
+    <div class="body">
+      <div class="stepper" id="stepper"></div>
+      <div id="difLive"></div>
+      <div id="stepPanel"></div>
+      <div class="step-nav">
+        <button type="button" class="mx-shiny s-gray" id="btnPrev">← Indietro</button>
+        <button type="button" class="mx-shiny s-green" id="btnNext">Avanti →</button>
+        <button type="button" class="mx-shiny s-violet" id="btnFinish" style="display:none">✓ Concludi diagnosi</button>
+      </div>
+    </div>
+  </article>
+  <div class="mx-toolbar" id="mxToolbar">
+    <h3 class="mx-toolbar-head"><span class="ico-wrap">💾</span><span class="title">Salvataggio &amp; esportazione<small>Salva l'analisi, ricarica un'analisi precedente o esporta in Word/PDF per la relazione tecnica</small></span></h3>
+    <div class="mx-toolbar-body">
+      <div class="mx-toolbar-inner">
+        <button type="button" class="mx-tb-btn tb-save"    id="btnSave"><span class="ico">💾</span><span class="label">Salva</span></button>
+        <button type="button" class="mx-tb-btn tb-load"    id="btnLoad"><span class="ico">📁</span><span class="label">Carica</span></button>
+        <button type="button" class="mx-tb-btn tb-compare" id="btnCompare"><span class="ico">⚖</span><span class="label">Confronta</span></button>
+        <button type="button" class="mx-tb-btn tb-word"    id="btnWord"><span class="ico">📝</span><span class="label">Salva Word</span></button>
+        <button type="button" class="mx-tb-btn tb-pdf"     id="btnPDF"><span class="ico">📄</span><span class="label">Stampa / PDF</span></button>
+        <button type="button" class="mx-tb-btn tb-report"  id="btnReport"><span class="ico">📦</span><span class="label">Al report</span></button>
+        <button type="button" class="mx-tb-btn" id="btnAggancia" style="background-image:linear-gradient(135deg,#26a69a,#00897b 45%,#004d40);box-shadow:0 3px 10px rgba(0,137,123,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)" onclick="_mxAggancialMappa()"><span class="ico">&#128205;</span><span class="label">Aggancia alla mappa</span></button>
+        <button type="button" class="mx-tb-btn tb-reset"   id="btnReset"><span class="ico">✕</span><span class="label">Reset</span></button>
+      </div>
+    </div>
+  </div>
+  <footer class="ft">
+    Mixando v3 · <strong>Modulo Biodeteriogeni v4.0</strong> · UNI 11182:2006 · UNI EN 16085:2012 · UNI EN 16096:2012 · WHO 2009 Guidelines for indoor air quality: dampness and mould · ISO 16000-19:2012 · UNI EN ISO 846:2019.
+  </footer>
+</main>
+<div class="modal" id="dlgModal"><div class="modal-paper" style="max-width:600px"><div class="modal-head"><h3 id="dlgTitle">Dialog</h3><button class="modal-close" id="dlgCloseBtn">&times;</button></div><div class="modal-body" id="dlgBody" style="padding:18px 20px;font-family:var(--ff-sans)"></div><div class="modal-actions" id="dlgActions"></div></div></div>
+<div class="modal" id="docModal"><div class="modal-paper"><div class="modal-head"><h3>📑 Anteprima documento</h3><button class="modal-close" id="modalCloseBtn">&times;</button></div><div class="modal-body mx-print" id="docBody"></div><div class="modal-actions"><button type="button" class="mx-shiny" id="btnDoExportWord" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#5a9bd8,#2b579a 45%,#0c2e5e)">📑 Scarica .doc</button><button type="button" class="mx-shiny" id="btnDoExportPDF" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000)">📄 Stampa / PDF</button><button type="button" class="mx-shiny s-blue" id="btnDoExportJSON" style="padding:8px 14px;font-size:12px">💾 .json</button><button type="button" class="mx-shiny s-gray" id="btnCloseModal" style="padding:8px 14px;font-size:12px">Chiudi</button></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+/* Mini-logo perito da mx2::perito.logoData */
+(function(){
+  function loadLg(){
+    try{
+      var p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");
+      var img=document.getElementById("mxLogoPerito");
+      var bar=document.querySelector(".mx-bar");
+      if(img && p && p.logoData){ img.src=p.logoData; img.style.display="block"; if(bar)bar.classList.add("has-logo"); }
+      else { if(img)img.style.display="none"; if(bar)bar.classList.remove("has-logo"); }
+    }catch(e){}
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",loadLg);
+  else loadLg();
+})();
+
+const DRAFT_KEY="mx2::bio-draft",SAVES_KEY="mx2::bio-saves";
+const STEPS=[
+  {id:"amb",    label:"1. Ambiente",                src:"T·UR·Tparete + LIM Sedlbauer 2001"},
+  {id:"riv",    label:"2. Identificazione visiva",  src:"UNI 11182:2006 §3.5/3.6 + ICOMOS-ISCS Glossary 2008"},
+  {id:"ind",    label:"3. Mould Index VTT",         src:"Hukka & Viitanen 1999 + Sedlbauer 2001"},
+  {id:"rischio",label:"4. Rischio salute",          src:"WHO 2009 + CDC + EPA"},
+  {id:"trat",   label:"5. Trattamento",             src:"EPA Mold Remediation + IICRC S520-2024 + UNI 11182"},
+  {id:"prev",   label:"6. Prevenzione",             src:"WHO 2009 + UNI EN ISO 13788:2013"}
+];
+const OPERATOR_BIO_IDS = ['amb','riv','ind','trat'];
+function getActiveSteps(){ return (STATE.mode==='operatore') ? STEPS.filter(s=>OPERATOR_BIO_IDS.indexOf(s.id)>=0) : STEPS; }
+const STATE={cur:0,finished:false,mode:'tecnico',data:{
+  tInt:null,urInt:null,tSup:null,tDew:null,durataUR:"",ventilazione:"",
+  organismo:[],colore:"",estensione:"",morfologia:"",odore:"",
+  vttIndex:null,
+  sintomiOcc:[],fragilita:"",
+  trattamento:"",biocida:"",noteTrat:"",
+  prevenzione:[],monitoraggio:""
+}};
+/* === DATABASE materiali → categoria LIM Sedlbauer 2001 PhD Stuttgart §6 ===
+   I  = biodegradabili (a_w_min ~0.80)
+   II = intermedi      (a_w_min ~0.85)
+   III= inorganici     (a_w_min ~0.90) */
+const BIO_MATERIALS=[
+  {id:"legno",label:"Legno (travi, perlinato, parquet)",cat:"I"},
+  {id:"cartongesso",label:"Cartongesso",cat:"I"},
+  {id:"pittura_org",label:"Pittura organica (lavabile, smalto)",cat:"I"},
+  {id:"carta_tessuto",label:"Carta da parati / tessuto",cat:"I"},
+  {id:"intonaco_calce",label:"Intonaco a calce / calce-cemento",cat:"II"},
+  {id:"intonaco_cem",label:"Intonaco cementizio / malta",cat:"II"},
+  {id:"mattone",label:"Mattone pieno / forato (laterizio)",cat:"II"},
+  {id:"pietra_tenera",label:"Pietra naturale tenera (tufo, arenaria)",cat:"II"},
+  {id:"cls_denso",label:"Calcestruzzo denso",cat:"III"},
+  {id:"pietra_dura",label:"Pietra dura (granito, marmo)",cat:"III"},
+  {id:"ceramica",label:"Ceramica / vetro",cat:"III"},
+  {id:"metallo",label:"Metallo / acciaio",cat:"III"}
+];
+
+/* === 3 famiglie fungine indoor (Adan & Samson 2011, Sedlbauer 2001) === */
+const BIO_FAMILIES=[
+  {id:"idrofili",label:"Idrofili",awMin:0.90,examples:"Stachybotrys chartarum, Chaetomium, Trichoderma. Indicatori di umidità persistente / condensa attiva."},
+  {id:"mesofili",label:"Mesofili",awMin:0.85,examples:"Cladosporium herbarum, Penicillium chrysogenum, Alternaria alternata. Crescono su superfici umide stagionali."},
+  {id:"xerofili",label:"Xerofili",awMin:0.75,examples:"Aspergillus niger, A. versicolor, Wallemia sebi. Tolleranti a basse a_w, crescono anche in zone solo localmente umide."}
+];
+
+/* === Algoritmo VTT M-Index istantaneo (formulazione operativa) ===
+   Stima euristica della velocità crescita basata su Hukka-Viitanen 1999 (Wood Sci Tech 33:475-485).
+   M = 6 × kT × kRH × catFactor dove:
+     kT = clamp(T/30, 0, 1), favorisce T 20-30°C
+     kRH = clamp((URsi - 80)/20, 0, 1), crescita zero sotto UR sup 80%
+     catFactor: cat I 1.0 (legno/cartongesso) · cat II 0.7 (intonaco/laterizio) · cat III 0.4 (cls/pietra dura)
+   Per calcolo rigoroso del TEMPO di crescita (formula closed-form Hukka-Viitanen Eq. 5): vedi modulo Termoigrometria sezione VTT. */
+function bioVttInstant(T,URsi,cat){
+  if(URsi==null||T==null||URsi<80)return 0;
+  const kT=Math.max(0,Math.min(1,T/30));
+  const kRH=Math.max(0,Math.min(1,(URsi-80)/20));
+  const catFactor=cat==="I"?1.0:cat==="II"?0.7:cat==="III"?0.4:0.7;
+  return Math.max(0,Math.min(6,6*kT*kRH*catFactor));
+}
+
+/* Suggerimento famiglia fungina probabile da a_w superficiale (UR/100) */
+function bioGetFamily(URsi){
+  if(URsi==null||URsi<75)return{id:"inibita",label:"Crescita inibita",awMin:0,examples:"UR superficiale < 75%: nessuna famiglia indoor cresce in modo significativo."};
+  const aw=URsi/100;
+  if(aw>=0.90)return BIO_FAMILIES[0];
+  if(aw>=0.85)return BIO_FAMILIES[1];
+  if(aw>=0.75)return BIO_FAMILIES[2];
+  return BIO_FAMILIES[2];
+}
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function showToast(m,k){const t=$("toast");t.textContent=m;t.className="toast show"+(k?" "+k:"");clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.className="toast",3200);}
+function persist(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify({ts:Date.now(),state:STATE}));}catch(e){}}
+function restore(){try{const r=localStorage.getItem(DRAFT_KEY);if(!r)return;const d=JSON.parse(r);if(d&&d.state){Object.assign(STATE.data,d.state.data||{});STATE.cur=d.state.cur||0;STATE.finished=!!d.state.finished;}}catch(e){}}
+function setField(k,v){STATE.data[k]=v;persist();if(window._difUpdate)_difUpdate();}
+function loadAna(){let p={},i={};try{p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");}catch(e){}try{const l=JSON.parse(localStorage.getItem("mx2::locali-v1")||"{}");i=l.ana||{};}catch(e){}return{perito:p,immobile:i};}
+function renderAna(){const a=loadAna(),p=a.perito,c=a.immobile;const pe=$("anaPerito"),ce=$("anaCliente");pe.querySelector(".n").textContent=p.nome||"n.d.";pe.querySelector(".m").textContent=[p.titolo,p.tel,p.email].filter(Boolean).join(" · ");ce.querySelector(".n").textContent=c.Nome||"n.d.";ce.querySelector(".m").textContent=[c.Indirizzo,c.DataSopr].filter(Boolean).join(" · ");}
+function renderStepper(){
+  const ACT=getActiveSteps();
+  let h='<div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button type="button" id="bioModeTog" style="appearance:none;border:1px solid var(--mx-accent,#558b2f);background:#fff;color:var(--mx-accent,#558b2f);padding:4px 12px;border-radius:14px;font:inherit;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em">'+(STATE.mode==='operatore'?'🔬 Passa a Tecnico (6 step)':'⚡ Passa a Operatore (4 step)')+'</button></div><div style="display:flex;flex-wrap:wrap;gap:5px">';
+  ACT.forEach((st,i)=>{let c="step-chip";if(i===STATE.cur)c+=" active";else if(i<STATE.cur)c+=" done";h+='<button type="button" class="'+c+'" data-i="'+i+'">'+esc(st.label)+'</button>';});
+  h+='</div>';
+  $("stepper").innerHTML=h;
+  $("stepper").querySelectorAll(".step-chip").forEach(el=>el.addEventListener("click",function(){STATE.cur=+this.dataset.i;persist();render();}));
+  const tog=$("bioModeTog"); if(tog)tog.addEventListener("click",function(){STATE.mode=(STATE.mode==='operatore'?'tecnico':'operatore');if(STATE.cur>=getActiveSteps().length)STATE.cur=0;persist();render();});
+}
+/* 20/11/2026: limiti dei campi numerici. Prima il modulo prendeva per buono qualunque numero (indice VTT 10 su 6,
+   umidità 150 %, superfici negative). I limiti vengono da quello che il campo dichiara: la scala scritta nell'unità
+   («0-6»), le percentuali 0-100, le temperature da -60 a 100 °C, i decibel da -30 a 150, il pH 0-14, l'anno di
+   costruzione fino al 2100; tutte le altre grandezze non negative. Un valore fuori dai limiti non viene preso. */
+var _mxFuoriScala={};
+function _mxLimiti(f,l,u){
+  var s=String(u||""), lab=String(l||""), m=s.match(/^\s*(-?\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)\s*$/);
+  if(m) return [parseFloat(m[1].replace(",",".")), parseFloat(m[2].replace(",","."))];
+  if(/%/.test(s)) return [0,100];
+  if(/°C/.test(s)) return [-60,100];
+  if(/^dB/.test(s)) return [-30,150];
+  if(/\bpH\b/.test(lab)) return [0,14];
+  if(/^Anno /.test(lab)) return [0,2100];
+  return [0,null];
+}
+function _mxNumero(el){
+  var k=el.dataset.fld, box=el.parentNode?el.parentNode.querySelector(".mx-fuori"):null, msg="";
+  var v=(el.value==="")?null:parseFloat(el.value);
+  if(v!=null && isNaN(v)) v=null;
+  if(v!=null){
+    var lo=(el.dataset.min!==undefined&&el.dataset.min!=="")?parseFloat(el.dataset.min):null;
+    var hi=(el.dataset.max!==undefined&&el.dataset.max!=="")?parseFloat(el.dataset.max):null;
+    if((lo!=null&&v<lo)||(hi!=null&&v>hi)){
+      msg=(hi!=null)?("Fuori dai limiti: questo campo va da "+lo+" a "+hi+". Il valore non è stato preso."):("Questo campo non può essere minore di "+lo+". Il valore non è stato preso.");
+      _mxFuoriScala[k]={txt:el.value,msg:msg};
+      v=null;
+    }
+  }
+  if(!msg) delete _mxFuoriScala[k];
+  if(box){ box.textContent=msg; box.style.display=msg?"block":"none"; }
+  el.style.borderColor=msg?"#b3261e":""; el.style.background=msg?"#fdeceb":"";
+  return v;
+}
+/* la scritta resta mentre si scrive nello stesso passo; cambiando passo, azzerando o caricando si riparte puliti */
+function _mxPulisciFuori(){ var a=document.activeElement; if(!(a&&a.getAttribute&&a.getAttribute("data-fld"))) _mxFuoriScala={}; }
+function inpNum(f,l,u,h){const v=STATE.data[f];var L=_mxLimiti(f,l,u),fu=_mxFuoriScala[f];return '<div class="fld"><label>'+esc(l)+(u?' <span class="opz">('+esc(u)+')</span>':"")+'</label><input type="number" step="0.01" value="'+(fu?esc(fu.txt):(v==null?"":v))+'" placeholder="'+esc(h||"")+'" data-fld="'+f+'" data-kind="num"'+(L[0]!=null?' min="'+L[0]+'" data-min="'+L[0]+'"':'')+(L[1]!=null?' max="'+L[1]+'" data-max="'+L[1]+'"':'')+(fu?' style="border-color:#b3261e;background:#fdeceb"':'')+'><small class="mx-fuori" style="display:'+(fu?'block':'none')+';color:#b3261e;font-weight:700;font-size:11.5px;margin-top:3px">'+(fu?esc(fu.msg):'')+'</small></div>';}
+function inpTxt(f,l,h){const v=STATE.data[f]||"";return '<div class="fld"><label>'+esc(l)+'</label><input type="text" value="'+esc(v)+'" placeholder="'+esc(h||"")+'" data-fld="'+f+'" data-kind="txt"></div>';}
+function inpSel(f,l,opts){const v=STATE.data[f]||"";let h='<div class="fld"><label>'+esc(l)+'</label><select data-fld="'+f+'" data-kind="txt"><option value="">seleziona</option>';opts.forEach(o=>h+='<option value="'+esc(o[0])+'"'+(v===o[0]?" selected":"")+'>'+esc(o[1])+'</option>');return h+'</select></div>';}
+function inpRad(f,l,opts){const v=STATE.data[f]||"";let h='<div class="fld"><label>'+esc(l)+'</label><div class="radio-row">';opts.forEach(o=>h+='<label><input type="radio" name="r_'+f+'" value="'+esc(o[0])+'"'+(v===o[0]?" checked":"")+' data-fld="'+f+'" data-kind="txt">'+esc(o[1])+'</label>');return h+'</div></div>';}
+function inpChk(f,l,opts){const v=STATE.data[f]||[];let h='<div class="fld"><label>'+esc(l)+'</label><div class="chkgrp">';opts.forEach(o=>h+='<label><input type="checkbox" value="'+esc(o[0])+'"'+(v.includes(o[0])?" checked":"")+' data-fld="'+f+'" data-kind="chk">'+esc(o[1])+'</label>');return h+'</div></div>';}
+function inpTxA(f,l,h){const v=STATE.data[f]||"";return '<div class="fld"><label>'+esc(l)+'</label><textarea data-fld="'+f+'" data-kind="txt" placeholder="'+esc(h||"")+'">'+esc(v)+'</textarea></div>';}
+function dewPoint(T,RH){if(T==null||RH==null||RH<=0)return null;const a=17.269,b=237.3;const al=Math.log(RH/100)+(a*T)/(b+T);return(b*al)/(a-al);}
+function panelAmb(){const dp=dewPoint(STATE.data.tInt,STATE.data.urInt);return '<div class="step-head"><h4>Condizioni ambientali</h4><span class="ref">UR sup > 80% (ISO 13788) = crescita muffe favorita</span></div>'+
+  '<div class="banner blue"><strong>Soglia di crescita (ISO 13788:2012):</strong> UR critica superficiale &gt; 80% (φsi,cr = 0,80) sostenuta = rischio muffe. T sup &lt; T rugiada = condensa superficiale (substrato umido). <strong>WHO 2009</strong> documenta gli effetti sanitari di umidità/muffe ma non fissa soglie quantitative.</div>'+
+  '<div class="grid4">'+inpNum("tInt","T interna","°C")+inpNum("urInt","UR interna","%")+inpNum("tSup","T superficie","°C","IR")+
+  '<div class="fld"><label>Punto rugiada <span class="opz">(°C)</span></label><input type="text" class="calc" value="'+(dp==null?"":dp.toFixed(2))+'" readonly></div></div>'+
+  '<div class="grid2" style="margin-top:10px">'+
+    inpSel("durataUR","Durata stimata UR>75%",[["sporadica","Sporadica (<24h)"],["breve","Breve (1-7 gg)"],["media","Media (1-4 settimane)"],["lunga","Lunga (>1 mese)"],["permanente","Permanente"]])+
+    inpSel("ventilazione","Ventilazione",[["nessuna","Nessuna"],["scarsa","Scarsa"],["adeguata","Adeguata"],["vmc","VMC controllata"]])+
+  '</div>';}
+function panelRiv(){return '<div class="step-head"><h4>Identificazione visiva del biodeteriogeno</h4><span class="ref">UNI 11182:2006</span></div>'+
+  '<div class="banner blue"><strong>UNI 11182:</strong> classifica per gruppi tassonomici e forma di alterazione. Distingue: muffe, alghe, licheni, batteri, piante superiori.</div>'+
+  '<div style="margin-top:10px">'+inpChk("organismo","Organismo/i presente/i (multi)",[["muffa_nera","Muffa nera (Stachybotrys, Cladosporium)"],["muffa_verde","Muffa verde (Penicillium, Aspergillus)"],["muffa_bianca","Muffa bianca (filamenti, Mucor)"],["alga_verde","Alga verde (Chlorella, Trentepohlia)"],["alga_blu","Alga blu-verde / cianobatteri"],["lichene_crostoso","Lichene crostoso"],["lichene_foliaceo","Lichene foliaceo"],["batteri_film","Biofilm batterico"],["piante_sup","Piante superiori (rampicanti, muschi)"],["incerto","Non identificato"]])+'</div>'+
+  '<div class="grid3" style="margin-top:10px">'+
+    inpSel("colore","Colore prevalente",[["nero","Nero / scuro"],["verde","Verde"],["giallo","Giallo / ocra"],["bianco","Bianco"],["rosa","Rosa / rossastro"],["grigio","Grigio"]])+
+    inpSel("estensione","Estensione",[["puntiforme","Puntiforme"],["localizzata","Localizzata < 0.5 m²"],["estesa","Estesa 0.5-5 m²"],["pervasiva","Pervasiva > 5 m²"]])+
+    inpSel("morfologia","Morfologia",[["polverosa","Polverosa"],["vellutata","Vellutata"],["filamentosa","Filamentosa"],["mucosa","Mucosa / gelatinosa"],["incrostante","Incrostante"]])+
+  '</div>'+
+  '<div style="margin-top:10px">'+inpSel("odore","Odore associato",[["nessuno","Nessuno"],["terra","Di terra / cantina"],["muffa","Muffa caratteristica"],["chimico","Chimico / acido"]])+'</div>';}
+function panelInd(){
+  const d=STATE.data;
+  /* Cat LIM dal materiale scelto */
+  const mat=BIO_MATERIALS.find(m=>m.id===d.materialeId);
+  const cat=mat?mat.cat:"II";
+  const vtt=bioVttInstant(d.tInt,d.urInt,cat);
+  const fam=bioGetFamily(d.urInt);
+  return '<div class="step-head"><h4>Indice VTT istantaneo + categoria LIM</h4><span class="ref">Hukka-Viitanen 1999 · Sedlbauer 2001</span></div>'+
+  '<div class="banner blue"><strong>Categoria LIM Sedlbauer</strong> dipende dal materiale del substrato. Scegli il materiale per ottenere la velocità di crescita stimata.</div>'+
+  inpSel("materialeId","Materiale del substrato (cat LIM)",BIO_MATERIALS.map(m=>[m.id,m.label+" (cat "+m.cat+")"]))+
+  '<div class="grid3" style="margin-top:10px">'+
+    '<div class="fld"><label>Categoria LIM determinata</label><input type="text" class="calc" readonly value="'+(mat?"Cat "+cat+" (a_w min "+(cat==="I"?"0.80":cat==="II"?"0.85":"0.90")+")":"n.d.")+'"></div>'+
+    '<div class="fld"><label>Indice VTT istantaneo (0-6)</label><input type="text" class="calc" readonly value="'+vtt.toFixed(2)+'" style="color:'+(vtt>=3?"var(--err)":vtt>=1?"var(--warn)":"var(--ok)")+'"></div>'+
+    '<div class="fld"><label>Famiglia fungina dominante</label><input type="text" class="calc" readonly value="'+fam.label+(fam.awMin?" (a_w ≥ "+fam.awMin+")":"")+'"></div>'+
+  '</div>'+
+  (fam.id!=="inibita"?'<div class="banner yellow" style="margin-top:10px"><strong>Esempi specie '+fam.label+':</strong> '+esc(fam.examples)+'</div>':'<div class="banner green" style="margin-top:10px"><strong>'+esc(fam.examples)+'</strong></div>')+
+  '<div class="banner blue" style="margin-top:10px"><strong>Scala VTT M-index:</strong> 0 nessuna crescita · 1 invisibile (microscopio) · 2 visibile localizzata · 3 visibile estesa · 4 moderata copertura · 5 ampia copertura · 6 molto pesante. <strong>Soglia operativa intervento: M ≥ 3</strong>.</div>'+
+  '<div style="margin-top:10px">'+inpNum("vttIndex","Indice osservato in cantiere (sovrascrivi se diverso)","0-6","stima visiva manuale")+'</div>';
+}
+function panelRischio(){return '<div class="step-head"><h4>Rischio per la salute</h4><span class="ref">WHO 2009 · D.Lgs 81/2008</span></div>'+
+  '<div class="banner blue" style="background:#eaf5e1;border-left:4px solid #558b2f"><strong>📦 Diagnosi differenziale:</strong> Verificare anche le altre cause di umidità che alimentano la crescita biologica: <a href=\'umidita-hub.html\' target=\'_blank\' style=\'color:#558b2f;font-weight:800\'>→ Hub Umidità (triage)</a> · <a href=\'condensa-glaser.html\' target=\'_blank\' style=\'color:#558b2f;font-weight:800\'>→ Glaser (condensa interstiziale)</a> · <a href=\'termoigrometria.html\' target=\'_blank\' style=\'color:#558b2f;font-weight:800\'>→ Termoigrometria (LIM Sedlbauer)</a> · <a href=\'risalita.html\' target=\'_blank\' style=\'color:#558b2f;font-weight:800\'>→ Risalita</a> · <a href=\'infiltrazioni.html\' target=\'_blank\' style=\'color:#558b2f;font-weight:800\'>→ Infiltrazioni</a></div>'+
+    '<div class="banner blue"><strong>WHO 2009, Guidelines for indoor air quality: dampness and mould:</strong> esposizione a muffe in ambienti umidi è causa documentata di asma, rinite, infezioni respiratorie. Allergie IgE-mediate, micotossine, COV di origine fungina (MVOC).</div>'+
+  '<div style="margin-top:10px">'+inpChk("sintomiOcc","Sintomi riferiti dagli occupanti (multi)",[["asma","Asma o respiro corto"],["rinite","Rinite / sinusite ricorrente"],["tosse","Tosse cronica"],["irritazione","Irritazione occhi/gola"],["cefalea","Cefalea"],["allergie","Allergie cutanee"],["nessuno","Nessuno riferito"]])+'</div>'+
+  '<div style="margin-top:10px">'+inpSel("fragilita","Categoria di occupanti più esposta",[["adulti_sani","Adulti sani"],["bambini","Bambini (<6 anni)"],["anziani","Anziani (>65)"],["asmatici","Asmatici / atopici"],["immunocompromessi","Immunocompromessi"]])+'</div>';}
+function panelTrat(){return '<div class="step-head"><h4>Trattamento e bonifica</h4><span class="ref">EPA Mold Remediation 2008 · IICRC S520-2024 · UNI 11182:2006 · ICOMOS-ISCS Glossary 2008</span></div>'+
+  _renderRisanamentoMuffe()+
+  '<div class="banner blue"><strong>Protocollo bonifica:</strong> rimozione meccanica (HEPA) → trattamento biocida → ripristino igrico (eliminare causa). Solo biocida senza causa = rapida ricomparsa.</div>'+
+  inpRad("trattamento","Metodo principale",[["rimozione_meccanica","🧽 Rimozione meccanica + aspirazione HEPA"],["biocida_quat","🧪 Biocida quaternario d'ammonio"],["biocida_ossigeno","💧 Biocida a base di perossido"],["biocida_natural","🌿 Biocida naturale (estratti vegetali, oli essenziali)"],["UV","☀ Radiazione UV-C (solo per superfici accessibili)"],["sostituzione","🔄 Sostituzione del supporto (cartongesso/intonaco compromesso)"]])+
+  '<div class="grid2" style="margin-top:10px">'+
+    inpSel("biocida","Biocida (se applicabile)",[["bac","Cloruro di benzalconio (BAC)"],["didac","Cloruro di didecil-dimetil-ammonio (DDAC)"],["perossido","Perossido di idrogeno"],["ipoclorito","Ipoclorito di sodio (uso limitato)"],["acido_lattico","Acido lattico"],["nessuno","Nessuno"]])+
+    inpTxt("noteTrat","Note operative","")+
+  '</div>';}
+function panelPrev(){return '<div class="step-head"><h4>Prevenzione recidive</h4><span class="ref">WHO 2009 · CAM 2026</span></div>'+
+  '<div class="banner green"><strong>Eliminare la causa:</strong> il biocida tratta il sintomo. Se l\'umidità persiste, la muffa ricompare. Priorità: ridurre UR <60%, eliminare ponti termici, ventilare.</div>'+
+  inpChk("prevenzione","Misure preventive da implementare (multi)",[["vmc","Installazione VMC con recupero (UNI EN 16798)"],["correzione_pt","Correzione ponti termici (cappotto)"],["deumidifica","Deumidificatore stagionale"],["riscaldamento","Riscaldamento più uniforme"],["aerazione","Aerazione manuale 2-3 volte/giorno"],["sigillatura","Sigillatura giunti finestra"],["antimuffa_pitture","Pitture antimuffa (silossani, calce)"]])+
+  '<div style="margin-top:10px">'+inpTxA("monitoraggio","Piano monitoraggio post-bonifica","Es. UR <60% verificata mensilmente per 12 mesi; ispezione visiva semestrale; ripetizione test microbiologici dopo 24 mesi.")+'</div>';}
+const panels={amb:panelAmb,riv:panelRiv,ind:panelInd,rischio:panelRischio,trat:panelTrat,prev:panelPrev};
+
+
+/* === MIXANDO v3 · Risanamento Muffe: dataset embedded === */
+const SOL_MUFFE = [
+  {id:'cond2', nome:"Bonifica IICRC S520 Condition 2 (settoriale)", categoria:"Rimozione fisica", invasivita:"media", tempistica:"3-7 giorni",
+   norma:"ANSI/IICRC S520-2024 4\u00aa ed.", normeSec:["EPA Mold Remediation 2008","UNI EN 14885:2023","D.Lgs 81/2008 Titolo X"],
+   sintesi:"Containment fisico (telo PE 6 mil) + pressione negativa con air scrubber HEPA H13 (\u22654 ach) + rimozione materiali porosi contaminati + pulizia HEPA vacuum + biocidi UNI EN 14885:2023 solo se necessari.",
+   limit:"Per area estesa (soglia EPA ~9,3 m\u00b2 = 100 sq ft) si passa al full containment. Nota: in IICRC S520 \"Condition\" indica il TIPO di contaminazione (1 ecologia normale / 2 spore depositate / 3 crescita attiva), non la superficie. Richiede DPI livello B (FFP3, tuta cat.III tipo 5/6, guanti EN ISO 374-5)."},
+  {id:'cond3', nome:"Bonifica IICRC S520 Condition 3 (full containment)", categoria:"Rimozione intensiva", invasivita:"alta", tempistica:"1-3 settimane",
+   norma:"ANSI/IICRC S520-2024 4\u00aa ed.", normeSec:["UNI EN ISO 16000-19:2014 (post-bonifica)","UNI EN 1822-1:2019 HEPA","D.Lgs 81/2008 art.272-275"],
+   sintesi:"Doppia barriera + anteroom decontaminazione + pressione negativa permanente (-5 Pa) + HEPA H13/H14 (\u22656 ach) + smaltimento rifiuti speciali + decontaminazione operatori + verifica post-remediation campionamento aria.",
+   limit:"Costi elevati. Sgombero locale obbligatorio. Verifica post-remediation OBBLIGATORIA (ISO 16000-19:2012 outdoor reference + indoor)."},
+  {id:'fonte_umidita', nome:"Eliminazione fonte umidit\u00e0 + RH<60% (PREREQUISITO)", categoria:"Causa-effetto", invasivita:"variabile", tempistica:"7-30 giorni",
+   norma:"WHO Indoor Air Quality 2009 + Sedlbauer 2001", normeSec:["UNI EN 16798-1:2019","VTT Mould Index Hukka-Viitanen 1999"],
+   sintesi:"Identificazione + rimozione della causa primaria (risalita, infiltrazione, ponte termico) + UR<60% (Sedlbauer LIM) tramite VMC \u22650,5 vol/h o deumidificazione attiva. Crescita fungina si arresta sotto questa soglia.",
+   limit:"Prerequisito OBBLIGATORIO per ogni bonifica. Da sola non sufficiente: serve comunque rimozione materiale colonizzato."},
+  {id:'biocidi_finitura', nome:"Materiali finitura biocidi-resistenti", categoria:"Prevenzione recidiva", invasivita:"bassa", tempistica:"5-10 giorni",
+   norma:"UNI EN 14885:2023", normeSec:["IICRC S520-2024"],
+   sintesi:"Ricostruzione con materiali a bassa idrofilia + biocidi (intonaci calce con biocidi (EN 14885:2022), pitture silicato/silossanico, pannelli calcio silicato traspirante).",
+   limit:"Biocidi nei materiali hanno durata limitata (5-10 anni). Non sostituiscono il controllo dell'umidit\u00e0."}
+];
+const DPI_MUFFE = [
+  {item:"Respiratore FFP3 (o P100 half-face)", norma:"UNI EN 149:2001+A1:2009 + ANSI/IICRC S520-2024", note:"OBBLIGATORIO per bonifica oltre ~0,9 m\u00b2 (soglia area EPA = 10 sq ft). Pieno facciale per Stachybotrys/Aspergillus fumigatus"},
+  {item:"Guanti nitrile lunghi cat.III", norma:"UNI EN ISO 374-1:2018 tipo A + EN ISO 374-5:2016", note:"Marcatura 'VIRUS' OBBLIGATORIA per spore vitali"},
+  {item:"Tuta monouso cat.III tipo 5/6", norma:"UNI EN ISO 13982-1:2011 + UNI EN 13034:2009", note:"Con cappuccio integrato"},
+  {item:"Occhiali a tenuta cat.3+4", norma:"UNI EN 166:2004 (ritirata 2022, oggi UNI EN ISO 16321-1:2022) cat.3+4", note:"Schermatura gocce + polveri grossolane"},
+  {item:"Calzari monouso", norma:"UNI EN ISO 13688:2022", note:"Sostituire all'uscita dall'area contaminata"},
+  {item:"Containment + pressione negativa HEPA", norma:"ANSI/IICRC S520-2024 4\u00aa ed.", note:"OBBLIGATORIO per Condition 2/3: HEPA H13 + estrazione aria"}
+];
+const STRUMENTI_MUFFE = [
+  {nome:"Campionatore aria a impatto", norma:"ISO 16000-18:2011 + ISO 16000-17:2008", uso:"Misura UFC/m\u00b3 fungine indoor + identificazione genere"},
+  {nome:"Campionatore filtrazione spore totali", norma:"ISO 16000-20:2014", uso:"Conta TOTALE spore (vitali+non vitali), conta microscopica"},
+  {nome:"Tape-lift / prelievo contatto", norma:"ISO 16000-19:2012 + UNI 11182:2006 + EN 16085:2012", uso:"Prelievo non distruttivo su superficie - beni culturali"},
+  {nome:"Datalogger T/UR (UR<60% Sedlbauer)", norma:"UNI EN ISO 7726:2026 + UNI EN 16242:2013", uso:"Monitoraggio continuo per verifica controllo umidit\u00e0 post-bonifica"},
+  {nome:"Termografia per ponti termici", norma:"UNI EN ISO 6781-1:2023", uso:"Individuazione zone fredde con condensa che alimentano la crescita"}
+];
+
+function _calcMuffeScores(){
+  const d = STATE.data;
+  const v = calcVerdict();
+  const est = d.estensione || '';
+  const org = d.organismo || [];
+  const ur = d.urInt;
+  const sc = {};
+  // cond2 (S520 - localizzata)
+  if(est === 'localizzata' || (est === 'puntiforme' && v.level !== 'basso')){
+    sc.cond2 = {pri:true, why:'Estensione '+est+' (Condition 2 IICRC S520-2024) - bonifica settoriale con containment + HEPA H13'};
+  } else {
+    sc.cond2 = {pri:false, why:'Per estensione '+(est||'non specificata')+' valutare se applicabile'};
+  }
+  // cond3 (S520 - estesa/pervasiva o specie patogene)
+  const patogeni = org.some(o => /stachybotrys|aspergillus fumigatus|fusarium/i.test(o));
+  if(['estesa','pervasiva'].includes(est) || patogeni){
+    sc.cond3 = {pri:true, why:(['estesa','pervasiva'].includes(est)?'Estensione '+est+' (oltre soglia EPA ~9,3 m\u00b2 = 100 sq ft)':'')+(patogeni?' + specie altamente patogene (Stachybotrys/Aspergillus fumigatus)':'')+' \u2192 full containment (protocollo IICRC S520-2024; in S520 \"Condition 3\" = crescita attiva, ossia il tipo di contaminazione)'};
+  } else {
+    sc.cond3 = {pri:false, why:'Estensione/specie non richiede full containment'};
+  }
+  // fonte_umidita (sempre obbligatorio)
+  sc.fonte_umidita = {pri:true, why:'PREREQUISITO obbligatorio: senza eliminazione fonte umidit\u00e0 + UR<60% (Sedlbauer LIM) la muffa ricresce in 2-4 settimane (WHO 2009)'};
+  // biocidi_finitura
+  if(v.level === 'alto' || v.level === 'critico'){
+    sc.biocidi_finitura = {pri:true, why:'Rischio '+v.level+' (score '+v.score+') \u2192 ricostruzione con materiali biocidi-resistenti (UNI EN 14885:2023)'};
+  } else {
+    sc.biocidi_finitura = {pri:false, why:'Rischio '+v.level+' - utile come prevenzione ma non urgente'};
+  }
+  return sc;
+}
+
+function _renderRisanamentoMuffe(){
+  const v = calcVerdict();
+  // Mostro la card sempre quando si arriva al panelTrat (step 5)
+  const sc = _calcMuffeScores();
+  let html = '';
+  html += '<section data-pat="muffe" data-sec="verdetto-summary" style="padding:10px 14px;background:linear-gradient(180deg,#eaf5e1,#fff);border:1px solid #cfe3b5;border-left:5px solid #558b2f;border-radius:10px;margin-bottom:12px;font-size:12.5px;color:#33691e"><b>\ud83d\udcca Verdetto:</b> Rischio <strong>'+v.level.toUpperCase()+'</strong> (score '+v.score+'/7) - '+v.summary+'</section>';
+  html += '<section data-pat="muffe" data-sec="risanamento" style="margin-top:14px;padding:16px 18px;background:linear-gradient(180deg,#eef9f1,#fff);border:1px solid #bce5c8;border-left:5px solid #2e7d52;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#1b5532;font-family:Georgia,serif;font-size:16px">\ud83d\udee0 Risanamento consigliato (algoritmo IICRC S520-2024)</h4>';
+  html += '<p style="margin:0 0 10px;font-size:12px;color:#1b5532;font-style:italic">Raccomandazione basata su estensione, organismi rilevati e livello di rischio. Riferimento: ANSI/IICRC S520-2024 + WHO 2009.</p>';
+  html += '<div style="display:grid;gap:8px">';
+  SOL_MUFFE.forEach(s=>{
+    const x = sc[s.id];
+    const pri = x && x.pri;
+    const badgeBg = pri ? 'linear-gradient(135deg,#f5d164,#d4a017)' : 'linear-gradient(135deg,#c1c5cc,#8e949c)';
+    const badgeC = pri ? '#3a2c00' : '#fff';
+    const badgeT = pri ? '\u2b50 RACCOMANDATA' : '\u25cb ALTERNATIVA';
+    html += '<div data-sol="'+s.id+'" style="background:#fff;border:1px solid #d8e8db;border-left:4px solid '+(pri?'#d4a017':'#9aa0a6')+';border-radius:10px;padding:11px 13px">'
+        + '<div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
+          + '<span style="font-size:9.5px;font-weight:800;letter-spacing:.14em;padding:3px 9px;border-radius:11px;background:'+badgeBg+';color:'+badgeC+'">'+badgeT+'</span>'
+          + '<strong style="flex:1;min-width:200px;font-family:Georgia,serif;font-size:14px;color:#2c1810">'+s.nome+'</strong>'
+          + '<span style="font-size:10.5px;color:#fff;background:#475569;padding:2px 8px;border-radius:9px;font-family:JetBrains Mono,monospace">'+s.tempistica+'</span>'
+        + '</div>'
+        + '<div style="font-size:12.5px;color:#5d1a14;font-weight:700;background:#fff8e5;padding:5px 9px;border-radius:6px;margin-bottom:6px;border-left:3px solid #d4a017">\ud83d\udcd0 '+x.why+'</div>'
+        + '<div style="font-size:12.5px;color:#5d4a30;line-height:1.5;margin-bottom:5px">'+s.sintesi+'</div>'
+        + '<div style="font-family:JetBrains Mono,monospace;font-size:11px;color:#1b5532;background:#eef9f1;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:5px"><b>Norma cardine:</b> '+s.norma+'</div>'
+        + (s.normeSec.length?'<div style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#666;margin-bottom:5px"><b>Secondarie:</b> '+s.normeSec.join(' \u00b7 ')+'</div>':'')
+        + '<div style="font-size:11.5px;color:#7f1d1d;background:#fff5f3;padding:5px 9px;border-radius:6px;border-left:3px solid #c0392b"><b>\u26a0 Limitazioni:</b> '+s.limit+'</div>'
+      + '</div>';
+  });
+  html += '</div></section>';
+
+  html += '<section data-pat="muffe" data-sec="dpi" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#fff5f3,#fff);border:1px solid #fdd;border-left:5px solid #c0392b;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#7f1d1d;font-family:Georgia,serif;font-size:15px">\ud83e\udd7a DPI OBBLIGATORI - rischio biologico</h4>';
+  html += '<p style="margin:0 0 10px;font-size:11.5px;color:#7f1d1d;font-style:italic">D.Lgs 81/2008 Titolo X (agenti biologici) + ANSI/IICRC S520-2024. NIENTE bonifica senza DPI completi.</p>';
+  html += '<div style="display:grid;gap:6px">';
+  DPI_MUFFE.forEach(p=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #fdd;border-left:3px solid #c0392b;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+p.item+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#c0392b;background:#fff5f3;padding:2px 7px;border-radius:9px;margin-left:6px">'+p.norma+'</span><div style="font-size:11px;color:#5d1a14;margin-top:3px">'+p.note+'</div></div>';
+  });
+  html += '</div></section>';
+
+  html += '<section data-pat="muffe" data-sec="strumenti" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#e3f3f5,#fff);border:1px solid #b3dde2;border-left:5px solid #0e7c87;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#075863;font-family:Georgia,serif;font-size:15px">\ud83d\udd2c Strumenti per indagine + verifica post-remediation</h4>';
+  html += '<p style="margin:0 0 10px;font-size:11.5px;color:#075863;font-style:italic">Famiglia ISO 16000 indoor air per bioaerosol. Verifica obbligatoria ISO 16000-19 dopo bonifica.</p>';
+  html += '<div style="display:grid;gap:6px">';
+  STRUMENTI_MUFFE.forEach(s=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #b3dde2;border-left:3px solid #0e7c87;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+s.nome+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#075863;background:#e3f3f5;padding:2px 7px;border-radius:9px;margin-left:6px">'+s.norma+'</span><div style="font-size:11px;color:#0f3a3f;margin-top:3px">'+s.uso+'</div></div>';
+  });
+  html += '</div></section>';
+  return html;
+}
+
+function calcVerdict(){
+  const d=STATE.data;
+  let level="basso",summary="";
+  const dpY=d.urInt!=null&&d.urInt>=75;
+  const extPesante=d.estensione==="estesa"||d.estensione==="pervasiva";
+  const sintomiPres=(d.sintomiOcc||[]).length>0&&!d.sintomiOcc.includes("nessuno");
+  const vttHigh=(d.vttIndex!=null&&d.vttIndex>=3);
+  const score=(dpY?1:0)+(extPesante?2:0)+(sintomiPres?2:0)+(vttHigh?2:0);
+  if(score>=5){level="critico";summary="Rischio critico, bonifica + correzione causa igrica urgente.";}
+  else if(score>=3){level="alto";summary="Rischio alto, pianificare bonifica e prevenzione entro 1 mese.";}
+  else if(score>=1){level="medio";summary="Rischio medio, monitoraggio + trattamento localizzato.";}
+  else {level="basso";summary="Rischio basso, monitoraggio periodico.";}
+  return{level,summary,score};
+}
+/* === MIXANDO v3 · Ragionamento differenziale dal vivo, riusa calcVerdict (517) + _calcMuffeScores (435), niente soglie inventate === */
+function _difBio(){
+  var d=STATE.data, v=calcVerdict(), org=d.organismo||[], H=[];
+  function add(nome,stato,motivo,fonte,riga){ H.push({nome:nome,stato:stato,motivo:motivo,fonte:fonte,riga:riga}); }
+  /* Indicatore 1, Umidità ambientale (calcVerdict 520) */
+  if(d.urInt!=null){
+    if(d.urInt>=75) add('Umidità ambientale (UR)','pres','UR interna '+d.urInt+'% ≥ 75% → soglia di attività biologica superata (+1 al rischio)','Sedlbauer LIM · ISO 13788','calcVerdict 520');
+    else add('Umidità ambientale (UR)','escl','UR interna '+d.urInt+'% < 75% → sotto la soglia di crescita','Sedlbauer LIM · ISO 13788','calcVerdict 520');
+  } else add('Umidità ambientale (UR)','na','manca UR interna (Step Ambiente)','Sedlbauer LIM · ISO 13788','calcVerdict 520');
+  /* Indicatore 2, Estensione (calcVerdict 521 + IICRC S520 443-451) */
+  if(d.estensione==='estesa'||d.estensione==='pervasiva') add('Estensione colonizzazione','pres','estensione '+d.estensione+' (oltre soglia area EPA ~9,3 m² = 100 sq ft) → +2; full containment (protocollo IICRC S520-2024; \"Condition 3\" = crescita attiva = tipo di contaminazione)','EPA Mold Remediation · IICRC S520-2024','calcVerdict 521 / S520 450');
+  else if(d.estensione==='localizzata'||d.estensione==='puntiforme') add('Estensione colonizzazione','mid','estensione '+d.estensione+' → bonifica settoriale con containment + HEPA H13 (Condition 2)','IICRC S520-2024','S520 443');
+  else add('Estensione colonizzazione','na','estensione non ancora specificata (Step Identificazione)','IICRC S520-2024','calcVerdict 521');
+  /* Indicatore 3, Sintomi occupanti (calcVerdict 522) */
+  var sint=(d.sintomiOcc||[]);
+  if(sint.length>0 && !sint.includes('nessuno')) add('Sintomi occupanti','pres','sintomi riferiti ('+sint.length+') → +2 (correlazione sanitaria WHO 2009)','WHO 2009','calcVerdict 522');
+  else if(sint.includes('nessuno')) add('Sintomi occupanti','escl','nessun sintomo riferito','WHO 2009','calcVerdict 522');
+  else add('Sintomi occupanti','na','sintomatologia non ancora compilata','WHO 2009','calcVerdict 522');
+  /* Indicatore 4, Indice VTT (calcVerdict 523) */
+  if(d.vttIndex!=null){
+    if(d.vttIndex>=3) add('Indice VTT (crescita visibile)','pres','indice VTT '+d.vttIndex+' ≥ 3 → crescita visibile estesa (+2)','VTT mould index (Hukka & Viitanen 1999)','calcVerdict 523');
+    else add('Indice VTT (crescita visibile)','escl','indice VTT '+d.vttIndex+' < 3 → crescita iniziale/assente','VTT mould index (Hukka & Viitanen 1999)','calcVerdict 523');
+  } else add('Indice VTT (crescita visibile)','na','indice VTT non ancora rilevato','VTT mould index','calcVerdict 523');
+  /* Specie patogene (IICRC S520 / _calcMuffeScores 449) */
+  var patogeni=org.some(function(o){return /stachybotrys|aspergillus fumigatus|fusarium/i.test(o);});
+  if(patogeni) add('Specie ad alta patogenicità','risk','rilevata Stachybotrys / Aspergillus fumigatus / Fusarium → full containment + DPI III cat. (IICRC S520 Condition 3)','IICRC S520-2024 · WHO 2009','_calcMuffeScores 449');
+  else if(org.length) add('Specie ad alta patogenicità','escl','nessuna specie altamente patogena tra quelle identificate','UNI 11182:2006','_calcMuffeScores 449');
+  else add('Specie ad alta patogenicità','na','organismo non ancora identificato (Step Identificazione)','UNI 11182:2006','panelRiv 352');
+  /* Prerequisito fonte umidità (cross-modulo, _calcMuffeScores 456) */
+  add('Fonte di umidità (causa a monte)','info','PREREQUISITO: la colonizzazione è una manifestazione, senza eliminare la fonte d’acqua e portare UR < 60% (Sedlbauer LIM) ricresce in 2-4 settimane. Diagnosi fonte: moduli Risalita / Infiltrazione / Condensa / Hub','WHO 2009 · Sedlbauer LIM','_calcMuffeScores 456');
+  return {v:v, hyps:H};
+}
+function _difEnsureStyle(){
+  if(document.getElementById('difLiveCss')) return;
+  var s=document.createElement('style'); s.id='difLiveCss';
+  s.textContent='#difLive .dif-box{border:1px solid #d8cfba;border-radius:12px;background:linear-gradient(180deg,#fffdf8,#f6f0e4);box-shadow:0 2px 10px rgba(40,30,10,.06);padding:11px 14px;margin:0 0 14px;font-size:12.5px}'
+   +'#difLive .dif-head{font-weight:800;color:#0a5d66;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}'
+   +'#difLive .dif-sub{font-weight:600;font-size:10.5px;color:#8a7f6c}'
+   +'#difLive .dif-verdict{border-left:4px solid;padding:6px 10px;border-radius:6px;background:#fff;margin-bottom:9px}'
+   +'#difLive .dif-pct{font-weight:800;margin-left:6px}#difLive .dif-summary{font-size:11.5px;color:#5a4d3f;margin-top:2px}'
+   +'#difLive .dif-hyps{display:flex;flex-direction:column;gap:5px}#difLive .dif-h{border-radius:7px;padding:5px 9px}'
+   +'#difLive .dif-badge{display:inline-block;font-size:10px;font-weight:800;color:#fff;padding:1px 7px;border-radius:20px;margin-right:5px}'
+   +'#difLive .dif-mot{font-size:11px;color:#5a4d3f;margin-top:2px}#difLive .dif-fonte{color:#8a7f6c;font-style:italic}'
+   +'#difLive .dif-foot{margin-top:9px;font-size:10px;color:#8a7f6c;border-top:1px solid #efe9dc;padding-top:6px}';
+  document.head.appendChild(s);
+}
+function _difHTML(R){
+  var v=R.v, kk={basso:'ok',medio:'warn',alto:'warn',critico:'err'}[v.level]||'warn';
+  var kc={ok:'#1b8a4b',warn:'#e67e22',err:'#c0392b'}[kk]||'#6b5c4c';
+  var lvl=(v.level||'').toUpperCase();
+  var h='<div class="dif-box"><div class="dif-head">🔬 Ragionamento differenziale <span class="dif-sub">dal vivo · sintesi del motore del modulo (calcVerdict)</span></div>';
+  h+='<div class="dif-verdict" style="border-color:'+kc+'"><div><b style="color:'+kc+'">Rischio '+esc(lvl)+'</b><span class="dif-pct">score '+(v.score==null?'n.d.':v.score)+'/7</span></div><div class="dif-summary">'+esc(v.summary)+'</div></div>';
+  h+='<div class="dif-sub" style="margin:0 0 6px">Indicatori che il motore valuta sulle risposte (UNI 11182 · WHO 2009 · IICRC S520-2024):</div>';
+  h+='<div class="dif-hyps">';
+  R.hyps.forEach(function(x){
+    var m={pres:['favorisce','#b8860b','#fef7e2'],escl:['sotto soglia','#1b8a4b','#e9f7ee'],mid:['settoriale','#0e7c87','#e9f6f6'],risk:['⚠ patogeno','#c0392b','#fdecea'],info:['prerequisito','#5b6b8a','#eef1f7'],na:['da rilevare','#8a7f6c','#f2efe7']}[x.stato]||['n.d.','#888','#eee'];
+    h+='<div class="dif-h" style="background:'+m[2]+'"><span class="dif-badge" style="background:'+m[1]+'">'+m[0]+'</span><b>'+esc(x.nome)+'</b><div class="dif-mot">'+esc(x.motivo)+' <span class="dif-fonte">['+esc(x.fonte)+']</span></div></div>';
+  });
+  h+='</div>';
+  h+='<div class="dif-foot">Sintesi della logica del modulo (calcVerdict 517-529, 4 indicatori; specie patogene _calcMuffeScores 449). Nessuna soglia inventata: ogni voce riporta norma e riga. La conclusione resta del tecnico.</div></div>';
+  return h;
+}
+function _immobileId(){ try{ var l=JSON.parse(localStorage.getItem('mx2::locali-v1')||'{}'); var a=(l&&l.ana)||{}; var raw=((a.Indirizzo||'')+(a.Catasto||'')+(a.Nome||'')).trim(); if(!raw) return ''; return ((a.Indirizzo||'')+'§'+(a.Catasto||'')+'§'+(a.Nome||'')).toLowerCase(); }catch(e){ return ''; } }
+function _evidenzeHTML(){
+  var R=[]; try{ R=JSON.parse(localStorage.getItem('mx2::reports')||'[]'); }catch(e){}
+  if(!Array.isArray(R)||!R.length) return '';
+  var cur=_immobileId();
+  var seen={}, items=[];
+  for(var i=R.length-1;i>=0;i--){ var r=R[i]; if(cur && r.immobile && r.immobile!==cur) continue; var k=r.module||r.moduleId||r.moduleName; if(!k||seen[k]) continue; seen[k]=1; items.push(r); }
+  if(!items.length) return '';
+  var h='<div class="dif-box" style="margin-top:10px"><div class="dif-head">📎 Evidenze da altri moduli <span class="dif-sub">stesso immobile · raccolte nel Report</span></div><div class="dif-hyps">';
+  items.forEach(function(r){ h+='<div class="dif-h" style="background:#eef3f7"><b>'+esc(r.moduleName||r.module||'modulo')+'</b><div class="dif-mot">'+esc(r.summary||r.verdict||'n.d.')+'</div></div>'; });
+  h+='</div><div class="dif-foot">Evidenze raccolte per questo immobile (modulo Report). Valutale per confermare o escludere le cause concorrenti, la decisione resta del tecnico. Nessuna esclusione automatica.</div></div>';
+  return h;
+}
+function _difUpdate(){ var el=document.getElementById('difLive'); if(!el) return; try{ _difEnsureStyle(); el.innerHTML=_difHTML(_difBio())+_evidenzeHTML(); }catch(e){ } }
+/* Stessa analisi differenziale, formattata per il report Word/PDF (riusa _difBio) */
+function _difReport(){
+  try{
+    var R=_difBio();
+    var stLab={pres:'Favorisce',escl:'Sotto soglia',mid:'Settoriale',risk:'Specie patogena',info:'Prerequisito',na:'Da rilevare'};
+    var x='<h2>Analisi dei fattori di rischio biologico</h2>';
+    x+='<p style="font-size:11px;color:#5d4a30;font-style:italic">A supporto della diagnosi: ogni fattore deriva dagli indicatori del verdetto automatico (IICRC S520), con la norma di riferimento. La conclusione resta del tecnico.</p>';
+    x+='<table><tr><th>Fattore</th><th>Stato</th><th>Motivazione</th><th>Riferimento</th></tr>';
+    R.hyps.forEach(function(hh){ x+='<tr><td>'+esc(hh.nome)+'</td><td><strong>'+esc(stLab[hh.stato]||hh.stato)+'</strong></td><td>'+esc(hh.motivo)+'</td><td>'+esc(hh.fonte)+'</td></tr>'; });
+    x+='</table>';
+    return x;
+  }catch(e){ return ''; }
+}
+
+function attachInputs(){$("stepPanel").querySelectorAll("[data-fld]").forEach(el=>{const ev=el.type==="checkbox"||el.tagName==="SELECT"||el.type==="radio"?"change":"input";el.addEventListener(ev,function(){const k=this.dataset.fld,kind=this.dataset.kind;let v;if(kind==="num")v=_mxNumero(this);else if(kind==="chk"){const cur=STATE.data[k]||[];if(this.checked){if(!cur.includes(this.value))cur.push(this.value);}else{const i=cur.indexOf(this.value);if(i>=0)cur.splice(i,1);}v=cur;}else v=this.value;setField(k,v);if(["tInt","urInt","durataUR"].includes(k))renderPanelOnly();});});}
+function render(){_mxPulisciFuori();renderStepper();const ACT=getActiveSteps();if(STATE.cur>=ACT.length)STATE.cur=ACT.length-1;const s=ACT[STATE.cur];$("stepPanel").innerHTML=panels[s.id]();attachInputs();const last=STATE.cur===ACT.length-1;$("btnPrev").disabled=STATE.cur===0;$("btnNext").style.display=last?"none":"";$("btnFinish").style.display=last?"":"none";_difUpdate();}
+function renderPanelOnly(){const ACT=getActiveSteps();const s=ACT[STATE.cur];const f=document.activeElement,fK=f?f.getAttribute("data-fld"):null;$("stepPanel").innerHTML=panels[s.id]();attachInputs();if(fK){const el=$("stepPanel").querySelector('[data-fld="'+fK+'"]');if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length);}catch(_){}}}}
+function next(){if(STATE.cur<getActiveSteps().length-1){STATE.cur++;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function prev(){if(STATE.cur>0){STATE.cur--;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function finish(){STATE.finished=true;persist();render();showToast("Diagnosi completata.","ok");setTimeout(()=>{$("mxToolbar").scrollIntoView({behavior:"smooth",block:"center"});},250);}
+
+function buildDoc(){const ana=loadAna(),p=ana.perito,c=ana.immobile,d=STATE.data,v=calcVerdict();const today=new Date().toLocaleDateString("it-IT",{day:"2-digit",month:"long",year:"numeric"});let h="<h1>Diagnosi Biodeteriogeni</h1>";h+='<p style="color:#6b5c4c;font-size:12px"><strong>Data:</strong> '+today+'</p>';h+="<h2>1. Anagrafica</h2><table><tr><th>Perito</th><td>"+esc(p.nome||"n.d.")+"</td></tr><tr><th>Committente</th><td>"+esc(c.Nome||"n.d.")+"</td></tr>";if(c.Indirizzo)h+="<tr><th>Immobile</th><td>"+esc(c.Indirizzo)+"</td></tr>";h+="</table>";h+="<h2>2. Ambiente</h2><table><tr><th>T interna</th><td>"+(d.tInt!=null?d.tInt+" °C":"n.d.")+"</td><th>UR interna</th><td>"+(d.urInt!=null?d.urInt+" %":"n.d.")+"</td></tr><tr><th>T superficie</th><td>"+(d.tSup!=null?d.tSup+" °C":"n.d.")+"</td><th>Durata UR>75%</th><td>"+esc(mxLab("durataUR",d.durataUR)||"n.d.")+"</td></tr></table>";h+="<h2>3. Identificazione</h2><table><tr><th>Organismi</th><td>"+esc(mxLab("organismo",d.organismo||[]).join(", ")||"n.d.")+"</td></tr><tr><th>Colore</th><td>"+esc(mxLab("colore",d.colore)||"n.d.")+"</td><th>Estensione</th><td>"+esc(mxLab("estensione",d.estensione)||"n.d.")+"</td></tr><tr><th>Morfologia</th><td>"+esc(mxLab("morfologia",d.morfologia)||"n.d.")+"</td><th>Odore</th><td>"+esc(mxLab("odore",d.odore)||"n.d.")+"</td></tr></table>";h+="<h2>4. VTT Mould Index</h2><table><tr><th>Indice osservato</th><td>"+(d.vttIndex!=null?d.vttIndex:"n.d.")+" / 6</td></tr></table>";h+="<h2>5. Salute</h2><table><tr><th>Sintomi riferiti</th><td>"+esc(mxLab("sintomiOcc",d.sintomiOcc||[]).join(", ")||"n.d.")+"</td></tr><tr><th>Fragilità</th><td>"+esc(mxLab("fragilita",d.fragilita)||"n.d.")+"</td></tr></table>";h+="<h2>6. Verdetto</h2><table><tr><th>Rischio</th><td><strong>"+esc(v.level.toUpperCase())+"</strong> (score "+v.score+"/7)</td></tr><tr><th>Indicazione</th><td>"+esc(v.summary)+"</td></tr></table>";h+=_difReport();h+="<h2>7. Trattamento e prevenzione</h2><table><tr><th>Metodo</th><td>"+esc(mxLab("trattamento",d.trattamento)||"n.d.")+"</td></tr><tr><th>Biocida</th><td>"+esc(mxLab("biocida",d.biocida)||"n.d.")+"</td></tr><tr><th>Prevenzione</th><td>"+esc(mxLab("prevenzione",d.prevenzione||[]).join(", ")||"n.d.")+"</td></tr></table>";h+=_strumReport();h+='<h2>Normative</h2><ul style="font-size:11.5px">';h+="<li><strong>UNI 11182:2006</strong>, Beni culturali. Descrizione della forma di alterazione.</li>";h+="<li><strong>UNI EN 16085:2012</strong>, Conservation cultural property. Methodology for sampling materials.</li>";h+="<li><strong>UNI EN 16096:2012</strong>, Conservation cultural property. Condition survey.</li>";h+="<li><strong>WHO 2009</strong>, Guidelines for indoor air quality: dampness and mould.</li>";h+="<li><strong>ISO 16000-19:2012</strong>, Indoor air. Sampling strategy for moulds.</li>";h+="<li><strong>UNI EN ISO 846:2019</strong>, Plastics. Action of micro-organisms.</li>";h+="<li>Hukka &amp; Viitanen (1999), Mould Index for wooden materials.</li></ul>";return h;}
+
+/* === #4 Tracciabilità strumentale, lettura registro condiviso mx2::strumentazione (editor nel modulo Risalita) === */
+function _strumGet(){ try{ var a=JSON.parse(localStorage.getItem('mx2::strumentazione')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function _strumReport(){
+  var list=_strumGet();
+  var x='<h2>Strumentazione utilizzata e tracciabilità</h2>';
+  if(!list.length) return x+'<p style="font-size:11.5px;color:#8a7f6c;font-style:italic">Strumentazione non ancora documentata. Compilare modello, matricola ed estremi di taratura nel modulo Risalita (toolbar &rarr; Strumentazione); il dato è condiviso tra i moduli.</p>';
+  x+='<table><tr><th>Strumento</th><th>Modello / marca</th><th>Matricola</th><th>Taratura</th><th>Norma di metodo</th></tr>';
+  list.forEach(function(r){ x+='<tr><td>'+esc(r.strumento||'n.d.')+'</td><td>'+esc(r.modello||'n.d.')+'</td><td>'+esc(r.matricola||'n.d.')+'</td><td>'+esc(r.taratura||'n.d.')+'</td><td>'+esc(r.norma||'n.d.')+'</td></tr>'; });
+  x+='</table>';
+  return x;
+}
+function openDocModal(){$("docBody").innerHTML=buildDoc();$("docModal").classList.add("show");}
+function closeDocModal(){$("docModal").classList.remove("show");}
+function exportWord(){const html='<!doctype html><html><head><meta charset="utf-8"><title>Biodeteriogeni</title><style>body{font-family:Georgia,serif;font-size:11pt;padding:20px}h1{font-size:18pt;font-style:italic}h2{font-size:13pt;color:#1b5e20;border-bottom:1pt solid #d8d3c4;padding-bottom:3pt}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9.5pt}th,td{padding:4pt 6pt;border-bottom:1pt solid #e6e0d2;text-align:left}th{background:#faf8f3;font-weight:700}</style></head><body>'+buildDoc()+'</body></html>';const blob=new Blob([html],{type:"application/msword"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="Biodeteriogeni_"+new Date().toISOString().slice(0,10)+".doc";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500);showToast("Word salvato.","ok");}
+function exportPDF(){window.print();}
+function exportJSON(){const ana=loadAna();const b={schemaVersion:"bio-v4.0",exportedAt:new Date().toISOString(),perito:ana.perito,immobile:ana.immobile,currentStep:STATE.cur,finished:STATE.finished,data:STATE.data,verdict:calcVerdict()};const blob=new Blob([JSON.stringify(b,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="Bio_"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500);showToast("JSON salvato.","ok");}
+function addToReport(){try{const r=JSON.parse(localStorage.getItem("mx2::reports")||"[]");r.push({id:"bi_"+Date.now(),module:"biodeteriogeni",moduleName:"Diagnosi Biodeteriogeni",version:"v4.0",createdAt:new Date().toISOString(),immobile:_immobileId(),summary:"Rischio "+calcVerdict().level,data:STATE.data,htmlSnippet:buildDoc()});localStorage.setItem("mx2::reports",JSON.stringify(r));showToast("Aggiunto al Report.","ok");}catch(e){showToast("Errore: "+e.message,"err");}}
+
+function listSaves(){try{return JSON.parse(localStorage.getItem(SAVES_KEY)||"[]");}catch(e){return[];}}
+function writeSaves(a){localStorage.setItem(SAVES_KEY,JSON.stringify(a));}
+function fmtTs(iso){try{return new Date(iso).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch(e){return iso;}}
+function openDlg(t,b,a){$("dlgTitle").innerHTML=t;$("dlgBody").innerHTML=b;$("dlgActions").innerHTML=a;$("dlgModal").classList.add("show");}
+function closeDlg(){$("dlgModal").classList.remove("show");}
+function openSaveDialog(){const a=loadAna(),c=a.immobile;const dn=(c.Nome?c.Nome:"Biodeteriogeni")+" del "+new Date().toLocaleDateString("it-IT");openDlg("💾 Salva",'<div class="fld"><label>Nome</label><input type="text" id="saveName" value="'+esc(dn)+'" maxlength="80"></div>','<button type="button" class="mx-shiny s-gray" id="dlgCancel" style="padding:8px 14px;font-size:12px">Annulla</button><button type="button" class="mx-shiny s-green" id="dlgConfirm" style="padding:8px 14px;font-size:12px">💾 Salva</button>');setTimeout(()=>{$("saveName").focus();$("saveName").select();},60);$("dlgCancel").addEventListener("click",closeDlg);$("dlgConfirm").addEventListener("click",function(){const nm=($("saveName").value||"").trim()||"Senza nome";const arr=listSaves();arr.push({id:"s_"+Date.now(),name:nm,ts:new Date().toISOString(),cur:STATE.cur,finished:STATE.finished,data:JSON.parse(JSON.stringify(STATE.data))});writeSaves(arr);closeDlg();showToast('Salvata: "'+nm+'"',"ok");});}
+function openLoadDialog(){const arr=listSaves().sort((a,b)=>b.ts.localeCompare(a.ts));let body=!arr.length?'<div class="dlg-empty">Archivio vuoto.</div>':'<div class="dlg-list">'+arr.map(s=>'<div class="dlg-item"><div style="flex:1"><div style="font-weight:700">'+esc(s.name)+'</div><div style="font-size:11px;font-family:monospace;color:#8b7355">'+fmtTs(s.ts)+'</div></div><button type="button" class="mx-shiny s-blue" data-load="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px">📥</button><button type="button" class="mx-shiny" data-del="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px;background-image:linear-gradient(135deg,#ef5350,#c62828);box-shadow:0 3px 10px rgba(198,40,40,.42)">🗑</button></div>').join("")+'</div>';openDlg("📁 Carica",body,'<button type="button" class="mx-shiny s-gray" id="dlgClose2" style="padding:8px 14px;font-size:12px">Chiudi</button>');$("dlgClose2").addEventListener("click",closeDlg);$("dlgBody").querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",function(){const s=listSaves().find(x=>x.id===this.dataset.load);if(!s||!confirm('Caricare "'+s.name+'"?'))return;STATE.cur=s.cur||0;STATE.finished=!!s.finished;STATE.data=JSON.parse(JSON.stringify(s.data));persist();render();closeDlg();showToast("Caricata.","ok");}));$("dlgBody").querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",function(){if(!confirm("Eliminare?"))return;writeSaves(listSaves().filter(x=>x.id!==this.dataset.del));openLoadDialog();}));}
+/* === Etichette leggibili delle risposte a scelta (19/11/2026) ===
+   Nel Word, nel PDF e nel Report le risposte a scelta uscivano col valore interno (es. «fascia_oriz», «mattone_pieno»).
+   mxLab() restituisce l'etichetta che si legge a schermo, presa dagli stessi pannelli del modulo. */
+var _MXLAB=null,_MXFLD=null;
+function _mxLabMap(){
+  if(_MXLAB) return _MXLAB; _MXLAB={}; _MXFLD={};
+  try{ var box=document.createElement("div");
+    Object.keys(panels).forEach(function(id){ try{ box.innerHTML=panels[id](); }catch(e){ return; }
+      box.querySelectorAll("[data-fld]").forEach(function(el){ var k=el.getAttribute("data-fld"); var m=_MXLAB[k]=_MXLAB[k]||{};
+        if(el.tagName==="SELECT"){ for(var i=0;i<el.options.length;i++){ if(el.options[i].value) m[el.options[i].value]=el.options[i].textContent; } }
+        else if(el.type==="radio"||el.type==="checkbox"){ var l=el.closest("label"); if(l&&el.value) m[el.value]=l.textContent; }
+        if(!_MXFLD[k]){ var f=el.closest(".fld"); var fl=f&&f.querySelector("label"); if(fl&&!fl.querySelector("input")) _MXFLD[k]=fl.textContent.replace(/\s+/g," ").trim(); else if(el.type==="checkbox"&&el.closest("label")) _MXFLD[k]=el.closest("label").textContent.replace(/^[^0-9A-Za-zÀ-ÿ(]+/,"").replace(/\s+/g," ").trim(); }
+      });
+    });
+  }catch(e){}
+  return _MXLAB;
+}
+function mxLab(campo,valore){
+  if(Array.isArray(valore)) return valore.map(function(x){ return mxLab(campo,x); });
+  if(valore==null||valore==="") return valore;
+  var m=_mxLabMap()[campo], l=m&&m[valore];
+  if(!l) return valore;
+  return String(l).replace(/^[^0-9A-Za-zÀ-ÿ<>≤≥(]+/,"").replace(/\s+/g," ").trim()||valore;
+}
+/* === Confronto fra due diagnosi salvate (19/11/2026) ===
+   Prima il tasto «Confronta» mostrava un avviso e apriva l'archivio di «Carica». Ora si scelgono due salvataggi
+   e una tabella li mette a fianco, con i campi diversi in arancio (come nel modulo Risalita). */
+function _mxFldName(k){ _mxLabMap(); return (_MXFLD&&_MXFLD[k])||String(k).replace(/_/g," ").replace(/([a-z0-9])([A-Z])/g,"$1 $2"); }
+function _mxCmpVal(k,v){
+  if(v===true) return "sì"; if(v===false) return "no";
+  if(v==null||v===""||(Array.isArray(v)&&!v.length)) return "n.d.";
+  if(Array.isArray(v)) return v.map(function(x){ return (x!==null&&typeof x==="object")?JSON.stringify(x):String(mxLab(k,x)); }).join(", ");
+  if(typeof v==="object") return JSON.stringify(v);
+  return String(mxLab(k,v));
+}
+function _mxRenderCmp(a,b){
+  var da=a.data||{}, db=b.data||{}, chiavi=[], righe="", diversi=0, tot=0, st="padding:4px 6px;border-bottom:1px solid #e6e0d2;text-align:left;vertical-align:top";
+  Object.keys(da).concat(Object.keys(db)).forEach(function(k){ if(chiavi.indexOf(k)<0) chiavi.push(k); });
+  chiavi.forEach(function(k){ var va=_mxCmpVal(k,da[k]), vb=_mxCmpVal(k,db[k]); if((va==="n.d."||va==="no")&&(vb==="n.d."||vb==="no")) return; tot++; var dif=(va!==vb); if(dif) diversi++;
+    righe+='<tr'+(dif?' style="background:#fff3e0"':'')+'><th style="'+st+';font-size:11px">'+esc(_mxFldName(k))+'</th><td style="'+st+'">'+esc(va)+'</td><td style="'+st+'">'+esc(vb)+'</td></tr>'; });
+  return '<div style="font-size:12.5px;margin-bottom:6px"><strong>'+(diversi?("Campi diversi: "+diversi+" su "+tot):("Nessuna differenza nei "+tot+" campi compilati"))+'</strong></div><table style="width:100%;border-collapse:collapse;font-size:11.5px"><tr><th style="'+st+'">Campo</th><th style="'+st+'">A · '+esc(a.name)+'<br><span style="font-weight:400">'+fmtTs(a.ts)+'</span></th><th style="'+st+'">B · '+esc(b.name)+'<br><span style="font-weight:400">'+fmtTs(b.ts)+'</span></th></tr>'+righe+'</table>';
+}
+function openCompareDialog(){
+  var arr=listSaves().slice().sort(function(x,y){ return String(y.ts).localeCompare(String(x.ts)); });
+  if(arr.length<2){ openDlg("⚖ Confronto",'<div class="dlg-empty">Servono almeno 2 diagnosi salvate con «Salva». Attualmente: '+arr.length+'.</div>','<button type="button" class="mx-shiny s-gray" id="dlgClose3" style="padding:8px 14px;font-size:12px">Chiudi</button>'); document.getElementById("dlgClose3").addEventListener("click",closeDlg); return; }
+  function opts(sel){ return arr.map(function(s,i){ return '<option value="'+esc(s.id)+'"'+(i===sel?" selected":"")+'>'+esc(s.name)+' · '+fmtTs(s.ts)+'</option>'; }).join(""); }
+  var stile="width:100%;padding:9px 11px;border:1px solid #d8d3c4;border-radius:8px;font:inherit;font-size:13px;background:#fff";
+  openDlg("⚖ Confronto diagnosi",'<div style="font-size:12.5px;margin-bottom:10px">Scegli due diagnosi salvate e premi «Confronta»: i campi diversi escono in arancio.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label style="display:block;font-size:11.5px;font-weight:700;margin-bottom:4px">Diagnosi A</label><select id="cmpA" style="'+stile+'">'+opts(0)+'</select></div><div><label style="display:block;font-size:11.5px;font-weight:700;margin-bottom:4px">Diagnosi B</label><select id="cmpB" style="'+stile+'">'+opts(1)+'</select></div></div><div id="cmpResult" style="margin-top:14px"></div>','<button type="button" class="mx-shiny s-gray" id="dlgClose4" style="padding:8px 14px;font-size:12px">Chiudi</button><button type="button" class="mx-shiny" id="dlgDoCompare" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#ffa726 0%,#ef6c00 45%,#bf360c 100%)">⚖ Confronta</button>');
+  document.getElementById("dlgClose4").addEventListener("click",closeDlg);
+  document.getElementById("dlgDoCompare").addEventListener("click",function(){ var all=listSaves(); var a=all.filter(function(s){return s.id===document.getElementById("cmpA").value;})[0], b=all.filter(function(s){return s.id===document.getElementById("cmpB").value;})[0]; if(!a||!b) return; document.getElementById("cmpResult").innerHTML=_mxRenderCmp(a,b); });
+}
+function resetDiagnosis(){if(!confirm("Azzerare la diagnosi corrente?"))return;Object.keys(STATE.data).forEach(k=>{const v=STATE.data[k];if(Array.isArray(v))STATE.data[k]=[];else if(typeof v==="number"||v===null)STATE.data[k]=null;else STATE.data[k]="";});STATE.cur=0;STATE.finished=false;persist();render();showToast("Azzerata.","ok");}
+
+document.addEventListener("DOMContentLoaded",function(){var $=function(id){return document.getElementById(id)||document.createElement('span');};restore();renderAna();render();$("btnPrev").addEventListener("click",prev);$("btnNext").addEventListener("click",next);$("btnFinish").addEventListener("click",finish);$("btnReloadAna").addEventListener("click",function(){renderAna();showToast("Ricaricata.","ok");});$("btnSave").addEventListener("click",openSaveDialog);$("btnLoad").addEventListener("click",openLoadDialog);$("btnCompare").addEventListener("click",openCompareDialog);$("btnReset").addEventListener("click",resetDiagnosis);$("dlgCloseBtn").addEventListener("click",closeDlg);$("dlgModal").addEventListener("click",function(e){if(e.target===this)closeDlg();});$("btnWord").addEventListener("click",openDocModal);$("btnPDF").addEventListener("click",function(){openDocModal();setTimeout(exportPDF,300);});$("btnReport").addEventListener("click",addToReport);$("btnJSON").addEventListener("click",exportJSON);$("modalCloseBtn").addEventListener("click",closeDocModal);$("btnCloseModal").addEventListener("click",closeDocModal);$("btnDoExportWord").addEventListener("click",exportWord);$("btnDoExportPDF").addEventListener("click",exportPDF);$("btnDoExportJSON").addEventListener("click",exportJSON);$("docModal").addEventListener("click",function(e){if(e.target===this)closeDocModal();});});
+window.MX_BIO={STATE,STEPS,calcVerdict};
+</script>
+<script>
+/* === MX SNAPSHOT IMPORTER (auto-install, Mixando v3) ===
+ * Aggiunge bottone "Apri snapshot" accanto al "JSON" della toolbar.
+ * Importa .json esportato dallo stesso modulo, ricarica la pagina.
+ * Riconosce pattern lite (STATE.cur/finished/data → *-draft) e
+ * pattern rich (state diretto → *-vN). NON modifica codice esistente.
+ * ====================================================== */
+(function(){
+  'use strict';
+  if (window.__mxSnapImportInstalled) return;
+  window.__mxSnapImportInstalled = true;
+  function findHostBtn(){
+    return document.querySelector('button[data-act="export-json"]')
+        || document.getElementById('btnJSON')
+        || document.getElementById('btnExportJSON')
+        || document.querySelector('.mx-tb-btn.tb-save');
+  }
+  function makeBtn(){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mx-tb-btn tb-load';
+    b.id = 'btnOpenSnap';
+    b.title = 'Apri uno snapshot .json esportato in precedenza da questo modulo (sostituirà i dati correnti).';
+    b.innerHTML = '<span class="ico">\u{1F4C2}</span><span class="label">Apri snapshot</span>';
+    return b;
+  }
+  function detectModuleKeys(){
+    /* 19/11/2026: solo le chiavi di QUESTO modulo, cioè quelle che il modulo nomina nel suo codice.
+       Prima prendeva le chiavi di tutti i moduli e lo snapshot finiva nella bozza del primo trovato
+       (un file dei Sali, aperto dal modulo Sali, sovrascriveva la bozza della Risalita). */
+    var src = '';
+    try { [].forEach.call(document.scripts, function(s){ if (!s.src) src += s.textContent; }); } catch(_){}
+    var condivise = {'mx2::perito':1,'mx2::periti-v2':1,'mx2::locali-v1':1,'mx2::reports':1,'mx2::indagini':1,'mx2::strumentazione':1,'mx2::chartTheme':1,'mx2::showPhysicalScale':1,'mx2::report-meta':1,'mx2::last-backup':1};
+    var mie = {}, re = /mx2::[A-Za-z0-9_-]+/g, m;
+    while ((m = re.exec(src))) { if (!condivise[m[0]]) mie[m[0]] = 1; }
+    return Object.keys(mie);
+  }
+  /* 20/11/2026: nomi con cui un file dichiara di venire da questo modulo (in «moduleId», in «module» o nella
+     sigla di «schemaVersion», per esempio 'sali-v3.1'). Servono a non aprire qui il file di un altro modulo. */
+  var _MX_MIEI = ['bio', 'biodeteriogeni'];
+  function _mxFileDiAltroModulo(obj){
+    if (!obj || typeof obj !== 'object') return '';
+    if (typeof obj._format === 'string' && obj._format.indexOf('mixando-backup') === 0) return 'Questo file è un backup generale di Mixando: si ripristina dalla pagina «Backup tecnico», non da qui.';
+    var d = obj.moduleId || obj.module || (typeof obj.schemaVersion === 'string' ? obj.schemaVersion : '');
+    if (typeof d !== 'string' || !d) return '';   /* il file non dice da dove viene: lo giudicano i controlli più sotto */
+    var n = d.toLowerCase().replace(/-v[\d.]+$/, '').replace(/_/g, '-');
+    if (_MX_MIEI.indexOf(n) >= 0) return '';
+    return 'Questo file viene da un altro modulo (' + (obj.moduleName || d) + ').';
+  }
+  function pickTargetKey(keys, payload){
+    var draftKeys = keys.filter(function(k){ return /-draft$/.test(k); });
+    var liteHint = payload && (payload.currentStep !== undefined || payload.data !== undefined);
+    if (liteHint && draftKeys.length){ return { key: draftKeys[0], kind: 'lite' }; }
+    var primaryKeys = keys.filter(function(k){ return !/-(saves|draft|prefs)$/.test(k); });
+    if (primaryKeys.length === 1) return { key: primaryKeys[0], kind: 'rich' };
+    if (primaryKeys.length > 1){
+      var sortable = primaryKeys.map(function(k){ try { return [k, (localStorage.getItem(k)||'').length]; } catch(_){ return [k, 0]; } });
+      sortable.sort(function(a,b){ return b[1] - a[1]; });
+      return { key: sortable[0][0], kind: 'rich' };
+    }
+    if (draftKeys.length) return { key: draftKeys[0], kind: 'lite' };
+    return null;
+  }
+  function openImportDialog(){
+    var f = document.createElement('input');
+    f.type = 'file'; f.accept = 'application/json';
+    f.style.display = 'none';
+    f.addEventListener('change', function(e){
+      var file = e.target.files && e.target.files[0]; if (!file) return;
+      var rd = new FileReader();
+      rd.onload = function(ev){
+        try {
+          var obj = JSON.parse(ev.target.result);
+          /* 20/11/2026: il tasto riapre solo i file di QUESTO modulo. Prima accettava, dopo una conferma, anche il file
+             di un altro modulo o il backup generale, e il lavoro del modulo aperto andava perso (provato: file dei Sali
+             nel Radon, file del Radon e della Risalita nei Sali). */
+          var _altro = _mxFileDiAltroModulo(obj);
+          if (_altro){ alert(_altro + '\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          /* 19/11/2026: file esportato da un modulo con la barra nuova (Glaser, Termoigrometria, Radon). Porta i dati
+             d'ingresso in «input», in una forma diversa da quella tenuta in memoria: scriverlo in memoria azzerava
+             il modulo. Qui si usa la stessa strada del tasto «Carica». */
+          if (obj && obj.input && window.MX && typeof window.MX.applyData === 'function'){
+            if (!confirm('Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.moduleName || obj.moduleId || '?') + '\n\nI dati correnti del modulo verranno SOSTITUITI.')) return;
+            var _esito = window.MX.applyData(obj.input, obj.moduleId);
+            if (_esito === 'ok') alert('Snapshot importato.');
+            else if (_esito === 'altro') alert('Questo file viene da un altro modulo (' + (obj.moduleName || obj.moduleId) + '): non importato.');
+            else alert('Il modulo non sa ricaricare questo file.');
+            return;
+          }
+          /* 20/11/2026: nei moduli con la barra nuova il solo file che si sa riaprire è quello con la voce «input».
+             Un file diverso, scritto in memoria così com'era, azzerava il modulo. */
+          if (window.MX && typeof window.MX.applyData === 'function'){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var keys = detectModuleKeys();
+          if (!keys.length){
+            alert('Nessuna chiave di lavoro trovata per questo modulo nello storage corrente.\nSuggerimento: apri il modulo, fai almeno un\'interazione, poi riprova.');
+            return;
+          }
+          var target = pickTargetKey(keys, obj);
+          if (!target){ alert('Non sono riuscito a individuare la chiave di salvataggio. Snapshot non importato.'); return; }
+          /* 20/11/2026: un file senza i dati dei passi svuotava la bozza */
+          if (target.kind === 'lite' && !(obj && (obj.data || obj.state))){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var msg = 'Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.module || obj.schemaVersion || '?') + '\n• Destinazione: ' + target.key + ' (' + target.kind + ')\n\nI dati correnti del modulo verranno SOSTITUITI.\nConsiglio: prima fai "JSON" per backup di sicurezza.\n\nProcedere?';
+          if (!confirm(msg)) return;
+          var toWrite;
+          if (target.kind === 'lite'){
+            toWrite = { ts: Date.now(), state: { cur: (obj.currentStep !== undefined ? obj.currentStep : 0), finished: !!obj.finished, data: (obj.data || obj.state || {}) } };
+          } else {
+            toWrite = obj.state || obj;
+          }
+          try { localStorage.setItem(target.key, JSON.stringify(toWrite)); }
+          catch (err) { alert('Errore scrittura storage: ' + (err.message || err)); return; }
+          alert('Snapshot importato in "' + target.key + '". Pagina in ricaricamento…');
+          location.reload();
+        } catch (err) { alert('Errore lettura JSON: ' + err.message); }
+      };
+      rd.readAsText(file);
+    });
+    document.body.appendChild(f); f.click(); setTimeout(function(){ try{ document.body.removeChild(f); }catch(_){} }, 1500);
+  }
+  function install(){
+    if (document.getElementById('btnOpenSnap')) return;
+    if (!detectModuleKeys().length) return;   /* 19/11/2026: il modulo non tiene dati in memoria, il tasto non potrebbe funzionare */
+    var host = findHostBtn();
+    if (!host || !host.parentNode){ return setTimeout(install, 250); }
+    var btn = makeBtn();
+    host.parentNode.insertBefore(btn, host.nextSibling);
+    btn.addEventListener('click', openImportDialog);
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(install, 150); });
+  } else {
+    setTimeout(install, 150);
+  }
+})();
+
+/* === Integrazione mappa-indagini (aggancio bidirezionale) === */
+function _mxIndaginiList(){
+  try{ var raw=localStorage.getItem('mx2::indagini'); if(!raw) return []; var a=JSON.parse(raw); return Array.isArray(a)?a:[]; }
+  catch(e){ return []; }
+}
+function _mxIndaginiSaveAll(list){
+  try{ localStorage.setItem('mx2::indagini', JSON.stringify(list||[])); return true; }
+  catch(e){ return false; }
+}
+function _mxIndaginiNewId(){
+  return 'ind_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+}
+
+// Mapping STATE.data → dati indagine per categoria 'biodeteriogeni'
+function _mxBuildDati_biodeteriogeni(d){
+  // Costruisce un sottoinsieme compatibile con il modal probe + preserva STATE intero
+  // I campi standard tInt, urInt, tSup vengono estratti se presenti, altrimenti restano in schedaCompleta
+  var out = {
+    schedaCompleta: JSON.parse(JSON.stringify(d || {}))
+  };
+  // Estrazione opportunistica di campi standard (se presenti con quei nomi)
+  ['tInt','urInt','tSup','tempC','urPerc','co2_ppm','pm25','pm10','tvoc','hcho','co','no2',
+   'co2','tempC2','tempInt'].forEach(function(k){
+    if(d && d[k] != null) out[k] = d[k];
+  });
+  // Eventuali sintomi/note/categoria sospetta
+  if(d){
+    if(d.sintomi) out.sintomi = d.sintomi;
+    if(d.note) out.note = d.note;
+    if(d.noteFinali) out.note = d.noteFinali;
+    if(d.tipologiaSospetta) out.tipologiaSospetta = d.tipologiaSospetta;
+    if(d.categoriaIaq) out.categoria_target = d.categoriaIaq;
+  }
+  return out;
+}
+
+/* 20/11/2026: le domande si fanno in una finestra dentro la pagina (window.mxChiedi, nel file condiviso
+   _shared/mx-switcher.js) e non più nelle finestrelle del browser. Se quel file non fosse stato caricato si torna
+   alle finestrelle di prima. _mxChiedi risponde con una promessa; _mxTesto chiede un solo testo. */
+function _mxChiedi(titolo, cfg){
+  if(window.mxChiedi) return window.mxChiedi(titolo, cfg);
+  cfg = cfg || {};
+  if(cfg.scelte){
+    var buone = cfg.scelte.filter(function(s){ return !s[2]; });
+    var r = prompt(titolo + '\n\n' + buone.map(function(s, i){ return (i+1) + '. ' + s[1]; }).join('\n') + '\n\nScrivi il numero:', '1');
+    var k = parseInt(r, 10) - 1;
+    return Promise.resolve(buone[k] ? buone[k][0] : null);
+  }
+  var out = [], campi = cfg.campi || [];
+  for(var i = 0; i < campi.length; i++){
+    var v = prompt(titolo + (campi[i][0] ? ('\n' + campi[i][0]) : ''), campi[i][1] == null ? '' : campi[i][1]);
+    if(v === null) return Promise.resolve(null);
+    out.push(v);
+  }
+  return Promise.resolve(out);
+}
+function _mxTesto(titolo, pre){ return _mxChiedi(titolo, {campi:[['', pre]]}).then(function(r){ return r ? r[0] : null; }); }
+async function _mxAggancialMappa(){
+  var cat = 'biodeteriogeni';
+  var moduloFile = 'biodeteriogeni.html';
+  var fileLabel = 'Biodeteriogeni';
+  // Pre-save scheda
+  try{ if(typeof persist === 'function') persist(); }catch(e){}
+  var d = STATE && STATE.data ? STATE.data : {};
+  var dati = _mxBuildDati_biodeteriogeni(d);
+
+  var lista = _mxIndaginiList();
+  var stessoCat = lista.filter(function(r){ return r.categoria === cat; });
+
+  /* 20/11/2026: scelta dentro la pagina (prima si scriveva 1, 2 o 3 in una finestrella del browser) */
+  var mode = await _mxChiedi('Aggancia la scheda '+fileLabel.toUpperCase()+' alla Mappa Indagini', {scelte:[['1','Nuovo punto sulla mappa'],['2','Aggiorna un punto esistente ('+(stessoCat.length?(stessoCat.length+' disponibili'):'nessuno disponibile')+')', !stessoCat.length]]});
+  if(!mode) return;
+
+  if(mode === '1'){
+    var _nn = await _mxChiedi('Nuovo punto sulla mappa', {campi:[['Nome del punto', fileLabel+' '+new Date().toLocaleDateString('it-IT')],['Stanza (facoltativa)','']], conferma:'Crea il punto'});
+    if(!_nn || !String(_nn[0]).trim()) return;
+    var nome = String(_nn[0]).trim(), stanza = String(_nn[1]||'').trim();
+    var rec = {
+      id: _mxIndaginiNewId(),
+      schemaVer: 1,
+      categoria: cat,
+      piano: 0,
+      x: 0.5, y: 0.5,
+      stanza: stanza || '',
+      nome: nome,
+      posizione: 'Da posizionare sulla mappa (apri Mappa Indagini e trascina il pin)',
+      dataCreazione: new Date().toISOString(),
+      dataModifica: new Date().toISOString(),
+      dati: dati,
+      note: 'Rilievo creato da scheda '+moduloFile,
+      foto: [],
+      termogrammi: [],
+      linkScheda: moduloFile+':'+Date.now(),
+      layerId: ''
+    };
+    lista.push(rec);
+    _mxIndaginiSaveAll(lista);
+    if(typeof showToast === 'function') showToast('✓ Punto "'+nome+'" creato sulla mappa indagini','ok');
+    setTimeout(function(){
+      if(confirm('Punto "'+nome+'" creato sulla Mappa Indagini.\nVuoi aprire ora la Mappa per posizionarlo?')){
+        window.location.href = 'mappa-indagini.html';
+      }
+    }, 500);
+  } else if(mode === '2'){
+    if(!stessoCat.length){ alert('Nessun punto di categoria '+fileLabel+' esistente sulla mappa.'); return; }
+    var ch = await _mxChiedi('Quale punto vuoi aggiornare?', {scelte: stessoCat.map(function(r, i){ return [String(i+1), r.nome+' ('+(r.stanza||'senza stanza')+')']; })});
+    if(!ch) return;
+    var idx = parseInt(ch)-1;
+    if(isNaN(idx) || idx<0 || idx>=stessoCat.length){ alert('Selezione non valida'); return; }
+    var target = stessoCat[idx];
+    target.dati = dati;
+    target.dataModifica = new Date().toISOString();
+    target.linkScheda = moduloFile+':'+Date.now();
+    target.note = (target.note || '') + (target.note ? ' · ':'') + 'Aggiornato da '+moduloFile+' il '+new Date().toLocaleDateString('it-IT');
+    for(var i=0;i<lista.length;i++){
+      if(lista[i].id === target.id){ lista[i] = target; break; }
+    }
+    _mxIndaginiSaveAll(lista);
+    if(typeof showToast === 'function') showToast('✓ Punto "'+target.nome+'" aggiornato','ok');
+  }
+}
+
+</script>
+<script src="_shared/mx-biblio.js" data-mod="biodeteriogeni" defer></script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

@@ -1,0 +1,261 @@
+/* =====================================================================
+ * MX Toolbar standard, 7 pulsanti gradient + modal anteprima full-screen
+ * Da includere in ogni modulo Mixando v3.
+ * MX-BUILD: 2026-05-24-toolbar-v2 pulsanti VIVACI (3-stop + shimmer + scale)
+ * ===================================================================== */
+
+/* ================== TOOLBAR STICKY BOTTOM ================== */
+.mx-toolbar{
+  position:fixed; bottom:0; left:0; right:0; z-index:40;
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.95) 30%,#fff);
+  backdrop-filter:blur(8px);
+  border-top:1px solid #d8d3c4;
+  box-shadow:0 -4px 18px rgba(20,20,40,.10);
+  padding:10px 14px env(safe-area-inset-bottom,10px);
+  display:block;  /* sempre visibile; bottoni disabilitati prima del calcolo */
+}
+.mx-toolbar.is-active{ display:block }
+.mx-toolbar.needs-result .mx-tb-btn[data-needs="result"]{ opacity:.4; cursor:not-allowed; filter:grayscale(.5) }
+.mx-toolbar-hint{
+  text-align:center; font-size:11.5px; color:#8b7355; font-style:italic; margin-bottom:6px;
+}
+.mx-toolbar.is-active .mx-toolbar-hint{ display:none }
+body.mx-has-toolbar{ padding-bottom:84px }
+.mx-toolbar-inner{
+  max-width:1080px; margin:0 auto;
+  display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center;
+}
+.mx-tb-btn{
+  appearance:none; border:0; color:#fff;
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.02em;
+  padding:12px 18px; border-radius:12px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:7px;
+  position:relative; overflow:hidden;
+  text-shadow:0 1px 2px rgba(0,0,0,.20);
+  box-shadow:
+    0 3px 8px rgba(0,0,0,.18),
+    0 1px 2px rgba(0,0,0,.10),
+    inset 0 1px 0 rgba(255,255,255,.30),
+    inset 0 -2px 4px rgba(0,0,0,.12);
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, filter .15s ease, background-position .35s ease;
+  background-size:180% 180%;
+  background-position:0% 0%;
+  white-space:nowrap; min-width:0;
+}
+.mx-tb-btn::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg, transparent 25%, rgba(255,255,255,.40) 48%, rgba(255,255,255,.40) 52%, transparent 75%);
+  transform:translateX(-130%); transition:transform .6s ease;
+}
+.mx-tb-btn:hover{
+  transform:translateY(-2px) scale(1.03);
+  background-position:100% 100%;
+  filter:brightness(1.08) saturate(1.15);
+}
+.mx-tb-btn:hover::before{ transform:translateX(130%) }
+.mx-tb-btn:active{ transform:translateY(0) scale(.98); transition-duration:.05s }
+.mx-tb-btn:disabled{ opacity:.45; cursor:not-allowed; filter:grayscale(.6) }
+.mx-tb-btn .ico{ font-size:16px; line-height:1; filter:drop-shadow(0 1px 2px rgba(0,0,0,.25)) }
+
+/* Gradient ricchi 3-stop con ombra colorata d'accent */
+.mx-tb-btn.tb-save{
+  background-image:linear-gradient(135deg,#64b5f6 0%,#1976d2 45%,#0d47a1 100%);
+  box-shadow:0 3px 10px rgba(25,118,210,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-load{
+  background-image:linear-gradient(135deg,#ffb74d 0%,#f57c00 45%,#bf360c 100%);
+  box-shadow:0 3px 10px rgba(245,124,0,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-compare{
+  background-image:linear-gradient(135deg,#ba68c8 0%,#7b1fa2 45%,#311b92 100%);
+  box-shadow:0 3px 10px rgba(123,31,162,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-word{
+  background-image:linear-gradient(135deg,#5a9bd8 0%,#2b579a 45%,#0c2e5e 100%);
+  box-shadow:0 3px 10px rgba(43,87,154,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-pdf{
+  background-image:linear-gradient(135deg,#ef5350 0%,#c62828 45%,#7f0000 100%);
+  box-shadow:0 3px 10px rgba(198,40,40,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-report{
+  background-image:linear-gradient(135deg,#ffd54f 0%,#f9a825 45%,#e65100 100%);
+  color:#3e2e00; text-shadow:0 1px 0 rgba(255,255,255,.45);
+  box-shadow:0 3px 10px rgba(249,168,37,.50), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 4px rgba(0,0,0,.10);
+}
+.mx-tb-btn.tb-reset{
+  background-image:linear-gradient(135deg,#9e9e9e 0%,#616161 45%,#212121 100%);
+  box-shadow:0 3px 10px rgba(97,97,97,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+
+/* Mobile: nascondi label tieni solo icone */
+@media (max-width:680px){
+  .mx-tb-btn{ padding:11px 13px; font-size:12px }
+  .mx-tb-btn .label{ display:none }
+  .mx-tb-btn .ico{ font-size:17px }
+}
+
+/* ================== MODAL ANTEPRIMA FULL-SCREEN ================== */
+.mx-modal{
+  position:fixed; inset:0; z-index:200;
+  background:rgba(20,20,40,.55); backdrop-filter:blur(4px);
+  display:none; align-items:stretch; justify-content:center;
+  padding:18px;
+}
+.mx-modal.is-open{ display:flex }
+.mx-modal-frame{
+  width:100%; max-width:1280px;
+  background:#fff; border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.mx-modal-head{
+  display:flex; align-items:center; gap:14px; padding:14px 20px;
+  border-bottom:1px solid #e6e0d2;
+  background:linear-gradient(180deg,#fdfbf4,#fff);
+}
+.mx-modal-head h2{
+  margin:0; font-family:Georgia,serif; font-style:italic; font-size:18px; color:#2c1810; flex:1
+}
+.mx-modal-head .x{
+  appearance:none; border:0; background:#f5f1e8; color:#6b5c4c;
+  width:36px; height:36px; border-radius:10px; cursor:pointer;
+  font-size:18px; font-weight:700; line-height:1;
+}
+.mx-modal-head .x:hover{ background:#ede5d0; color:#2c1810 }
+.mx-modal-body{
+  flex:1; display:grid; grid-template-columns:320px 1fr; gap:0; min-height:0;
+}
+.mx-modal-side{
+  background:#faf8f3; border-right:1px solid #e6e0d2;
+  padding:16px 18px; overflow-y:auto;
+}
+.mx-modal-side h3{
+  margin:0 0 8px; font-family:Georgia,serif; font-size:14px; font-style:italic; color:#2c1810;
+  border-bottom:1px solid #e6e0d2; padding-bottom:6px;
+}
+.mx-modal-side h3:not(:first-child){ margin-top:18px }
+.mx-modal-side .mx-fld{ display:flex; flex-direction:column; gap:3px; margin-bottom:8px }
+.mx-modal-side .mx-fld label{ font-size:10.5px; font-weight:700; color:#6b5c4c; letter-spacing:.04em }
+.mx-modal-side .mx-fld input,
+.mx-modal-side .mx-fld textarea{
+  padding:7px 9px; border:1px solid #e6e0d2; border-radius:7px;
+  font:inherit; font-size:12.5px; color:#2c1810; background:#fff; outline:none; min-width:0; width:100%;
+}
+.mx-modal-side .mx-fld textarea{ min-height:60px; resize:vertical; font-family:inherit }
+.mx-modal-side .mx-fld input:focus,
+.mx-modal-side .mx-fld textarea:focus{ border-color:#2c5d7c; box-shadow:0 0 0 2px rgba(44,93,124,.18) }
+.mx-modal-side .mx-info{
+  background:#e8f2fa; border-left:3px solid #2c5d7c;
+  padding:8px 10px; border-radius:6px; font-size:11px; color:#1a3d52; line-height:1.5; margin-bottom:10px
+}
+.mx-modal-side .mx-warn{
+  background:#fff3e0; border-left:3px solid #f57c00;
+  padding:8px 10px; border-radius:6px; font-size:11px; color:#5d3a00; line-height:1.5; margin-bottom:10px
+}
+.mx-modal-side .mx-info b, .mx-modal-side .mx-warn b{ color:#0a1f2e }
+.mx-modal-side .mx-link{
+  appearance:none; border:1px solid #2c5d7c; background:#fff; color:#2c5d7c;
+  font:inherit; font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:7px; cursor:pointer; letter-spacing:.04em
+}
+.mx-modal-side .mx-link:hover{ background:#2c5d7c; color:#fff }
+.mx-modal-side .mx-sections label{
+  display:flex; align-items:center; gap:8px; padding:5px 0; font-size:12.5px; color:#2c1810; cursor:pointer
+}
+.mx-modal-side .mx-sections input[type="checkbox"]{ width:16px; height:16px; cursor:pointer; accent-color:#2c5d7c }
+.mx-modal-preview{
+  flex:1; overflow-y:auto; padding:24px; background:#ece9df;
+  display:flex; justify-content:center;
+}
+.mx-modal-paper{
+  width:100%; max-width:760px;
+  background:#fff;
+  box-shadow:0 4px 14px rgba(0,0,0,.12);
+  padding:48px 56px; min-height:100%;
+  font-family:Georgia,serif; color:#2c1810; font-size:13.5px; line-height:1.6;
+}
+@media (max-width:780px){
+  .mx-modal-body{ grid-template-columns:1fr }
+  .mx-modal-side{ border-right:0; border-bottom:1px solid #e6e0d2; max-height:280px }
+  .mx-modal-paper{ padding:24px 22px }
+}
+.mx-doc-head{ display:flex; gap:18px; margin-bottom:18px; padding-bottom:14px; border-bottom:2px solid #2c1810 }
+.mx-doc-head .logo img{ max-height:64px; max-width:120px }
+.mx-doc-head .doc-meta{ flex:1; font-size:11.5px; line-height:1.5; color:#6b5c4c }
+.mx-doc-head .doc-meta strong{ color:#2c1810; font-size:13px }
+.mx-doc-head .doc-meta .perito-name{ font-size:14px; color:#2c1810; font-weight:700 }
+.mx-doc h1{ font-size:22px; margin:18px 0 12px; color:#2c1810; font-weight:700; font-style:italic }
+.mx-doc h2{ font-size:16px; margin:18px 0 8px; color:#2c5d7c; border-bottom:1px solid #d8d3c4; padding-bottom:4px }
+.mx-doc h3{ font-size:14px; margin:14px 0 6px; color:#2c1810 }
+.mx-doc p{ margin:6px 0 }
+.mx-doc table{ width:100%; border-collapse:collapse; margin:8px 0; font-size:12px }
+.mx-doc table th, .mx-doc table td{ padding:5px 8px; border-bottom:1px solid #e6e0d2; text-align:left }
+.mx-doc table th{ background:#faf8f3; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.04em }
+.mx-doc .ver-ok{ background:#f0f8f3; border-left:3px solid #1f7a4d; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc .ver-warn{ background:#fdf6ec; border-left:3px solid #b07820; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc .ver-err{ background:#fbf0f0; border-left:3px solid #a83232; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc .ver-crit{ background:#f5e6f9; border-left:3px solid #7b1fa2; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc-note{ background:#fffbef; border:1px solid #f0e0c4; padding:10px 12px; margin:10px 0; border-radius:6px; font-style:italic; font-size:12px }
+.mx-doc-footer{ margin-top:24px; padding-top:14px; border-top:1px solid #d8d3c4; font-size:10.5px; color:#8b7355; text-align:center; line-height:1.6 }
+
+/* Bottoni in fondo al modal */
+.mx-modal-foot{
+  display:flex; gap:8px; padding:12px 20px; border-top:1px solid #e6e0d2;
+  background:linear-gradient(180deg,#fff,#fdfbf4); flex-wrap:wrap;
+}
+.mx-modal-foot .left{ flex:1; display:flex; gap:8px; flex-wrap:wrap }
+.mx-modal-foot .right{ display:flex; gap:8px; flex-wrap:wrap }
+
+/* ================== TOAST ================== */
+.mx-toast{
+  position:fixed; left:50%; bottom:120px; transform:translateX(-50%);
+  background:#2c1810; color:#fff; padding:11px 18px; border-radius:24px;
+  font-size:13px; box-shadow:0 6px 18px rgba(0,0,0,.30); z-index:300;
+  opacity:0; transition:opacity .25s ease;
+  pointer-events:none; max-width:90vw; text-align:center;
+}
+.mx-toast.show{ opacity:1 }
+
+/* ================== DIALOG SAVE (mini) ================== */
+.mx-dialog{ position:fixed; inset:0; background:rgba(20,20,40,.55); backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center; z-index:250; padding:16px }
+.mx-dialog.is-open{ display:flex }
+.mx-dialog-card{ width:100%; max-width:480px; background:#fff; border-radius:14px; box-shadow:0 18px 50px rgba(0,0,0,.40);
+  padding:22px 24px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif }
+.mx-dialog-card h3{ margin:0 0 8px; font-family:Georgia,serif; font-style:italic; font-size:17px; color:#2c1810 }
+.mx-dialog-card p{ margin:0 0 12px; font-size:13px; color:#6b5c4c }
+.mx-dialog-card .mx-fld{ display:flex; flex-direction:column; gap:4px; margin-bottom:10px }
+.mx-dialog-card .mx-fld label{ font-size:11.5px; font-weight:700; color:#6b5c4c; letter-spacing:.04em }
+.mx-dialog-card .mx-fld input, .mx-dialog-card .mx-fld textarea{
+  padding:9px 11px; border:1px solid #e6e0d2; border-radius:8px; font:inherit; font-size:13.5px; outline:none; width:100% }
+.mx-dialog-card .mx-fld textarea{ min-height:60px; resize:vertical }
+.mx-dialog-card .mx-fld input:focus, .mx-dialog-card .mx-fld textarea:focus{ border-color:#1976d2; box-shadow:0 0 0 2px rgba(25,118,210,.18) }
+.mx-dialog-foot{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px }
+.mx-dialog-foot button{ appearance:none; border:1px solid #d8d3c4; background:#fff; color:#2c1810; font:inherit; font-size:13px; font-weight:700; padding:9px 14px; border-radius:9px; cursor:pointer; letter-spacing:.04em }
+.mx-dialog-foot button.primary{ border-color:#1976d2; background:linear-gradient(135deg,#1976d2,#1565c0); color:#fff }
+.mx-dialog-foot button.danger{ border-color:#c62828; color:#c62828 }
+.mx-dialog-foot button:hover{ filter:brightness(.94) }
+
+/* ================== LIST SAVED ================== */
+.mx-saves-list{ display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:340px; overflow-y:auto }
+.mx-save-row{ display:flex; gap:8px; padding:10px 12px; border:1px solid #e6e0d2; border-radius:9px; background:#fff; align-items:center }
+.mx-save-row .info{ flex:1; min-width:0 }
+.mx-save-row .info .nm{ font-weight:700; color:#2c1810; font-size:13.5px }
+.mx-save-row .info .meta{ font-size:11px; color:#8b7355 }
+.mx-save-row button{ appearance:none; border:1px solid #d8d3c4; background:#fff; border-radius:7px; padding:6px 10px; font-size:11.5px; font-weight:700; cursor:pointer }
+.mx-save-row button.load{ color:#f57c00; border-color:#f57c00 }
+.mx-save-row button.load:hover{ background:#f57c00; color:#fff }
+.mx-save-row button.cmp{ color:#7b1fa2; border-color:#7b1fa2 }
+.mx-save-row button.cmp:hover{ background:#7b1fa2; color:#fff }
+.mx-save-row button.del{ color:#c62828; border-color:#c62828 }
+.mx-save-row button.del:hover{ background:#c62828; color:#fff }
+
+/* ================== STAMPA (PDF via window.print) ================== */
+@media print {
+  body * { visibility:hidden !important }
+  .mx-print, .mx-print * { visibility:visible !important }
+  .mx-print{ position:absolute; left:0; top:0; width:100%; padding:24px; box-shadow:none !important; max-width:none !important }
+  .mx-modal, .mx-toolbar, .mx-bar, .mx-modal-side, .mx-modal-head, .mx-modal-foot, .mx-toast, .mx-dialog { display:none !important }
+  .mx-doc h2{ break-after:avoid }
+  .mx-doc table, .mx-doc .ver-ok, .mx-doc .ver-warn, .mx-doc .ver-err{ break-inside:avoid }
+}

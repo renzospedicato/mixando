@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mixando Lab · Quadri Fessurativi v1.0</title>
+<style>
+:root{--ink:#2c1810;--ink-soft:#5a4d3f;--ink-mute:#8a7f6c;--line:#e6e0d2;--paper:#fffdf8;--paper2:#f6f0e4;
+--mx-accent:#0e7c87;--mx-accent-strong:#0a5b64;--mx-accent-soft:#e3f3f5;--ok:#1b8a4b;--warn:#e67e22;--err:#c0392b;--crit:#7b1fa2}
+*{box-sizing:border-box}
+body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#f3eee2;font-size:14px;line-height:1.45}
+a{color:var(--mx-accent-strong)}
+.mx-bar{position:relative;height:56px;display:flex;align-items:center;gap:14px;padding:0 20px;background:linear-gradient(180deg,#fff,#fbf8ef);border-bottom:3px solid var(--mx-accent);box-shadow:0 2px 12px rgba(20,20,40,.08)}
+.mx-bar .em{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45),transparent 55%),linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));color:#fff;font-size:19px;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35)}
+.mx-bar .tit{display:flex;flex-direction:column;line-height:1.15}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--mx-accent-strong)}
+.mx-bar .ti{font-family:Georgia,serif;font-weight:700;font-style:italic;font-size:16px;color:#1a1410}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar .sp{flex:1}
+.mx-bar a.back{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:7px 14px;border:1.5px solid var(--mx-accent);border-radius:9px;background:rgba(255,255,255,.65);transition:all .2s}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));color:#fff;transform:translateY(-1px)}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 80px}
+.hero{text-align:center;margin:8px 0 14px}
+.hero h2{margin:0 0 6px;font-family:Georgia,serif;font-size:clamp(20px,4vw,28px);font-weight:700}
+.hero h2 em{color:var(--mx-accent-strong)}
+.hero .sub{color:var(--ink-soft);font-size:13px;max-width:760px;margin:0 auto}
+.disclaimer{margin:12px auto 0;max-width:820px;padding:9px 14px;border-radius:10px;font-size:12px;line-height:1.5;background:#fff5f3;border:1px solid #f0c8c0;color:#7f1d1d}
+.disclaimer b{color:#5a1410}
+.ana-strip{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.ana-strip .pc{flex:1;min-width:200px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 13px}
+.ana-strip .pc .h{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 14px rgba(40,30,10,.05);overflow:hidden}
+.card .body{padding:16px}
+.stepper{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.step-chip{appearance:none;border:1px solid var(--line);background:linear-gradient(180deg,#fffefb,#f7f2e8);color:var(--ink-mute);padding:6px 12px;border-radius:14px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .15s,background .15s,color .15s,border-color .15s}
+.step-chip.done{border-color:var(--ok);color:var(--ok);background:linear-gradient(180deg,#eef8f0,#e2f0e6)}
+.step-chip.active{color:#fff;border-color:#0a5b64;background:linear-gradient(180deg,#18a4b0,#0e7c87 55%,#0a5b64);box-shadow:0 2px 7px rgba(14,124,135,.34),inset 0 1px 0 rgba(255,255,255,.34);text-shadow:0 1px 1px rgba(0,0,0,.22)}
+.step-chip:hover:not(.active){border-color:var(--mx-accent);color:var(--mx-accent-strong);background:var(--mx-accent-soft);transform:translateY(-1px)}
+.step-head{margin:0 0 12px}
+.step-head h4{margin:0;font-family:Georgia,serif;font-size:18px;font-weight:700}
+.step-head .ref{font-size:11px;color:var(--ink-mute);font-weight:600}
+.banner{padding:9px 13px;border-radius:9px;font-size:12px;line-height:1.5;margin:0 0 12px}
+.banner.blue{background:var(--mx-accent-soft);border-left:4px solid var(--mx-accent)}
+.banner.yellow{background:#fdf6ec;border-left:4px solid #e8c98a}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:620px){.grid2,.grid3{grid-template-columns:1fr}}
+.fld{display:flex;flex-direction:column;gap:4px;margin-bottom:4px}
+.fld label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.02em}
+.fld label .opz{font-weight:400;color:var(--ink-mute);font-size:10.5px}
+.fld input,.fld select,.fld textarea{font:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.fld textarea{min-height:60px;resize:vertical}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--mx-accent);box-shadow:0 0 0 2px var(--mx-accent-soft)}
+.radio-row{display:flex;gap:8px;flex-wrap:wrap}
+.radio-row label{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;cursor:pointer;background:#fff;font-weight:700;color:var(--ink-soft)}
+.radio-row input{accent-color:var(--mx-accent)}
+.chkgrp{display:flex;gap:8px;flex-wrap:wrap}
+.chkgrp label{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border:1px solid var(--line);border-radius:16px;font-size:12px;cursor:pointer;background:#fff;font-weight:600;color:var(--ink-soft)}
+.verdict{margin-top:14px;padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--paper)}
+.verdict.is-ok{background:#f0f8f3;border-color:#cce6d8}
+.verdict.is-warn{background:#fdf6ec;border-color:#f0e0c4}
+.verdict.is-err{background:#fbf0f0;border-color:#e6c8c8}
+.verdict .lbl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute)}
+.verdict .v{font-family:Georgia,serif;font-style:italic;font-size:21px;font-weight:700;margin:3px 0}
+.verdict .s{font-size:12.5px;color:var(--ink-soft)}
+.step-nav{display:flex;justify-content:space-between;margin-top:16px}
+.mx-shiny{appearance:none;border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;padding:10px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s}
+.mx-shiny:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.mx-shiny:disabled{opacity:.5;cursor:not-allowed}
+.s-accent{background:linear-gradient(135deg,#18a4b0,#0e7c87 50%,#0a5b64)}
+.s-gray{background:linear-gradient(135deg,#9aa0a6,#6b7177)}
+.s-green{background:linear-gradient(135deg,#34c46a,#1b8a4b)}
+.s-blue{background:linear-gradient(135deg,#4d9bd8,#2b6fa8)}
+.s-red{background:linear-gradient(135deg,#e0645c,#9c1f17)}
+.mx-toolbar{background:#fff;border:1px solid #e6e0d2;border-radius:14px;box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden;margin-top:16px}
+.mx-toolbar-head{margin:0;padding:13px 18px;font-family:Georgia,serif;font-size:15px;color:#2c1810;font-weight:700;border-bottom:1px solid #e6e0d2;background:linear-gradient(180deg,rgba(25,118,210,.10),#fff);display:flex;align-items:center;gap:10px}
+.mx-toolbar-head .ico-wrap{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.mx-toolbar-head .title{flex:1}
+.mx-toolbar-head .title small{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-style:italic;font-size:11.5px;color:#8b7355;font-weight:500;letter-spacing:0;margin-top:2px}
+.mx-toolbar-body{padding:14px 18px 16px}
+.mx-toolbar.needs-result .mx-tb-btn[data-needs="result"]{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
+.mx-toolbar-hint{text-align:center;font-size:12px;color:#8b7355;font-style:italic;margin-bottom:10px;padding:6px 10px;background:#fffbef;border-radius:7px;border:1px dashed #e0d7b8}
+.mx-toolbar.is-active .mx-toolbar-hint{display:none}
+.mx-toolbar-inner{max-width:1080px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.mx-tb-btn{appearance:none;border:0;color:#fff;font:inherit;font-size:13px;font-weight:700;letter-spacing:.02em;padding:12px 18px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);box-shadow:0 3px 8px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.12);transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background-position .35s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap;min-width:0}
+.mx-tb-btn::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-tb-btn:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-tb-btn:hover::before{transform:translateX(130%)}
+.mx-tb-btn:active{transform:translateY(0) scale(.98);transition-duration:.05s}
+.mx-tb-btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.6)}
+.mx-tb-btn:disabled:hover{transform:none;filter:grayscale(.6)}
+.mx-tb-btn .ico{font-size:16px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.mx-tb-btn.tb-word{background-image:linear-gradient(135deg,#5a9bd8 0%,#2b579a 45%,#0c2e5e 100%);box-shadow:0 3px 10px rgba(43,87,154,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-pdf{background-image:linear-gradient(135deg,#ef5350 0%,#c62828 45%,#7f0000 100%);box-shadow:0 3px 10px rgba(198,40,40,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-report{background-image:linear-gradient(135deg,#ffd54f 0%,#f9a825 45%,#e65100 100%);color:#3e2e00;text-shadow:0 1px 0 rgba(255,255,255,.45);box-shadow:0 3px 10px rgba(249,168,37,.50),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -2px 4px rgba(0,0,0,.10)}
+.mx-tb-btn.tb-save{background-image:linear-gradient(135deg,#64b5f6 0%,#1976d2 45%,#0d47a1 100%);box-shadow:0 3px 10px rgba(25,118,210,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-graph{background-image:linear-gradient(135deg,#26a69a,#00897b 45%,#004d40);box-shadow:0 3px 10px rgba(0,137,123,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-quadro{background-image:linear-gradient(135deg,#9575cd,#5e35b1 45%,#311b92 100%);box-shadow:0 3px 10px rgba(94,53,177,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-strum{background-image:linear-gradient(135deg,#78909c,#455a64 45%,#263238);box-shadow:0 3px 10px rgba(69,90,100,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-reset{background-image:linear-gradient(135deg,#9e9e9e 0%,#616161 45%,#212121 100%);box-shadow:0 3px 10px rgba(97,97,97,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+@media (max-width:680px){.mx-tb-btn{padding:11px 13px;font-size:12px}.mx-tb-btn .label{display:none}.mx-tb-btn .ico{font-size:17px}}
+.tb-btn{appearance:none;border:1px solid var(--line);background:linear-gradient(180deg,#fffefb,#f5efe3);border-radius:9px;padding:8px 12px;font:inherit;font-size:12px;font-weight:700;color:var(--ink-soft);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.tb-btn:hover{transform:translateY(-1px);border-color:var(--mx-accent);color:var(--mx-accent-strong)}
+.modal{position:fixed;inset:0;background:rgba(20,15,10,.5);display:none;align-items:center;justify-content:center;z-index:200;padding:16px}
+.modal.show{display:flex}
+.modal-paper{background:#fff;border-radius:14px;max-width:860px;width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+.modal-head h3{margin:0;font-family:Georgia,serif;font-size:16px}
+.modal-close{appearance:none;border:0;background:#f5f1e8;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:17px;font-weight:800}
+.modal-body{padding:18px;overflow:auto}
+.modal-body h1{font-size:21px;font-style:italic;margin:0 0 10px}
+.modal-body h2{font-size:14px;color:#3e2723;border-bottom:1px solid var(--line);padding-bottom:3px;margin-top:16px}
+.modal-body table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.modal-body th,.modal-body td{padding:5px 7px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}
+.modal-body th{background:#faf8f3;font-weight:700}
+.modal-actions{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--line)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.32);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:300}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.ft{text-align:center;color:var(--ink-mute);font-size:11px;padding:18px;line-height:1.6}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:9px;pointer-events:none;z-index:1}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<div class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab">
+  <div class="tit"><span class="tag">Patologia · Strutturale</span><span class="ti">Quadri Fessurativi</span></div>
+  <span class="sp"></span>
+  <a class="back" href="suite.html">&larr; Suite</a>
+</div>
+<main class="wrap">
+  <section class="hero">
+    <h2>Quadri <em>Fessurativi</em></h2>
+    <p class="sub">Screening, rilievo e documentazione delle lesioni: tipo, cinematismo, causa probabile e classe di gravità per ampiezza (BRE Digest 251 · NTC 2018), per orientare il sopralluogo e la relazione tecnica.</p>
+    <div class="disclaimer"><b>&#9888; Strumento di screening, non valutazione strutturale.</b> La classificazione è un ausilio basato su fonti consultabili. La valutazione della reale gravità e degli interventi compete <b>esclusivamente a un tecnico strutturista qualificato</b> (NTC 2018). Per lesioni ampie, passanti, multiple o in evoluzione: rivolgersi a un professionista.</div>
+  </section>
+  <div class="ana-strip">
+    <div class="pc"><div class="h">Perito / Tecnico</div><div class="n" id="anaPerito">n.d.</div></div>
+    <div class="pc"><div class="h">Committente / Immobile</div><div class="n" id="anaComm">n.d.</div></div>
+  </div>
+  <article class="card"><div class="body">
+    <div class="stepper" id="stepper"></div>
+    <div id="difLive"></div>
+    <div id="stepPanel"></div>
+    <div class="step-nav">
+      <button type="button" class="mx-shiny s-gray" id="btnPrev">&larr; Indietro</button>
+      <button type="button" class="mx-shiny s-accent" id="btnNext">Avanti &rarr;</button>
+      <button type="button" class="mx-shiny s-green" id="btnFinish" style="display:none">&#10003; Completa screening</button>
+    </div>
+  </div></article>
+  <div class="mx-toolbar needs-result" id="mxToolbar">
+    <h3 class="mx-toolbar-head">
+      <span class="ico-wrap">&#128190;</span>
+      <span class="title">Salvataggio &amp; esportazione<small>Salva lo screening ed esporta in Word/PDF per la relazione tecnica; documenta il quadro grafico</small></span>
+    </h3>
+    <div class="mx-toolbar-body">
+      <div class="mx-toolbar-hint">&#9432; Concludi lo screening (ultimo step &laquo;Completa screening&raquo;) per attivare i pulsanti di salvataggio ed esportazione</div>
+      <div class="mx-toolbar-inner">
+        <button type="button" class="mx-tb-btn tb-word" id="btnWord" data-needs="result"><span class="ico">&#128221;</span><span class="label">Salva Word</span></button>
+        <button type="button" class="mx-tb-btn tb-pdf" id="btnPDF" data-needs="result"><span class="ico">&#128196;</span><span class="label">Stampa / PDF</span></button>
+        <button type="button" class="mx-tb-btn tb-report" id="btnReport" data-needs="result"><span class="ico">&#128230;</span><span class="label">Al report</span></button>
+        <button type="button" class="mx-tb-btn tb-graph" id="btnAggancia"><span class="ico">&#128205;</span><span class="label">Aggancia alla mappa</span></button>
+        <button type="button" class="mx-tb-btn tb-save" id="btnJSON" data-needs="result"><span class="ico">&#128190;</span><span class="label">.json</span></button>
+        <button type="button" class="mx-tb-btn tb-quadro" id="btnQuadro"><span class="ico">&#128506;</span><span class="label">Quadro grafico</span></button>
+        <button type="button" class="mx-tb-btn tb-strum" id="btnStrum"><span class="ico">&#128295;</span><span class="label">Strumentazione</span></button>
+        <button type="button" class="mx-tb-btn tb-reset" id="btnReset"><span class="ico">&#10005;</span><span class="label">Reset</span></button>
+      </div>
+    </div>
+  </div>
+  <div class="ft">Mixando v3 · <strong>Quadri Fessurativi v1.0</strong> · BRE Digest 251 (1995) · NTC 2018 (DM 17/01/2018) · UNI EN 1996 (EC6) · UNI EN 1998 (EC8) · UNI 11182:2006 · Fonti: <code>VERIFICA-FONTI-FESSURAZIONI.md</code></div>
+</main>
+<div class="modal" id="docModal" role="dialog" aria-modal="true">
+  <div class="modal-paper">
+    <div class="modal-head"><h3>&#128209; Anteprima documento</h3><button class="modal-close" id="docCloseX">&times;</button></div>
+    <div class="modal-body" id="docBody"></div>
+    <div class="modal-actions">
+      <button type="button" class="mx-shiny s-blue" id="btnDoWord" style="font-size:12px;padding:8px 14px">&#128209; Scarica .doc</button>
+      <button type="button" class="mx-shiny s-red" id="btnDoPDF" style="font-size:12px;padding:8px 14px">&#128196; Stampa / PDF</button>
+      <button type="button" class="mx-shiny s-gray" id="docCloseBtn" style="font-size:12px;padding:8px 14px">Chiudi</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="strumModal" role="dialog" aria-modal="true">
+  <div class="modal-paper">
+    <div class="modal-head"><h3>&#128295; Strumentazione utilizzata e taratura</h3><button class="modal-close" id="strumCloseX">&times;</button></div>
+    <div class="modal-body" id="strumBody"></div>
+    <div class="modal-actions">
+      <button type="button" class="mx-shiny s-green" id="strumAddBtn" style="font-size:12px;padding:8px 14px">&#10133; Aggiungi strumento</button>
+      <button type="button" class="mx-shiny s-gray" id="strumCloseBtn" style="font-size:12px;padding:8px 14px">Chiudi</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="qfModal" role="dialog" aria-modal="true">
+  <div class="modal-paper" style="max-width:980px">
+    <div class="modal-head"><h3>&#128506; Quadro fessurativo grafico</h3><button class="modal-close" id="qfCloseX">&times;</button></div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:#6b5c4c;margin:0 0 8px">Carica una <b>foto o un prospetto</b> del muro, poi traccia le lesioni: <b>Nuova lesione</b> &rarr; clic su ogni vertice &rarr; <b>Chiudi lesione</b>. Ogni lesione ha una gravit&agrave; (colore) e un'etichetta. Si salva nel report come tavola del quadro fessurativo.</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+        <label class="tb-btn" style="cursor:pointer;margin:0"><span>&#128193;</span>&nbsp;Sfondo<input type="file" id="qfBgInput" accept="image/*" style="display:none"></label>
+        <select id="qfSev" style="font:inherit;font-size:12px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff">
+          <option value="strutturale">&#128308; Strutturale</option>
+          <option value="serviceability">&#128992; Serviceability</option>
+          <option value="funzionale">&#128993; Funzionale</option>
+          <option value="estetico">&#128994; Estetico</option>
+        </select>
+        <input type="text" id="qfLabel" placeholder="Etichetta (es. L1)" style="font:inherit;font-size:12px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;width:130px">
+        <button type="button" class="tb-btn" id="qfNew"><span>&#9999;</span>&nbsp;Nuova lesione</button>
+        <button type="button" class="tb-btn" id="qfUndo"><span>&#8630;</span>&nbsp;Annulla punto</button>
+        <button type="button" class="tb-btn" id="qfClose2"><span>&#10003;</span>&nbsp;Chiudi lesione</button>
+        <button type="button" class="tb-btn" id="qfClear"><span>&#128465;</span>&nbsp;Pulisci</button>
+      </div>
+      <div style="border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#faf8f3">
+        <canvas id="qfCanvas" width="900" height="600" style="width:100%;display:block;cursor:crosshair"></canvas>
+      </div>
+      <div id="qfStatus" style="font-size:11.5px;color:#8a7f6c;margin:6px 0"></div>
+      <div id="qfList" style="font-size:12px"></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="mx-shiny s-green" id="qfSave" style="font-size:12px;padding:8px 14px">&#128190; Salva nel report</button>
+      <button type="button" class="mx-shiny s-gray" id="qfCloseBtn" style="font-size:12px;padding:8px 14px">Chiudi</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+function esc(s){s=(s==null)?"":(""+s);return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function $(id){return document.getElementById(id)||document.createElement('span');}
+var DRAFT_KEY="mx2::fessurazioni-v1";
+function loadAna(){var p={},i={};try{p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");}catch(e){}try{var l=JSON.parse(localStorage.getItem("mx2::locali-v1")||"{}");i=l.ana||{};}catch(e){}return{perito:p,immobile:i};}
+
+/* ===== STATO + STEP ===== */
+var STATE={cur:0,finished:false,data:{
+  struttura:"",eta:null,piani:null,ctx_sisma:"",ctx_scavi:"",ctx_falda:"",ctx_sovraccarichi:"",
+  orientamento:"",elemento:"",passante:"",ampiezza:null,lunghezza:null,andamento:"",
+  ripetizionePiani:"",simmetria:"",replicata:"",evoluzione:"",
+  fessurimetro:[],noteCTU:"",
+  quadroBg:null,quadroImg:null,quadroLines:[]
+}};
+var STEPS=[
+  {id:"ctx",   label:"1. Contesto",        src:"NTC 2018 §8 · condizioni al contorno (Cusmano)"},
+  {id:"les",   label:"2. Rilievo lesione", src:"BRE 251 · NTC 2018 · ampiezza/orientamento"},
+  {id:"quadro",label:"3. Quadro d'insieme",src:"ripetizione · simmetria · evoluzione (Cusmano)"},
+  {id:"monit", label:"4. Monitoraggio",    src:"fessurimetro/biffe · letture datate (Cusmano)"},
+  {id:"diag",  label:"5. Screening",       src:"sintesi: tipo · cinematismo · gravità"}
+];
+function getActiveSteps(){return STEPS;}
+function persist(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify(STATE));}catch(e){}}
+function restore(){try{var s=JSON.parse(localStorage.getItem(DRAFT_KEY));if(s&&s.data){STATE=s;}}catch(e){}}
+function setField(k,v){STATE.data[k]=v;persist();if(window._difUpdate)_difUpdate();}
+
+/* ===== DATI fedeli alle fonti (vedi VERIFICA-FONTI-FESSURAZIONI.md) ===== */
+/* BRE Digest 251 (1995), classe del danno per ampiezza (cross-conf. Tona 1/5/15mm) */
+function breCat(mm){
+  if(mm==null||isNaN(mm))return null;
+  if(mm<0.1)return{cat:0,grado:"Trascurabile (negligible)",liv:"ok",rng:"< 0,1 mm"};
+  if(mm<1)  return{cat:1,grado:"Molto lieve (very slight)",liv:"ok",rng:"0,1-1 mm"};
+  if(mm<5)  return{cat:2,grado:"Lieve (slight)",liv:"ok",rng:"1-5 mm"};
+  if(mm<15) return{cat:3,grado:"Moderato (moderate)",liv:"warn",rng:"5-15 mm"};
+  if(mm<=25)return{cat:4,grado:"Severo (severe)",liv:"err",rng:"15-25 mm"};
+  return{cat:5,grado:"Molto severo (very severe)",liv:"err",rng:"> 25 mm"};
+}
+/* orientamento → tipo · cinematismo · causa · fonte (tassonomia INFO/CUS/TONA) */
+var TIPI={
+  ragnatela:{tipo:"Da ritiro",cin:"ritiro igrometrico",causa:"ritiro dell'intonaco/cls, asciugatura troppo rapida",base:"ok",fonte:"INFO · TONA (cavillature)"},
+  gradini:  {tipo:"Da assestamento (a gradini)",cin:"cedimento differenziale",causa:"assestamento differenziale delle fondazioni / variazioni del terreno",base:"warn",fonte:"INFO · Cusmano"},
+  verticale:{tipo:"Verticale",cin:"compressione / schiacciamento",causa:"sovraccarichi, spinte; in muratura: malta confinata → trazione biassiale nei mattoni",base:"warn",fonte:"INFO · Cusmano · UNI EN 1996"},
+  orizzontale:{tipo:"Orizzontale",cin:"flessione / carichi verticali",causa:"carichi verticali eccessivi, flessione dei solai, deformazioni viscose ai piani bassi",base:"warn",fonte:"INFO · Tona"},
+  diagonale:{tipo:"Diagonale (45°)",cin:"taglio",causa:"taglio per dissesti/spinte laterali o azioni sismiche; nei tamponamenti c.a. → deformazione anomala del telaio",base:"err",fonte:"INFO · Cusmano · NTC 2018"},
+  arco:     {tipo:"Ad arco",cin:"cedimento della parte portante sottostante",causa:"cedimento di trave/solaio/terreno sotto l'apertura",base:"warn",fonte:"Cusmano · INFO"},
+  croce:    {tipo:"A croce",cin:"traslazione + rotazione",causa:"verosimile evento sismico (croci ~30-45° sopra/sotto le aperture)",base:"err",fonte:"Cusmano"},
+  piramide: {tipo:"A piramide (tavolato)",cin:"deformazione differenziale dei solai",causa:"diversa deformazione del solaio inferiore/superiore rispetto al tavolato",base:"warn",fonte:"Tona"}
+};
+var TIPO_ELEM_NOTE={
+  intonaco:"limitata all'intonaco → spesso non strutturale (verificare se passante)",
+  giunto:"su giunto/cambio materiale → dilatazione termica differenziale",
+  architrave:"contatto architrave/laterizio → dilatazione differente (giunto siliconato)",
+  cordolo:"in prossimità del cordolo di solaio → ritiro cls / rotazione del solaio (Tona)"
+};
+function difFonte(s){var M={
+ "INFO":"Infografica «Le fessure negli edifici»",
+ "Cusmano":"Cusmano, «Fessure murarie: che fare?» (Recupero)",
+ "Tona":"Tona, «Lesioni strutturali negli edifici contemporanei» (2014)",
+ "BRE251":"BRE Digest 251 (1995)","NTC2018":"NTC 2018 (DM 17/01/2018)"};
+ return s;}
+
+/* ===== TREND MONITORAGGIO (fessurimetro), letture datate; soglia indicativa, dato grezzo sempre mostrato ===== */
+function _monitTrend(){
+  var arr=(STATE.data.fessurimetro||[]).filter(function(r){return r&&r.lettura!=null&&!isNaN(r.lettura);});
+  if(arr.length<2) return{n:arr.length,flag:"insuff",delta:null,rate:null,band:0.5,deltaTxt:"servono ≥2 letture datate",first:arr[0]||null,last:arr[arr.length-1]||null};
+  var s=arr.slice().sort(function(a,b){return (a.data||"")<(b.data||"")?-1:((a.data||"")>(b.data||"")?1:0);});
+  var first=s[0],last=s[s.length-1];
+  var delta=Math.round((last.lettura-first.lettura)*100)/100, rate=null;
+  try{var d1=new Date(first.data),d2=new Date(last.data),ms=d2-d1;if(ms>0){var years=ms/(365.25*24*3600*1000);rate=Math.round((delta/years)*100)/100;}}catch(e){}
+  var BAND=0.5; /* soglia indicativa (fessurimetro ris. ~0,1 mm); la significatività reale la fissa il tecnico */
+  var flag=(delta>=BAND)?"crescita":((delta<=-BAND)?"riduzione":"stabile");
+  var deltaTxt="Δ "+(delta>0?"+":"")+delta+" mm"+(rate!=null?" · "+(rate>0?"+":"")+rate+" mm/anno":"")+" ("+arr.length+" letture)";
+  return{n:arr.length,flag:flag,delta:delta,rate:rate,band:BAND,deltaTxt:deltaTxt,first:first,last:last};
+}
+/* ===== MOTORE SCREENING (riusa breCat + TIPI + trend; nessuna soglia inventata) ===== */
+function calcVerdict(){
+  var d=STATE.data, flags=[];
+  var bc=breCat(d.ampiezza);
+  var ti=d.orientamento?TIPI[d.orientamento]:null;
+  var mt=_monitTrend();
+  if(!ti && !bc) return{verdict:"Dati insufficienti",kind:"warn",summary:"Indica almeno l'orientamento (Step 2) e l'ampiezza misurata.",bc:null,ti:null,livello:"warn",flags:flags,mt:mt};
+  /* livello base = max tra gravità-ampiezza (BRE) e gravità-tipo */
+  var lvlRank={ok:0,warn:1,err:2};
+  var lvl="ok";
+  if(bc){ lvl=bc.liv; flags.push("Ampiezza "+d.ampiezza+" mm → BRE 251 cat. "+bc.cat+" ("+bc.grado+")"); }
+  if(ti && lvlRank[ti.base]>lvlRank[lvl]){ lvl=ti.base; }
+  /* evoluzione effettiva: il monitoraggio oggettivo prevale sul giudizio manuale */
+  var effEvol=d.evoluzione;
+  if(mt.flag==="crescita"){ effEvol="evoluzione"; }
+  else if(mt.flag==="stabile" && !effEvol){ effEvol="stabile"; }
+  /* ESCALATORI (da fonte) */
+  if(d.passante==="passante"){ lvl="err"; flags.push("Lesione PASSANTE → segnale strutturale (Cusmano)"); }
+  if(effEvol==="evoluzione"){ lvl="err"; flags.push((mt.flag==="crescita"?"Monitoraggio: apertura in aumento ("+mt.deltaTxt+") → ":"")+"In EVOLUZIONE nel tempo → discriminante n.1 (Cusmano)"); }
+  else if(effEvol==="stabile"){ flags.push((mt.flag==="stabile"?"Monitoraggio: "+mt.deltaTxt+" → ":"")+"Stabile/esaurita nel tempo → spesso meno preoccupante (Cusmano)"); }
+  if((d.simmetria==="si"||d.ripetizionePiani==="si") && lvlRank[lvl]<1){ lvl="warn"; }
+  if(d.simmetria==="si"||d.ripetizionePiani==="si"){ flags.push("Ripetuta/simmetrica su più piani → possibile cedimento di setto/pilastro (Cusmano)"); }
+  if((d.struttura==="ca"||d.struttura==="mista") && d.orientamento==="diagonale" && d.elemento==="tamponamento"){ lvl="err"; flags.push("45° nel tamponamento c.a. → SEMPRE deformazione anomala del telaio (prassi strutturale · NTC 2018)"); }
+  if(d.ctx_sisma==="si" && (d.orientamento==="croce"||d.orientamento==="diagonale")){ flags.push("Contesto sismico + quadro a croce/diagonale → valutazione sismica (EC8)"); }
+  if(d.ctx_falda==="si"||d.ctx_scavi==="si"){ flags.push("Falda/scavi adiacenti → possibile cedimento fondale (condizioni al contorno, Cusmano)"); }
+  /* verdetto */
+  var verdict,kind,summary;
+  if(lvl==="ok"){ verdict="Screening: quadro FISIOLOGICO / estetico"; kind="ok"; summary="Indicatori compatibili con lesione non strutturale ("+(ti?ti.tipo:"")+"). Documentare e ri-osservare nel tempo."; }
+  else if(lvl==="warn"){ verdict="Screening: DA MONITORARE"; kind="warn"; summary="Quadro potenzialmente significativo ("+(ti?ti.tipo:"")+"). Monitorare l'apertura nel tempo (fessurimetro); se cresce, coinvolgere un tecnico strutturista."; }
+  else { verdict="Screening: APPROFONDIMENTO STRUTTURALE"; kind="err"; summary="Segnali strutturali ("+(ti?ti.tipo:"")+"). Rivolgersi a un tecnico strutturista (NTC 2018) per la valutazione della sicurezza."; }
+  return{verdict:verdict,kind:kind,summary:summary,bc:bc,ti:ti,livello:lvl,flags:flags,mt:mt};
+}
+function azioneFor(lvl){
+  if(lvl==="ok")return "Documenta (foto datata) e ri-osserva periodicamente.";
+  if(lvl==="warn")return "Monitora con fessurimetro/spie (letture datate); se l'apertura cresce → tecnico strutturista.";
+  return "🔴 Rivolgiti a un tecnico strutturista qualificato (NTC 2018) per la valutazione della sicurezza.";
+}
+
+/* ===== INPUT helpers ===== */
+function inpSel(f,l,opts,hint){var v=STATE.data[f]||"";var h='<div class="fld"><label>'+esc(l)+(hint?' <span class="opz">'+esc(hint)+'</span>':"")+'</label><select data-fld="'+f+'" data-kind="txt"><option value="">seleziona</option>';opts.forEach(function(o){h+='<option value="'+esc(o[0])+'"'+(v===o[0]?" selected":"")+'>'+esc(o[1])+'</option>';});return h+'</select></div>';}
+/* 20/11/2026: limiti dei campi numerici. Prima il modulo prendeva per buono qualunque numero (indice VTT 10 su 6,
+   umidità 150 %, superfici negative). I limiti vengono da quello che il campo dichiara: la scala scritta nell'unità
+   («0-6»), le percentuali 0-100, le temperature da -60 a 100 °C, i decibel da -30 a 150, il pH 0-14, l'anno di
+   costruzione fino al 2100; tutte le altre grandezze non negative. Un valore fuori dai limiti non viene preso. */
+var _mxFuoriScala={};
+function _mxLimiti(f,l,u){
+  var s=String(u||""), lab=String(l||""), m=s.match(/^\s*(-?\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)\s*$/);
+  if(m) return [parseFloat(m[1].replace(",",".")), parseFloat(m[2].replace(",","."))];
+  if(/%/.test(s)) return [0,100];
+  if(/°C/.test(s)) return [-60,100];
+  if(/^dB/.test(s)) return [-30,150];
+  if(/\bpH\b/.test(lab)) return [0,14];
+  if(/^Anno /.test(lab)) return [0,2100];
+  return [0,null];
+}
+function _mxNumero(el){
+  var k=el.dataset.fld, box=el.parentNode?el.parentNode.querySelector(".mx-fuori"):null, msg="";
+  var v=(el.value==="")?null:parseFloat(el.value);
+  if(v!=null && isNaN(v)) v=null;
+  if(v!=null){
+    var lo=(el.dataset.min!==undefined&&el.dataset.min!=="")?parseFloat(el.dataset.min):null;
+    var hi=(el.dataset.max!==undefined&&el.dataset.max!=="")?parseFloat(el.dataset.max):null;
+    if((lo!=null&&v<lo)||(hi!=null&&v>hi)){
+      msg=(hi!=null)?("Fuori dai limiti: questo campo va da "+lo+" a "+hi+". Il valore non è stato preso."):("Questo campo non può essere minore di "+lo+". Il valore non è stato preso.");
+      _mxFuoriScala[k]={txt:el.value,msg:msg};
+      v=null;
+    }
+  }
+  if(!msg) delete _mxFuoriScala[k];
+  if(box){ box.textContent=msg; box.style.display=msg?"block":"none"; }
+  el.style.borderColor=msg?"#b3261e":""; el.style.background=msg?"#fdeceb":"";
+  return v;
+}
+/* la scritta resta mentre si scrive nello stesso passo; cambiando passo, azzerando o caricando si riparte puliti */
+function _mxPulisciFuori(){ var a=document.activeElement; if(!(a&&a.getAttribute&&a.getAttribute("data-fld"))) _mxFuoriScala={}; }
+function inpNum(f,l,u,hint){var v=STATE.data[f];var L=_mxLimiti(f,l,u),fu=_mxFuoriScala[f];return '<div class="fld"><label>'+esc(l)+(u?' <span class="opz">('+esc(u)+')</span>':"")+'</label><input type="number" step="0.1" value="'+(fu?esc(fu.txt):(v==null?"":v))+'" placeholder="'+esc(hint||"")+'" data-fld="'+f+'" data-kind="num"'+(L[0]!=null?' min="'+L[0]+'" data-min="'+L[0]+'"':'')+(L[1]!=null?' max="'+L[1]+'" data-max="'+L[1]+'"':'')+(fu?' style="border-color:#b3261e;background:#fdeceb"':'')+'><small class="mx-fuori" style="display:'+(fu?'block':'none')+';color:#b3261e;font-weight:700;font-size:11.5px;margin-top:3px">'+(fu?esc(fu.msg):'')+'</small></div>';}
+function inpTxt(f,l,hint){var v=STATE.data[f]||"";return '<div class="fld"><label>'+esc(l)+'</label><input type="text" value="'+esc(v)+'" placeholder="'+esc(hint||"")+'" data-fld="'+f+'" data-kind="txt"></div>';}
+function inpTxA(f,l,hint){var v=STATE.data[f]||"";return '<div class="fld"><label>'+esc(l)+'</label><textarea data-fld="'+f+'" data-kind="txt" placeholder="'+esc(hint||"")+'">'+esc(v)+'</textarea></div>';}
+function inpRad(f,l,opts){var v=STATE.data[f]||"";var h='<div class="fld"><label>'+esc(l)+'</label><div class="radio-row">';opts.forEach(function(o){h+='<label><input type="radio" name="r_'+f+'" value="'+esc(o[0])+'"'+(v===o[0]?" checked":"")+' data-fld="'+f+'" data-kind="txt">'+esc(o[1])+'</label>';});return h+'</div></div>';}
+
+/* ===== PANELS ===== */
+var panels={
+  ctx:function(){return '<div class="step-head"><h4>1. Contesto dell\'edificio</h4><span class="ref">NTC 2018 §8 · condizioni al contorno</span></div>'+
+    '<div class="banner blue">Il contesto orienta l\'interpretazione: tipo di struttura, età e fattori esterni (sisma, scavi, falda, sovraccarichi) cambiano il significato dello stesso quadro fessurativo.</div>'+
+    '<div class="grid3">'+inpSel("struttura","Tipo di struttura",[["muratura","Muratura portante"],["ca","Cemento armato (telaio)"],["mista","Mista"]])+
+      inpNum("eta","Età costruzione","anni","es. 45")+inpNum("piani","N° piani","","es. 4")+'</div>'+
+    '<div class="grid2" style="margin-top:8px">'+
+      inpRad("ctx_sisma","Evento sismico recente in zona?",[["si","Sì"],["no","No"],["incognito","Incognito"]])+
+      inpRad("ctx_scavi","Scavi/demolizioni adiacenti recenti?",[["si","Sì"],["no","No"],["incognito","Incognito"]])+'</div>'+
+    '<div class="grid2" style="margin-top:8px">'+
+      inpRad("ctx_falda","Variazioni di falda / acque sotterranee?",[["si","Sì"],["no","No"],["incognito","Incognito"]])+
+      inpRad("ctx_sovraccarichi","Sovraccarichi / cambio d'uso recenti?",[["si","Sì"],["no","No"],["incognito","Incognito"]])+'</div>';},
+  les:function(){var d=STATE.data;var bc=breCat(d.ampiezza);return '<div class="step-head"><h4>2. Rilievo della lesione</h4><span class="ref">BRE Digest 251 · NTC 2018</span></div>'+
+    '<div class="banner blue">Rileva la geometria e, fondamentale, se la lesione è <strong>passante</strong> (taglia tutto lo spessore = segnale strutturale) o <strong>apparente</strong> (limitata all\'intonaco). [Cusmano]</div>'+
+    '<div class="grid2">'+
+      inpSel("orientamento","Orientamento / forma",[["verticale","Verticale"],["orizzontale","Orizzontale"],["diagonale","Diagonale ~45°"],["gradini","A gradini (giunti)"],["ragnatela","A ragnatela / superficiale"],["arco","Ad arco (sopra apertura)"],["croce","A croce (facciata)"],["piramide","A piramide (tavolato)"]])+
+      inpSel("elemento","Elemento interessato",[["intonaco","Solo intonaco"],["muro","Muro portante"],["tamponamento","Tamponamento"],["pilastro","Pilastro"],["trave","Trave"],["solaio","Solaio"],["arco","Arco / volta"],["cordolo","Cordolo di solaio"],["architrave","Architrave"],["giunto","Giunto / cambio materiale"]])+'</div>'+
+    '<div class="grid3" style="margin-top:8px">'+
+      inpNum("ampiezza","Ampiezza misurata","mm","fessurimetro/calibro")+
+      inpNum("lunghezza","Lunghezza","cm","opz.")+
+      inpSel("andamento","Andamento",[["uniforme","Uniforme (traslazione)"],["ampia-stretta","Da ampia a stretta (rotazione)"],["incognito","Incognito"]])+'</div>'+
+    (bc?'<div class="banner yellow" style="margin-top:8px"><strong>BRE Digest 251:</strong> '+d.ampiezza+' mm → categoria '+bc.cat+' · '+esc(bc.grado)+' ('+bc.rng+'). <span style="color:#8a7f6c">L\'ampiezza è una scala di danno, non da sola la gravità strutturale.</span></div>':"")+
+    '<div style="margin-top:8px">'+inpRad("passante","La lesione è passante?",[["passante","Passante (tutto lo spessore)"],["apparente","Apparente (solo intonaco)"],["incognito","Da verificare"]])+'</div>';},
+  quadro:function(){return '<div class="step-head"><h4>3. Quadro d\'insieme ed evoluzione</h4><span class="ref">Cusmano · Tona</span></div>'+
+    '<div class="banner blue"><strong>L\'evoluzione nel tempo è IL discriminante</strong> (Cusmano): una lesione «esaurita» che non progredisce è spesso meno preoccupante di una più sottile ma in crescita.</div>'+
+    '<div class="grid3">'+
+      inpRad("ripetizionePiani","Si ripete identica su più piani?",[["si","Sì"],["no","No"],["incognito","?"]])+
+      inpRad("simmetria","Simmetrica rispetto a setto/pilastro?",[["si","Sì"],["no","No"],["incognito","?"]])+
+      inpRad("replicata","Replicata su pavimento e soffitto?",[["si","Sì"],["no","No"],["incognito","?"]])+'</div>'+
+    '<div style="margin-top:10px">'+inpRad("evoluzione","Evoluzione nel tempo",[["stabile","Stabile / esaurita"],["evoluzione","In evoluzione (cresce)"],["incognito","Non ancora monitorata"]])+'</div>'+
+    '<div style="margin-top:10px">'+inpTxA("noteCTU","Note del tecnico","Osservazioni, riferimenti fotografici, ipotesi…")+'</div>';},
+  monit:function(){var d=STATE.data;var arr=d.fessurimetro||[];var mt=_monitTrend();
+    var rows=arr.map(function(r,idx){return {r:r,idx:idx};}).sort(function(a,b){return (a.r.data||"")<(b.r.data||"")?-1:1;});
+    var h='<div class="step-head"><h4>4. Monitoraggio strumentale</h4><span class="ref">fessurimetro / biffe · letture datate (Cusmano)</span></div>';
+    h+='<div class="banner blue">Registra le <strong>letture datate</strong> del fessurimetro (biffe lato A/B) o delle spie. Il confronto nel tempo è il <strong>discriminante di gravità</strong>: apertura in aumento → approfondimento; stabile → spesso meno preoccupante. [Cusmano]</div>';
+    h+='<div class="grid3" style="align-items:end">'+
+       '<div class="fld"><label>Data lettura</label><input type="date" id="mDate"></div>'+
+       '<div class="fld"><label>Apertura misurata <span class="opz">(mm)</span></label><input type="number" step="0.01" id="mVal" placeholder="es. 1.20"></div>'+
+       '<div class="fld"><label>Nota <span class="opz">(opz.)</span></label><input type="text" id="mNote" placeholder="biffa A/B, strumento…"></div></div>';
+    h+='<div style="margin:6px 0 12px"><button type="button" class="mx-shiny s-accent" id="mAdd" style="font-size:12px;padding:8px 14px">＋ Aggiungi lettura</button></div>';
+    if(rows.length){
+      var base=rows[0].r.lettura;
+      h+='<table style="width:100%;border-collapse:collapse;font-size:12.5px"><tr><th style="text-align:left;padding:5px;border-bottom:1px solid #eee">Data</th><th style="text-align:left;padding:5px;border-bottom:1px solid #eee">Apertura (mm)</th><th style="text-align:left;padding:5px;border-bottom:1px solid #eee">Δ vs 1ª</th><th style="text-align:left;padding:5px;border-bottom:1px solid #eee">Nota</th><th></th></tr>';
+      rows.forEach(function(o){var dl=Math.round((o.r.lettura-base)*100)/100;h+='<tr><td style="padding:5px">'+esc(o.r.data)+'</td><td style="padding:5px">'+esc(o.r.lettura)+'</td><td style="padding:5px;color:'+(dl>0?'#c0392b':(dl<0?'#e67e22':'#1b8a4b'))+'">'+(dl>0?'+':'')+dl+'</td><td style="padding:5px;color:#6b5c4c">'+esc(o.r.note||'')+'</td><td style="padding:5px"><button type="button" class="_mDel" data-i="'+o.idx+'" style="border:0;background:#f3dede;color:#7f0000;border-radius:5px;cursor:pointer;padding:2px 7px">✕</button></td></tr>';});
+      h+='</table>';
+    } else h+='<p style="color:#8a7f6c;font-style:italic;font-size:12px">Nessuna lettura registrata. Inserisci almeno 2 letture datate per valutare il trend.</p>';
+    var tc={crescita:"is-err",riduzione:"is-warn",stabile:"is-ok",insuff:""}[mt.flag];
+    var tl={crescita:"⚠ Apertura in AUMENTO",riduzione:"Apertura in riduzione (verificare)",stabile:"Apertura sostanzialmente STABILE",insuff:"Trend non ancora valutabile"}[mt.flag];
+    h+='<div class="verdict '+tc+'" style="margin-top:10px"><div class="lbl">Trend monitoraggio</div><div class="v">'+tl+'</div><div class="s">'+esc(mt.deltaTxt)+'. <span style="color:#8a7f6c">Soglia indicativa ±'+mt.band+' mm (risoluzione fessurimetro ~0,1 mm); la significatività la stabilisce il tecnico. L\'esito alimenta lo screening (Step 5).</span></div></div>';
+    return h;},
+  diag:function(){var v=calcVerdict();var bc=v.bc,ti=v.ti;return '<div class="step-head"><h4>5. Screening del quadro fessurativo</h4></div>'+
+    '<div class="verdict is-'+v.kind+'"><div class="lbl">Esito screening</div><div class="v">'+esc(v.verdict)+'</div><div class="s">'+esc(v.summary)+'</div></div>'+
+    '<table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:12.5px"><tr><th style="text-align:left;padding:5px;border-bottom:1px solid #eee">Voce</th><th style="text-align:left;padding:5px;border-bottom:1px solid #eee">Esito</th><th style="text-align:left;padding:5px;border-bottom:1px solid #eee">Fonte</th></tr>'+
+      (ti?'<tr><td style="padding:5px"><b>Tipo</b></td><td style="padding:5px">'+esc(ti.tipo)+'</td><td style="padding:5px;color:#8a7f6c">'+esc(ti.fonte)+'</td></tr>'+
+          '<tr><td style="padding:5px"><b>Cinematismo</b></td><td style="padding:5px">'+esc(ti.cin)+'</td><td style="padding:5px;color:#8a7f6c">'+esc(ti.fonte)+'</td></tr>'+
+          '<tr><td style="padding:5px"><b>Causa probabile</b></td><td style="padding:5px">'+esc(ti.causa)+'</td><td style="padding:5px;color:#8a7f6c">'+esc(ti.fonte)+'</td></tr>':"")+
+      (bc?'<tr><td style="padding:5px"><b>Gravità (ampiezza)</b></td><td style="padding:5px">cat. '+bc.cat+' · '+esc(bc.grado)+' ('+bc.rng+')</td><td style="padding:5px;color:#8a7f6c">BRE Digest 251</td></tr>':"")+
+      '<tr><td style="padding:5px"><b>Azione consigliata</b></td><td style="padding:5px" colspan="2">'+esc(azioneFor(v.livello))+'</td></tr>'+
+    '</table>'+
+    '<div class="disclaimer" style="margin-top:14px">Questo è uno <b>screening</b>: la valutazione della sicurezza e degli interventi compete a un <b>tecnico strutturista</b> (NTC 2018).</div>';}
+};
+
+/* ===== RENDER ===== */
+function renderStepper(){var steps=getActiveSteps();var h="";steps.forEach(function(st,i){var c="step-chip";if(i===STATE.cur)c+=" active";else if(i<STATE.cur)c+=" done";h+='<button type="button" class="'+c+'" data-i="'+i+'">'+esc(st.label)+'</button>';});$("stepper").innerHTML=h;
+  var sp=$("stepper");sp.querySelectorAll(".step-chip").forEach(function(el){el.addEventListener("click",function(){STATE.cur=+this.dataset.i;persist();render();});});}
+function attachInputs(){$("stepPanel").querySelectorAll("[data-fld]").forEach(function(el){var ev=(el.type==="checkbox"||el.tagName==="SELECT"||el.type==="radio")?"change":"input";el.addEventListener(ev,function(){var k=this.dataset.fld,kind=this.dataset.kind,v;if(kind==="num")v=_mxNumero(this);else v=this.value;setField(k,v);if(["struttura","orientamento","elemento","ampiezza","passante","evoluzione","ripetizionePiani","simmetria"].indexOf(k)>=0)renderPanelOnly();});});}
+function render(){_mxPulisciFuori();renderStepper();var steps=getActiveSteps();var s=steps[STATE.cur];$("stepPanel").innerHTML=panels[s.id]();attachInputs();_wireStep(s.id);var last=STATE.cur===steps.length-1;$("btnPrev").disabled=STATE.cur===0;$("btnNext").style.display=last?"none":"";$("btnFinish").style.display=last?"":"none";_mxToolbarGate();_difUpdate();}
+function _mxToolbarGate(){var tb=document.getElementById('mxToolbar');if(!tb)return;var fin=!!STATE.finished;if(fin){tb.classList.remove('needs-result');tb.classList.add('is-active');}else{tb.classList.add('needs-result');tb.classList.remove('is-active');}var bs=tb.querySelectorAll('.mx-tb-btn[data-needs="result"]');for(var i=0;i<bs.length;i++){bs[i].disabled=!fin;}}
+function renderPanelOnly(){var steps=getActiveSteps();var s=steps[STATE.cur];var f=document.activeElement,fK=f?f.getAttribute("data-fld"):null;$("stepPanel").innerHTML=panels[s.id]();attachInputs();_wireStep(s.id);if(fK){var el=$("stepPanel").querySelector('[data-fld="'+fK+'"]');if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length);}catch(_){}}}_difUpdate();}
+function _wireStep(id){if(id!=="monit")return;var a=document.getElementById("mAdd");if(a)a.addEventListener("click",monitAdd);document.querySelectorAll("._mDel").forEach(function(el){el.addEventListener("click",function(){monitDel(+this.dataset.i);});});}
+function monitAdd(){var dt=(document.getElementById("mDate")||{}).value,val=(document.getElementById("mVal")||{}).value,note=(document.getElementById("mNote")||{}).value;if(!dt||val===""||val==null){showToast("Inserisci data e apertura.","err");return;}STATE.data.fessurimetro=STATE.data.fessurimetro||[];STATE.data.fessurimetro.push({data:dt,lettura:parseFloat(val),note:note||""});persist();renderPanelOnly();showToast("Lettura aggiunta.","ok");}
+function monitDel(i){if(!STATE.data.fessurimetro)return;STATE.data.fessurimetro.splice(i,1);persist();renderPanelOnly();}
+function next(){var steps=getActiveSteps();if(STATE.cur<steps.length-1){STATE.cur++;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function prev(){if(STATE.cur>0){STATE.cur--;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function finish(){STATE.finished=true;persist();render();showToast("Screening completato.","ok");setTimeout(function(){$("mxToolbar").scrollIntoView({behavior:"smooth",block:"center"});},250);}
+function resetAll(){if(!confirm("Azzerare lo screening corrente?"))return;Object.keys(STATE.data).forEach(function(k){var v=STATE.data[k];if(Array.isArray(v))STATE.data[k]=[];else if(typeof v==="number"||v===null)STATE.data[k]=null;else STATE.data[k]="";});STATE.cur=0;STATE.finished=false;persist();render();showToast("Azzerato.","ok");}
+function showToast(m,k){var t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},2200);}
+
+/* ===== PANNELLO DIFFERENZIALE LIVE ===== */
+function _difEnsureStyle(){
+  if(document.getElementById('difLiveCss'))return;
+  var s=document.createElement('style');s.id='difLiveCss';
+  s.textContent='#difLive .dif-box{border:1px solid #d8cfba;border-radius:12px;background:linear-gradient(180deg,#fffdf8,#f6f0e4);box-shadow:0 2px 10px rgba(40,30,10,.06);padding:11px 14px;margin:0 0 14px;font-size:12.5px}'
+   +'#difLive .dif-head{font-weight:800;color:#0a5d66;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}'
+   +'#difLive .dif-sub{font-weight:600;font-size:10.5px;color:#8a7f6c}'
+   +'#difLive .dif-verdict{border-left:4px solid;padding:6px 10px;border-radius:6px;background:#fff;margin-bottom:9px}'
+   +'#difLive .dif-pct{font-weight:800;margin-left:6px;font-size:11px}#difLive .dif-summary{font-size:11px;color:#5a4d3f;margin-top:2px}'
+   +'#difLive .dif-hyps{display:flex;flex-direction:column;gap:5px}#difLive .dif-h{border-radius:7px;padding:5px 9px}'
+   +'#difLive .dif-badge{display:inline-block;font-size:10px;font-weight:800;color:#fff;padding:1px 7px;border-radius:20px;margin-right:5px}'
+   +'#difLive .dif-mot{font-size:11px;color:#5a4d3f;margin-top:2px}#difLive .dif-fonte{color:#8a7f6c;font-style:italic}'
+   +'#difLive .dif-foot{margin-top:9px;font-size:10px;color:#8a7f6c;border-top:1px solid #efe9dc;padding-top:6px}';
+  document.head.appendChild(s);
+}
+function _difFess(){
+  var v=calcVerdict(),H=[];
+  function add(nome,stato,motivo,fonte){H.push({nome:nome,stato:stato,motivo:motivo,fonte:fonte});}
+  if(v.ti){
+    add("Tipo di lesione","id",v.ti.tipo+", cinematismo: "+v.ti.cin,v.ti.fonte);
+    add("Causa probabile",(v.livello==="ok"?"ok":"conc"),v.ti.causa,v.ti.fonte);
+  } else add("Tipo di lesione","na","indica l'orientamento (Step 2)","INFO");
+  if(v.bc){
+    var bst=(v.bc.liv==="ok"?"ok":(v.bc.liv==="warn"?"mid":"risk"));
+    add("Gravità per ampiezza",bst,"cat. "+v.bc.cat+" · "+v.bc.grado+" ("+v.bc.rng+")","BRE Digest 251 (1995)");
+  } else add("Gravità per ampiezza","na","misura l'ampiezza in mm (Step 2)","BRE Digest 251");
+  if(STATE.data.passante==="passante") add("Passante","risk","taglia tutto lo spessore → segnale strutturale","Cusmano");
+  else if(STATE.data.passante==="apparente") add("Apparente","ok","limitata all'intonaco → spesso non strutturale","Cusmano");
+  if(STATE.data.evoluzione==="evoluzione") add("Evoluzione","risk","in crescita → discriminante n.1 di gravità","Cusmano");
+  else if(STATE.data.evoluzione==="stabile") add("Evoluzione","ok","stabile/esaurita → spesso meno preoccupante","Cusmano");
+  if(v.mt && v.mt.n>=2) add("Monitoraggio",(v.mt.flag==="crescita"?"risk":(v.mt.flag==="stabile"?"ok":"info")),v.mt.deltaTxt+" → "+(v.mt.flag==="crescita"?"apertura in aumento (segnale di evoluzione)":(v.mt.flag==="stabile"?"apertura stabile":"verificare")),"Cusmano · letture datate");
+  add("Conclusione","info","screening, non valutazione tecnica: per lesioni passanti/ampie/in evoluzione → tecnico strutturista (NTC 2018)","NTC 2018");
+  return{v:v,hyps:H};
+}
+function _difHTML(R){
+  var v=R.v,kc={err:'#c0392b',warn:'#e67e22',ok:'#1b8a4b'}[v.kind]||'#6b5c4c';
+  var h='<div class="dif-box"><div class="dif-head">🔬 Screening differenziale <span class="dif-sub">dal vivo · sintesi del motore (calcVerdict)</span></div>';
+  h+='<div class="dif-verdict" style="border-color:'+kc+'"><div><b style="color:'+kc+'">'+esc(v.verdict)+'</b></div><div class="dif-summary">'+esc(v.summary)+'</div></div>';
+  h+='<div class="dif-sub" style="margin:0 0 6px">Valutazione sulle risposte (BRE 251 · NTC 2018 · Cusmano · Tona):</div><div class="dif-hyps">';
+  R.hyps.forEach(function(x){
+    var m={id:['identificato','#0e7c87','#e6f4f5'],ok:['favorevole','#1b8a4b','#e9f7ee'],mid:['da monitorare','#b8860b','#fef7e2'],conc:['concorrente','#b8860b','#fef7e2'],risk:['⚠ rilevante','#c0392b','#fdecea'],info:['nota','#5b6b8a','#eef1f7'],na:['da rilevare','#8a7f6c','#f2efe7']}[x.stato]||['n.d.','#888','#eee'];
+    h+='<div class="dif-h" style="background:'+m[2]+'"><span class="dif-badge" style="background:'+m[1]+'">'+m[0]+'</span><b>'+esc(x.nome)+'</b><div class="dif-mot">'+esc(x.motivo)+' <span class="dif-fonte">['+esc(x.fonte)+']</span></div></div>';
+  });
+  h+='</div>';
+  if(v.flags&&v.flags.length)h+='<div class="dif-foot"><b>Segnali:</b> '+v.flags.map(function(f){return esc(f);}).join(' · ')+'</div>';
+  h+='<div class="dif-foot">Screening basato su fonti consultabili (VERIFICA-FONTI-FESSURAZIONI). Nessuna soglia inventata. La valutazione strutturale resta del tecnico strutturista.</div></div>';
+  return h;
+}
+function _difUpdate(){var el=document.getElementById('difLive');if(!el)return;try{_difEnsureStyle();el.innerHTML=_difHTML(_difFess())+_evidenzeHTML();}catch(e){}}
+
+/* ===== EVIDENZE cross-modulo (stesso immobile) ===== */
+function _immobileId(){try{var l=JSON.parse(localStorage.getItem('mx2::locali-v1')||'{}');var a=(l&&l.ana)||{};var raw=((a.Indirizzo||'')+(a.Catasto||'')+(a.Nome||'')).trim();if(!raw)return '';return ((a.Indirizzo||'')+'§'+(a.Catasto||'')+'§'+(a.Nome||'')).toLowerCase();}catch(e){return '';}}
+function _evidenzeHTML(){
+  var R=[];try{R=JSON.parse(localStorage.getItem('mx2::reports')||'[]');}catch(e){}
+  if(!Array.isArray(R)||!R.length)return '';
+  var cur=_immobileId(),seen={},items=[];
+  for(var i=R.length-1;i>=0;i--){var r=R[i];if(cur&&r.immobile&&r.immobile!==cur)continue;var k=r.module||r.moduleId||r.moduleName;if(!k||seen[k])continue;seen[k]=1;items.push(r);}
+  if(!items.length)return '';
+  var h='<div class="dif-box" style="margin-top:10px"><div class="dif-head">📎 Evidenze da altri moduli <span class="dif-sub">stesso immobile · raccolte nel Report</span></div><div class="dif-hyps">';
+  items.forEach(function(r){h+='<div class="dif-h" style="background:#eef3f7"><b>'+esc(r.moduleName||r.module||'modulo')+'</b><div class="dif-mot">'+esc(r.summary||r.verdict||'n.d.')+'</div></div>';});
+  h+='</div><div class="dif-foot">Evidenze raccolte per questo immobile (modulo Report). Valutale insieme al quadro fessurativo, la decisione resta del tecnico.</div></div>';
+  return h;
+}
+
+/* ===== STRUMENTAZIONE condivisa ===== */
+var STRUMENTI_FESS=[
+ {nome:"Fessurimetro graduato (biffe)",norma:"prassi · BRE/UNI",uso:"misura apertura e spostamento relativo nel tempo"},
+ {nome:"Spie / vetrini a cavallo della lesione",norma:"prassi",uso:"rilevazione qualitativa dell'evoluzione"},
+ {nome:"Calibro / estensimetro millesimale",norma:"prassi",uso:"misura puntuale dell'ampiezza"},
+ {nome:"Inclinometro",norma:"prassi",uso:"rotazioni/fuori piombo di setti e pilastri"},
+ {nome:"Martinetti piatti",norma:"ASTM C1196/C1197 · RILEM",uso:"stato tensionale nella muratura"},
+ {nome:"Sclerometro / pacometro",norma:"UNI EN 12504-2 (sclerometro) · BS 1881-204 (pacometro)",uso:"resistenza cls / posizione armature"}
+];
+function _strumGet(){try{var a=JSON.parse(localStorage.getItem('mx2::strumentazione')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function _strumSet(a){try{localStorage.setItem('mx2::strumentazione',JSON.stringify(a||[]));}catch(e){}}
+function _strumReport(){
+  var list=_strumGet();var x='<h2>Strumentazione utilizzata e tracciabilità</h2>';
+  if(!list.length)return x+'<p style="font-size:11.5px;color:#8a7f6c;font-style:italic">Strumentazione non ancora documentata. Compilare modello, matricola ed estremi di taratura (toolbar → Strumentazione); il dato è condiviso tra i moduli.</p>';
+  x+='<table><tr><th>Strumento</th><th>Modello</th><th>Matricola</th><th>Taratura</th><th>Norma</th></tr>';
+  list.forEach(function(r){x+='<tr><td>'+esc(r.strumento||'n.d.')+'</td><td>'+esc(r.modello||'n.d.')+'</td><td>'+esc(r.matricola||'n.d.')+'</td><td>'+esc(r.taratura||'n.d.')+'</td><td>'+esc(r.norma||'n.d.')+'</td></tr>';});
+  return x+'</table>';
+}
+function _strumRender(){
+  var b=$("strumBody");if(!b)return;var list=_strumGet();
+  var h='<p style="font-size:12px;color:#6b5c4c;margin:0 0 8px">Registra gli strumenti usati con matricola e taratura: confluiscono nel report. Dato <b>condiviso tra i moduli</b> (un\'unica compilazione).</p>';
+  h+='<div style="margin:0 0 10px">';STRUMENTI_FESS.forEach(function(s,i){h+='<button type="button" class="tb-btn _strumSugg" data-i="'+i+'" style="font-size:10.5px;margin:2px;padding:3px 9px">+ '+esc(s.nome)+'</button>';});h+='</div>';
+  h+='<table style="width:100%;border-collapse:collapse;font-size:11.5px"><tr><th style="text-align:left;padding:4px">Strumento</th><th style="text-align:left;padding:4px">Modello</th><th style="text-align:left;padding:4px">Matricola</th><th style="text-align:left;padding:4px">Taratura</th><th></th></tr>';
+  if(!list.length)h+='<tr><td colspan="5" style="color:#8a7f6c;font-style:italic;padding:6px">Nessuno strumento: usa i suggerimenti sopra o «Aggiungi strumento».</td></tr>';
+  list.forEach(function(r,i){h+='<tr>'+
+    '<td style="padding:2px"><input data-k="strumento" data-i="'+i+'" value="'+esc(r.strumento||'')+'" style="width:100%;font-size:11px"></td>'+
+    '<td style="padding:2px"><input data-k="modello" data-i="'+i+'" value="'+esc(r.modello||'')+'" style="width:100%;font-size:11px"></td>'+
+    '<td style="padding:2px"><input data-k="matricola" data-i="'+i+'" value="'+esc(r.matricola||'')+'" style="width:100%;font-size:11px"></td>'+
+    '<td style="padding:2px"><input data-k="taratura" data-i="'+i+'" value="'+esc(r.taratura||'')+'" placeholder="es. 12/03/2026 cert.1234" style="width:100%;font-size:11px"></td>'+
+    '<td style="padding:2px"><button type="button" class="_strumDel" data-i="'+i+'" style="border:0;background:#f3dede;color:#7f0000;border-radius:5px;cursor:pointer;padding:3px 7px">✕</button></td></tr>';});
+  h+='</table>';b.innerHTML=h;
+  b.querySelectorAll('input[data-k]').forEach(function(el){el.addEventListener('input',function(){var a=_strumGet(),i=+this.dataset.i;if(a[i]){a[i][this.dataset.k]=this.value;_strumSet(a);}});});
+  b.querySelectorAll('._strumDel').forEach(function(el){el.addEventListener('click',function(){var a=_strumGet();a.splice(+this.dataset.i,1);_strumSet(a);_strumRender();});});
+  b.querySelectorAll('._strumSugg').forEach(function(el){el.addEventListener('click',function(){var s=STRUMENTI_FESS[+this.dataset.i],a=_strumGet();a.push({strumento:s.nome,modello:'',matricola:'',taratura:'',norma:s.norma});_strumSet(a);_strumRender();});});
+}
+function _strumAdd(){var a=_strumGet();a.push({strumento:'',modello:'',matricola:'',taratura:'',norma:''});_strumSet(a);_strumRender();}
+function openStrum(){_strumRender();$("strumModal").classList.add("show");}
+function closeStrum(){$("strumModal").classList.remove("show");}
+
+/* ===== REPORT ===== */
+function ynLabel(v){return v==="si"?"Sì":(v==="no"?"No":(v==="passante"?"Passante":(v==="apparente"?"Apparente":(v||"n.d."))));}
+function buildDoc(){
+  var ana=loadAna(),p=ana.perito,c=ana.immobile,d=STATE.data,v=calcVerdict();
+  var today=new Date().toLocaleDateString("it-IT",{day:"2-digit",month:"long",year:"numeric"});
+  var strLab={muratura:"Muratura portante",ca:"Cemento armato",mista:"Mista"};
+  var h="<h1>Screening Quadro Fessurativo</h1>";
+  h+='<p style="color:#6b5c4c;font-size:12px"><strong>Data:</strong> '+today+'</p>';
+  h+="<h2>1. Anagrafica</h2><table><tr><th>Perito</th><td>"+esc(p.nome||"n.d.")+"</td><th>Committente</th><td>"+esc(c.Nome||"n.d.")+"</td></tr>";
+  if(c.Indirizzo)h+="<tr><th>Immobile</th><td colspan='3'>"+esc(c.Indirizzo)+"</td></tr>";h+="</table>";
+  h+="<h2>2. Contesto</h2><table><tr><th>Struttura</th><td>"+esc(strLab[d.struttura]||"n.d.")+"</td><th>Età</th><td>"+(d.eta!=null?d.eta+" anni":"n.d.")+"</td></tr>";
+  h+="<tr><th>N° piani</th><td>"+(d.piani!=null?d.piani:"n.d.")+"</td><th>Sisma recente</th><td>"+ynLabel(d.ctx_sisma)+"</td></tr>";
+  h+="<tr><th>Scavi adiacenti</th><td>"+ynLabel(d.ctx_scavi)+"</td><th>Variazioni falda</th><td>"+ynLabel(d.ctx_falda)+"</td></tr>";
+  h+="<tr><th>Sovraccarichi</th><td colspan='3'>"+ynLabel(d.ctx_sovraccarichi)+"</td></tr></table>";
+  h+="<h2>3. Rilievo della lesione</h2><table><tr><th>Orientamento</th><td>"+(v.ti?esc(v.ti.tipo):esc(d.orientamento||"n.d."))+"</td><th>Elemento</th><td>"+esc(d.elemento||"n.d.")+"</td></tr>";
+  h+="<tr><th>Ampiezza</th><td>"+(d.ampiezza!=null?d.ampiezza+" mm":"n.d.")+(v.bc?" (BRE cat. "+v.bc.cat+")":"")+"</td><th>Lunghezza</th><td>"+(d.lunghezza!=null?d.lunghezza+" cm":"n.d.")+"</td></tr>";
+  h+="<tr><th>Passante</th><td>"+ynLabel(d.passante)+"</td><th>Andamento</th><td>"+esc(d.andamento==="ampia-stretta"?"da ampia a stretta (rotazione)":(d.andamento||"n.d."))+"</td></tr></table>";
+  h+="<h2>4. Quadro d'insieme</h2><table><tr><th>Ripetuta su più piani</th><td>"+ynLabel(d.ripetizionePiani)+"</td><th>Simmetrica</th><td>"+ynLabel(d.simmetria)+"</td></tr>";
+  h+="<tr><th>Replicata pav/soffitto</th><td>"+ynLabel(d.replicata)+"</td><th>Evoluzione</th><td>"+esc(d.evoluzione==="evoluzione"?"in evoluzione":(d.evoluzione==="stabile"?"stabile/esaurita":"n.d."))+"</td></tr></table>";
+  var mt=v.mt||_monitTrend();
+  if(d.fessurimetro&&d.fessurimetro.length){
+    var mrows=d.fessurimetro.map(function(r,ix){return{r:r,ix:ix};}).sort(function(a,b){return (a.r.data||"")<(b.r.data||"")?-1:1;});
+    var mb=mrows.length?mrows[0].r.lettura:0;
+    h+="<h2>4-bis. Monitoraggio strumentale (fessurimetro)</h2><table><tr><th>Data</th><th>Apertura (mm)</th><th>Δ vs 1ª</th><th>Nota</th></tr>";
+    mrows.forEach(function(o){var dl=Math.round((o.r.lettura-mb)*100)/100;h+="<tr><td>"+esc(o.r.data)+"</td><td>"+esc(o.r.lettura)+"</td><td>"+(dl>0?"+":"")+dl+"</td><td>"+esc(o.r.note||"")+"</td></tr>";});
+    h+="</table>";
+    var mtxt={crescita:"apertura in aumento → segnale di evoluzione",stabile:"apertura sostanzialmente stabile",riduzione:"apertura in riduzione (verificare lo strumento)",insuff:"trend non valutabile (servono ≥2 letture)"}[mt.flag];
+    h+="<p><strong>Trend:</strong> "+esc(mt.deltaTxt)+" · "+esc(mtxt)+". <em>Soglia indicativa ±"+mt.band+" mm; la significatività la stabilisce il tecnico strutturista.</em></p>";
+  }
+  h+="<h2>5. Esito dello screening</h2><table><tr><th>Esito</th><td><strong>"+esc(v.verdict)+"</strong></td></tr>";
+  if(v.ti){h+="<tr><th>Tipo</th><td>"+esc(v.ti.tipo)+"</td></tr><tr><th>Cinematismo</th><td>"+esc(v.ti.cin)+"</td></tr><tr><th>Causa probabile</th><td>"+esc(v.ti.causa)+"</td></tr>";}
+  if(v.bc)h+="<tr><th>Gravità (BRE 251)</th><td>cat. "+v.bc.cat+" · "+esc(v.bc.grado)+" ("+v.bc.rng+")</td></tr>";
+  h+="<tr><th>Azione consigliata</th><td>"+esc(azioneFor(v.livello))+"</td></tr><tr><th>Sintesi</th><td>"+esc(v.summary)+"</td></tr></table>";
+  if(v.flags&&v.flags.length){h+="<p><strong>Segnali rilevati:</strong></p><ul>";v.flags.forEach(function(f){h+="<li>"+esc(f)+"</li>";});h+="</ul>";}
+  if(d.noteCTU)h+="<p><strong>Note del tecnico:</strong> "+esc(d.noteCTU).replace(/\n/g,"<br>")+"</p>";
+  if(d.quadroImg){
+    h+="<h2>Quadro fessurativo grafico</h2>";
+    h+='<img src="'+d.quadroImg+'" style="max-width:100%;border:1px solid #d8d3c4;border-radius:6px">';
+    if(d.quadroLines&&d.quadroLines.length){var _sl={strutturale:"Strutturale",serviceability:"Serviceability",funzionale:"Funzionale",estetico:"Estetico"};h+="<table><tr><th>Lesione</th><th>Gravità (legenda)</th></tr>";d.quadroLines.forEach(function(L){h+="<tr><td>"+esc(L.label||"")+"</td><td>"+esc(_sl[L.sev]||L.sev||"")+"</td></tr>";});h+="</table>";}
+  }
+  h+="<h2>6. Metodo di rilievo consigliato (Cusmano)</h2><ol style='font-size:11.5px'><li>Perlustrazione visiva di ogni dissesto sull'intero edificio.</li><li>Conoscenza dell'edificio (progetto, età, schema portante).</li><li>Condizioni al contorno (falda, scavi, terreno, mezzi pesanti, alberature).</li><li>Rilievo del quadro fessurativo (direzione, spessore, profondità, <strong>passante/apparente</strong>, ripetizione su più piani).</li><li>Indagini se necessario (carotaggi, martinetti piatti, prove soniche, pacometro/sclerometro).</li><li>Monitoraggio dell'evoluzione (fessurimetro/spie), <em>l'evoluzione nel tempo è il discriminante</em>.</li></ol>";
+  h+=_strumReport();
+  h+='<h2>Normative e fonti</h2><ul style="font-size:11.5px"><li><strong>BRE Digest 251</strong> (1995), classificazione del danno per ampiezza (base Burland).</li><li><strong>NTC 2018</strong> (DM 17/01/2018) §8, valutazione costruzioni esistenti; limiti SLS apertura fessure c.a.</li><li><strong>UNI EN 1996</strong> (EC6 muratura) · <strong>UNI EN 1998</strong> (EC8 sisma) · <strong>UNI 11182:2006</strong>.</li><li>Cusmano, «Fessure murarie: che fare?» (Recupero) · Tona, «Lesioni strutturali negli edifici contemporanei» (2014).</li></ul>';
+  h+='<p style="font-size:11px;font-style:italic;color:#7f1d1d;margin-top:8px"><strong>Avvertenza:</strong> documento di screening e documentazione, non valutazione strutturale. La valutazione della sicurezza e degli interventi compete esclusivamente a un tecnico strutturista qualificato (NTC 2018).</p>';
+  return h;
+}
+function openDocModal(){$("docBody").innerHTML=buildDoc();$("docModal").classList.add("show");}
+function closeDocModal(){$("docModal").classList.remove("show");}
+function exportWord(){var html='<!doctype html><html><head><meta charset="utf-8"><title>Quadro Fessurativo</title><style>body{font-family:Georgia,serif;font-size:11pt;padding:20px}h1{font-size:18pt;font-style:italic}h2{font-size:13pt;color:#5a2d0c;border-bottom:1pt solid #d8d3c4;padding-bottom:3pt}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9.5pt}th,td{padding:4pt 6pt;border-bottom:1pt solid #e6e0d2;text-align:left}th{background:#faf8f3;font-weight:700}ul,ol{font-size:10pt}</style></head><body>'+buildDoc()+'</body></html>';var blob=new Blob([html],{type:"application/msword"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="Fessurazioni_"+new Date().toISOString().slice(0,10)+".doc";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},800);showToast("Word salvato.","ok");}
+function exportPDF(){window.print();}
+function exportJSON(){var ana=loadAna();var b={schemaVersion:"fessurazioni-v1.0",exportedAt:new Date().toISOString(),perito:ana.perito,immobile:ana.immobile,data:STATE.data,verdict:calcVerdict()};var blob=new Blob([JSON.stringify(b,null,2)],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="Fessurazioni_"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},800);showToast("JSON salvato.","ok");}
+function addToReport(){try{var r=JSON.parse(localStorage.getItem("mx2::reports")||"[]");var v=calcVerdict();r.push({id:"fe_"+Date.now(),module:"fessurazioni",moduleName:"Screening Quadro Fessurativo",version:"v1.0",createdAt:new Date().toISOString(),immobile:_immobileId(),summary:v.verdict+(v.ti?" · "+v.ti.tipo:""),data:STATE.data,htmlSnippet:buildDoc()});localStorage.setItem("mx2::reports",JSON.stringify(r));showToast("Aggiunto al Report.","ok");}catch(e){showToast("Errore: "+e.message,"err");}}
+
+/* ===== AGGANCIA ALLA MAPPA, crea/aggiorna un punto «fessurazioni» in mx2::indagini (schema handler mappa-indagini) ===== */
+function _mxIndaginiList(){ try{ var raw=localStorage.getItem('mx2::indagini'); if(!raw) return []; var a=JSON.parse(raw); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function _mxIndaginiSaveAll(list){ try{ localStorage.setItem('mx2::indagini', JSON.stringify(list||[])); return true; }catch(e){ return false; } }
+function _mxIndaginiNewId(){ return 'ind_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8); }
+function _mxBuildDatiFess(d){
+  d=d||{};
+  var andMap={verticale:'verticale',orizzontale:'orizzontale',diagonale:'diagonale',gradini:'scaletta',ragnatela:'ramificato',arco:'arco',croce:'diagonale',piramide:''};
+  var profMap={passante:'passante',apparente:'superficiale',incognito:''};
+  var supMap={intonaco:'intonaco',muro:'mur_port',tamponamento:'mur_tamp',pilastro:'cls',trave:'cls',solaio:'cls',arco:'mur_port',cordolo:'cls',architrave:'cls',giunto:'altro'};
+  var evoMap={stabile:'stabile',evoluzione:'attiva',incognito:'nd'};
+  var sup=supMap[d.elemento]||''; if(!sup && d.struttura){ sup=(d.struttura==='ca')?'cls':(d.struttura==='mista'?'mista':'mur_port'); }
+  var v=(typeof calcVerdict==='function')?calcVerdict():null;
+  return { ampiezza:(d.ampiezza!=null?d.ampiezza:''), lunghezza:(d.lunghezza!=null?d.lunghezza:''), andamento:andMap[d.orientamento]||'', profondita:profMap[d.passante]||'', supporto:sup, posizione:'', pattern:((d.ripetizionePiani==='si'||d.simmetria==='si')?'diffusa':''), evoluzione:evoMap[d.evoluzione]||'', _screening:(v?{verdict:v.verdict,tipo:(v.ti?v.ti.tipo:''),bre:(v.bc?v.bc.cat:null),livello:v.livello}:null) };
+}
+/* 20/11/2026: le domande si fanno in una finestra dentro la pagina (window.mxChiedi, nel file condiviso
+   _shared/mx-switcher.js) e non più nelle finestrelle del browser. Se quel file non fosse stato caricato si torna
+   alle finestrelle di prima. _mxChiedi risponde con una promessa; _mxTesto chiede un solo testo. */
+function _mxChiedi(titolo, cfg){
+  if(window.mxChiedi) return window.mxChiedi(titolo, cfg);
+  cfg = cfg || {};
+  if(cfg.scelte){
+    var buone = cfg.scelte.filter(function(s){ return !s[2]; });
+    var r = prompt(titolo + '\n\n' + buone.map(function(s, i){ return (i+1) + '. ' + s[1]; }).join('\n') + '\n\nScrivi il numero:', '1');
+    var k = parseInt(r, 10) - 1;
+    return Promise.resolve(buone[k] ? buone[k][0] : null);
+  }
+  var out = [], campi = cfg.campi || [];
+  for(var i = 0; i < campi.length; i++){
+    var v = prompt(titolo + (campi[i][0] ? ('\n' + campi[i][0]) : ''), campi[i][1] == null ? '' : campi[i][1]);
+    if(v === null) return Promise.resolve(null);
+    out.push(v);
+  }
+  return Promise.resolve(out);
+}
+function _mxTesto(titolo, pre){ return _mxChiedi(titolo, {campi:[['', pre]]}).then(function(r){ return r ? r[0] : null; }); }
+async function _mxAggancialMappa(){
+  var cat='fessurazioni', moduloFile='fessurazioni.html', NL=String.fromCharCode(10);
+  try{ persist(); }catch(e){}
+  var d=STATE.data||{}, dati=_mxBuildDatiFess(d);
+  var lista=_mxIndaginiList(), stessoCat=lista.filter(function(r){ return r.categoria===cat; });
+  /* 20/11/2026: scelta dentro la pagina (prima si scriveva 1, 2 o 3 in una finestrella del browser) */
+  var mode=await _mxChiedi('Aggancia la scheda FESSURAZIONI alla Mappa Indagini', {scelte:[['1','Nuovo punto sulla mappa'],['2','Aggiorna un punto esistente ('+(stessoCat.length?(stessoCat.length+' disponibili'):'nessuno disponibile')+')', !stessoCat.length]]});
+  if(!mode) return;
+  if(mode==='1'){
+    var _nn=await _mxChiedi('Nuovo punto sulla mappa', {campi:[['Nome del punto','Fessurazione '+new Date().toLocaleDateString('it-IT')],['Stanza (facoltativa)','']], conferma:'Crea il punto'});
+    if(!_nn || !String(_nn[0]).trim()) return;
+    var nome=String(_nn[0]).trim(), stanza=String(_nn[1]||'').trim();
+    var rec={ id:_mxIndaginiNewId(), schemaVer:1, categoria:cat, piano:0, x:0.5, y:0.5, stanza:stanza||'', nome:nome, posizione:'Da posizionare sulla mappa (apri Mappa Indagini e trascina il pin)', dataCreazione:new Date().toISOString(), dataModifica:new Date().toISOString(), dati:dati, note:'Rilievo creato da scheda '+moduloFile, foto:[], termogrammi:[], linkScheda:moduloFile+':'+Date.now(), layerId:'' };
+    lista.push(rec); _mxIndaginiSaveAll(lista);
+    showToast('Punto «'+nome+'» creato sulla Mappa Indagini','ok');
+    setTimeout(function(){ if(confirm(['Punto «'+nome+'» creato sulla Mappa Indagini.','Vuoi aprire ora la Mappa per posizionarlo?'].join(NL))){ window.location.href='mappa-indagini.html'; } },600);
+  } else if(mode==='2'){
+    if(!stessoCat.length){ alert('Nessun punto di categoria FESSURAZIONI sulla mappa. Usa «Nuovo punto» o crea prima un pin dalla Mappa Indagini.'); return; }
+    var ch=await _mxChiedi('Quale punto aggiornare con i dati di questa scheda?', {scelte: stessoCat.map(function(r,i){ return [String(i+1), r.nome+' ('+(r.stanza||'senza stanza')+')']; })}); if(!ch) return;
+    var ix=parseInt(ch,10)-1; if(isNaN(ix)||ix<0||ix>=stessoCat.length){ alert('Numero non valido.'); return; }
+    var target=stessoCat[ix];
+    for(var i=0;i<lista.length;i++){ if(lista[i].id===target.id){ lista[i].dati=dati; lista[i].dataModifica=new Date().toISOString(); lista[i].linkScheda=moduloFile+':'+Date.now(); break; } }
+    _mxIndaginiSaveAll(lista);
+    showToast('Punto «'+target.nome+'» aggiornato con i dati della scheda','ok');
+  }
+}
+
+/* ===== QUADRO GRAFICO, annotatore lesioni su foto/prospetto ===== */
+var _qf={bg:null,bgData:null,lines:[],cur:null};
+var QF_SEV={strutturale:{c:'#c0392b',l:'Strutturale'},serviceability:{c:'#e67e22',l:'Serviceability'},funzionale:{c:'#d4a017',l:'Funzionale'},estetico:{c:'#1b8a4b',l:'Estetico'}};
+function _qfCanvas(){return document.getElementById('qfCanvas');}
+function _qfRedraw(){
+  var cv=_qfCanvas();if(!cv)return;var ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#f3eee2';ctx.fillRect(0,0,cv.width,cv.height);
+  if(_qf.bg){var img=_qf.bg,s=Math.max(cv.width/img.width,cv.height/img.height),w=img.width*s,h=img.height*s,x=(cv.width-w)/2,y=(cv.height-h)/2;ctx.drawImage(img,x,y,w,h);}
+  else{ctx.fillStyle='#8a7f6c';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('Carica una foto / prospetto del muro (pulsante «Sfondo»)',cv.width/2,cv.height/2);ctx.textAlign='left';}
+  function drawLine(L,active){if(!L.points.length)return;var col=(QF_SEV[L.sev]||QF_SEV.strutturale).c;ctx.strokeStyle=col;ctx.lineWidth=3.5;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();L.points.forEach(function(p,i){if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);});ctx.stroke();
+    if(active){ctx.fillStyle=col;L.points.forEach(function(p){ctx.beginPath();ctx.arc(p.x,p.y,4,0,2*Math.PI);ctx.fill();});}
+    var p0=L.points[0],tx=(L.label||'')+'';if(tx){ctx.font='bold 13px sans-serif';ctx.lineWidth=3;ctx.strokeStyle='#fff';ctx.strokeText(tx,p0.x+6,p0.y-6);ctx.fillStyle=col;ctx.fillText(tx,p0.x+6,p0.y-6);}}
+  _qf.lines.forEach(function(L){drawLine(L,false);});
+  if(_qf.cur)drawLine(_qf.cur,true);
+}
+function _qfPos(e){var cv=_qfCanvas(),r=cv.getBoundingClientRect();var cx=(e.touches?e.touches[0].clientX:e.clientX),cy=(e.touches?e.touches[0].clientY:e.clientY);return{x:Math.round((cx-r.left)*(cv.width/(r.width||cv.width))),y:Math.round((cy-r.top)*(cv.height/(r.height||cv.height)))};}
+function _qfClick(e){if(!_qf.cur)return;_qf.cur.points.push(_qfPos(e));_qfStatus();_qfRedraw();}
+function _qfNew(){var sev=(document.getElementById('qfSev')||{}).value||'strutturale';var lab=((document.getElementById('qfLabel')||{}).value||'').trim()||('L'+(_qf.lines.length+1));_qf.cur={points:[],sev:sev,label:lab};_qfStatus();_qfRedraw();}
+function _qfUndo(){if(_qf.cur&&_qf.cur.points.length){_qf.cur.points.pop();_qfRedraw();_qfStatus();}}
+function _qfCloseLine(){if(_qf.cur&&_qf.cur.points.length>=2){_qf.lines.push(_qf.cur);_qf.cur=null;var li=document.getElementById('qfLabel');if(li)li.value='';_qfList();_qfRedraw();_qfStatus();showToast('Lesione aggiunta.','ok');}else{showToast('Servono almeno 2 punti.','err');}}
+function _qfClear(){if(!confirm('Eliminare tutte le lesioni tracciate?'))return;_qf.lines=[];_qf.cur=null;_qfList();_qfRedraw();_qfStatus();}
+function _qfDel(i){_qf.lines.splice(i,1);_qfList();_qfRedraw();}
+function _qfStatus(){var el=document.getElementById('qfStatus');if(!el)return;el.textContent=_qf.cur?('Lesione in tracciamento: '+_qf.cur.points.length+' punti, clic per aggiungere un vertice, «Chiudi lesione» per terminare.'):(_qf.lines.length+' lesioni tracciate.');}
+function _qfList(){var el=document.getElementById('qfList');if(!el)return;if(!_qf.lines.length){el.innerHTML='<span style="color:#8a7f6c;font-style:italic">Nessuna lesione tracciata.</span>';return;}var h='<table style="width:100%;border-collapse:collapse"><tr><th style="text-align:left;padding:3px">#</th><th style="text-align:left;padding:3px">Etichetta</th><th style="text-align:left;padding:3px">Gravità</th><th style="text-align:left;padding:3px">Punti</th><th></th></tr>';_qf.lines.forEach(function(L,i){var sv=QF_SEV[L.sev]||QF_SEV.strutturale;h+='<tr><td style="padding:3px">'+(i+1)+'</td><td style="padding:3px">'+esc(L.label||'')+'</td><td style="padding:3px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+sv.c+';margin-right:4px;vertical-align:middle"></span>'+sv.l+'</td><td style="padding:3px">'+L.points.length+'</td><td style="padding:3px"><button type="button" class="_qfDel" data-i="'+i+'" style="border:0;background:#f3dede;color:#7f0000;border-radius:5px;cursor:pointer;padding:2px 7px">✕</button></td></tr>';});h+='</table>';el.innerHTML=h;el.querySelectorAll('._qfDel').forEach(function(b){b.addEventListener('click',function(){_qfDel(+this.dataset.i);});});}
+function _qfLoadBg(e){var f=e.target.files&&e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(ev){var img=new Image();img.onload=function(){var mx=1100,sc=Math.min(1,mx/Math.max(img.width,img.height));var tc=document.createElement('canvas');tc.width=Math.max(1,Math.round(img.width*sc));tc.height=Math.max(1,Math.round(img.height*sc));tc.getContext('2d').drawImage(img,0,0,tc.width,tc.height);try{_qf.bgData=tc.toDataURL('image/jpeg',0.85);}catch(_e){_qf.bgData=ev.target.result;}var im2=new Image();im2.onload=function(){_qf.bg=im2;_qfRedraw();};im2.src=_qf.bgData;};img.src=ev.target.result;};rd.readAsDataURL(f);}
+function _qfOpen(){
+  _qf.lines=(STATE.data.quadroLines?JSON.parse(JSON.stringify(STATE.data.quadroLines)):[]);_qf.cur=null;_qf.bg=null;_qf.bgData=STATE.data.quadroBg||null;
+  var m=document.getElementById('qfModal');if(m)m.classList.add('show');
+  if(_qf.bgData){var img=new Image();img.onload=function(){_qf.bg=img;_qfRedraw();};img.src=_qf.bgData;}
+  var cv=_qfCanvas();if(cv&&!cv._qfWired){cv.addEventListener('click',_qfClick);cv._qfWired=true;}
+  _qfList();_qfStatus();setTimeout(_qfRedraw,40);
+}
+function _qfClose(){var m=document.getElementById('qfModal');if(m)m.classList.remove('show');}
+function _qfSaveToReport(){
+  var cv=_qfCanvas();if(!cv)return;
+  if(_qf.cur&&_qf.cur.points.length>=2){_qf.lines.push(_qf.cur);_qf.cur=null;}
+  _qfRedraw();
+  STATE.data.quadroLines=_qf.lines.map(function(L){return{points:L.points,sev:L.sev,label:L.label};});
+  STATE.data.quadroBg=_qf.bgData||null;
+  try{STATE.data.quadroImg=cv.toDataURL('image/jpeg',0.85);}catch(e){try{STATE.data.quadroImg=cv.toDataURL();}catch(_e){STATE.data.quadroImg=null;}}
+  persist();if(window._difUpdate)_difUpdate();
+  showToast('Quadro grafico salvato nel report.','ok');_qfClose();
+}
+
+/* ===== INIT (resiliente) ===== */
+document.addEventListener("DOMContentLoaded",function(){
+  restore();
+  var ana=loadAna();
+  $("anaPerito").textContent=(ana.perito&&ana.perito.nome)?ana.perito.nome:"n.d.";
+  $("anaComm").textContent=(ana.immobile&&(ana.immobile.Nome||ana.immobile.Indirizzo))?(ana.immobile.Nome||ana.immobile.Indirizzo):"n.d.";
+  var on=function(id,ev,fn){var el=document.getElementById(id);if(el)el.addEventListener(ev,fn);};
+  on("btnPrev","click",prev);on("btnNext","click",next);on("btnFinish","click",finish);
+  on("btnWord","click",openDocModal);on("btnPDF","click",function(){openDocModal();setTimeout(exportPDF,300);});
+  on("btnReport","click",addToReport);on("btnJSON","click",exportJSON);on("btnReset","click",resetAll);
+  on("btnAggancia","click",_mxAggancialMappa);
+  on("btnStrum","click",openStrum);on("strumCloseX","click",closeStrum);on("strumCloseBtn","click",closeStrum);on("strumAddBtn","click",_strumAdd);
+  on("btnQuadro","click",_qfOpen);on("qfCloseX","click",_qfClose);on("qfCloseBtn","click",_qfClose);
+  on("qfBgInput","change",_qfLoadBg);on("qfNew","click",_qfNew);on("qfUndo","click",_qfUndo);on("qfClose2","click",_qfCloseLine);on("qfClear","click",_qfClear);on("qfSave","click",_qfSaveToReport);
+  on("docCloseX","click",closeDocModal);on("docCloseBtn","click",closeDocModal);
+  on("btnDoWord","click",exportWord);on("btnDoPDF","click",exportPDF);
+  render();
+});
+window.MX_FESS={STATE:STATE,STEPS:STEPS,calcVerdict:calcVerdict,breCat:breCat};
+</script>
+<script src="_shared/mx-biblio.js" data-mod="fessurazioni" defer></script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

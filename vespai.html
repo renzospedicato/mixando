@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mixando Lab · Diagnosi Vespai Aerati v5.0</title>
+<style>
+:root{--mx-accent:#6d4c41;--mx-accent-strong:#3e2723;--mx-accent-soft:rgba(109,76,65,.12);
+--bg:#f5f1e8;--paper:#fff;--ink:#2c1810;--ink-soft:#6b5c4c;--ink-mute:#8b7355;
+--line:#e6e0d2;--ok:#1f7a4d;--warn:#b07820;--err:#a83232;--r:14px;
+--ff-serif:Georgia,"Cambria",serif;--ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+--ff-mono:ui-monospace,"SF Mono",Consolas,monospace;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:56px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:56px;display:flex;align-items:center;gap:14px;padding:0 20px;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%);box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04);backdrop-filter:saturate(1.15);border-bottom:3px solid var(--mx-accent)}
+.mx-bar .em{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong) 100%);color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12);text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;flex-shrink:0;position:relative}
+.mx-bar .meta{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--mx-accent-strong);display:inline-flex;align-items:center;gap:6px;line-height:1.2}
+.mx-bar .tag::before,.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,Cambria,Times,serif;font-weight:700;font-style:italic;font-size:16px;color:#1a1410;letter-spacing:.01em;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:7px 14px;border:1.5px solid var(--mx-accent);border-radius:9px;background:rgba(255,255,255,.65);transition:all .2s}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.20);transform:translateY(-1px)}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+.mx-logo-mini{height:32px;width:32px;border-radius:8px;background:#fff;padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.12);object-fit:contain;flex-shrink:0;display:none;border:1px solid var(--line)}
+.mx-bar.has-logo .em{display:none}
+@media (max-width:600px){.mx-bar{height:50px;padding:0 14px;gap:10px}body{padding-top:50px}.mx-bar .em{width:32px;height:32px;font-size:17px}.mx-bar .ti{font-size:13.5px}.mx-logo-center{height:26px;max-width:90px}}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 22px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:760px;color:var(--ink-soft);font-size:14px}
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
+.ana-strip .pc{padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700;color:var(--ink)}
+.ana-strip .pc .m{font-size:11.5px;color:var(--ink-mute);margin-top:2px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card .body{padding:16px 18px}
+.norm-strip{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 14px;background:#faf8f3;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;font-size:11.5px}
+.norm-strip .src{color:var(--ink-mute);font-style:italic}
+.norm-strip .src b{color:var(--ink);font-style:normal}
+.mode-btn{appearance:none;border:1.5px solid var(--mx-accent);background:#fff;color:var(--mx-accent-strong);padding:6px 12px;border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;letter-spacing:.04em}
+.mode-btn:hover{background:var(--mx-accent);color:#fff}
+.stepper{display:flex;flex-wrap:wrap;gap:5px;padding:10px;background:#fafaf6;border:1px solid var(--line);border-radius:10px;margin-bottom:14px}
+.step-chip{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink-mute);padding:6px 11px;border-radius:14px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .15s}
+.step-chip.done{border-color:var(--ok);color:var(--ok);background:#e8f5e9}
+.step-chip.active{color:#fff;border-color:#0a5b64;background:linear-gradient(180deg,#18a4b0,#0e7c87 55%,#0a5b64);box-shadow:0 2px 7px rgba(14,124,135,.34),inset 0 1px 0 rgba(255,255,255,.34);text-shadow:0 1px 1px rgba(0,0,0,.22)}
+.step-chip:hover:not(.active){border-color:var(--mx-accent);color:var(--mx-accent-strong);background:var(--mx-accent-soft)}
+.banner{margin:8px 0 14px;padding:10px 14px;border-radius:9px;font-size:12.5px;line-height:1.55}
+.banner.blue{background:#e3f2fd;border-left:4px solid #1976d2;color:#0d47a1}
+.banner.yellow{background:#fff8e1;border-left:4px solid #f9a825;color:#7d5a1f}
+.banner.green{background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20}
+.banner.red{background:#ffebee;border-left:4px solid var(--err);color:#7f0000}
+.banner.purple{background:#f4ecf7;border-left:4px solid #7d3c98;color:#4a235a}
+.banner strong{font-weight:800}
+.step-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.step-head h4{margin:0;font-family:var(--ff-serif);font-size:18px;color:var(--ink);font-weight:700}
+.step-head .ref{font-size:11px;color:var(--ink-mute);font-style:italic;background:#faf8f3;padding:4px 10px;border-radius:7px;border:1px solid var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em}
+.fld label .opz{font-weight:400;color:var(--ink-mute);font-size:10.5px}
+.fld input,.fld select,.fld textarea{padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13.5px;background:#fff;outline:none;width:100%;color:var(--ink)}
+.fld input[type=number]{font-family:var(--ff-mono)}
+.fld textarea{min-height:70px;resize:vertical;font-family:inherit}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.fld .calc{background:#faf8f3 !important;font-family:var(--ff-mono);font-weight:700}
+.tipo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:14px}
+.tipo-card{padding:14px;border:1.5px solid var(--line);background:#fff;border-radius:12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.tipo-card:hover{border-color:var(--mx-accent);background:#fff8f0;transform:translateY(-2px);box-shadow:0 4px 12px rgba(109,76,65,.15)}
+.tipo-card.sel{border-color:var(--mx-accent);background:linear-gradient(135deg,#fff8f0,#fff);border-width:2px;box-shadow:0 4px 16px rgba(109,76,65,.18)}
+.tipo-card .nome{font-family:var(--ff-serif);font-weight:700;color:var(--mx-accent-strong);margin-bottom:6px;font-size:14.5px;line-height:1.25}
+.tipo-card .desc{font-size:12px;color:var(--ink-soft);margin-bottom:8px;line-height:1.5}
+.tipo-card .ht{font-size:11px;color:var(--ink-mute)}
+.tipo-card .ht b{color:var(--ink);font-weight:700}
+.step-nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+.mx-shiny{appearance:none;border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;letter-spacing:.04em;padding:11px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap}
+.mx-shiny::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-shiny:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-shiny:hover::before{transform:translateX(130%)}
+.s-blue{background-image:linear-gradient(135deg,#42a5f5,#1565c0 45%,#0d47a1);box-shadow:0 3px 10px rgba(21,101,192,.42)}
+.s-gray{background-image:linear-gradient(135deg,#bdbdbd,#757575 45%,#424242);box-shadow:0 3px 10px rgba(97,97,97,.42)}
+.s-violet{background-image:linear-gradient(135deg,#ab47bc,#6a1b9a 45%,#3e0a5b);box-shadow:0 3px 10px rgba(106,27,154,.42)}
+.s-green{background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);box-shadow:0 3px 10px rgba(46,125,50,.42)}
+.s-accent{background-image:linear-gradient(135deg,#6d4c41,#3e2723);box-shadow:0 3px 10px rgba(109,76,65,.42)}
+.mx-toolbar{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin:18px 0 14px;overflow:hidden}
+.mx-toolbar-head{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),#fff);display:flex;align-items:center;gap:10px}
+.mx-toolbar-head .ico-wrap{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.mx-toolbar-head .title{flex:1}
+.mx-toolbar-head .title small{display:block;font-family:var(--ff-sans);font-style:italic;font-size:11.5px;color:var(--ink-mute);font-weight:500;margin-top:2px}
+.mx-toolbar-body{padding:14px 18px 16px}
+.mx-toolbar-inner{max-width:1080px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.mx-tb-btn{appearance:none;border:0;color:#fff;font:inherit;font-size:13px;font-weight:700;letter-spacing:.02em;padding:12px 18px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.12);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease,background-position .35s ease;background-size:180% 180%;background-position:0% 0%}
+.mx-tb-btn::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-tb-btn:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-tb-btn:hover::before{transform:translateX(130%)}
+.mx-tb-btn .ico{font-size:16px}
+.mx-tb-btn.tb-save{background-image:linear-gradient(135deg,#64b5f6,#1976d2 45%,#0d47a1)}
+.mx-tb-btn.tb-load{background-image:linear-gradient(135deg,#ffb74d,#f57c00 45%,#bf360c)}
+.mx-tb-btn.tb-compare{background-image:linear-gradient(135deg,#ba68c8,#7b1fa2 45%,#311b92)}
+.mx-tb-btn.tb-word{background-image:linear-gradient(135deg,#5a9bd8,#2b579a 45%,#0c2e5e)}
+.mx-tb-btn.tb-pdf{background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000)}
+.mx-tb-btn.tb-report{background-image:linear-gradient(135deg,#ffd54f,#f9a825 45%,#e65100);color:#3e2e00}
+.mx-tb-btn.tb-reset{background-image:linear-gradient(135deg,#9e9e9e,#616161 45%,#212121)}
+.verdict-box{padding:18px;border-radius:12px;margin-top:14px;border:2px solid;text-align:center}
+.verdict-box.ok{background:#e8f5e9;border-color:var(--ok);color:#1b5e20}
+.verdict-box.warn{background:#fff8e1;border-color:#f9a825;color:#7d5a1f}
+.verdict-box.err{background:#ffebee;border-color:var(--err);color:#7f0000}
+.verdict-box .lbl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.verdict-box .v{font-family:var(--ff-serif);font-style:italic;font-size:22px;font-weight:700;margin-bottom:4px}
+.verdict-box .s{font-size:12.5px;line-height:1.55}
+.metric-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.metric-table th,.metric-table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.metric-table thead th{background:linear-gradient(180deg,var(--mx-accent-soft),#fff);font-weight:700;color:var(--mx-accent-strong);border-bottom:2px solid var(--mx-accent);font-size:11.5px;letter-spacing:.04em}
+.metric-table .mono{font-family:var(--ff-mono);text-align:right}
+.metric-table .pos{color:var(--ok);font-weight:700}
+.metric-table .neg{color:var(--err);font-weight:700}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:28px 12px}
+.modal.show{display:flex}
+.modal-paper{background:#fff;max-width:840px;width:100%;border-radius:12px;box-shadow:0 18px 60px rgba(0,0,0,.4);overflow:hidden}
+.modal-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.modal-head h3{margin:0;font-family:var(--ff-serif);font-size:16px;color:var(--ink)}
+.modal-close{appearance:none;border:0;background:#f5f1e8;color:var(--ink);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:17px;font-weight:800}
+.modal-body{padding:24px 28px;font-family:var(--ff-serif);color:var(--ink);font-size:13px;line-height:1.6;max-height:70vh;overflow-y:auto}
+.modal-body h1{font-size:22px;margin:0 0 12px;font-weight:700;font-style:italic}
+.modal-body h2{font-size:15px;margin:22px 0 8px;color:var(--mx-accent-strong);border-bottom:1px solid #d8d3c4;padding-bottom:4px}
+.modal-body table{width:100%;border-collapse:collapse;margin:10px 0;font-size:11.5px}
+.modal-body table th,.modal-body table td{padding:5px 7px;border-bottom:1px solid var(--line);text-align:left}
+.modal-body table th{background:#faf8f3;font-weight:700;text-transform:uppercase;font-size:10.5px}
+.modal-actions{padding:12px 18px;border-top:1px solid var(--line);background:#faf8f3;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.dlg-list{max-height:50vh;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:#faf8f3}
+.dlg-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px}
+.dlg-empty{padding:30px;text-align:center;color:var(--ink-mute);font-style:italic;font-size:13px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:10px;font-size:13.5px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.32);z-index:300;opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);max-width:88vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:var(--ok)}.toast.err{background:var(--err)}.toast.warn{background:var(--warn)}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+@media (max-width:760px){.grid2,.grid3,.grid4,.ana-strip{grid-template-columns:1fr}}
+@media print{body * {visibility:hidden !important}.mx-print, .mx-print * {visibility:visible !important}.mx-print{position:absolute;left:0;top:0;width:100%}}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab"><img id="mxLogoPerito" class="mx-logo-mini" alt="Logo perito">
+  <div class="meta"><span class="tag">Patologia · Vespai aerati</span><h1 class="ti">Diagnosi Vespai Aerati · v5.0</h1></div>
+  <a class="back" href="suite.html">← Suite</a>
+</header>
+<main>
+  <section class="hero">
+    <h2 id="heroTitle">Diagnosi <em>Vespai Aerati</em></h2>
+    <p id="heroSub">Wizard 9 step (Tecnico) o 5 step (Operatore): contesto edificio, tipologia (5 sistemi costruttivi), rilievo geometrico UNI EN ISO 13370:2018 punto 7.2 e App. G, rilievo bocchette con valori consigliati, calcolo aerazione su 3 metodi normati, microclima vespaio, eventuale misura radon, verdetto e piano di monitoraggio.</p>
+    <div style="margin-top:14px"><a href="assistente.html?skill=vespai" target="_blank" rel="noopener" style="display:inline-block;background:linear-gradient(135deg,#0a7d8a,#0a5d66 55%,#06363c);color:#fff;font-weight:800;font-size:13.5px;text-decoration:none;padding:11px 18px;border-radius:10px;box-shadow:0 3px 10px rgba(10,93,102,.35)">💬 Assistente bocchette: dimmi le misure, te le calcolo</a></div>
+  </section>
+  <div class="ana-strip">
+    <div class="pc" id="anaPerito"><div class="h">Perito / tecnico</div><div class="n">n.d.</div><div class="m"></div></div>
+    <div class="pc" id="anaCliente"><div class="h">Committente / immobile</div><div class="n">n.d.</div><div class="m"></div></div>
+  </div>
+  <div style="text-align:center;margin-bottom:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+    <a href="locali-cantiere.html" target="_blank" style="font-size:12px;color:var(--mx-accent-strong);font-weight:700;text-decoration:none;border:1px solid var(--mx-accent);padding:6px 13px;border-radius:8px">⚙ Modifica in Locali-Cantiere</a>
+    <button type="button" class="mx-shiny s-green" id="btnReloadAna" style="padding:6px 13px;font-size:11.5px">↻ Ricarica anagrafica</button>
+  </div>
+  <article class="card">
+    <div class="body">
+      <div class="norm-strip">
+        <div class="src">📖 Riferimento: <b id="stepRef">n.d.</b></div>
+        <div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:var(--ink-mute)">Modalità:</span><button type="button" class="mode-btn" id="btnMode">⚡ Operatore (5 step)</button></div>
+      </div>
+      <div class="stepper" id="stepper"></div>
+      <div id="difLive"></div>
+      <div id="stepPanel"></div>
+      <div class="step-nav">
+        <button type="button" class="mx-shiny s-gray" id="btnPrev">← Indietro</button>
+        <button type="button" class="mx-shiny s-accent" id="btnNext">Avanti →</button>
+        <button type="button" class="mx-shiny s-violet" id="btnFinish" style="display:none">✓ Concludi diagnosi</button>
+      </div>
+    </div>
+  </article>
+  <div class="mx-toolbar" id="mxToolbar">
+    <h3 class="mx-toolbar-head"><span class="ico-wrap">💾</span><span class="title">Salvataggio &amp; esportazione<small>Salva l'analisi, ricarica un'analisi precedente o esporta in Word/PDF per la relazione tecnica</small></span></h3>
+    <div class="mx-toolbar-body">
+      <div class="mx-toolbar-inner">
+        <button type="button" class="mx-tb-btn tb-save"    id="btnSave"><span class="ico">💾</span><span class="label">Salva</span></button>
+        <button type="button" class="mx-tb-btn tb-load"    id="btnLoad"><span class="ico">📁</span><span class="label">Carica</span></button>
+        <button type="button" class="mx-tb-btn tb-compare" id="btnCompare"><span class="ico">⚖</span><span class="label">Confronta</span></button>
+        <button type="button" class="mx-tb-btn tb-word"    id="btnWord"><span class="ico">📝</span><span class="label">Salva Word</span></button>
+        <button type="button" class="mx-tb-btn tb-pdf"     id="btnPDF"><span class="ico">📄</span><span class="label">Stampa / PDF</span></button>
+        <button type="button" class="mx-tb-btn tb-report"  id="btnReport"><span class="ico">📦</span><span class="label">Al report</span></button>
+        <button type="button" class="mx-tb-btn" id="btnAggancia" style="background-image:linear-gradient(135deg,#26a69a,#00897b 45%,#004d40);box-shadow:0 3px 10px rgba(0,137,123,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)" onclick="_mxAggancialMappa()"><span class="ico">&#128205;</span><span class="label">Aggancia alla mappa</span></button>
+        <button type="button" class="mx-tb-btn tb-reset"   id="btnReset"><span class="ico">✕</span><span class="label">Reset</span></button>
+      </div>
+    </div>
+  </div>
+  <footer class="ft">Mixando v3 · <strong>Diagnosi Vespai Aerati v5.0</strong> · DM 5/7/1975 · DPR 380/2001 · UNI EN ISO 13370:2018 punto 7.2 e App. G · Reg.Igiene tipo Lombardia (DGR n. 4/45266 (25/07/1989)) · ARPAT Toscana (radon, 1500 mm²/m) · UNI EN 12599:2012 · UNI ISO 11665-4:2021 · D.Lgs 101/2020 · DPCM 11/01/2024 PNAR · ANSI/AARST CCAH-2020 · BRE BR 211:2023</footer>
+</main>
+<div class="modal" id="dlgModal"><div class="modal-paper" style="max-width:600px"><div class="modal-head"><h3 id="dlgTitle">Dialog</h3><button class="modal-close" id="dlgCloseBtn">&times;</button></div><div class="modal-body" id="dlgBody" style="padding:18px 20px;font-family:var(--ff-sans);max-height:70vh;overflow-y:auto"></div><div class="modal-actions" id="dlgActions"></div></div></div>
+<div class="modal" id="docModal"><div class="modal-paper"><div class="modal-head"><h3>📑 Anteprima documento</h3><button class="modal-close" id="modalCloseBtn">&times;</button></div><div class="modal-body mx-print" id="docBody"></div><div class="modal-actions"><button type="button" class="mx-shiny" id="btnDoExportWord" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#5a9bd8,#2b579a 45%,#0c2e5e)">📝 Scarica .doc</button><button type="button" class="mx-shiny" id="btnDoExportPDF" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000)">📄 Stampa / PDF</button><button type="button" class="mx-shiny s-blue" id="btnDoExportJSON" style="padding:8px 14px;font-size:12px">💾 .json</button><button type="button" class="mx-shiny s-gray" id="btnCloseModal" style="padding:8px 14px;font-size:12px">Chiudi</button></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+(function(){
+/* === MIXANDO v3 · Risanamento Tenuta: dataset embedded === */
+const SOL_TENUTA = [{nome:"Sigillatura giunti involucro con nastri butilici/EPDM",categoria:"Tenuta giunti",invasivita:"media",tempistica:"5-15 giorni",norma:"UNI EN ISO 9972:2015",normeSec:["UNI 11673-1:2017 (posa serramenti)", "UNI EN ISO 6946:2018"],sintesi:"Sigillatura sistematica dei punti critici dell'involucro (giunzione serramento-muratura, attraversamenti impianti, cordoli, cassonetti) con nastri butilici autoadesivi, guarnizioni EPDM, schiume PU espandenti a celle chiuse. Riduzione progressiva di n50.",limit:"Non sempre individuabili tutti i punti critici senza Blower Door + termografia + fumogeni. Verifica post-intervento obbligatoria."},{nome:"Sostituzione serramenti con classe permeabilit\u00e0 4",categoria:"Sostituzione componenti",invasivita:"alta",tempistica:"10-30 giorni",norma:"UNI EN 12207:2017",normeSec:["UNI EN 14351-1:2016 (CE marking)", "UNI 11673-1:2017", "D.M. 26/06/2015"],sintesi:"Sostituzione di serramenti vecchi con nuovi a triplo vetro Uw\u22641,0 W/m\u00b2K, classe permeabilit\u00e0 all'aria 4 (UNI EN 12207:2017, q<0,75 m\u00b3/h\u00b7m a 100 Pa), posa secondo nodo termo-igrometrico UNI 11673.",limit:"Costi elevati. Per beni vincolati richiede repliche custom o autorizzazione."},{nome:"Vespaio aerato per controllo umidit\u00e0 da terra",categoria:"Aerazione fondazione",invasivita:"alta (nuovo)",tempistica:"fase costruttiva",norma:"UNI EN ISO 13370:2018",normeSec:["Reg.Igiene Lombardia DGR 25/07/1989 n. 4/45266", "ARPAT 1500 mm\u00b2/m", "D.Lgs 101/2020 (radon)"],sintesi:"Realizzazione di vespaio ventilato (casseri a perdere, h\u226530 cm) sotto piano terra con bocchette di aerazione perimetrali calcolate per ricambio aria \u22651 vol/h. Effetto duale: controllo umidit\u00e0 + diluizione radon.",limit:"Costo aggiuntivo su piano terra. Manutenzione bocchette periodica."}];
+const DPI_TENUTA = [{"item": "Otoprotettori", "norma": "UNI EN 352-1:2021", "note": "Blower Door raggiunge 75-85 dB(A) (D.Lgs 81/08 art.190)"}, {"item": "Guanti meccanici", "norma": "UNI EN 388:2019", "note": "Manipolazione telaio Blower Door e accessori"}, {"item": "Casco", "norma": "UNI EN 397:2026", "note": "In presenza di soffitti bassi/condotti tecnici"}, {"item": "Protocollo ambienti confinati", "norma": "DPR 177/2011", "note": "Per ispezioni vespai aerati: rilevatori O2/H2S/CO + uomo a vista"}];
+const STRUMENTI_TENUTA = [{"nome": "Blower Door", "norma": "UNI EN ISO 9972:2015", "uso": "Misura n50 in pressione/depressione (doppia direzione obbligatoria)"}, {"nome": "Termografia", "norma": "UNI EN ISO 6781-1:2023", "uso": "Visualizzazione termica punti di infiltrazione aria"}, {"nome": "Fumogeni", "norma": "(complementare a Blower Door)", "uso": "Visualizzazione visiva flussi aria nei punti critici"}];
+
+function _renderRisanamentoTenuta(){
+  let html = '';
+  html += '<section data-pat="tenuta" data-sec="risanamento" style="margin-top:14px;padding:16px 18px;background:linear-gradient(180deg,#eef9f1,#fff);border:1px solid #bce5c8;border-left:5px solid #2e7d52;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#1b5532;font-family:Georgia,serif;font-size:16px">\ud83d\udee0 Risanamento consigliato</h4>';
+  html += '<p style="margin:0 0 10px;font-size:12px;color:#1b5532;font-style:italic">Tecniche normate applicabili. Verificare prerequisiti caso per caso.</p>';
+  html += '<div style="display:grid;gap:8px">';
+  SOL_TENUTA.forEach(s=>{
+    html += '<div style="background:#fff;border:1px solid #d8e8db;border-left:4px solid #d4a017;border-radius:10px;padding:11px 13px">'
+      + '<div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
+        + '<span style="font-size:9.5px;font-weight:800;letter-spacing:.14em;padding:3px 9px;border-radius:11px;background:linear-gradient(135deg,#f5d164,#d4a017);color:#3a2c00">\u2b50 APPLICABILE</span>'
+        + '<strong style="flex:1;min-width:200px;font-family:Georgia,serif;font-size:14px;color:#2c1810">'+s.nome+'</strong>'
+        + '<span style="font-size:10.5px;color:#fff;background:#475569;padding:2px 8px;border-radius:9px;font-family:JetBrains Mono,monospace">'+s.tempistica+'</span>'
+      + '</div>'
+      + '<div style="font-size:12.5px;color:#5d4a30;line-height:1.5;margin-bottom:5px">'+s.sintesi+'</div>'
+      + '<div style="font-family:JetBrains Mono,monospace;font-size:11px;color:#1b5532;background:#eef9f1;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:5px"><b>Norma cardine:</b> '+s.norma+'</div>'
+      + (s.normeSec.length?'<div style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#666;margin-bottom:5px"><b>Secondarie:</b> '+s.normeSec.join(' \u00b7 ')+'</div>':'')
+      + '<div style="font-size:11.5px;color:#7f1d1d;background:#fff5f3;padding:5px 9px;border-radius:6px;border-left:3px solid #c0392b"><b>\u26a0 Limitazioni:</b> '+s.limit+'</div>'
+    + '</div>';
+  });
+  html += '</div></section>';
+  html += '<section data-pat="tenuta" data-sec="dpi" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#fff5f3,#fff);border:1px solid #fdd;border-left:5px solid #c0392b;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#7f1d1d;font-family:Georgia,serif;font-size:15px">\ud83e\udd7a DPI (D.Lgs 81/2008)</h4><div style="display:grid;gap:6px">';
+  DPI_TENUTA.forEach(p=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #fdd;border-left:3px solid #c0392b;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+p.item+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#c0392b;background:#fff5f3;padding:2px 7px;border-radius:9px;margin-left:6px">'+p.norma+'</span><div style="font-size:11px;color:#5d1a14;margin-top:3px">'+p.note+'</div></div>';
+  });
+  html += '</div></section>';
+  html += '<section data-pat="tenuta" data-sec="strumenti" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#e3f3f5,#fff);border:1px solid #b3dde2;border-left:5px solid #0e7c87;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#075863;font-family:Georgia,serif;font-size:15px">\ud83d\udd2c Strumenti per verifica</h4><div style="display:grid;gap:6px">';
+  STRUMENTI_TENUTA.forEach(s=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #b3dde2;border-left:3px solid #0e7c87;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+s.nome+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#075863;background:#e3f3f5;padding:2px 7px;border-radius:9px;margin-left:6px">'+s.norma+'</span><div style="font-size:11px;color:#0f3a3f;margin-top:3px">'+s.uso+'</div></div>';
+  });
+  html += '</div></section>';
+  return html;
+}
+
+function loadLg(){try{var p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");var img=document.getElementById("mxLogoPerito");var bar=document.querySelector(".mx-bar");if(img&&p&&p.logoData){img.src=p.logoData;img.style.display="block";if(bar)bar.classList.add("has-logo");}else{if(img)img.style.display="none";if(bar)bar.classList.remove("has-logo");}}catch(e){}}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",loadLg);else loadLg();})();
+const DRAFT_KEY="mx2::vespai-draft",SAVES_KEY="mx2::vespai-saves";
+const TIPOLOGIE=[
+{id:'tradizionale_archetti',nome:'Vespaio tradizionale ad archetti in muratura',descrizione:"Archetti in mattoni pieni o pietra che sostengono il pavimento sospeso. Tecnica antica documentata nei trattati rinascimentali e nelle case rurali italiane.",altezza_tipica:'20-40 cm',fonte:'Trattatistica architettonica italiana (Alberti, Palladio); Carbonara G., "Trattato di restauro architettonico", UTET'},
+{id:'tavelloni_ca',nome:'Vespaio tradizionale a tavelloni in laterizio',descrizione:"Tavelloni in laterizio armato (o cls) appoggiati su muretti laterali in mattone, formando una camera d'aria continua. Diffuso in Italia anni 1950-1990.",altezza_tipica:'20-50 cm',fonte:'Manuali tecnici di costruzione tradizionale italiana (Hoepli, BE-MA editrice)'},
+{id:'cassero_plastico',nome:'Cassero a perdere in plastica riciclata',descrizione:'Casseri modulari in polipropilene riciclato a forma di cupola, posati a secco su magrone, riempiti di calcestruzzo per la soletta superiore.',altezza_tipica:'h da 5 a 70 cm',fonte:'Documentazione tecnica dei produttori di casseri a perdere'},
+{id:'cassero_perso_pannelli',nome:'Cassero a perdere a pannelli misti (ceramica/EPS)',descrizione:"Pannelli prefabbricati in laterizio o EPS (polistirene espanso) con funzione di cassero non recuperabile. Spesso integrano già l'isolamento termico.",altezza_tipica:'20-40 cm',fonte:'Schede tecniche produttori; manuali Casaclima e Passivhaus Institut'},
+{id:'platea_calda',nome:'Platea calda (alternativa al vespaio aerato)',descrizione:"NON è un vespaio aerato in senso stretto: è una platea piena con isolamento termico XPS posto sotto la soletta. Quando il rischio radon è basso e il terreno è asciutto, può essere alternativa più economica.",altezza_tipica:'15-30 cm (solo isolamento)',fonte:'Casaclima, schede tecniche (espertocasaclima.com); BRE BR 211 specifica condizioni di equivalenza'}
+];
+const SOGLIE_REGIONALI={
+'Lombardia':{livello:2,tipo:'norma',norma:'Reg. Locale di Igiene tipo Lombardia (strumento comunale su modello regionale; Titolo III aggiornato con DGR 25/07/1989 n. 4/45266), art. 3.2.6 «Intercapedini e vespai»: aerazione libera ≥ 1/100 della superficie del vespaio per ventilazione dal basso (grigliati a pavimento), riducibile a 1/200 per ventilazione perimetrale a finestrelle ove recepito dal Comune (es. Reg. Igiene Comune di Milano)',verifica_url:'https://comune.codogno.lo.it/wp-content/uploads/2023/03/036REG_igiene.pdf'},
+'Toscana':{livello:2,tipo:'raccomandazione',norma:'Raccomandazione tecnica ARPAT (mitigazione radon): superficie consigliata almeno 1500 mm2 per metro di muro perimetrale, non norma edilizia vincolante',verifica_url:'https://www.arpat.toscana.it/app/uploads/temi-ambientali/radioattivita/radon/cosa-fare/radon-tecniche-mitigazione-scheda2-ventilazione-vespaio.pdf'}
+};
+const REGIONI_IT=['Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria',"Valle d'Aosta",'Veneto'];
+function getSogliaRegionale(regione,A_m2,P_m){var s_perim=(A_m2/200)*1e6,s_grigl=(A_m2/100)*1e6,s_arpat=P_m*1500;if(regione==='Lombardia')return{livello:2,tipo:'norma',regione,soglia_perim:s_perim,soglia_grigl:s_grigl,soglia_arpat_radon:null,soglia_finale:s_grigl,fonte:SOGLIE_REGIONALI.Lombardia.norma,verifica_url:SOGLIE_REGIONALI.Lombardia.verifica_url};if(regione==='Toscana')return{livello:2,tipo:'raccomandazione',regione,soglia_perim:null,soglia_grigl:null,soglia_arpat_radon:s_arpat,soglia_finale:s_arpat,fonte:SOGLIE_REGIONALI.Toscana.norma,verifica_url:SOGLIE_REGIONALI.Toscana.verifica_url};return{livello:3,tipo:'conservativa',regione:regione||'(non specificata)',soglia_perim:s_perim,soglia_grigl:s_grigl,soglia_arpat_radon:s_arpat,soglia_finale:Math.max(s_grigl,s_arpat),fonte:'Soglia conservativa = max(A/100 Reg. Igiene tipo Lombardia verificato, ARPAT Toscana 1500 mm2/m). Per la relazione tecnica verificare il regolamento edilizio comunale.',verifica_url:null};}
+const STEPS_FULL=[
+{id:'contesto',label:'1. Contesto edificio',src:'DM 5/7/1975 + DPR 380/2001 art. 24 + D.Lgs 101/2020'},
+{id:'struttura',label:'2. Tipologia vespaio',src:'5 tipologie costruttive (casseri a perdere in plastica, tradizionali, CasaClima)'},
+{id:'geometria',label:'3. Rilievo geometrico',src:'UNI EN ISO 13370:2018 punto 7.2 e App. G (sup., perim., altezza)'},
+{id:'bocchette',label:'4. Rilievo bocchette',src:'Reg.Igiene Lombardia DGR n. 4/45266 (25/07/1989) + ARPAT Toscana'},
+{id:'calcolo',label:'5. Calcolo aerazione',src:'3 metodi: A/100 grigliata, A/200 perimetrale, ARPAT P×1500 mm²/m, interasse max 2,5 m'},
+{id:'microclima',label:'6. Microclima vespaio',src:'UNI EN ISO 7726:2026 (T+UR), UNI EN 12599:2012, UNI EN ISO 13788:2013 (Magnus-Tetens)'},
+{id:'radon',label:'7. Eventuale misura radon',src:'D.Lgs 101/2020 art.12/17 + UNI ISO 11665-4:2021 (dosimetri CR-39)'},
+{id:'verdetto',label:'8. Verdetto + risanamento',src:'NTC 2018 + DPCM 11/01/2024 PNAR + ANSI/AARST CCAH-2020 (SSD)'},
+{id:'monitoraggio',label:'9. Piano monitoraggio',src:'UNI EN ISO 6781-1:2023 termografia + dosimetri annuali (4 fasi)'}
+];
+const OPERATORE_IDS=['contesto','geometria','bocchette','calcolo','verdetto'];
+const STATE={cur:0,finished:false,mode:'tecnico',data:{tipoEdificio:'',destinazione:'',regione:'',comune:'',tipoVespaio:'',altezzaVespaio:null,superficie:null,perimetro:null,numBocchette:null,diametroBocchette:null,formaBocchette:'',supTotaleAperture:null,verificaMetodo1:null,verificaMetodo2:null,verificaInterasse:null,tAria:null,urAria:null,tParete:null,ricambiOra:null,radonMisura:null,conformita:'',noteCTU:'',noteMonit:''}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function showToast(m,k){const t=$("toast");t.textContent=m;t.className="toast show"+(k?" "+k:"");clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.className="toast",3200);}
+function fmtA(mm2){if(mm2==null||isNaN(mm2))return 'n.d.';return mm2.toFixed(0)+' mm² | '+(mm2/100).toFixed(1)+' cm² | '+(mm2/1e6).toFixed(4)+' m²';}
+function persist(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify({ts:Date.now(),state:STATE}));}catch(e){}}
+function restore(){try{const r=localStorage.getItem(DRAFT_KEY);if(!r)return;const d=JSON.parse(r);if(d&&d.state){Object.assign(STATE.data,d.state.data||{});STATE.cur=d.state.cur||0;STATE.finished=!!d.state.finished;STATE.mode=d.state.mode||'tecnico';}}catch(e){}}
+function setField(k,v){STATE.data[k]=v;persist();if(window._difUpdate)_difUpdate();}
+function getActiveSteps(){return STATE.mode==='operatore'?STEPS_FULL.filter(s=>OPERATORE_IDS.includes(s.id)):STEPS_FULL;}
+function loadAna(){let p={},i={};try{p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");}catch(e){}try{const l=JSON.parse(localStorage.getItem("mx2::locali-v1")||"{}");i=l.ana||{};}catch(e){}return{perito:p,immobile:i};}
+function renderAna(){const a=loadAna(),p=a.perito,c=a.immobile;const pe=$("anaPerito"),ce=$("anaCliente");pe.querySelector(".n").textContent=p.nome||"n.d.";pe.querySelector(".m").textContent=[p.titolo,p.tel,p.email].filter(Boolean).join(" · ");ce.querySelector(".n").textContent=c.Nome||"n.d.";ce.querySelector(".m").textContent=[c.Indirizzo,c.DataSopr].filter(Boolean).join(" · ");}
+function renderStepper(){const steps=getActiveSteps();let h="";steps.forEach((st,i)=>{let c="step-chip";if(i===STATE.cur)c+=" active";else if(i<STATE.cur)c+=" done";h+='<button type="button" class="'+c+'" data-i="'+i+'">'+esc(st.label)+'</button>';});$("stepper").innerHTML=h;$("stepper").querySelectorAll(".step-chip").forEach(el=>el.addEventListener("click",function(){STATE.cur=+this.dataset.i;persist();render();}));}
+/* 20/11/2026: limiti dei campi numerici. Prima il modulo prendeva per buono qualunque numero (indice VTT 10 su 6,
+   umidità 150 %, superfici negative). I limiti vengono da quello che il campo dichiara: la scala scritta nell'unità
+   («0-6»), le percentuali 0-100, le temperature da -60 a 100 °C, i decibel da -30 a 150, il pH 0-14, l'anno di
+   costruzione fino al 2100; tutte le altre grandezze non negative. Un valore fuori dai limiti non viene preso. */
+var _mxFuoriScala={};
+function _mxLimiti(f,l,u){
+  var s=String(u||""), lab=String(l||""), m=s.match(/^\s*(-?\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)\s*$/);
+  if(m) return [parseFloat(m[1].replace(",",".")), parseFloat(m[2].replace(",","."))];
+  if(/%/.test(s)) return [0,100];
+  if(/°C/.test(s)) return [-60,100];
+  if(/^dB/.test(s)) return [-30,150];
+  if(/\bpH\b/.test(lab)) return [0,14];
+  if(/^Anno /.test(lab)) return [0,2100];
+  return [0,null];
+}
+function _mxNumero(el){
+  var k=el.dataset.fld, box=el.parentNode?el.parentNode.querySelector(".mx-fuori"):null, msg="";
+  var v=(el.value==="")?null:parseFloat(el.value);
+  if(v!=null && isNaN(v)) v=null;
+  if(v!=null){
+    var lo=(el.dataset.min!==undefined&&el.dataset.min!=="")?parseFloat(el.dataset.min):null;
+    var hi=(el.dataset.max!==undefined&&el.dataset.max!=="")?parseFloat(el.dataset.max):null;
+    if((lo!=null&&v<lo)||(hi!=null&&v>hi)){
+      msg=(hi!=null)?("Fuori dai limiti: questo campo va da "+lo+" a "+hi+". Il valore non è stato preso."):("Questo campo non può essere minore di "+lo+". Il valore non è stato preso.");
+      _mxFuoriScala[k]={txt:el.value,msg:msg};
+      v=null;
+    }
+  }
+  if(!msg) delete _mxFuoriScala[k];
+  if(box){ box.textContent=msg; box.style.display=msg?"block":"none"; }
+  el.style.borderColor=msg?"#b3261e":""; el.style.background=msg?"#fdeceb":"";
+  return v;
+}
+/* la scritta resta mentre si scrive nello stesso passo; cambiando passo, azzerando o caricando si riparte puliti */
+function _mxPulisciFuori(){ var a=document.activeElement; if(!(a&&a.getAttribute&&a.getAttribute("data-fld"))) _mxFuoriScala={}; }
+function inpNum(f,l,u,h){const v=STATE.data[f];var L=_mxLimiti(f,l,u),fu=_mxFuoriScala[f];return '<div class="fld"><label>'+esc(l)+(u?' <span class="opz">('+esc(u)+')</span>':"")+'</label><input type="number" step="0.01" value="'+(fu?esc(fu.txt):(v==null?"":v))+'" placeholder="'+esc(h||"")+'" data-fld="'+f+'" data-kind="num"'+(L[0]!=null?' min="'+L[0]+'" data-min="'+L[0]+'"':'')+(L[1]!=null?' max="'+L[1]+'" data-max="'+L[1]+'"':'')+(fu?' style="border-color:#b3261e;background:#fdeceb"':'')+'><small class="mx-fuori" style="display:'+(fu?'block':'none')+';color:#b3261e;font-weight:700;font-size:11.5px;margin-top:3px">'+(fu?esc(fu.msg):'')+'</small></div>';}
+function inpInt(f,l,u,h){const v=STATE.data[f];var L=_mxLimiti(f,l,u),fu=_mxFuoriScala[f];return '<div class="fld"><label>'+esc(l)+(u?' <span class="opz">('+esc(u)+')</span>':"")+'</label><input type="number" step="1" value="'+(fu?esc(fu.txt):(v==null?"":v))+'" placeholder="'+esc(h||"")+'" data-fld="'+f+'" data-kind="int"'+(L[0]!=null?' min="'+L[0]+'" data-min="'+L[0]+'"':'')+(L[1]!=null?' max="'+L[1]+'" data-max="'+L[1]+'"':'')+(fu?' style="border-color:#b3261e;background:#fdeceb"':'')+'><small class="mx-fuori" style="display:'+(fu?'block':'none')+';color:#b3261e;font-weight:700;font-size:11.5px;margin-top:3px">'+(fu?esc(fu.msg):'')+'</small></div>';}
+function inpSel(f,l,opts){const v=STATE.data[f]||"";let h='<div class="fld"><label>'+esc(l)+'</label><select data-fld="'+f+'" data-kind="txt"><option value="">seleziona</option>';opts.forEach(o=>h+='<option value="'+esc(o[0])+'"'+(v===o[0]?" selected":"")+'>'+esc(o[1])+'</option>');return h+'</select></div>';}
+function inpTxA(f,l,h){const v=STATE.data[f]||"";return '<div class="fld"><label>'+esc(l)+'</label><textarea data-fld="'+f+'" data-kind="txt" placeholder="'+esc(h||"")+'">'+esc(v)+'</textarea></div>';}
+const panels={
+contesto:function(){const d=STATE.data;let h='<div class="step-head"><h4>1. Contesto dell\'edificio</h4><span class="ref">DM 5/7/1975 · DPR 380/2001 · D.Lgs 101/2020</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Tipo intervento, destinazione d\'uso e regione del cantiere, determina le soglie normative applicabili.</p>';h+='<div class="grid2">'+inpSel("tipoEdificio","Tipo di edificio",[["esistente","Edificio esistente (D.Lgs 101 art.12: 300 Bq/m³)"],["nuova","Nuova costruzione post 31/12/2024 (200 Bq/m³)"],["ristrutturazione","Ristrutturazione conservativa (DL Salva Casa 2024)"]])+inpSel("destinazione","Destinazione d'uso",[["residenziale","Residenziale (DM 5/7/1975)"],["luogo_lavoro","Luogo di lavoro (D.Lgs 101 art.17)"],["scuola","Scuola / pubblico (UNI/PdR 122:2022)"],["commerciale","Commerciale / uffici"]])+'</div>';h+='<div class="grid2" style="margin-top:10px">';const regOpts=REGIONI_IT.map(r=>[r,r+(SOGLIE_REGIONALI[r]?' ✓ norma verificata':'')]);h+=inpSel("regione","Regione del cantiere",regOpts);h+='<div class="fld"><label>Comune del cantiere</label><input type="text" value="'+esc(d.comune||'')+'" placeholder="es. Lecce" data-fld="comune" data-kind="txt"></div>';h+='</div>';if(d.regione){const hasSpec=!!SOGLIE_REGIONALI[d.regione];h+='<div class="banner '+(hasSpec?'green':'yellow')+'" style="margin-top:12px">';if(hasSpec)h+='<strong>📐 '+esc(d.regione)+', norma specifica verificata:</strong><br>'+esc(SOGLIE_REGIONALI[d.regione].norma)+' · <a href="'+SOGLIE_REGIONALI[d.regione].verifica_url+'" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">📖 verifica fonte</a>';else h+='<strong>⚠ '+esc(d.regione)+', regolamento comunale specifico</strong><br>Soglia applicata: conservativa nazionale (max tra Reg.Igiene Lombardia DGR n. 4/45266 (25/07/1989) e ARPAT Toscana 1500 mm²/m). Per la relazione tecnica verificare il regolamento edilizio del Comune.';h+='</div>';}h+='<div class="banner blue" style="font-size:11.5px;margin-top:10px">Le Regioni dovevano identificare le aree prioritarie entro il 21/02/2026 ai sensi del PNAR 2023-2032 (DPCM 11/01/2024); verificare lo stato di individuazione nella regione del cantiere.</div>';return h;},
+struttura:function(){const d=STATE.data;let h='<div class="step-head"><h4>2. Tipologia costruttiva del vespaio</h4><span class="ref">5 sistemi costruttivi verificati</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 8px">Identificazione tipologia per dimensionamento, calcolo termico UNI EN ISO 13370:2018 e analisi diagnostica.</p>';h+='<div class="tipo-grid">';TIPOLOGIE.forEach(function(t){const sel=(d.tipoVespaio===t.id);h+='<div class="tipo-card'+(sel?' sel':'')+'" data-tipoclick="'+t.id+'"><div class="nome">'+esc(t.nome)+'</div><div class="desc">'+esc(t.descrizione)+'</div><div class="ht"><b>h tipica:</b> '+esc(t.altezza_tipica)+'</div></div>';});h+='</div>';h+='<div style="margin-top:14px;max-width:400px">'+inpNum("altezzaVespaio","Altezza utile vespaio","m","es. 0.40")+'</div>';if(d.altezzaVespaio!=null&&!isNaN(d.altezzaVespaio)){const hV=+d.altezzaVespaio;if(hV<0.30)h+='<div class="banner red" style="margin-top:10px;max-width:520px">🚫 <strong>Altezza insufficiente</strong> ('+hV.toFixed(2)+' m), Sotto 0,30 m il vespaio non è ispezionabile e l\'aerazione naturale è inefficace.</div>';else if(hV<0.50)h+='<div class="banner yellow" style="margin-top:10px;max-width:520px">⚠ <strong>Altezza sotto soglia raccomandata</strong> ('+hV.toFixed(2)+' m), DGR Lombardia n. 4/45266 (25/07/1989) (prassi edilizia italiana) raccomanda ≥ 0,50 m. Per intervento radon, ANSI/AARST CCAH-2020 §3 raccomanda ≥ 0,60 m.</div>';else if(hV<0.60)h+='<div class="banner blue" style="margin-top:10px;max-width:520px">ℹ <strong>Altezza accettabile</strong> ('+hV.toFixed(2)+' m, ≥ 0,50 m DGR Lombardia / prassi edilizia italiana). Per intervento radon (SSD) ANSI/AARST CCAH-2020 §3 raccomanda ≥ 0,60 m.</div>';else h+='<div class="banner green" style="margin-top:10px;max-width:520px">✅ <strong>Altezza idonea</strong> ('+hV.toFixed(2)+' m, ≥ 0,60 m ANSI/AARST CCAH-2020 §3), adatta a ispezione, ventilazione e SSD.</div>';}return h;},
+geometria:function(){const d=STATE.data;let h='<div class="step-head"><h4>3. Rilievo geometrico</h4><span class="ref">UNI EN ISO 13370:2018 punto 7.2 e App. G</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Misure base per calcolo aerazione e stima coefficiente termico equivalente Ux.</p>';h+='<div class="grid2" style="max-width:700px">'+inpNum("superficie","Superficie vespaio A","m²","es. 100")+inpNum("perimetro","Perimetro edificio P","m","es. 40")+'</div>';if(d.superficie&&d.perimetro)h+='<div class="banner blue" style="margin-top:14px"><strong>Volume vespaio:</strong> '+(d.superficie*(d.altezzaVespaio||0.4)).toFixed(2)+' m³ (h='+(d.altezzaVespaio||0.4)+' m)<br><strong>Compattezza A/P:</strong> '+(d.superficie/d.perimetro).toFixed(2)+' m (più alto = più isolato dal terreno)</div>';return h;},
+bocchette:function(){const d=STATE.data;let h='<div class="step-head"><h4>4. Rilievo bocchette di ventilazione</h4><span class="ref">Reg.Igiene Lombardia + ARPAT</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Conteggio e dimensione delle bocchette esistenti per verifica di conformità.</p>';h+='<div class="grid3" style="max-width:700px">'+inpInt("numBocchette","Numero bocchette","","es. 12")+inpNum("diametroBocchette","Diametro singola","mm","es. 100")+inpSel("formaBocchette","Forma",[["circolare","Circolare (Ø)"],["rettangolare","Rettangolare (quadrata)"],["griglia","Griglia a pavimento (50% area)"]])+'</div>';if(d.numBocchette&&d.diametroBocchette&&d.formaBocchette){let aS=0;if(d.formaBocchette==='circolare')aS=Math.PI*Math.pow(d.diametroBocchette/2,2);else if(d.formaBocchette==='rettangolare')aS=Math.pow(d.diametroBocchette,2);else if(d.formaBocchette==='griglia')aS=Math.pow(d.diametroBocchette,2)*0.5;const tot=d.numBocchette*aS;STATE.data.supTotaleAperture=tot;h+='<div class="banner green" style="margin-top:14px"><strong>Superficie totale aperture rilevate:</strong> '+fmtA(tot);if(d.formaBocchette==='rettangolare')h+='<div style="font-size:11px;margin-top:4px;color:#1e6b3a">'+d.numBocchette+' × '+d.diametroBocchette+'² mm² (quadrato equivalente).</div>';if(d.formaBocchette==='griglia')h+='<div style="font-size:11px;margin-top:4px;color:#1e6b3a">'+d.numBocchette+' × '+d.diametroBocchette+'² × 50% (porosità: default ingegneristico / dato di targa).</div>';h+='</div>';}if(d.superficie&&d.perimetro){const sog=getSogliaRegionale(d.regione,d.superficie,d.perimetro);const D_def=100,A_s=Math.PI*Math.pow(D_def/2,2);const N_sug=Math.max(Math.ceil(sog.soglia_finale/A_s),Math.ceil(d.perimetro/2.5));const int_sug=d.perimetro/N_sug;h+='<div style="margin-top:20px;padding:16px;background:#fff8f0;border:2px dashed var(--mx-accent);border-radius:10px"><div style="font-weight:800;color:var(--mx-accent-strong);font-size:14px;margin-bottom:8px">💡 Valori consigliati dall\'algoritmo (basati su passo 1 + 3)</div><div style="font-size:13px;color:var(--ink);margin-bottom:10px">Per A=<b>'+d.superficie+'</b> m², P=<b>'+d.perimetro+'</b> m, regione: <b>'+esc(d.regione||'non specificata')+'</b> (livello '+sog.livello+'):</div><table class="metric-table"><tr><td><b>Numero bocchette</b></td><td class="mono" style="color:var(--mx-accent-strong);font-size:15px;font-weight:800">'+N_sug+'</td></tr><tr><td><b>Diametro</b></td><td class="mono">Ø '+D_def+' mm</td></tr><tr><td><b>Forma</b></td><td class="mono">circolare</td></tr><tr><td><b>Interasse medio</b></td><td class="mono">'+int_sug.toFixed(2)+' m</td></tr></table><button type="button" class="mx-shiny s-accent" id="btnApplyConsigliato" style="margin-top:10px;padding:9px 16px;font-size:12.5px">✓ Applica valori consigliati</button><div style="font-size:11px;color:var(--ink-mute);margin-top:8px;font-style:italic">Compila automaticamente i campi sopra. Modificabili a mano dopo.</div></div>';}else{h+='<div class="banner yellow" style="margin-top:18px">⚠ Compila prima il <strong>passo 3 (Rilievo geometrico)</strong>: superficie e perimetro, per vedere i valori consigliati dall\'algoritmo.</div>';}return h;},
+calcolo:function(){const d=STATE.data;let h='<div class="step-head"><h4>5. Calcolo aerazione, verifica + dimensionamento</h4><span class="ref">A/100 (Lombardia) · ARPAT radon · interasse</span></div>';if(!d.superficie||!d.perimetro){h+='<div class="banner yellow">⚠ Compila prima il <strong>passo 3 (Rilievo geometrico)</strong>: superficie e perimetro.</div>';return h;}const sog=getSogliaRegionale(d.regione,d.superficie,d.perimetro);const S1p=(d.superficie/200)*1e6,S1g=(d.superficie/100)*1e6,S2=(d.perimetro*1500);const S_ric=sog.soglia_finale;const D=100,A_s=Math.PI*Math.pow(D/2,2);const N_sup=Math.ceil(S_ric/A_s),N_int=Math.ceil(d.perimetro/2.5);const N_cons=Math.max(N_sup,N_int);const int_calc=d.perimetro/N_cons,S_calc=N_cons*A_s;const supAp=d.supTotaleAperture||0;const ok1=supAp>=S1g,ok2=supAp>=S2,ok3=d.numBocchette&&d.numBocchette>=N_int;STATE.data.verificaMetodo1=ok1;STATE.data.verificaMetodo2=ok2;STATE.data.verificaInterasse=ok3;const cl=sog.tipo==='norma'?'green':'yellow';const ico=sog.tipo==='norma'?'🇮🇹 Norma regionale verificata':(sog.tipo==='raccomandazione'?'⚠ Raccomandazione tecnica (non norma vincolante)':'⚠ Soglia conservativa');h+='<div class="banner '+cl+'"><strong>'+ico+' · '+esc(d.regione||'(regione non specificata)')+'</strong><br>'+esc(sog.fonte);if(sog.verifica_url)h+='<br><a href="'+sog.verifica_url+'" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">📖 verifica fonte</a>';h+='</div>';h+='<div style="padding:18px;background:#e8f5e9;border-left:4px solid var(--ok);border-radius:8px;margin:12px 0"><div style="font-weight:800;color:#1e6b3a;font-size:15px;margin-bottom:10px">📐 Dimensionamento consigliato (automatico)</div><table class="metric-table" style="background:#fff"><thead><tr><th>Parametro</th><th>Valore</th></tr></thead><tbody><tr><td><b>Numero bocchette</b></td><td class="mono" style="color:#1e6b3a;font-weight:800;font-size:15px">'+N_cons+'</td></tr><tr><td><b>Diametro standard</b></td><td class="mono">Ø '+D+' mm (range 80-120 ammesso)</td></tr><tr><td><b>Interasse medio</b></td><td class="mono">'+int_calc.toFixed(2)+' m (max norma: 2,50 m)</td></tr><tr><td><b>Sup. totale calcolata</b></td><td class="mono">'+fmtA(S_calc)+'</td></tr><tr><td><b>Sup. minima richiesta</b></td><td class="mono">'+fmtA(S_ric)+'</td></tr></tbody></table><div style="font-size:11px;color:var(--ink-mute);margin-top:8px;font-style:italic">Algoritmo: N = max(⌈S_richiesta/A_singola⌉, ⌈P/2,5⌉). Soglia conservativa = max tra A/100 (Reg. Igiene tipo Lombardia, verificato) e ARPAT (P×1500 mm²/m).</div></div>';h+='<div style="padding:14px;background:#fff;border:1px solid var(--line);border-radius:8px;margin-bottom:12px"><div style="font-weight:700;margin-bottom:10px">📚 Soglie normative, confronto</div><div style="font-size:12.5px;line-height:1.8"><div>· <b>A/100</b> (Reg. Igiene tipo Lombardia, art. 3.2.6, verificato): '+d.superficie.toFixed(0)+'/100 = '+(d.superficie/100).toFixed(2)+' m² = <b>'+fmtA(S1g)+'</b></div><div>· <b>A/200</b> (ventilazione perimetrale a finestrelle, Reg. Igiene Comune di Milano art. 3.2.6, ove recepito dal Comune): <b>'+fmtA(S1p)+'</b></div><div>· <b>Metodo 2 ARPAT</b> (Linee guida radon Toscana Scheda 2): S₂ = P × 1500 = '+d.perimetro.toFixed(0)+' × 1500 = <b>'+fmtA(S2)+'</b></div><div>· <b>Metodo 3 interasse</b> (prassi cantieristica): N ≥ P/2,5 = <b>'+N_int+' bocchette minimo</b></div><div style="margin-top:8px;padding:8px 10px;background:#faf8f3;border-left:3px solid var(--mx-accent);border-radius:4px;font-size:11px;color:var(--ink-soft)">ℹ <b>Nota ARPAT:</b> 1500 mm²/m = 15 cm²/m = 0,0015 m²/m. <a href="https://www.arpat.toscana.it/app/uploads/temi-ambientali/radioattivita/radon/cosa-fare/radon-tecniche-mitigazione-scheda2-ventilazione-vespaio.pdf" target="_blank" rel="noopener">PDF ARPAT</a></div><div style="margin-top:8px;padding:8px;background:#e8f5e9;border-radius:4px;font-size:12.5px"><b>✅ Soglia normativa applicata:</b> '+fmtA(S_ric)+' · '+(sog.livello===2?'<b>'+esc(d.regione)+'</b>':'soglia conservativa max')+'.</div></div></div>';if(supAp>0){const tutto=ok1&&ok2&&ok3;h+='<div style="padding:14px;background:#fff;border:1px solid var(--line);border-left:4px solid '+(tutto?'var(--ok)':'var(--err)')+';border-radius:8px"><div style="font-weight:800;margin-bottom:10px">🔍 Verifica dello stato esistente (dal passo 4)</div><div style="font-size:13px;line-height:1.8"><div>· Sup. aperture esistenti: <b>'+fmtA(supAp)+'</b></div><div>· Numero bocchette esistenti: <b>'+(d.numBocchette||0)+'</b></div><div style="margin-top:8px"></div><div>'+(ok1?'<span class="pos">✅</span>':'<span class="neg">❌</span>')+' Metodo 1 A/100 (Reg. Igiene tipo Lombardia): '+(ok1?'CONFORME':'NON CONFORME, mancano '+fmtA(S1g-supAp))+'</div><div>'+(ok2?'<span class="pos">✅</span>':'<span class="neg">❌</span>')+' Metodo 2 (ARPAT P×1500): '+(ok2?'CONFORME':'NON CONFORME, mancano '+fmtA(S2-supAp))+'</div><div>'+(ok3?'<span class="pos">✅</span>':'<span class="neg">❌</span>')+' Metodo 3 (interasse ≥'+N_int+'): '+(ok3?'CONFORME':'NON CONFORME, '+(N_int-(d.numBocchette||0))+' bocchette in più')+'</div>';if(!tutto)h+='<div style="margin-top:10px;padding:10px;background:#fff5f5;border-radius:4px;font-size:12.5px"><b>Intervento consigliato:</b> portare a '+N_cons+' bocchette Ø '+D+' mm con interasse '+int_calc.toFixed(2)+' m.</div>';h+='</div></div>';}else h+='<div class="banner blue"><strong>Suggerimento:</strong> compila il passo 4 (Bocchette) per confrontare lo stato esistente con il dimensionamento.</div>';return h;},
+microclima:function(){const d=STATE.data;let h='<div class="step-head"><h4>6. Microclima del vespaio</h4><span class="ref">UNI EN ISO 7726:2026 + UNI EN 12599:2012</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Misure T, UR, ricambi/h con datalogger termoigrometrico. Punto rugiada con Magnus-Tetens (UNI EN ISO 13788:2013 App. E).</p>';h+='<div class="grid4" style="max-width:760px">'+inpNum("tAria","T aria","°C","")+inpNum("urAria","UR aria","%","0-100")+inpNum("tParete","T parete (soletta sup.)","°C","")+inpNum("ricambiOra","Ricambi orari","n/h","target 1-2")+'</div>';if(d.tAria!=null&&d.urAria!=null&&d.urAria>0&&d.urAria<=100){const a=17.269,b=237.3;const alpha=Math.log(d.urAria/100)+(a*d.tAria)/(b+d.tAria);const dew=(b*alpha)/(a-alpha);h+='<div class="banner yellow" style="margin-top:14px"><strong>Punto di rugiada (Magnus-Tetens):</strong> '+dew.toFixed(1)+' °C';if(d.tParete!=null){if(d.tParete<dew)h+='<br><span style="color:#7f0000">⚠ T parete ('+d.tParete+'°C) &lt; punto di rugiada → <strong>CONDENSA SUPERFICIALE</strong> in atto sulla soletta.</span>';else h+='<br><span style="color:#1b5e20">✅ T parete sopra punto di rugiada, niente condensa attesa.</span>';}h+='</div>';}if(d.ricambiOra!=null){if(d.ricambiOra<1)h+='<div class="banner red"><strong>Ricambi insufficienti</strong> ('+d.ricambiOra+' n/h), target raccomandato 1-2 n/h (ASHRAE; ARPAT radon).</div>';else if(d.ricambiOra<2)h+='<div class="banner blue"><strong>Ricambi minimi soddisfatti</strong> ('+d.ricambiOra+' n/h). Per aree radon-prone target 2 n/h.</div>';else h+='<div class="banner green"><strong>Ricambi ottimali</strong> ('+d.ricambiOra+' n/h), adatto anche ad aree radon-prone.</div>';}return h;},
+radon:function(){const d=STATE.data;let h='<div class="step-head"><h4>7. Eventuale misura radon</h4><span class="ref">D.Lgs 101/2020 + UNI ISO 11665-4:2021</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Per aree radon-prone (zone prioritarie PNAR): misurazione integrata 2 semestri con dosimetro CR-39.</p>';h+='<div style="max-width:400px">'+inpNum("radonMisura","Concentrazione media annua","Bq/m³","es. 250")+'</div>';if(d.radonMisura!=null&&!isNaN(d.radonMisura)){const sg=(d.tipoEdificio==='nuova')?200:300;const cf=d.radonMisura<=sg;h+='<div class="banner '+(cf?'green':'red')+'" style="margin-top:14px"><strong>'+(cf?'✅ CONFORME':'⚠ NON CONFORME')+'</strong><br>Misura: '+d.radonMisura+' Bq/m³ vs soglia D.Lgs 101/2020: '+sg+' Bq/m³ ('+(d.tipoEdificio==='nuova'?'art.12 c.1 lett.b nuove':'art.12 c.1 lett.a esistenti / art.17 lavoro')+').</div>';}h+='<div class="banner purple" style="margin-top:14px"><strong>📖 Modulo dedicato:</strong> per l\'analisi radon completa (12-step wizard, ICRP 137, SSD/SMD), aprire il modulo <a href="radon.html" style="color:inherit;text-decoration:underline"><b>Gas Radon</b></a>.</div>';return h;},
+verdetto:function(){const d=STATE.data;const v=calcVerdict();let h='<div class="step-head"><h4>8. Verdetto + raccomandazioni di risanamento</h4><span class="ref">NTC 2018 + PNAR + ANSI/AARST CCAH-2020</span></div>';h+='<div class="verdict-box '+v.kind+'"><div class="lbl">Esito verifica</div><div class="v">'+esc(v.verdict)+'</div><div class="s">'+esc(v.summary)+'</div></div>';if(v.azioni&&v.azioni.length){h+='<div style="margin-top:14px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:10px"><div style="font-weight:800;color:var(--mx-accent-strong);margin-bottom:8px">🔧 Raccomandazioni di risanamento</div><ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.7">';v.azioni.forEach(function(a){h+='<li>'+esc(a)+'</li>';});h+='</ul></div>';}h+='<div style="margin-top:14px">'+inpTxA("noteCTU","Note tecniche / osservazioni","Annotazioni del professionista per la relazione tecnica")+'</div>';return h;},
+monitoraggio:function(){let h='<div class="step-head"><h4>9. Piano di monitoraggio post-intervento</h4><span class="ref">ANSI/AARST CCAH-2020 §10 + UNI EN ISO 6781-1:2023</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Verifica efficacia degli interventi nel tempo.</p>';h+='<div style="display:flex;flex-direction:column;gap:10px">';h+='<div class="banner green"><strong>Fase 1, Verifica immediata (&lt; 30 giorni)</strong><br>Termoigrometro datalogger 7-14 giorni. Verifica: ricambi/h ≥ 1, T+UR stabile, no condensa.</div>';h+='<div class="banner blue"><strong>Fase 2, Misura radon semestrale</strong><br>Dosimetri CR-39 esposti 6 mesi (semestre invernale o estivo). UNI ISO 11665-4:2021.</div>';h+='<div class="banner yellow"><strong>Fase 3, Misura annua di conferma</strong><br>2 dosimetri CR-39 in serie su 12 mesi (2 semestri). Verifica conformità D.Lgs 101/2020.</div>';h+='<div class="banner purple"><strong>Fase 4, Monitoraggio continuativo</strong><br>Ogni 5-10 anni o dopo ristrutturazioni. Termografia annuale (UNI EN ISO 6781-1:2023).</div>';h+='</div>';h+='<div style="margin-top:14px">'+inpTxA("noteMonit","Personalizzazioni del piano di monitoraggio","")+'</div>';return h;}
+};
+function calcVerdict(){const d=STATE.data;if(!d.superficie||!d.perimetro)return{verdict:"Dati insufficienti",kind:"warn",summary:"Compila almeno il passo 3 (Rilievo geometrico) e il passo 4 (Bocchette).",azioni:[]};const sog=getSogliaRegionale(d.regione,d.superficie,d.perimetro);var _db=d.diametroBocchette||0,_aS=0;if(d.formaBocchette==='circolare')_aS=Math.PI*Math.pow(_db/2,2);else if(d.formaBocchette==='rettangolare')_aS=_db*_db;else if(d.formaBocchette==='griglia')_aS=_db*_db*0.5;const supAp=(d.supTotaleAperture!=null)?d.supTotaleAperture:((d.numBocchette||0)*_aS);const _vm1=supAp>=(d.superficie/100)*1e6,_vm2=supAp>=(d.perimetro*1500),_vm3=!!(d.numBocchette&&d.numBocchette>=Math.ceil(d.perimetro/2.5));const conformeAer=supAp>0&&(sog.livello===2?(d.regione==='Lombardia'?_vm1:_vm2):(_vm1&&_vm2));const sR=(d.tipoEdificio==='nuova')?200:300;const radonOk=(d.radonMisura==null||isNaN(d.radonMisura)||d.radonMisura<=sR);const hOk=(d.altezzaVespaio==null||d.altezzaVespaio>=0.30);const mOk=(d.urAria==null||d.urAria<=80);const ok=conformeAer&&radonOk&&hOk&&mOk;let verdict,kind,summary;let azioni=[];if(supAp<=0){verdict="Verifica incompleta";kind="warn";summary="Sup. aperture esistenti non rilevata, compilare il passo 4 (Rilievo bocchette).";}else if(ok){verdict="VESPAIO CONFORME";kind="ok";summary="Aerazione conforme alla norma applicabile ("+esc(d.regione||'soglia conservativa')+"). Microclima adeguato. "+(d.radonMisura!=null?"Radon "+d.radonMisura+" Bq/m³ ≤ "+sR+" Bq/m³.":"");}else{verdict="VESPAIO NON CONFORME";kind="err";let pr=[];if(!conformeAer)pr.push("aerazione insufficiente");if(!radonOk)pr.push("radon "+d.radonMisura+" Bq/m³ > soglia "+sR);if(!hOk)pr.push("altezza vespaio "+d.altezzaVespaio+" m < 0,30 m (non ispezionabile)");if(!mOk)pr.push("UR "+d.urAria+"% > 80% (condensa + biodeteriogeni)");summary="Non conformità: "+pr.join("; ")+".";}if(!conformeAer&&supAp>0){const D=100,A_s=Math.PI*Math.pow(D/2,2);const N_c=Math.max(Math.ceil(sog.soglia_finale/A_s),Math.ceil(d.perimetro/2.5));azioni.push("Aerazione: portare a "+N_c+" bocchette Ø "+D+" mm (interasse "+(d.perimetro/N_c).toFixed(2)+" m), distribuite N-basso + S-alto per effetto camino.");}if(!radonOk){azioni.push("Radon sopra soglia: predisporre ventilazione meccanica forzata o SSD (Sub-Slab Depressurization, ANSI/AARST CCAH-2020) con verifica PFD.");azioni.push("Aprire il modulo Gas Radon per il piano completo di mitigazione.");}if(!mOk){azioni.push("UR > 80%: rischio condensa + biodeteriogeni. Verificare drenaggio terreno + aumentare ricambi/h (target 2 n/h). Aprire modulo Biodeteriogeni per valutazione muffe.");}if(!hOk){azioni.push("Altezza insufficiente: considerare alternative (cassero in plastica ad alto profilo, oppure platea calda con membrana radon-stop).");}if(d.urAria!=null&&d.tParete!=null&&d.tAria!=null&&d.urAria>=20&&d.tAria>=-10){const a=17.269,b=237.3,alpha=Math.log(d.urAria/100)+(a*d.tAria)/(b+d.tAria),dew=(b*alpha)/(a-alpha);if(d.tParete<dew)azioni.push("Condensa in atto sulla soletta superiore (T parete "+d.tParete+"°C < punto rugiada "+dew.toFixed(1)+"°C): aumentare ventilazione + isolamento intradosso.");}return{verdict,kind,summary,azioni,sog,conformeAer,radonOk,hOk,mOk,verificaMetodo1:_vm1,verificaMetodo2:_vm2,verificaInterasse:_vm3};}
+/* === MIXANDO v3 · Ragionamento differenziale dal vivo, riusa calcVerdict (296), niente soglie inventate === */
+function _difVespai(){
+  var d=STATE.data, v=calcVerdict(), H=[];
+  function add(nome,stato,motivo,fonte,riga){ H.push({nome:nome,stato:stato,motivo:motivo,fonte:fonte,riga:riga}); }
+  /* 1, Aerazione (calcVerdict 296: conformeAer) */
+  var supAp=d.supTotaleAperture||0;
+  if(supAp<=0) add('Aerazione del vespaio','na','sup. aperture non ancora rilevata (Step Bocchette)','DM 5/7/1975 · Reg.Igiene Lombardia · ARPAT','calcVerdict 296');
+  else if(d.verificaMetodo1==null&&d.verificaMetodo2==null) add('Aerazione del vespaio','na','apri lo Step Calcolo per eseguire le 3 verifiche normate','DM 5/7/1975 · ARPAT','calcolo 290');
+  else if(v.conformeAer) add('Aerazione del vespaio','ok','aperture conformi alla soglia applicabile (A/100 Lombardia · ARPAT P×1500 mm²/m · interasse ≤2,5 m)','Reg.Igiene Lombardia DGR n. 4/45266 (25/07/1989) · ARPAT','calcVerdict 296');
+  else add('Aerazione del vespaio','risk','aperture insufficienti rispetto alla soglia applicabile → integrare bocchette (vedi Step Calcolo)','Reg.Igiene Lombardia · ARPAT 1500 mm²/m','calcVerdict 296');
+  /* 2, Radon (calcVerdict 296: radonOk) */
+  var sR=(d.tipoEdificio==='nuova')?200:300;
+  if(d.radonMisura==null||isNaN(d.radonMisura)) add('Radon','na','non misurato (Step Radon), soglia applicabile '+sR+' Bq/m³','D.Lgs 101/2020 art.12/17','calcVerdict 296');
+  else if(d.radonMisura<=sR) add('Radon','ok',d.radonMisura+' Bq/m³ ≤ '+sR+' Bq/m³ → conforme','D.Lgs 101/2020 art.12/17','radon 292 / calcVerdict 296');
+  else add('Radon','risk',d.radonMisura+' Bq/m³ > '+sR+' Bq/m³ → mitigazione SSD (ANSI/AARST CCAH-2020) o ventilazione forzata','D.Lgs 101/2020 · DPCM 11/01/2024 PNAR','calcVerdict 296');
+  /* 3, Altezza ispezionabile (calcVerdict 296: hOk) */
+  if(d.altezzaVespaio==null) add('Altezza utile','na','non ancora rilevata (Step Tipologia)','DGR Lombardia · prassi edilizia italiana','calcVerdict 296');
+  else if(d.altezzaVespaio>=0.30) add('Altezza utile',(d.altezzaVespaio>=0.50?'ok':'mid'),d.altezzaVespaio+' m ≥ 0,30 m (ispezionabile)'+(d.altezzaVespaio<0.50?' ma < 0,50 m raccomandati (DGR Lombardia / prassi edilizia italiana)':''),'DGR Lombardia · ANSI/AARST CCAH-2020 §3 (radon)','struttura 287 / calcVerdict 296');
+  else add('Altezza utile','risk',d.altezzaVespaio+' m < 0,30 m → non ispezionabile, aerazione naturale inefficace','BRE BR 211:2023','calcVerdict 296');
+  /* 4, Microclima / UR (calcVerdict 296: mOk) */
+  if(d.urAria==null) add('Microclima (UR vespaio)','na','UR aria non ancora rilevata (Step Microclima)','UNI EN ISO 13788:2013','calcVerdict 296');
+  else if(d.urAria<=80) add('Microclima (UR vespaio)','ok','UR '+d.urAria+'% ≤ 80% → rischio condensa/biodeteriogeni contenuto','UNI EN ISO 13788:2013','calcVerdict 296');
+  else add('Microclima (UR vespaio)','risk','UR '+d.urAria+'% > 80% → condensa + rischio biodeteriogeni (modulo dedicato)','UNI EN ISO 13788:2013','calcVerdict 296');
+  return {v:v, hyps:H};
+}
+function _difEnsureStyle(){
+  if(document.getElementById('difLiveCss')) return;
+  var s=document.createElement('style'); s.id='difLiveCss';
+  s.textContent='#difLive .dif-box{border:1px solid #d8cfba;border-radius:12px;background:linear-gradient(180deg,#fffdf8,#f6f0e4);box-shadow:0 2px 10px rgba(40,30,10,.06);padding:11px 14px;margin:0 0 14px;font-size:12.5px}'
+   +'#difLive .dif-head{font-weight:800;color:#0a5d66;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}'
+   +'#difLive .dif-sub{font-weight:600;font-size:10.5px;color:#8a7f6c}'
+   +'#difLive .dif-verdict{border-left:4px solid;padding:6px 10px;border-radius:6px;background:#fff;margin-bottom:9px}'
+   +'#difLive .dif-pct{font-weight:800;margin-left:6px}#difLive .dif-summary{font-size:11.5px;color:#5a4d3f;margin-top:2px}'
+   +'#difLive .dif-hyps{display:flex;flex-direction:column;gap:5px}#difLive .dif-h{border-radius:7px;padding:5px 9px}'
+   +'#difLive .dif-badge{display:inline-block;font-size:10px;font-weight:800;color:#fff;padding:1px 7px;border-radius:20px;margin-right:5px}'
+   +'#difLive .dif-mot{font-size:11px;color:#5a4d3f;margin-top:2px}#difLive .dif-fonte{color:#8a7f6c;font-style:italic}'
+   +'#difLive .dif-foot{margin-top:9px;font-size:10px;color:#8a7f6c;border-top:1px solid #efe9dc;padding-top:6px}';
+  document.head.appendChild(s);
+}
+function _difHTML(R){
+  var v=R.v, kc={ok:'#1b8a4b',warn:'#e67e22',err:'#c0392b'}[v.kind]||'#6b5c4c';
+  var naz=(v.azioni&&v.azioni.length)?v.azioni.length+(v.azioni.length===1?' azione':' azioni'):'';
+  var h='<div class="dif-box"><div class="dif-head">🔬 Ragionamento differenziale <span class="dif-sub">dal vivo · sintesi del motore del modulo (calcVerdict)</span></div>';
+  h+='<div class="dif-verdict" style="border-color:'+kc+'"><div><b style="color:'+kc+'">'+esc(v.verdict)+'</b>'+(naz?'<span class="dif-pct">'+naz+'</span>':'')+'</div><div class="dif-summary">'+esc(v.summary)+'</div></div>';
+  h+='<div class="dif-sub" style="margin:0 0 6px">Criteri di conformità valutati sulle risposte (il verdetto richiede tutti conformi):</div>';
+  h+='<div class="dif-hyps">';
+  R.hyps.forEach(function(x){
+    var m={ok:['conforme','#1b8a4b','#e9f7ee'],mid:['accettabile','#0e7c87','#e9f6f6'],risk:['⚠ non conforme','#c0392b','#fdecea'],na:['da rilevare','#8a7f6c','#f2efe7']}[x.stato]||['n.d.','#888','#eee'];
+    h+='<div class="dif-h" style="background:'+m[2]+'"><span class="dif-badge" style="background:'+m[1]+'">'+m[0]+'</span><b>'+esc(x.nome)+'</b><div class="dif-mot">'+esc(x.motivo)+' <span class="dif-fonte">['+esc(x.fonte)+']</span></div></div>';
+  });
+  h+='</div>';
+  h+='<div class="dif-foot">Sintesi della logica del modulo (calcVerdict 296: il vespaio è conforme solo se aerazione ∧ radon ∧ altezza ∧ microclima sono tutti conformi). Nessuna soglia inventata: ogni voce riporta norma e riga. La conclusione resta del tecnico.</div></div>';
+  return h;
+}
+function _immobileId(){ try{ var l=JSON.parse(localStorage.getItem('mx2::locali-v1')||'{}'); var a=(l&&l.ana)||{}; var raw=((a.Indirizzo||'')+(a.Catasto||'')+(a.Nome||'')).trim(); if(!raw) return ''; return ((a.Indirizzo||'')+'§'+(a.Catasto||'')+'§'+(a.Nome||'')).toLowerCase(); }catch(e){ return ''; } }
+function _evidenzeHTML(){
+  var R=[]; try{ R=JSON.parse(localStorage.getItem('mx2::reports')||'[]'); }catch(e){}
+  if(!Array.isArray(R)||!R.length) return '';
+  var cur=_immobileId();
+  var seen={}, items=[];
+  for(var i=R.length-1;i>=0;i--){ var r=R[i]; if(cur && r.immobile && r.immobile!==cur) continue; var k=r.module||r.moduleId||r.moduleName; if(!k||seen[k]) continue; seen[k]=1; items.push(r); }
+  if(!items.length) return '';
+  var h='<div class="dif-box" style="margin-top:10px"><div class="dif-head">📎 Evidenze da altri moduli <span class="dif-sub">stesso immobile · raccolte nel Report</span></div><div class="dif-hyps">';
+  items.forEach(function(r){ h+='<div class="dif-h" style="background:#eef3f7"><b>'+esc(r.moduleName||r.module||'modulo')+'</b><div class="dif-mot">'+esc(r.summary||r.verdict||'n.d.')+'</div></div>'; });
+  h+='</div><div class="dif-foot">Evidenze raccolte per questo immobile (modulo Report). Valutale per confermare o escludere le cause concorrenti, la decisione resta del tecnico. Nessuna esclusione automatica.</div></div>';
+  return h;
+}
+function _difUpdate(){ var el=document.getElementById('difLive'); if(!el) return; try{ _difEnsureStyle(); el.innerHTML=_difHTML(_difVespai())+_evidenzeHTML(); }catch(e){ } }
+/* Stessa analisi differenziale, formattata per il report Word/PDF (riusa _difVespai) */
+function _difReport(){
+  try{
+    var R=_difVespai();
+    var stLab={ok:'Conforme',mid:'Accettabile',risk:'Non conforme',na:'Da rilevare'};
+    var x='<h2>Analisi dei criteri di conformità</h2>';
+    x+='<p style="font-size:11px;color:#5d4a30;font-style:italic">A supporto del verdetto: ogni criterio (aerazione, radon, altezza, microclima) deriva dalle stesse condizioni del verdetto automatico, con la norma di riferimento. La conclusione resta del tecnico.</p>';
+    x+='<table><tr><th>Criterio</th><th>Stato</th><th>Motivazione</th><th>Riferimento</th></tr>';
+    R.hyps.forEach(function(hh){ x+='<tr><td>'+esc(hh.nome)+'</td><td><strong>'+esc(stLab[hh.stato]||hh.stato)+'</strong></td><td>'+esc(hh.motivo)+'</td><td>'+esc(hh.fonte)+'</td></tr>'; });
+    x+='</table>';
+    return x;
+  }catch(e){ return ''; }
+}
+function attachInputs(){$("stepPanel").querySelectorAll("[data-fld]").forEach(el=>{const isNum=el.type==="number"||el.dataset.kind==="num"||el.dataset.kind==="int";const ev=(el.type==="checkbox"||el.tagName==="SELECT"||el.type==="radio"||isNum)?"change":"input";el.addEventListener(ev,function(){const k=this.dataset.fld,kind=this.dataset.kind;let v;if(kind==="num")v=_mxNumero(this);else if(kind==="int"){v=_mxNumero(this);if(v!=null)v=parseInt(v);}else v=this.value;setField(k,v);if(["regione","superficie","perimetro","numBocchette","diametroBocchette","formaBocchette","altezzaVespaio","tipoEdificio","radonMisura","tAria","urAria","tParete","ricambiOra"].includes(k))renderPanelOnly();});});$("stepPanel").querySelectorAll("[data-tipoclick]").forEach(el=>el.addEventListener("click",function(){setField("tipoVespaio",this.dataset.tipoclick);renderPanelOnly();}));const ba=$("btnApplyConsigliato");if(ba)ba.addEventListener("click",function(){const d=STATE.data;if(!d.superficie||!d.perimetro)return;const sog=getSogliaRegionale(d.regione,d.superficie,d.perimetro);const D=100,A_s=Math.PI*Math.pow(D/2,2);const N=Math.max(Math.ceil(sog.soglia_finale/A_s),Math.ceil(d.perimetro/2.5));setField("numBocchette",N);setField("diametroBocchette",D);setField("formaBocchette","circolare");renderPanelOnly();showToast("Valori consigliati applicati.","ok");});}
+function render(){_mxPulisciFuori();renderStepper();const steps=getActiveSteps();const s=steps[STATE.cur];$("stepRef").textContent=s?s.src:'n.d.';$("btnMode").textContent=STATE.mode==='operatore'?'🔬 Passa a Tecnico (9 step)':'⚡ Passa a Operatore (5 step)';$("stepPanel").innerHTML=panels[s.id]();attachInputs();const last=STATE.cur===steps.length-1;$("btnPrev").disabled=STATE.cur===0;$("btnNext").style.display=last?"none":"";$("btnFinish").style.display=last?"":"none";_difUpdate();}
+function renderPanelOnly(){const steps=getActiveSteps();const s=steps[STATE.cur];const f=document.activeElement;const fK=f?f.getAttribute("data-fld"):null;$("stepPanel").innerHTML=panels[s.id]();attachInputs();if(fK){const el=$("stepPanel").querySelector('[data-fld="'+fK+'"]');if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length);}catch(_){}}}_difUpdate();}
+function next(){const steps=getActiveSteps();if(STATE.cur<steps.length-1){STATE.cur++;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function prev(){if(STATE.cur>0){STATE.cur--;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function finish(){STATE.finished=true;persist();render();showToast("Diagnosi completata.","ok");setTimeout(()=>$("mxToolbar").scrollIntoView({behavior:"smooth",block:"center"}),250);}
+function setMode(m){STATE.mode=m;STATE.cur=0;persist();render();showToast("Modalità: "+(m==='operatore'?'Operatore (5 step)':'Tecnico (9 step)'),"ok");}
+function buildDocSections(d,v){const tipo=TIPOLOGIE.find(t=>t.id===d.tipoVespaio);let h="<h2>1. Contesto edificio</h2><table>";h+="<tr><th>Tipo edificio</th><td>"+esc(mxLab("tipoEdificio",d.tipoEdificio)||"n.d.")+"</td><th>Destinazione</th><td>"+esc(mxLab("destinazione",d.destinazione)||"n.d.")+"</td></tr>";h+="<tr><th>Regione</th><td>"+esc(mxLab("regione",d.regione)||"n.d.")+"</td><th>Comune</th><td>"+esc(d.comune||"n.d.")+"</td></tr>";h+="</table>";h+="<h2>2. Tipologia costruttiva</h2><table>";h+="<tr><th>Tipologia</th><td>"+esc(tipo?tipo.nome:"n.d.")+"</td></tr><tr><th>Altezza utile</th><td>"+(d.altezzaVespaio!=null?d.altezzaVespaio+" m":"n.d.")+"</td></tr>";if(tipo){h+="<tr><th>Descrizione</th><td>"+esc(tipo.descrizione)+"</td></tr><tr><th>h tipica</th><td>"+esc(tipo.altezza_tipica)+"</td></tr><tr><th>Fonte</th><td><em>"+esc(tipo.fonte)+"</em></td></tr>";}h+="</table>";h+="<h2>3. Rilievo geometrico (UNI EN ISO 13370:2018 punto 7.2 e App. G)</h2><table>";h+="<tr><th>Superficie A</th><td>"+(d.superficie!=null?d.superficie+" m²":"n.d.")+"</td><th>Perimetro P</th><td>"+(d.perimetro!=null?d.perimetro+" m":"n.d.")+"</td></tr>";if(d.superficie&&d.altezzaVespaio)h+="<tr><th>Volume</th><td>"+(d.superficie*d.altezzaVespaio).toFixed(2)+" m³</td><th>Compattezza A/P</th><td>"+(d.superficie/d.perimetro).toFixed(2)+" m</td></tr>";h+="</table>";h+="<h2>4. Rilievo bocchette</h2><table>";h+="<tr><th>N° bocchette</th><td>"+(d.numBocchette||"n.d.")+"</td><th>Diametro</th><td>"+(d.diametroBocchette!=null?d.diametroBocchette+" mm":"n.d.")+"</td></tr>";h+="<tr><th>Forma</th><td>"+esc(mxLab("formaBocchette",d.formaBocchette)||"n.d.")+"</td><th>Sup. totale</th><td>"+(d.supTotaleAperture?fmtA(d.supTotaleAperture):"n.d.")+"</td></tr>";h+="</table>";if(d.superficie&&d.perimetro){const sog=getSogliaRegionale(d.regione,d.superficie,d.perimetro);const S1p=(d.superficie/200)*1e6,S1g=(d.superficie/100)*1e6,S2=d.perimetro*1500;h+="<h2>5. Calcolo aerazione, 3 metodi</h2><table><tr><th>Metodo</th><th>Riferimento</th><th>Sup. richiesta</th><th>Conforme?</th></tr>";h+="<tr><td>A/100 (Reg. Igiene tipo Lombardia, art. 3.2.6)</td><td>verificato su fonte primaria</td><td>"+fmtA(S1g)+"</td><td>"+(v.verificaMetodo1?"✓":"✗")+"</td></tr>";h+="<tr><td>A/200 (ventilazione perimetrale)</td><td>Reg. Igiene Comune di Milano art. 3.2.6, ove recepito</td><td>"+fmtA(S1p)+"</td><td>n.d.</td></tr>";h+="<tr><td>2 ARPAT (P×1500)</td><td>ARPAT Toscana, radon</td><td>"+fmtA(S2)+"</td><td>"+(v.verificaMetodo2?"✓":"✗")+"</td></tr>";h+="<tr><td>3 interasse (P/2,5)</td><td>Prassi cantieristica</td><td>≥ "+Math.ceil(d.perimetro/2.5)+" bocchette</td><td>"+(v.verificaInterasse?"✓":"✗")+"</td></tr>";h+="<tr><th colspan='3'>Soglia applicata</th><td><strong>"+fmtA(sog.soglia_finale)+"</strong></td></tr>";h+="</table>";}h+="<h2>6. Microclima vespaio (UNI EN ISO 7726:2026)</h2><table>";h+="<tr><th>T aria</th><td>"+(d.tAria!=null?d.tAria+" °C":"n.d.")+"</td><th>UR aria</th><td>"+(d.urAria!=null?d.urAria+"%":"n.d.")+"</td></tr>";h+="<tr><th>T parete</th><td>"+(d.tParete!=null?d.tParete+" °C":"n.d.")+"</td><th>Ricambi/h</th><td>"+(d.ricambiOra!=null?d.ricambiOra+" n/h":"n.d.")+"</td></tr>";if(d.tAria!=null&&d.urAria!=null&&d.urAria>0&&d.urAria<=100){const a=17.269,b=237.3,alpha=Math.log(d.urAria/100)+(a*d.tAria)/(b+d.tAria),dew=(b*alpha)/(a-alpha);h+="<tr><th>Punto rugiada</th><td colspan='3'>"+dew.toFixed(1)+" °C "+(d.tParete!=null&&d.tParete<dew?"<strong style='color:#7f0000'>(CONDENSA)</strong>":"")+"</td></tr>";}h+="</table>";if(d.radonMisura!=null){const sgR=(d.tipoEdificio==='nuova')?200:300;h+="<h2>7. Misura radon (UNI ISO 11665-4:2021)</h2><table>";h+="<tr><th>Concentrazione</th><td>"+d.radonMisura+" Bq/m³</td><th>Soglia</th><td>"+sgR+" Bq/m³</td></tr>";h+="<tr><th>Esito</th><td colspan='3'><strong>"+(d.radonMisura<=sgR?"✓ CONFORME":"✗ NON CONFORME")+"</strong>, D.Lgs 101/2020 "+(d.tipoEdificio==='nuova'?"art.12 c.1 lett.b":"art.12 c.1 lett.a / art.17")+"</td></tr></table>";}h+="<h2>8. Verdetto + risanamento</h2><table><tr><th>Esito principale</th><td><strong>"+esc(v.verdict)+"</strong></td></tr><tr><th>Indicazione</th><td>"+esc(v.summary)+"</td></tr></table>";if(v.azioni&&v.azioni.length){h+="<h3>Raccomandazioni di risanamento</h3><ol>";v.azioni.forEach(function(a){h+="<li>"+esc(a)+"</li>";});h+="</ol>";}if(d.noteCTU)h+="<p><strong>Note tecniche:</strong> "+esc(d.noteCTU).replace(/\n/g,"<br>")+"</p>";h+=_difReport();h+="<h2>9. Piano di monitoraggio</h2><ul>";h+="<li><strong>Fase 1 (&lt;30 giorni):</strong> termoigrometro datalogger 7-14 giorni → ricambi/h, T+UR, condensa.</li>";h+="<li><strong>Fase 2 (semestrale):</strong> dosimetri CR-39 6 mesi (UNI ISO 11665-4:2021).</li>";h+="<li><strong>Fase 3 (annua):</strong> 2 dosimetri CR-39 in serie 12 mesi, verifica D.Lgs 101/2020.</li>";h+="<li><strong>Fase 4 (continuativa):</strong> ogni 5-10 anni + termografia (UNI EN ISO 6781-1:2023).</li>";h+="</ul>";if(d.noteMonit)h+="<p><strong>Personalizzazioni:</strong> "+esc(d.noteMonit).replace(/\n/g,"<br>")+"</p>";h+=_strumReport();h+='<h2>Riferimenti normativi consultabili</h2><ul style="font-size:11.5px">';h+='<li><strong>DM Sanità 5/7/1975</strong>, Requisiti igienico-sanitari abitazioni (modifica Istruzioni Min. 20/6/1896 art. 57+61).</li>';h+='<li><strong>DPR 380/2001 art. 24</strong>, Agibilità.</li>';h+='<li><strong>UNI EN ISO 13370:2018 punto 7.2 e App. G</strong>, Prestazione termica suspended floor with ventilated air space.</li>';h+='<li><strong>Reg.Locale Igiene tipo Regione Lombardia</strong> (DGR 25/07/1989 n. 4/45266), Aerazione vespai.</li>';h+='<li><strong>Linee guida ARPAT Toscana</strong>, Mitigazione radon: 1500 mm²/m perimetro.</li>';h+='<li><strong>UNI EN ISO 7726:2026</strong>, Microclima (strumenti di misura T/UR).</li>';h+='<li><strong>UNI EN 12599:2012</strong>, Ventilazione: prove di misura.</li>';h+='<li><strong>UNI EN ISO 13788:2013 App. E</strong>, Magnus-Tetens.</li>';h+='<li><strong>UNI ISO 11665-4:2021</strong>, Misura radon-222 integrata.</li>';h+='<li><strong>D.Lgs 101/2020 art. 12 + art. 17</strong>, Limiti radon: 300 / 200 Bq/m³.</li>';h+='<li><strong>DPCM 11/01/2024 PNAR 2023-2032</strong>.</li>';h+='<li><strong>ANSI/AARST CCAH-2020</strong>, Sub-Slab Depressurization.</li>';h+='<li><strong>BRE BR 211:2023</strong>, Radon protective measures (UK).</li>';h+='<li><strong>UNI EN ISO 6781-1:2023</strong>, Termografia.</li>';h+='</ul><p style="font-size:11px;font-style:italic;color:#6b5c4c;margin-top:8px">Normative verificate con doppio/triplo controllo su fonti istituzionali consultabili.</p>';return h;}
+function buildDoc(){const ana=loadAna(),p=ana.perito,c=ana.immobile,d=STATE.data;const v=calcVerdict();const today=new Date().toLocaleDateString("it-IT",{day:"2-digit",month:"long",year:"numeric"});let h="<h1>Diagnosi Vespai Aerati</h1>";h+='<p style="color:#6b5c4c;font-size:12px"><strong>Data:</strong> '+today+' · <strong>Modalità:</strong> '+(STATE.mode==='operatore'?'Operatore (5 step)':'Tecnico (9 step)')+'</p>';h+="<h2>Anagrafica</h2><table><tr><th>Perito</th><td>"+esc(p.nome||"n.d.")+"</td></tr><tr><th>Committente</th><td>"+esc(c.Nome||"n.d.")+"</td></tr>";if(c.Indirizzo)h+="<tr><th>Immobile</th><td>"+esc(c.Indirizzo)+"</td></tr>";h+="</table>";h+=buildDocSections(d,v);return h;}
+/* === #4 Tracciabilità strumentale, lettura registro condiviso mx2::strumentazione (editor nel modulo Risalita) === */
+function _strumGet(){ try{ var a=JSON.parse(localStorage.getItem('mx2::strumentazione')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function _strumReport(){
+  var list=_strumGet();
+  var x='<h2>Strumentazione utilizzata e tracciabilità</h2>';
+  if(!list.length) return x+'<p style="font-size:11.5px;color:#8a7f6c;font-style:italic">Strumentazione non ancora documentata. Compilare modello, matricola ed estremi di taratura nel modulo Risalita (toolbar &rarr; Strumentazione); il dato è condiviso tra i moduli.</p>';
+  x+='<table><tr><th>Strumento</th><th>Modello / marca</th><th>Matricola</th><th>Taratura</th><th>Norma di metodo</th></tr>';
+  list.forEach(function(r){ x+='<tr><td>'+esc(r.strumento||'n.d.')+'</td><td>'+esc(r.modello||'n.d.')+'</td><td>'+esc(r.matricola||'n.d.')+'</td><td>'+esc(r.taratura||'n.d.')+'</td><td>'+esc(r.norma||'n.d.')+'</td></tr>'; });
+  x+='</table>';
+  return x;
+}
+function openDocModal(){$("docBody").innerHTML=buildDoc();$("docModal").classList.add("show");}
+function closeDocModal(){$("docModal").classList.remove("show");}
+function exportWord(){const html='<!doctype html><html><head><meta charset="utf-8"><title>Diagnosi Vespai Aerati</title><style>body{font-family:Georgia,serif;font-size:11pt;padding:20px}h1{font-size:18pt;font-style:italic}h2{font-size:13pt;color:#3e2723;border-bottom:1pt solid #d8d3c4;padding-bottom:3pt}h3{font-size:11.5pt;color:#6d4c41;margin-top:14pt}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9.5pt}th,td{padding:4pt 6pt;border-bottom:1pt solid #e6e0d2;text-align:left}th{background:#faf8f3;font-weight:700}ul,ol{font-size:10pt;line-height:1.5}</style></head><body>'+buildDoc()+'</body></html>';const blob=new Blob([html],{type:"application/msword"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="vespai_"+new Date().toISOString().slice(0,10)+".doc";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500);showToast("Word salvato.","ok");}
+function exportPDF(){window.print();}
+function exportJSON(){const ana=loadAna();const b={schemaVersion:"vespai-v5.0",exportedAt:new Date().toISOString(),perito:ana.perito,immobile:ana.immobile,mode:STATE.mode,currentStep:STATE.cur,finished:STATE.finished,data:STATE.data,verdict:calcVerdict()};const blob=new Blob([JSON.stringify(b,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="vespai_"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500);showToast("JSON salvato.","ok");}
+function addToReport(){try{const r=JSON.parse(localStorage.getItem("mx2::reports")||"[]");r.push({id:"ve_"+Date.now(),module:"vespai",moduleName:"Diagnosi Vespai Aerati",version:"v5.0",createdAt:new Date().toISOString(),immobile:_immobileId(),summary:calcVerdict().verdict||"OK",data:STATE.data,htmlSnippet:buildDoc()});localStorage.setItem("mx2::reports",JSON.stringify(r));showToast("Aggiunto al Report.","ok");}catch(e){showToast("Errore: "+e.message,"err");}}
+function listSaves(){try{return JSON.parse(localStorage.getItem(SAVES_KEY)||"[]");}catch(e){return[];}}
+function writeSaves(a){localStorage.setItem(SAVES_KEY,JSON.stringify(a));}
+function fmtTs(iso){try{return new Date(iso).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch(e){return iso;}}
+function openDlg(t,b,a){$("dlgTitle").innerHTML=t;$("dlgBody").innerHTML=b;$("dlgActions").innerHTML=a;$("dlgModal").classList.add("show");}
+function closeDlg(){$("dlgModal").classList.remove("show");}
+function openSaveDialog(){const a=loadAna(),c=a.immobile;const dn=(c.Nome?c.Nome:"Diagnosi Vespai")+" del "+new Date().toLocaleDateString("it-IT");openDlg("💾 Salva",'<div class="fld"><label>Nome</label><input type="text" id="saveName" value="'+esc(dn)+'" maxlength="80"></div>','<button type="button" class="mx-shiny s-gray" id="dlgCancel" style="padding:8px 14px;font-size:12px">Annulla</button><button type="button" class="mx-shiny s-green" id="dlgConfirm" style="padding:8px 14px;font-size:12px">💾 Salva</button>');setTimeout(()=>{$("saveName").focus();$("saveName").select();},60);$("dlgCancel").addEventListener("click",closeDlg);$("dlgConfirm").addEventListener("click",function(){const nm=($("saveName").value||"").trim()||"Senza nome";const arr=listSaves();arr.push({id:"s_"+Date.now(),name:nm,ts:new Date().toISOString(),mode:STATE.mode,cur:STATE.cur,finished:STATE.finished,data:JSON.parse(JSON.stringify(STATE.data))});writeSaves(arr);closeDlg();showToast('Salvata: "'+nm+'"',"ok");});}
+function openLoadDialog(){const arr=listSaves().sort((a,b)=>b.ts.localeCompare(a.ts));let body=!arr.length?'<div class="dlg-empty">Archivio vuoto.</div>':'<div class="dlg-list">'+arr.map(s=>'<div class="dlg-item"><div style="flex:1"><div style="font-weight:700">'+esc(s.name)+'</div><div style="font-size:11px;font-family:monospace;color:#8b7355">'+fmtTs(s.ts)+'</div></div><button type="button" class="mx-shiny s-blue" data-load="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px">📥</button><button type="button" class="mx-shiny" data-del="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px;background-image:linear-gradient(135deg,#ef5350,#c62828);box-shadow:0 3px 10px rgba(198,40,40,.42)">🗑</button></div>').join("")+'</div>';openDlg("📁 Carica",body,'<button type="button" class="mx-shiny s-gray" id="dlgClose2" style="padding:8px 14px;font-size:12px">Chiudi</button>');$("dlgClose2").addEventListener("click",closeDlg);$("dlgBody").querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",function(){const s=listSaves().find(x=>x.id===this.dataset.load);if(!s||!confirm('Caricare "'+s.name+'"?'))return;STATE.cur=s.cur||0;STATE.mode=s.mode||'tecnico';STATE.finished=!!s.finished;STATE.data=JSON.parse(JSON.stringify(s.data));persist();render();closeDlg();showToast("Caricata.","ok");}));$("dlgBody").querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",function(){if(!confirm("Eliminare?"))return;writeSaves(listSaves().filter(x=>x.id!==this.dataset.del));openLoadDialog();}));}
+/* === Etichette leggibili delle risposte a scelta (19/11/2026) ===
+   Nel Word, nel PDF e nel Report le risposte a scelta uscivano col valore interno (es. «fascia_oriz», «mattone_pieno»).
+   mxLab() restituisce l'etichetta che si legge a schermo, presa dagli stessi pannelli del modulo. */
+var _MXLAB=null,_MXFLD=null;
+function _mxLabMap(){
+  if(_MXLAB) return _MXLAB; _MXLAB={}; _MXFLD={};
+  try{ var box=document.createElement("div");
+    Object.keys(panels).forEach(function(id){ try{ box.innerHTML=panels[id](); }catch(e){ return; }
+      box.querySelectorAll("[data-fld]").forEach(function(el){ var k=el.getAttribute("data-fld"); var m=_MXLAB[k]=_MXLAB[k]||{};
+        if(el.tagName==="SELECT"){ for(var i=0;i<el.options.length;i++){ if(el.options[i].value) m[el.options[i].value]=el.options[i].textContent; } }
+        else if(el.type==="radio"||el.type==="checkbox"){ var l=el.closest("label"); if(l&&el.value) m[el.value]=l.textContent; }
+        if(!_MXFLD[k]){ var f=el.closest(".fld"); var fl=f&&f.querySelector("label"); if(fl&&!fl.querySelector("input")) _MXFLD[k]=fl.textContent.replace(/\s+/g," ").trim(); else if(el.type==="checkbox"&&el.closest("label")) _MXFLD[k]=el.closest("label").textContent.replace(/^[^0-9A-Za-zÀ-ÿ(]+/,"").replace(/\s+/g," ").trim(); }
+      });
+    });
+  }catch(e){}
+  return _MXLAB;
+}
+function mxLab(campo,valore){
+  if(Array.isArray(valore)) return valore.map(function(x){ return mxLab(campo,x); });
+  if(valore==null||valore==="") return valore;
+  var m=_mxLabMap()[campo], l=m&&m[valore];
+  if(!l) return valore;
+  return String(l).replace(/^[^0-9A-Za-zÀ-ÿ<>≤≥(]+/,"").replace(/\s+/g," ").trim()||valore;
+}
+/* === Confronto fra due diagnosi salvate (19/11/2026) ===
+   Prima il tasto «Confronta» mostrava un avviso e apriva l'archivio di «Carica». Ora si scelgono due salvataggi
+   e una tabella li mette a fianco, con i campi diversi in arancio (come nel modulo Risalita). */
+function _mxFldName(k){ _mxLabMap(); return (_MXFLD&&_MXFLD[k])||String(k).replace(/_/g," ").replace(/([a-z0-9])([A-Z])/g,"$1 $2"); }
+function _mxCmpVal(k,v){
+  if(v===true) return "sì"; if(v===false) return "no";
+  if(v==null||v===""||(Array.isArray(v)&&!v.length)) return "n.d.";
+  if(Array.isArray(v)) return v.map(function(x){ return (x!==null&&typeof x==="object")?JSON.stringify(x):String(mxLab(k,x)); }).join(", ");
+  if(typeof v==="object") return JSON.stringify(v);
+  return String(mxLab(k,v));
+}
+function _mxRenderCmp(a,b){
+  var da=a.data||{}, db=b.data||{}, chiavi=[], righe="", diversi=0, tot=0, st="padding:4px 6px;border-bottom:1px solid #e6e0d2;text-align:left;vertical-align:top";
+  Object.keys(da).concat(Object.keys(db)).forEach(function(k){ if(chiavi.indexOf(k)<0) chiavi.push(k); });
+  chiavi.forEach(function(k){ var va=_mxCmpVal(k,da[k]), vb=_mxCmpVal(k,db[k]); if((va==="n.d."||va==="no")&&(vb==="n.d."||vb==="no")) return; tot++; var dif=(va!==vb); if(dif) diversi++;
+    righe+='<tr'+(dif?' style="background:#fff3e0"':'')+'><th style="'+st+';font-size:11px">'+esc(_mxFldName(k))+'</th><td style="'+st+'">'+esc(va)+'</td><td style="'+st+'">'+esc(vb)+'</td></tr>'; });
+  return '<div style="font-size:12.5px;margin-bottom:6px"><strong>'+(diversi?("Campi diversi: "+diversi+" su "+tot):("Nessuna differenza nei "+tot+" campi compilati"))+'</strong></div><table style="width:100%;border-collapse:collapse;font-size:11.5px"><tr><th style="'+st+'">Campo</th><th style="'+st+'">A · '+esc(a.name)+'<br><span style="font-weight:400">'+fmtTs(a.ts)+'</span></th><th style="'+st+'">B · '+esc(b.name)+'<br><span style="font-weight:400">'+fmtTs(b.ts)+'</span></th></tr>'+righe+'</table>';
+}
+function openCompareDialog(){
+  var arr=listSaves().slice().sort(function(x,y){ return String(y.ts).localeCompare(String(x.ts)); });
+  if(arr.length<2){ openDlg("⚖ Confronto",'<div class="dlg-empty">Servono almeno 2 diagnosi salvate con «Salva». Attualmente: '+arr.length+'.</div>','<button type="button" class="mx-shiny s-gray" id="dlgClose3" style="padding:8px 14px;font-size:12px">Chiudi</button>'); document.getElementById("dlgClose3").addEventListener("click",closeDlg); return; }
+  function opts(sel){ return arr.map(function(s,i){ return '<option value="'+esc(s.id)+'"'+(i===sel?" selected":"")+'>'+esc(s.name)+' · '+fmtTs(s.ts)+'</option>'; }).join(""); }
+  var stile="width:100%;padding:9px 11px;border:1px solid #d8d3c4;border-radius:8px;font:inherit;font-size:13px;background:#fff";
+  openDlg("⚖ Confronto diagnosi",'<div style="font-size:12.5px;margin-bottom:10px">Scegli due diagnosi salvate e premi «Confronta»: i campi diversi escono in arancio.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label style="display:block;font-size:11.5px;font-weight:700;margin-bottom:4px">Diagnosi A</label><select id="cmpA" style="'+stile+'">'+opts(0)+'</select></div><div><label style="display:block;font-size:11.5px;font-weight:700;margin-bottom:4px">Diagnosi B</label><select id="cmpB" style="'+stile+'">'+opts(1)+'</select></div></div><div id="cmpResult" style="margin-top:14px"></div>','<button type="button" class="mx-shiny s-gray" id="dlgClose4" style="padding:8px 14px;font-size:12px">Chiudi</button><button type="button" class="mx-shiny" id="dlgDoCompare" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#ffa726 0%,#ef6c00 45%,#bf360c 100%)">⚖ Confronta</button>');
+  document.getElementById("dlgClose4").addEventListener("click",closeDlg);
+  document.getElementById("dlgDoCompare").addEventListener("click",function(){ var all=listSaves(); var a=all.filter(function(s){return s.id===document.getElementById("cmpA").value;})[0], b=all.filter(function(s){return s.id===document.getElementById("cmpB").value;})[0]; if(!a||!b) return; document.getElementById("cmpResult").innerHTML=_mxRenderCmp(a,b); });
+}
+function resetDiagnosis(){if(!confirm("Azzerare la diagnosi corrente?"))return;Object.keys(STATE.data).forEach(k=>{const v=STATE.data[k];if(Array.isArray(v))STATE.data[k]=[];else if(typeof v==="number"||v===null)STATE.data[k]=null;else STATE.data[k]="";});STATE.cur=0;STATE.finished=false;persist();render();showToast("Azzerata.","ok");}
+document.addEventListener("DOMContentLoaded",function(){restore();renderAna();render();$("btnPrev").addEventListener("click",prev);$("btnNext").addEventListener("click",next);$("btnFinish").addEventListener("click",finish);$("btnMode").addEventListener("click",function(){setMode(STATE.mode==='operatore'?'tecnico':'operatore');});$("btnReloadAna").addEventListener("click",function(){renderAna();showToast("Ricaricata.","ok");});$("btnSave").addEventListener("click",openSaveDialog);$("btnLoad").addEventListener("click",openLoadDialog);$("btnCompare").addEventListener("click",openCompareDialog);$("btnReset").addEventListener("click",resetDiagnosis);$("dlgCloseBtn").addEventListener("click",closeDlg);$("dlgModal").addEventListener("click",function(e){if(e.target===this)closeDlg();});$("btnWord").addEventListener("click",openDocModal);$("btnPDF").addEventListener("click",function(){openDocModal();setTimeout(exportPDF,300);});$("btnReport").addEventListener("click",addToReport);$("modalCloseBtn").addEventListener("click",closeDocModal);$("btnCloseModal").addEventListener("click",closeDocModal);$("btnDoExportWord").addEventListener("click",exportWord);$("btnDoExportPDF").addEventListener("click",exportPDF);$("btnDoExportJSON").addEventListener("click",exportJSON);$("docModal").addEventListener("click",function(e){if(e.target===this)closeDocModal();});});
+window.MX_VESPAI={STATE,STEPS_FULL,TIPOLOGIE,SOGLIE_REGIONALI,getSogliaRegionale,calcVerdict,setMode};
+</script>
+<script>
+/* === MX SNAPSHOT IMPORTER (auto-install, Mixando v3) ===
+ * Aggiunge bottone "Apri snapshot" accanto al "JSON" della toolbar.
+ * Importa .json esportato dallo stesso modulo, ricarica la pagina.
+ * Riconosce pattern lite (STATE.cur/finished/data → *-draft) e
+ * pattern rich (state diretto → *-vN). NON modifica codice esistente.
+ * ====================================================== */
+(function(){
+  'use strict';
+  if (window.__mxSnapImportInstalled) return;
+  window.__mxSnapImportInstalled = true;
+  function findHostBtn(){
+    return document.querySelector('button[data-act="export-json"]')
+        || document.getElementById('btnJSON')
+        || document.getElementById('btnExportJSON')
+        || document.querySelector('.mx-tb-btn.tb-save');
+  }
+  function makeBtn(){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mx-tb-btn tb-load';
+    b.id = 'btnOpenSnap';
+    b.title = 'Apri uno snapshot .json esportato in precedenza da questo modulo (sostituirà i dati correnti).';
+    b.innerHTML = '<span class="ico">\u{1F4C2}</span><span class="label">Apri snapshot</span>';
+    return b;
+  }
+  function detectModuleKeys(){
+    /* 19/11/2026: solo le chiavi di QUESTO modulo, cioè quelle che il modulo nomina nel suo codice.
+       Prima prendeva le chiavi di tutti i moduli e lo snapshot finiva nella bozza del primo trovato
+       (un file dei Sali, aperto dal modulo Sali, sovrascriveva la bozza della Risalita). */
+    var src = '';
+    try { [].forEach.call(document.scripts, function(s){ if (!s.src) src += s.textContent; }); } catch(_){}
+    var condivise = {'mx2::perito':1,'mx2::periti-v2':1,'mx2::locali-v1':1,'mx2::reports':1,'mx2::indagini':1,'mx2::strumentazione':1,'mx2::chartTheme':1,'mx2::showPhysicalScale':1,'mx2::report-meta':1,'mx2::last-backup':1};
+    var mie = {}, re = /mx2::[A-Za-z0-9_-]+/g, m;
+    while ((m = re.exec(src))) { if (!condivise[m[0]]) mie[m[0]] = 1; }
+    return Object.keys(mie);
+  }
+  /* 20/11/2026: nomi con cui un file dichiara di venire da questo modulo (in «moduleId», in «module» o nella
+     sigla di «schemaVersion», per esempio 'sali-v3.1'). Servono a non aprire qui il file di un altro modulo. */
+  var _MX_MIEI = ['vespai'];
+  function _mxFileDiAltroModulo(obj){
+    if (!obj || typeof obj !== 'object') return '';
+    if (typeof obj._format === 'string' && obj._format.indexOf('mixando-backup') === 0) return 'Questo file è un backup generale di Mixando: si ripristina dalla pagina «Backup tecnico», non da qui.';
+    var d = obj.moduleId || obj.module || (typeof obj.schemaVersion === 'string' ? obj.schemaVersion : '');
+    if (typeof d !== 'string' || !d) return '';   /* il file non dice da dove viene: lo giudicano i controlli più sotto */
+    var n = d.toLowerCase().replace(/-v[\d.]+$/, '').replace(/_/g, '-');
+    if (_MX_MIEI.indexOf(n) >= 0) return '';
+    return 'Questo file viene da un altro modulo (' + (obj.moduleName || d) + ').';
+  }
+  function pickTargetKey(keys, payload){
+    var draftKeys = keys.filter(function(k){ return /-draft$/.test(k); });
+    var liteHint = payload && (payload.currentStep !== undefined || payload.data !== undefined);
+    if (liteHint && draftKeys.length){ return { key: draftKeys[0], kind: 'lite' }; }
+    var primaryKeys = keys.filter(function(k){ return !/-(saves|draft|prefs)$/.test(k); });
+    if (primaryKeys.length === 1) return { key: primaryKeys[0], kind: 'rich' };
+    if (primaryKeys.length > 1){
+      var sortable = primaryKeys.map(function(k){ try { return [k, (localStorage.getItem(k)||'').length]; } catch(_){ return [k, 0]; } });
+      sortable.sort(function(a,b){ return b[1] - a[1]; });
+      return { key: sortable[0][0], kind: 'rich' };
+    }
+    if (draftKeys.length) return { key: draftKeys[0], kind: 'lite' };
+    return null;
+  }
+  function openImportDialog(){
+    var f = document.createElement('input');
+    f.type = 'file'; f.accept = 'application/json';
+    f.style.display = 'none';
+    f.addEventListener('change', function(e){
+      var file = e.target.files && e.target.files[0]; if (!file) return;
+      var rd = new FileReader();
+      rd.onload = function(ev){
+        try {
+          var obj = JSON.parse(ev.target.result);
+          /* 20/11/2026: il tasto riapre solo i file di QUESTO modulo. Prima accettava, dopo una conferma, anche il file
+             di un altro modulo o il backup generale, e il lavoro del modulo aperto andava perso (provato: file dei Sali
+             nel Radon, file del Radon e della Risalita nei Sali). */
+          var _altro = _mxFileDiAltroModulo(obj);
+          if (_altro){ alert(_altro + '\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          /* 19/11/2026: file esportato da un modulo con la barra nuova (Glaser, Termoigrometria, Radon). Porta i dati
+             d'ingresso in «input», in una forma diversa da quella tenuta in memoria: scriverlo in memoria azzerava
+             il modulo. Qui si usa la stessa strada del tasto «Carica». */
+          if (obj && obj.input && window.MX && typeof window.MX.applyData === 'function'){
+            if (!confirm('Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.moduleName || obj.moduleId || '?') + '\n\nI dati correnti del modulo verranno SOSTITUITI.')) return;
+            var _esito = window.MX.applyData(obj.input, obj.moduleId);
+            if (_esito === 'ok') alert('Snapshot importato.');
+            else if (_esito === 'altro') alert('Questo file viene da un altro modulo (' + (obj.moduleName || obj.moduleId) + '): non importato.');
+            else alert('Il modulo non sa ricaricare questo file.');
+            return;
+          }
+          /* 20/11/2026: nei moduli con la barra nuova il solo file che si sa riaprire è quello con la voce «input».
+             Un file diverso, scritto in memoria così com'era, azzerava il modulo. */
+          if (window.MX && typeof window.MX.applyData === 'function'){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var keys = detectModuleKeys();
+          if (!keys.length){
+            alert('Nessuna chiave di lavoro trovata per questo modulo nello storage corrente.\nSuggerimento: apri il modulo, fai almeno un\'interazione, poi riprova.');
+            return;
+          }
+          var target = pickTargetKey(keys, obj);
+          if (!target){ alert('Non sono riuscito a individuare la chiave di salvataggio. Snapshot non importato.'); return; }
+          /* 20/11/2026: un file senza i dati dei passi svuotava la bozza */
+          if (target.kind === 'lite' && !(obj && (obj.data || obj.state))){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var msg = 'Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.module || obj.schemaVersion || '?') + '\n• Destinazione: ' + target.key + ' (' + target.kind + ')\n\nI dati correnti del modulo verranno SOSTITUITI.\nConsiglio: prima fai "JSON" per backup di sicurezza.\n\nProcedere?';
+          if (!confirm(msg)) return;
+          var toWrite;
+          if (target.kind === 'lite'){
+            toWrite = { ts: Date.now(), state: { cur: (obj.currentStep !== undefined ? obj.currentStep : 0), finished: !!obj.finished, data: (obj.data || obj.state || {}) } };
+          } else {
+            toWrite = obj.state || obj;
+          }
+          try { localStorage.setItem(target.key, JSON.stringify(toWrite)); }
+          catch (err) { alert('Errore scrittura storage: ' + (err.message || err)); return; }
+          alert('Snapshot importato in "' + target.key + '". Pagina in ricaricamento…');
+          location.reload();
+        } catch (err) { alert('Errore lettura JSON: ' + err.message); }
+      };
+      rd.readAsText(file);
+    });
+    document.body.appendChild(f); f.click(); setTimeout(function(){ try{ document.body.removeChild(f); }catch(_){} }, 1500);
+  }
+  function install(){
+    if (document.getElementById('btnOpenSnap')) return;
+    if (!detectModuleKeys().length) return;   /* 19/11/2026: il modulo non tiene dati in memoria, il tasto non potrebbe funzionare */
+    var host = findHostBtn();
+    if (!host || !host.parentNode){ return setTimeout(install, 250); }
+    var btn = makeBtn();
+    host.parentNode.insertBefore(btn, host.nextSibling);
+    btn.addEventListener('click', openImportDialog);
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(install, 150); });
+  } else {
+    setTimeout(install, 150);
+  }
+})();
+
+/* === Integrazione mappa-indagini (aggancio bidirezionale) === */
+function _mxIndaginiList(){
+  try{ var raw=localStorage.getItem('mx2::indagini'); if(!raw) return []; var a=JSON.parse(raw); return Array.isArray(a)?a:[]; }
+  catch(e){ return []; }
+}
+function _mxIndaginiSaveAll(list){
+  try{ localStorage.setItem('mx2::indagini', JSON.stringify(list||[])); return true; }
+  catch(e){ return false; }
+}
+function _mxIndaginiNewId(){
+  return 'ind_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+}
+
+// Mapping STATE.data → dati indagine per categoria 'vespai'
+function _mxBuildDati_vespai(d){
+  // Costruisce un sottoinsieme compatibile con il modal probe + preserva STATE intero
+  // I campi standard tInt, urInt, tSup vengono estratti se presenti, altrimenti restano in schedaCompleta
+  var out = {
+    schedaCompleta: JSON.parse(JSON.stringify(d || {}))
+  };
+  // Estrazione opportunistica di campi standard (se presenti con quei nomi)
+  ['tInt','urInt','tSup','tempC','urPerc','co2_ppm','pm25','pm10','tvoc','hcho','co','no2',
+   'co2','tempC2','tempInt'].forEach(function(k){
+    if(d && d[k] != null) out[k] = d[k];
+  });
+  // Eventuali sintomi/note/categoria sospetta
+  if(d){
+    if(d.sintomi) out.sintomi = d.sintomi;
+    if(d.note) out.note = d.note;
+    if(d.noteFinali) out.note = d.noteFinali;
+    if(d.tipologiaSospetta) out.tipologiaSospetta = d.tipologiaSospetta;
+    if(d.categoriaIaq) out.categoria_target = d.categoriaIaq;
+  }
+  return out;
+}
+
+/* 20/11/2026: le domande si fanno in una finestra dentro la pagina (window.mxChiedi, nel file condiviso
+   _shared/mx-switcher.js) e non più nelle finestrelle del browser. Se quel file non fosse stato caricato si torna
+   alle finestrelle di prima. _mxChiedi risponde con una promessa; _mxTesto chiede un solo testo. */
+function _mxChiedi(titolo, cfg){
+  if(window.mxChiedi) return window.mxChiedi(titolo, cfg);
+  cfg = cfg || {};
+  if(cfg.scelte){
+    var buone = cfg.scelte.filter(function(s){ return !s[2]; });
+    var r = prompt(titolo + '\n\n' + buone.map(function(s, i){ return (i+1) + '. ' + s[1]; }).join('\n') + '\n\nScrivi il numero:', '1');
+    var k = parseInt(r, 10) - 1;
+    return Promise.resolve(buone[k] ? buone[k][0] : null);
+  }
+  var out = [], campi = cfg.campi || [];
+  for(var i = 0; i < campi.length; i++){
+    var v = prompt(titolo + (campi[i][0] ? ('\n' + campi[i][0]) : ''), campi[i][1] == null ? '' : campi[i][1]);
+    if(v === null) return Promise.resolve(null);
+    out.push(v);
+  }
+  return Promise.resolve(out);
+}
+function _mxTesto(titolo, pre){ return _mxChiedi(titolo, {campi:[['', pre]]}).then(function(r){ return r ? r[0] : null; }); }
+async function _mxAggancialMappa(){
+  var cat = 'vespai';
+  var moduloFile = 'vespai.html';
+  var fileLabel = 'Vespai';
+  // Pre-save scheda
+  try{ if(typeof persist === 'function') persist(); }catch(e){}
+  var d = STATE && STATE.data ? STATE.data : {};
+  var dati = _mxBuildDati_vespai(d);
+
+  var lista = _mxIndaginiList();
+  var stessoCat = lista.filter(function(r){ return r.categoria === cat; });
+
+  /* 20/11/2026: scelta dentro la pagina (prima si scriveva 1, 2 o 3 in una finestrella del browser) */
+  var mode = await _mxChiedi('Aggancia la scheda '+fileLabel.toUpperCase()+' alla Mappa Indagini', {scelte:[['1','Nuovo punto sulla mappa'],['2','Aggiorna un punto esistente ('+(stessoCat.length?(stessoCat.length+' disponibili'):'nessuno disponibile')+')', !stessoCat.length]]});
+  if(!mode) return;
+
+  if(mode === '1'){
+    var _nn = await _mxChiedi('Nuovo punto sulla mappa', {campi:[['Nome del punto', fileLabel+' '+new Date().toLocaleDateString('it-IT')],['Stanza (facoltativa)','']], conferma:'Crea il punto'});
+    if(!_nn || !String(_nn[0]).trim()) return;
+    var nome = String(_nn[0]).trim(), stanza = String(_nn[1]||'').trim();
+    var rec = {
+      id: _mxIndaginiNewId(),
+      schemaVer: 1,
+      categoria: cat,
+      piano: 0,
+      x: 0.5, y: 0.5,
+      stanza: stanza || '',
+      nome: nome,
+      posizione: 'Da posizionare sulla mappa (apri Mappa Indagini e trascina il pin)',
+      dataCreazione: new Date().toISOString(),
+      dataModifica: new Date().toISOString(),
+      dati: dati,
+      note: 'Rilievo creato da scheda '+moduloFile,
+      foto: [],
+      termogrammi: [],
+      linkScheda: moduloFile+':'+Date.now(),
+      layerId: ''
+    };
+    lista.push(rec);
+    _mxIndaginiSaveAll(lista);
+    if(typeof showToast === 'function') showToast('✓ Punto "'+nome+'" creato sulla mappa indagini','ok');
+    setTimeout(function(){
+      if(confirm('Punto "'+nome+'" creato sulla Mappa Indagini.\nVuoi aprire ora la Mappa per posizionarlo?')){
+        window.location.href = 'mappa-indagini.html';
+      }
+    }, 500);
+  } else if(mode === '2'){
+    if(!stessoCat.length){ alert('Nessun punto di categoria '+fileLabel+' esistente sulla mappa.'); return; }
+    var ch = await _mxChiedi('Quale punto vuoi aggiornare?', {scelte: stessoCat.map(function(r, i){ return [String(i+1), r.nome+' ('+(r.stanza||'senza stanza')+')']; })});
+    if(!ch) return;
+    var idx = parseInt(ch)-1;
+    if(isNaN(idx) || idx<0 || idx>=stessoCat.length){ alert('Selezione non valida'); return; }
+    var target = stessoCat[idx];
+    target.dati = dati;
+    target.dataModifica = new Date().toISOString();
+    target.linkScheda = moduloFile+':'+Date.now();
+    target.note = (target.note || '') + (target.note ? ' · ':'') + 'Aggiornato da '+moduloFile+' il '+new Date().toLocaleDateString('it-IT');
+    for(var i=0;i<lista.length;i++){
+      if(lista[i].id === target.id){ lista[i] = target; break; }
+    }
+    _mxIndaginiSaveAll(lista);
+    if(typeof showToast === 'function') showToast('✓ Punto "'+target.nome+'" aggiornato','ok');
+  }
+}
+
+</script>
+<script src="_shared/mx-biblio.js" data-mod="vespai" defer></script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     

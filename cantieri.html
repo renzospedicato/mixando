@@ -1,0 +1,1584 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cantieri">
+<title>Mixando Lab · Cantieri, Pianificazione</title>
+<style>
+:root{
+  --mx-accent:#8e44ad; --mx-accent-strong:#5e3370; --mx-accent-soft:rgba(142,68,173,.12);
+  --bg:#f5f1e8; --paper:#fff; --ink:#2c1810; --ink-soft:#6b5c4c; --ink-mute:#8b7355;
+  --line:#e6e0d2; --ok:#1f7a4d; --warn:#b07820; --err:#a83232;
+  --r:14px; --ff-serif:Georgia,"Cambria","Times New Roman",serif;
+  --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:56px}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+
+/* === MX BAR (header restyled) === */
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:56px;display:flex;align-items:center;gap:14px;padding:0 20px;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%);border-bottom:3px solid var(--mx-accent);box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04)}
+.mx-bar .em{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong) 100%);color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12);text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--mx-accent-strong);display:inline-flex;align-items:center;gap:6px;line-height:1.2}
+.mx-bar .tag::before,.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:16px;color:#1a1410;letter-spacing:.01em;line-height:1.15;text-shadow:0 1px 0 rgba(255,255,255,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:7px 14px;border-radius:9px;border:1.5px solid var(--mx-accent);background:rgba(255,255,255,.65);transition:all .2s}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30);transform:translateY(-1px)}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+
+/* === Ana strip (sync from Module #1) === */
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto 8px;max-width:1080px}
+.ana-strip .pc{padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700;color:var(--ink)}
+.ana-strip .pc .m{font-size:11.5px;color:var(--ink-mute);margin-top:2px}
+.ana-actions{text-align:center;margin:0 auto 16px;max-width:1080px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ana-actions a,.ana-actions button{font-size:12px;font-weight:700;text-decoration:none;padding:6px 13px;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;border:1px solid currentColor}
+.ana-actions a{color:var(--mx-accent)}
+.ana-actions button.mx-reload{background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);color:#fff;border:0;box-shadow:0 3px 10px rgba(46,125,50,.42)}
+
+/* === MC BAR: multi-cantieri selector === */
+.mc-bar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;box-shadow:0 1px 2px rgba(20,20,40,.04)}
+.mc-bar .mc-lbl{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-right:4px}
+.mc-bar select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;background:#fff;flex:1;min-width:180px;font-weight:600;color:var(--ink)}
+.mc-bar select:focus{outline:none;border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.mc-bar .mc-meta{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-mute);flex-basis:100%;padding-top:4px;border-top:1px dashed var(--line);margin-top:4px}
+.mc-bar .mc-meta .pill{padding:2px 8px;background:var(--mx-accent-soft);color:var(--mx-accent-strong);border-radius:999px;font-weight:700;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+
+/* === HERO === */
+.hero{padding:6px 6px 18px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:680px;color:var(--ink-soft);font-size:14px}
+
+/* === CARD === */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card>h3{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),var(--paper));display:flex;align-items:center;gap:10px}
+.card>h3 .num{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:var(--ff-sans)}
+.card .body{padding:16px 18px}
+
+/* === ROW: label + input === */
+.row{display:grid;grid-template-columns:170px 1fr;gap:10px;align-items:start;margin-bottom:12px}
+.row>label{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);padding-top:9px}
+.row .ctl{display:flex;flex-direction:column;gap:6px}
+.row input[type="text"],.row input[type="date"],.row input[type="number"],.row select,.row textarea{padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:14px;background:#fff;outline:none;color:var(--ink);width:100%}
+.row input:focus,.row select:focus,.row textarea:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.row textarea{min-height:64px;resize:vertical;font-family:inherit}
+.row .hint{font-size:11px;color:var(--ink-mute);font-style:italic}
+@media (max-width:680px){.row{grid-template-columns:1fr}.row>label{padding-top:0}}
+
+/* === PILLS (chk/radio Mixando) === */
+.chkgrp,.radio-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chkgrp label,.radio-row label{position:relative;overflow:hidden;padding:9px 16px;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%);border:1.5px solid var(--line);border-radius:22px;font-weight:700;font-size:12px;color:#5a4a3a;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6)}
+.chkgrp label::before,.radio-row label::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%);transform:translateX(-140%);transition:transform .65s ease;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02);border-color:var(--mx-accent);background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft) 100%);box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6);color:var(--mx-accent-strong)}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%)}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong) 100%);color:#fff;border-color:var(--mx-accent-strong);box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15);text-shadow:0 1px 2px rgba(0,0,0,.25);transform:translateY(-1px) scale(1.04);font-weight:800}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98);transition-duration:.05s}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent);cursor:pointer;margin-right:3px}
+
+/* === Titoli abilitativi attesi === */
+.titoli-box{background:#fff;border:1px solid var(--line);border-left:4px solid var(--mx-accent);border-radius:9px;padding:12px 14px;margin-top:8px}
+.titoli-box .h{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mx-accent-strong);margin-bottom:8px}
+.titoli-box .tt{font-size:13px;color:var(--ink);line-height:1.55;margin-bottom:4px}
+.titoli-box .tt strong{color:var(--mx-accent-strong)}
+.titoli-box ul{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:var(--ink-soft)}
+.titoli-box ul li{margin-bottom:3px}
+.titoli-box .ref{font-size:10.5px;color:var(--ink-mute);margin-top:8px;font-style:italic}
+
+/* === Agenda attività === */
+.ag-add{display:grid;grid-template-columns:1fr 150px 130px 110px auto;gap:8px;margin-bottom:14px}
+.ag-add input,.ag-add select{padding:10px 12px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:13px;background:#fff;outline:none}
+.ag-add input:focus,.ag-add select:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.ag-list{display:flex;flex-direction:column;gap:7px}
+.ag-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--prio-color,var(--mx-accent));border-radius:9px;transition:all .15s}
+.ag-item[data-prio="alta"]{--prio-color:var(--err)}
+.ag-item[data-prio="media"]{--prio-color:var(--warn)}
+.ag-item[data-prio="bassa"]{--prio-color:var(--ok)}
+.ag-item.done{opacity:.55}
+.ag-item.done .name{text-decoration:line-through;color:var(--ink-mute)}
+.ag-item input.chk{flex:0 0 auto;width:20px;height:20px;accent-color:var(--mx-accent);cursor:pointer}
+.ag-item .info{flex:1;min-width:0}
+.ag-item .name{font-weight:600;color:var(--ink);font-size:13.5px}
+.ag-item .det{font-size:11px;color:var(--ink-mute);display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+.ag-item .det .tp{background:var(--mx-accent-soft);color:var(--mx-accent-strong);padding:1px 6px;border-radius:6px;font-weight:700;letter-spacing:.04em}
+.ag-item .det .due{font-weight:700}
+.ag-item .det .due.overdue{color:var(--err)}
+.ag-item button.rm{appearance:none;width:30px;height:30px;border:1px solid var(--line);background:#fff;border-radius:7px;color:var(--err);cursor:pointer;font-size:14px;flex:0 0 auto}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+.filters button{padding:6px 12px;border:1px solid var(--line);background:#fff;border-radius:999px;font:inherit;font-size:11px;font-weight:700;color:var(--ink);cursor:pointer;letter-spacing:.04em}
+.filters button.is-on{background:var(--mx-accent);color:#fff;border-color:var(--mx-accent)}
+
+/* === Documenti checklist === */
+.doc-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.doc-filters button{padding:5px 10px;border:1px solid var(--line);background:#fff;border-radius:999px;font:inherit;font-size:10.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;letter-spacing:.04em;text-transform:uppercase}
+.doc-filters button.is-on{background:var(--mx-accent);color:#fff;border-color:var(--mx-accent)}
+.doc-list{display:flex;flex-direction:column;gap:8px}
+.doc-item{padding:11px 14px;background:#fff;border:1px solid var(--line);border-radius:9px;font-size:13px}
+.doc-item.is-done{background:linear-gradient(180deg,rgba(31,122,77,.06),#fff);border-color:rgba(31,122,77,.30)}
+.doc-item.is-missing{background:linear-gradient(180deg,rgba(168,50,50,.05),#fff)}
+.doc-item .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.doc-item .nome{font-weight:700;color:var(--ink);font-size:13.5px;line-height:1.3}
+.doc-item .tipo{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mx-accent-strong);background:var(--mx-accent-soft);padding:2px 8px;border-radius:6px;white-space:nowrap;flex:0 0 auto}
+.doc-item .meta{font-size:11.5px;color:var(--ink-mute);margin-top:5px;line-height:1.45}
+.doc-item .meta a{color:var(--mx-accent);text-decoration:none}
+.doc-item .meta a:hover{text-decoration:underline}
+.doc-item .stato-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.doc-item .stato-row select{padding:5px 8px;border:1px solid var(--line);border-radius:7px;font:inherit;font-size:11.5px;background:#fff;font-weight:700;color:var(--ink)}
+.doc-item .stato-row input[type="date"]{padding:5px 8px;border:1px solid var(--line);border-radius:7px;font:inherit;font-size:11.5px;background:#fff;color:var(--ink)}
+.doc-item .stato-row .lab{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-right:3px}
+
+/* === Cronoprogramma fasi === */
+.fasi-list{display:flex;flex-direction:column;gap:10px}
+.fase-item{padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.fase-item .top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.fase-item .ord{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:0 0 auto}
+.fase-item .nome{font-weight:700;color:var(--ink);font-size:14px;flex:1}
+.fase-item .pct-num{font-family:var(--ff-serif);font-size:18px;font-weight:700;color:var(--mx-accent-strong);min-width:46px;text-align:right}
+.fase-item .obj{font-size:11.5px;color:var(--ink-soft);line-height:1.45;margin-bottom:8px}
+.fase-item .pct-bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:8px}
+.fase-item .pct-fill{height:100%;background:linear-gradient(90deg,var(--mx-accent),var(--mx-accent-strong));border-radius:99px;transition:width .3s}
+.fase-item input[type="range"]{width:100%;accent-color:var(--mx-accent);margin:4px 0}
+.fase-item textarea{width:100%;min-height:48px;padding:7px 9px;border:1px solid var(--line);border-radius:7px;font:inherit;font-size:12px;background:#fff;outline:none;resize:vertical}
+.fase-item textarea:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+
+/* === STATS === */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:14px}
+.stat{padding:11px 13px;background:#fff;border:1px solid var(--line);border-radius:10px;text-align:center}
+.stat .v{font-family:var(--ff-serif);font-size:22px;font-weight:700;color:var(--ink)}
+.stat .v.ok{color:var(--ok)} .stat .v.err{color:var(--err)} .stat .v.warn{color:var(--warn)}
+.stat .l{font-size:10px;letter-spacing:.10em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;margin-top:3px}
+
+/* === LIBRERIA MX-TB-BTN: pulsanti shimmer 3-stop (allineata radon/glaser/termo) === */
+.mx-tb-btn{
+  appearance:none; border:0; color:#fff;
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.02em;
+  padding:12px 18px; border-radius:12px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:7px;
+  position:relative; overflow:hidden;
+  text-shadow:0 1px 2px rgba(0,0,0,.20);
+  box-shadow:0 3px 8px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.12);
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, filter .15s ease, background-position .35s ease;
+  background-size:180% 180%;
+  background-position:0% 0%;
+  white-space:nowrap; min-width:0;
+}
+.mx-tb-btn::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg, transparent 25%, rgba(255,255,255,.40) 48%, rgba(255,255,255,.40) 52%, transparent 75%);
+  transform:translateX(-130%); transition:transform .6s ease;
+}
+.mx-tb-btn:hover{ transform:translateY(-2px) scale(1.03); background-position:100% 100%; filter:brightness(1.08) saturate(1.15); }
+.mx-tb-btn:hover::before{ transform:translateX(130%); }
+.mx-tb-btn:active{ transform:translateY(0) scale(.98); transition-duration:.05s; }
+.mx-tb-btn:disabled{ opacity:.45; cursor:not-allowed; filter:grayscale(.6); }
+.mx-tb-btn .ico{ font-size:16px; line-height:1; filter:drop-shadow(0 1px 2px rgba(0,0,0,.25)); }
+.mx-tb-btn.tb-save{ background-image:linear-gradient(135deg,#64b5f6 0%,#1976d2 45%,#0d47a1 100%); box-shadow:0 3px 10px rgba(25,118,210,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18); }
+.mx-tb-btn.tb-load{ background-image:linear-gradient(135deg,#ffb74d 0%,#f57c00 45%,#bf360c 100%); box-shadow:0 3px 10px rgba(245,124,0,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18); }
+.mx-tb-btn.tb-compare{ background-image:linear-gradient(135deg,#ba68c8 0%,#7b1fa2 45%,#311b92 100%); box-shadow:0 3px 10px rgba(123,31,162,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18); }
+.mx-tb-btn.tb-word{ background-image:linear-gradient(135deg,#5a9bd8 0%,#2b579a 45%,#0c2e5e 100%); box-shadow:0 3px 10px rgba(43,87,154,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18); }
+.mx-tb-btn.tb-pdf{ background-image:linear-gradient(135deg,#ef5350 0%,#c62828 45%,#7f0000 100%); box-shadow:0 3px 10px rgba(198,40,40,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18); }
+.mx-tb-btn.tb-report{ background-image:linear-gradient(135deg,#ffd54f 0%,#f9a825 45%,#e65100 100%); color:#3e2e00; text-shadow:0 1px 0 rgba(255,255,255,.45); box-shadow:0 3px 10px rgba(249,168,37,.50),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -2px 4px rgba(0,0,0,.10); }
+.mx-tb-btn.tb-reset{ background-image:linear-gradient(135deg,#9e9e9e 0%,#616161 45%,#212121 100%); box-shadow:0 3px 10px rgba(97,97,97,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18); }
+.mx-tb-btn.tb-ok{ background-image:linear-gradient(135deg,#81c784 0%,#388e3c 45%,#1b5e20 100%); box-shadow:0 3px 10px rgba(56,142,60,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18); }
+.mx-tb-btn.tb-accent{ background-image:linear-gradient(135deg,#ff9966 0%,#e67e22 45%,#a8581a 100%); box-shadow:0 3px 10px rgba(230,126,34,.45),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18); }
+.mx-tb-btn.tb-teal{ background-image:linear-gradient(135deg,#4db6ac 0%,#00897b 45%,#004d40 100%); box-shadow:0 3px 10px rgba(0,137,123,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18); }
+.mx-tb-btn--sm{ padding:8px 13px; font-size:11.5px; }
+.mx-tb-btn--xs{ padding:6px 11px; font-size:10.5px; border-radius:10px; }
+
+/* === MODAL ANTEPRIMA === */
+.mx-modal{position:fixed;inset:0;background:rgba(20,20,40,.62);display:none;align-items:flex-start;justify-content:center;z-index:200;padding:30px 16px;overflow-y:auto}
+.mx-modal.is-open{display:flex}
+.mx-modal-box{background:#fff;border-radius:16px;max-width:880px;width:100%;box-shadow:0 18px 40px rgba(0,0,0,.30);overflow:hidden}
+.mx-modal-top{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,var(--mx-accent-soft),#fff)}
+.mx-modal-top h3{margin:0;font-family:var(--ff-serif);font-size:17px;font-weight:700;color:var(--ink)}
+.mx-modal-top button.close{appearance:none;border:0;background:transparent;font-size:24px;color:var(--ink-mute);cursor:pointer;padding:4px 8px}
+.mx-modal-body{padding:18px 22px;max-height:62vh;overflow-y:auto;font-size:13.5px;line-height:1.6;color:var(--ink)}
+.mx-modal-body h4{font-family:var(--ff-serif);color:var(--mx-accent-strong);margin:14px 0 6px;font-size:15px}
+.mx-modal-body h5{font-family:var(--ff-sans);color:var(--ink);margin:10px 0 4px;font-size:12.5px;text-transform:uppercase;letter-spacing:.08em}
+.mx-modal-body table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px}
+.mx-modal-body td,.mx-modal-body th{padding:6px 9px;border:1px solid var(--line);text-align:left;vertical-align:top}
+.mx-modal-body th{background:var(--mx-accent-soft);font-weight:700;color:var(--mx-accent-strong)}
+.mx-modal-foot{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;background:#fafafa;flex-wrap:wrap}
+
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+
+.empty{padding:24px;text-align:center;color:var(--ink-mute);font-style:italic}
+.danger-bar{background:linear-gradient(180deg,rgba(168,50,50,.07),#fff);border:1px solid rgba(168,50,50,.25);border-radius:9px;padding:9px 12px;font-size:12px;color:var(--err);margin-bottom:12px}
+.note-box{background:#fff;border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-top:10px;font-size:12.5px;color:var(--ink-soft);line-height:1.55}
+.note-box strong{color:var(--ink)}
+
+@media (max-width:600px){
+  .mx-bar{height:50px;padding:0 14px;gap:10px}
+  body{padding-top:50px}
+  .mx-bar .em{width:32px;height:32px;font-size:17px}
+  .mx-bar .ti{font-size:13.5px}
+  .mx-bar .tag{font-size:8.5px;letter-spacing:.18em}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+  .mx-logo-center{height:26px;max-width:90px}
+  .ana-strip{grid-template-columns:1fr}
+  .ag-add{grid-template-columns:1fr}
+  .mc-bar select{min-width:140px}
+}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar">
+  <div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab">
+  <div class="meta"><span class="tag">Cantiere</span><h1 class="ti">Cantieri, Pianificazione</h1></div>
+  <a class="back" href="suite.html">← Suite</a>
+</header>
+
+<main>
+  <!-- Anagrafica sincronizzata dal modulo Dati del Cantiere -->
+  <div class="ana-strip">
+    <div class="pc" id="anaPerito"><div class="h">Perito / tecnico</div><div class="n">n.d.</div><div class="m"></div></div>
+    <div class="pc" id="anaCliente"><div class="h">Committente / immobile</div><div class="n">n.d.</div><div class="m"></div></div>
+  </div>
+  <div class="ana-actions">
+    <a href="locali-cantiere.html" target="_blank">&#9881; Modifica in Dati del Cantiere</a>
+    <button type="button" class="mx-reload" id="btnReloadAna">&#8635; Ricarica anagrafica</button>
+  </div>
+
+  <!-- Multi-cantieri selector -->
+  <section class="mc-bar" id="mcBar">
+    <span class="mc-lbl">Cantiere attivo:</span>
+    <select id="mcActive"><option value="">nessun cantiere</option></select>
+    <button type="button" class="mx-tb-btn tb-compare" id="mcNew" style="padding:7px 12px;font-size:10.5px">+ Nuovo</button>
+    <button type="button" class="mx-tb-btn tb-save" id="mcRename" style="padding:7px 12px;font-size:10.5px">Rinomina</button>
+    <button type="button" class="mx-tb-btn tb-teal" id="mcDuplicate" style="padding:7px 12px;font-size:10.5px">Duplica</button>
+    <button type="button" class="mx-tb-btn tb-load" id="mcArchive" style="padding:7px 12px;font-size:10.5px">Archivia</button>
+    <button type="button" class="mx-tb-btn tb-pdf" id="mcDelete" style="padding:7px 12px;font-size:10.5px">Elimina</button>
+    <div class="mc-meta" id="mcMeta"><span class="pill" id="mcCount">0 cantieri</span><span id="mcUpd">n.d.</span></div>
+  </section>
+
+  <section class="hero">
+    <h2>Pianificazione <em>cantiere</em></h2>
+    <p>Gestione multi-cantieri con tipo intervento (DPR 380/2001), agenda attività, catalogo documenti (D.Lgs 81/2008, D.Lgs 42/2004, D.Lgs 36/2023) e cronoprogramma per fasi (UNI 11150 · ISO 21502).</p>
+  </section>
+
+  <div id="cantiereContainer">
+    <div class="empty">Crea un cantiere per iniziare. I dati anagrafici (perito · committente · immobile) sono presi dal modulo <a href="locali-cantiere.html">Dati del Cantiere</a>.</div>
+  </div>
+
+  <!-- Toolbar standard 7 pulsanti -->
+  <section class="mx-toolbar">
+    <button type="button" class="mx-tb-btn tb-compare" id="btnPreview">&#128270; Anteprima</button>
+    <button type="button" class="mx-tb-btn tb-word" id="btnWord">&#128196; Word</button>
+    <button type="button" class="mx-tb-btn tb-pdf" id="btnPdf">&#128195; PDF</button>
+    <button type="button" class="mx-tb-btn tb-save" id="btnJson">&#123;&nbsp;&#125; JSON</button>
+    <button type="button" class="mx-tb-btn tb-reset" id="btnReset">&#8634; Reset</button>
+    <button type="button" class="mx-tb-btn tb-ok" id="btnSnap">&#128190; Salva snapshot</button>
+    <button type="button" class="mx-tb-btn tb-reset" id="btnOpenSnap">&#128194; Apri snapshot</button>
+    <input type="file" id="fileOpen" accept="application/json" style="display:none">
+  </section>
+
+  <footer class="ft"><strong>Mixando · Cantieri v4 (multi-cantieri)</strong><br>DPR 380/2001 art. 3 · D.Lgs 81/2008 Titolo IV · D.Lgs 42/2004 art. 21 · D.Lgs 36/2023 + DM MASE 24/11/2025 · NTC 2018 · UNI 11150-3/-4:2005 · ISO 21502:2020</footer>
+</main>
+
+<!-- Modal anteprima -->
+<div class="mx-modal" id="modalPreview" role="dialog" aria-modal="true" aria-labelledby="modalPreviewTitle">
+  <div class="mx-modal-box">
+    <div class="mx-modal-top">
+      <h3 id="modalPreviewTitle">Anteprima cantiere</h3>
+      <button type="button" class="close" id="modalClose" aria-label="Chiudi">×</button>
+    </div>
+    <div class="mx-modal-body" id="modalBody"></div>
+    <div class="mx-modal-foot">
+      <button type="button" class="mx-tb-btn tb-word" id="m_btnWord" style="font-size:10.5px;padding:8px 14px">&#128196; Word</button>
+      <button type="button" class="mx-tb-btn tb-pdf" id="m_btnPdf" style="font-size:10.5px;padding:8px 14px">&#128195; PDF</button>
+      <button type="button" class="mx-tb-btn tb-save" id="m_btnJson" style="font-size:10.5px;padding:8px 14px">&#123;&nbsp;&#125; JSON</button>
+      <button type="button" class="mx-tb-btn tb-reset" id="m_btnClose" style="font-size:10.5px;padding:8px 14px">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+ * Mixando · Cantieri v4, Pianificazione multi-cantieri
+ *
+ * Schema: mx2::cantieri-multi-v1 = {
+ *   schemaVersion: 1,
+ *   list: [Cantiere],
+ *   activeId: 'c_xxx',
+ *   updatedAt: ISO
+ * }
+ *
+ * Cantiere = {
+ *   id, label, stato, tipo_intervento, modificatori:[],
+ *   dataApertura, dataChiusura, importoLavori, note,
+ *   committente_label, indirizzo_label, regione, comune, gps_label,
+ *   attivita:[{id,name,tipo,due,prio,done,createdAt}],
+ *   documenti:{[docId]:{stato,dataRichiesta,dataOttenimento,scadenza,note}},
+ *   fasi:{[faseId]:{pct,note}},
+ *   createdAt, updatedAt
+ * }
+ *
+ * Fonti dati (DPR 380, D.Lgs 81, D.Lgs 42, D.Lgs 36, NTC 2018, DM MASE,
+ * UNI 11150-3/-4, ISO 21502): vedi cantieri-norme.js / cantieri-tipi-
+ * intervento.js / cantieri-documenti.js / cantieri-fasi-lavoro.js
+ * (verificate 2026-05-03).
+ * ===================================================================== */
+(function(){
+  'use strict';
+
+  /* ============== CATALOGHI VERIFICATI (DPR 380/2001 + L. correlate) ============== */
+  const TIPI_INTERVENTO = [
+    { id:'manutenzione_ordinaria', nome:'Manutenzione ordinaria', icon:'\u{1F527}',
+      rif:'DPR 380/2001 art. 3 c.1 lett. a)',
+      titolo:'Nessuno (attività libera)',
+      definizione:'Riparazione, rinnovamento e sostituzione delle finiture; integrazione/manutenzione efficienza degli impianti tecnologici esistenti.',
+      esempi:['Tinteggiatura','Sostituzione rivestimenti','Sostituzione sanitari','Riparazione intonaci','Manutenzione impianti senza modifica tracciato','Sostituzione infissi senza modifica forma'],
+      doc_obb:['durc'],
+      doc_cond:[{doc:'autorizz_soprintendenza',se:'bene_vincolato'}]
+    },
+    { id:'manutenzione_straordinaria_leggera', nome:'Manutenzione straord. (non strutturale)', icon:'\u{1F6E0}',
+      rif:'DPR 380/2001 art. 3 c.1 lett. b) + art. 6-bis (CILA)',
+      titolo:'CILA',
+      definizione:'Rinnovamento/sostituzione parti anche strutturali e integrazione impianti senza alterare volumetria né cambiare destinazione urbanisticamente rilevante (SOLO se NON strutturale).',
+      esempi:['Rifacimento intonaci/tinteggiature','Sostituzione infissi con modifica forma','Rifacimento impianti con modifica tracciato','Frazionamento/accorpamento unità','Bagni/cucine'],
+      doc_obb:['cila','durc','pos'],
+      doc_cond:[
+        {doc:'psc',se:'piu_imprese_o_200_ug'},
+        {doc:'notifica_preliminare_asl',se:'condizione_art99'},
+        {doc:'autorizz_soprintendenza',se:'bene_vincolato'},
+        {doc:'cam_dossier',se:'appalto_pubblico'}
+      ]
+    },
+    { id:'manutenzione_straordinaria_strutturale', nome:'Manutenzione straord. (strutturale)', icon:'\u{1F3D7}',
+      rif:'DPR 380/2001 art. 3 c.1 lett. b) + art. 22 (SCIA)',
+      titolo:'SCIA',
+      definizione:'Manutenzione straordinaria che interessa parti strutturali (travi, pilastri, solai, murature portanti). Richiede SCIA + deposito sismico/autorizzazione Genio Civile in zone sismiche.',
+      esempi:['Sostituzione solai','Rinforzo murature portanti','Apertura/chiusura porte su muri portanti','Travi e pilastri','Cordoli'],
+      doc_obb:['scia','durc','pos','progetto_strutturale'],
+      doc_cond:[
+        {doc:'psc',se:'piu_imprese_o_200_ug'},
+        {doc:'notifica_preliminare_asl',se:'condizione_art99'},
+        {doc:'deposito_sismico',se:'zona_sismica_3'},
+        {doc:'autorizzazione_sismica',se:'zona_sismica_1_2'},
+        {doc:'autorizz_soprintendenza',se:'bene_vincolato'}
+      ]
+    },
+    { id:'restauro_conservativo', nome:'Restauro e risanamento conservativo', icon:'\u{1F3DB}',
+      rif:'DPR 380/2001 art. 3 c.1 lett. c) + art. 22 (SCIA o PdC)',
+      titolo:'SCIA (o PdC se cambia destinazione)',
+      definizione:'Conservare l’organismo edilizio assicurandone la funzionalità nel rispetto degli elementi tipologici, formali e strutturali; consolidamento, ripristino, rinnovo elementi, inserimento accessori/impianti, eliminazione elementi estranei.',
+      esempi:['Consolidamento murature storiche con malte compatibili','Ripristino intonaci tradizionali','Restauro elementi decorativi','Coperture con materiali storici','Risanamento umidità di risalita (CAM § 2.3.13)','Impianti reversibili'],
+      doc_obb:['scia','durc','pos'],
+      doc_cond:[
+        {doc:'autorizz_soprintendenza',se:'bene_vincolato (PREVENTIVA OBBLIGATORIA)'},
+        {doc:'restauratore_certificato',se:'bene_vincolato + decorazioni'},
+        {doc:'psc',se:'piu_imprese_o_200_ug'},
+        {doc:'cam_dossier',se:'appalto_pubblico'},
+        {doc:'deposito_sismico',se:'zona_sismica_3'},
+        {doc:'autorizzazione_sismica',se:'zona_sismica_1_2'}
+      ]
+    },
+    { id:'ristrutturazione_edilizia', nome:'Ristrutturazione edilizia', icon:'\u{1F3E0}',
+      rif:'DPR 380/2001 art. 3 c.1 lett. d) + art. 22/10 (SCIA o PdC)',
+      titolo:'SCIA (leggera) o PdC (pesante con modifica volumetrica/sagoma)',
+      definizione:'Trasformazione dell’organismo edilizio anche in tutto diverso dal precedente, comprese demolizione e ricostruzione con stessa volumetria.',
+      esempi:['Modifica radicale layout','Demolizione e ricostruzione stessa volumetria','Cambio destinazione d’uso','Aumento superficie utile','Modifica prospetti','Ascensori in vani esterni'],
+      doc_obb:['scia','durc','pos','progetto_strutturale','ape'],
+      doc_cond:[
+        {doc:'psc',se:'piu_imprese_o_200_ug'},
+        {doc:'notifica_preliminare_asl',se:'condizione_art99'},
+        {doc:'deposito_sismico',se:'zona_sismica_3'},
+        {doc:'autorizzazione_sismica',se:'zona_sismica_1_2'},
+        {doc:'autorizz_soprintendenza',se:'bene_vincolato'},
+        {doc:'cam_dossier',se:'appalto_pubblico'}
+      ]
+    },
+    { id:'nuova_costruzione', nome:'Nuova costruzione', icon:'\u{1F3D7}',
+      rif:'DPR 380/2001 art. 3 c.1 lett. e) + art. 10 (PdC)',
+      titolo:'PdC (Permesso di Costruire)',
+      definizione:'Trasformazione edilizia ed urbanistica del territorio non rientrante nelle precedenti: nuovi manufatti, ampliamento volumetrico, infrastrutture/impianti che modificano permanentemente il territorio.',
+      esempi:['Nuovo edificio residenziale/produttivo','Ampliamento volumetrico','Pertinenze > 20% volume principale','Manufatti interrati nuovi','Infrastrutture/impianti permanenti'],
+      doc_obb:['pdc','durc','pos','psc','notifica_preliminare_asl','progetto_strutturale','ape','collaudo_statico'],
+      doc_cond:[
+        {doc:'deposito_sismico',se:'zona_sismica_3'},
+        {doc:'autorizzazione_sismica',se:'zona_sismica_1_2'},
+        {doc:'cam_dossier',se:'appalto_pubblico'},
+        {doc:'autorizz_soprintendenza',se:'bene_vincolato_o_paesaggio'}
+      ]
+    },
+    { id:'demolizione', nome:'Demolizione (e ricostruzione)', icon:'\u{1F4A5}',
+      rif:'DPR 380/2001 art. 3 c.1 lett. e.7) o lett. d)',
+      titolo:'PdC (con ricostruzione) o SCIA (parziale)',
+      definizione:'Demolizione totale o parziale. Con ricostruzione stessa volumetria/sagoma → ristrutturazione lett. d). Senza ricostruzione o con incremento volumetrico → nuova costruzione lett. e).',
+      esempi:['Demolizione fabbricato fatiscente','Demolizione e ricostruzione stessa volumetria','Demolizione parziale per accorpamento','Demolizione per cambio destinazione'],
+      doc_obb:['pdc','durc','pos','psc','notifica_preliminare_asl','piano_gestione_rifiuti'],
+      doc_cond:[
+        {doc:'piano_lavoro_amianto',se:'presenza_amianto_certificata'},
+        {doc:'autorizz_soprintendenza',se:'bene_vincolato (vincolo IMPEDISCE demolizione)'},
+        {doc:'deposito_sismico',se:'zona_sismica_3'}
+      ]
+    }
+  ];
+
+  const MODIFICATORI = [
+    { id:'bene_vincolato', nome:'Bene culturale vincolato',
+      rif:'D.Lgs 42/2004 art. 21 (preventiva Soprintendenza)',
+      titolo:'Autorizzazione Soprintendenza ex art. 21 (preventiva al titolo edilizio comunale)',
+      doc_obb:['autorizz_soprintendenza','relazione_storico_artistica'],
+      doc_cond:[{doc:'restauratore_certificato',se:'restauro_decorazioni'}]
+    },
+    { id:'zona_sismica', nome:'Zona sismica (1-3)',
+      rif:'NTC 2018 (DM 17/01/2018) § 8 + Circ. 21/01/2019 n.7 C.S.LL.PP.',
+      titolo:'Zona 1-2: autorizzazione sismica preventiva Genio Civile · Zona 3: deposito sismico',
+      doc_obb:['progetto_strutturale','relazione_calcolo','relazione_geologica'],
+      doc_cond:[
+        {doc:'autorizzazione_sismica',se:'zona_1_o_2'},
+        {doc:'deposito_sismico',se:'zona_3'}
+      ]
+    },
+    { id:'appalto_pubblico', nome:'Appalto pubblico (CAM)',
+      rif:'D.Lgs 36/2023 art. 57 c.2 + DM MASE 24/11/2025 (CAM Edilizia, vigore 02/02/2026)',
+      titolo:'Dossier CAM obbligatorio + procedure di gara',
+      doc_obb:['cam_dossier'],
+      doc_cond:[
+        {doc:'antimafia',se:'sopra_soglia'},
+        {doc:'bim_modello',se:'oltre_2mln_euro'},
+        {doc:'durc',se:'sempre'}
+      ]
+    }
+  ];
+
+  /* ============== DOC_CATALOG (D.Lgs 81/2008 + DPR 380 + D.Lgs 42 + NTC 2018) ============== */
+  const DOC_CATALOG = [
+    /* TITOLI EDILIZI (DPR 380/2001) */
+    {id:'cila', nome:'CILA, Comunicazione Inizio Lavori Asseverata', tipo:'titolo_edilizio', icon:'\u{1F4C4}',
+      chi_firma:'Tecnico abilitato + proprietario', destinatario:'SUE Comune', invio:'Telematica via SUE',
+      validita:'Lavori entro 30 gg dalla presentazione', rif:'DPR 380/2001 art. 6-bis',
+      verifica_url:'https://www.bosettiegatti.eu/info/norme/statali/2001_0380.htm#06bis'},
+    {id:'scia', nome:'SCIA, Segnalazione Certificata Inizio Attività', tipo:'titolo_edilizio', icon:'\u{1F4DD}',
+      chi_firma:'Tecnico abilitato + proprietario', destinatario:'SUE Comune', invio:'Telematica via SUE',
+      validita:'Inizio entro 1 anno; conclusione 3 anni (prorogabili)', rif:'DPR 380/2001 art. 22',
+      verifica_url:'https://www.bosettiegatti.eu/info/norme/statali/2001_0380.htm#022'},
+    {id:'pdc', nome:'PdC, Permesso di Costruire', tipo:'titolo_edilizio', icon:'\u{1F4DC}',
+      chi_firma:'Tecnico progettista + proprietario', destinatario:'SUE Comune', invio:'Telematica via SUE',
+      validita:'Inizio entro 1 anno; conclusione 3 anni', rif:'DPR 380/2001 art. 10 + 20',
+      verifica_url:'https://www.bosettiegatti.eu/info/norme/statali/2001_0380.htm#010'},
+    /* SICUREZZA (D.Lgs 81/2008 Titolo IV) */
+    {id:'psc', nome:'PSC, Piano di Sicurezza e Coordinamento', tipo:'sicurezza', icon:'\u{1F6E1}',
+      chi_firma:'CSP (Coordinatore Sicurezza Progettazione)', destinatario:'In cantiere + imprese esecutrici', invio:'Documentale',
+      validita:'Aggiornato in fase esecutiva dal CSE', rif:'D.Lgs 81/2008 art. 100 + Allegato XV',
+      verifica_url:'https://www.bosettiegatti.eu/info/norme/statali/2008_0081.htm#100'},
+    {id:'pos', nome:'POS, Piano Operativo di Sicurezza', tipo:'sicurezza', icon:'\u{1F6E0}',
+      chi_firma:'Datore di lavoro impresa esecutrice', destinatario:'In cantiere + CSE prima inizio lavori', invio:'Documentale',
+      validita:'Aggiornato per modifiche significative', rif:'D.Lgs 81/2008 art. 96 + Allegato XV',
+      verifica_url:'https://www.bosettiegatti.eu/info/norme/statali/2008_0081.htm#096'},
+    {id:'notifica_preliminare_asl', nome:'Notifica preliminare ASL', tipo:'sicurezza', icon:'\u{2709}',
+      chi_firma:'Committente o RUP', destinatario:'ASL competente (+ DPL nei casi previsti)', invio:'Telematica',
+      validita:'Aggiornare per modifiche sostanziali', rif:'D.Lgs 81/2008 art. 99 + Allegato XII',
+      verifica_url:'https://www.bosettiegatti.eu/info/norme/statali/2008_0081.htm#099'},
+    {id:'piano_lavoro_amianto', nome:'Piano di lavoro amianto', tipo:'sicurezza', icon:'\u{2620}',
+      chi_firma:'Datore lavoro impresa Cat. 10 Albo Gestori', destinatario:'ASL competente', invio:'Telematica/cartacea',
+      validita:'Per la durata dei lavori (min 30 gg preavviso)', rif:'D.Lgs 81/2008 Titolo IX Capo III + L. 257/1992',
+      verifica_url:'https://www.bosettiegatti.eu/info/norme/statali/2008_0081.htm#256'},
+    /* CONTRIBUTIVO */
+    {id:'durc', nome:'DURC, Documento Unico Regolarità Contributiva', tipo:'contributivo', icon:'\u{1F4CB}',
+      chi_firma:'Generato automaticamente INPS/INAIL/Casse Edili', destinatario:'Stazione appaltante / Comune', invio:'Telematica DURC Online',
+      validita:'120 gg dalla data emissione', rif:'DM 30/01/2015 + D.Lgs 81/2008 art. 90 + D.Lgs 36/2023',
+      verifica_url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50130.durc-online.html'},
+    /* SISMICA (NTC 2018) */
+    {id:'deposito_sismico', nome:'Deposito sismico (zona 3)', tipo:'sismica', icon:'\u{1F30A}',
+      chi_firma:'Progettista strutturale abilitato', destinatario:'Genio Civile / struttura tecnica regionale', invio:'Telematica regionale',
+      validita:'Per la durata dei lavori', rif:'NTC 2018 § 8 + L. 64/1974 art. 2',
+      verifica_url:'https://www.gazzettaufficiale.it/eli/id/2018/02/20/18A00716/sg'},
+    {id:'autorizzazione_sismica', nome:'Autorizzazione sismica preventiva (zone 1-2)', tipo:'sismica', icon:'\u{1F30B}',
+      chi_firma:'Progettista strutturale + DL', destinatario:'Genio Civile / struttura tecnica regionale', invio:'Telematica regionale',
+      validita:'Per la durata dei lavori autorizzati', rif:'NTC 2018 § 8 + L. 64/1974',
+      verifica_url:'https://www.gazzettaufficiale.it/eli/id/2018/02/20/18A00716/sg'},
+    /* SOPRINTENDENZA (D.Lgs 42/2004) */
+    {id:'autorizz_soprintendenza', nome:'Autorizzazione Soprintendenza art. 21', tipo:'soprintendenza', icon:'\u{1F3DB}',
+      chi_firma:'Proprietario + Tecnico (+ Restauratore se decorazioni)', destinatario:'SABAP competente', invio:'PEC / piattaforma MiC',
+      validita:'5 anni dal rilascio', rif:'D.Lgs 42/2004 art. 21 + Parte II',
+      verifica_url:'https://www.bosettiegatti.eu/info/norme/statali/2004_0042.htm#021'},
+    {id:'restauratore_certificato', nome:'Progetto firmato Restauratore certificato (Albo MiC)', tipo:'restauro', icon:'\u{1F58C}',
+      chi_firma:'Restauratore Beni Culturali iscritto Albo MiC', destinatario:'Allegato a istanza Soprintendenza', invio:'Documentale',
+      validita:'Per la durata dell’intervento', rif:'D.Lgs 42/2004 + DM 86/2009',
+      verifica_url:'https://professionisti.cultura.gov.it/restauratori'},
+    {id:'relazione_storico_artistica', nome:'Relazione storico-artistica', tipo:'soprintendenza', icon:'\u{1F4DC}',
+      chi_firma:'Tecnico/storico/restauratore', destinatario:'Soprintendenza', invio:'Documentale',
+      validita:'Per la durata dell’intervento', rif:'D.Lgs 42/2004 art. 21 (allegato istanza)',
+      verifica_url:'https://www.bosettiegatti.eu/info/norme/statali/2004_0042.htm'},
+    /* APPALTO PUBBLICO + CAM */
+    {id:'cam_dossier', nome:'Dossier CAM Edilizia', tipo:'appalto', icon:'\u{267B}',
+      chi_firma:'Progettista / Offerente / DL', destinatario:'Stazione appaltante', invio:'Documentale',
+      validita:'Per la durata appalto', rif:'D.Lgs 36/2023 art. 57 c.2 + DM MASE 24/11/2025 (vigore 02/02/2026) · DM 23/06/2022 (transitorio)',
+      verifica_url:'https://www.mase.gov.it/portale/cam-vigenti'},
+    {id:'antimafia', nome:'Comunicazioni / Informazioni antimafia', tipo:'appalto', icon:'\u{1F50D}',
+      chi_firma:'Stazione appaltante (richiede) / BDNA (rilascia)', destinatario:'Stazione appaltante', invio:'Telematica BDNA',
+      validita:'6 mesi (12 per attestazione SOA)', rif:'D.Lgs 159/2011 + D.Lgs 36/2023',
+      verifica_url:'https://www.interno.gov.it/it/temi/sicurezza/anti-mafia-e-anti-corruzione'},
+    /* STRUTTURALI / URBANISTICI */
+    {id:'progetto_strutturale', nome:'Progetto strutturale + relazione calcolo', tipo:'strutturale', icon:'\u{1F4D0}',
+      chi_firma:'Ingegnere strutturista abilitato', destinatario:'Genio Civile + DL', invio:'Telematica',
+      validita:'Per la durata dei lavori', rif:'NTC 2018 + DPR 380/2001 art. 65',
+      verifica_url:'https://www.gazzettaufficiale.it/eli/id/2018/02/20/18A00716/sg'},
+    {id:'relazione_calcolo', nome:'Relazione di calcolo strutturale', tipo:'strutturale', icon:'\u{1F4D0}',
+      chi_firma:'Ingegnere strutturista', destinatario:'Genio Civile + DL', invio:'Telematica',
+      validita:'Per la durata dei lavori', rif:'NTC 2018 § 7 + DPR 380/2001',
+      verifica_url:'https://www.gazzettaufficiale.it/eli/id/2018/02/20/18A00716/sg'},
+    {id:'relazione_geologica', nome:'Relazione geologica', tipo:'strutturale', icon:'\u{1F30D}',
+      chi_firma:'Geologo iscritto albo', destinatario:'Genio Civile + DL', invio:'Telematica',
+      validita:'Per la durata dei lavori', rif:'NTC 2018 § 6 + DM 14/01/2008',
+      verifica_url:'https://www.gazzettaufficiale.it/eli/id/2018/02/20/18A00716/sg'},
+    {id:'collaudo_statico', nome:'Collaudo statico', tipo:'strutturale', icon:'\u{2705}',
+      chi_firma:'Ingegnere collaudatore (10 anni anzianità, indipendente)', destinatario:'Genio Civile + Comune', invio:'Telematica',
+      validita:'Permanente', rif:'L. 1086/1971 + DPR 380/2001 art. 65-67 + NTC 2018 § 9',
+      verifica_url:'https://www.gazzettaufficiale.it/eli/id/2018/02/20/18A00716/sg'},
+    {id:'ape', nome:'APE, Attestato di Prestazione Energetica', tipo:'urbanistico', icon:'\u{2696}',
+      chi_firma:'Certificatore energetico abilitato (CEE)', destinatario:'Catasto energetico regionale + Comune', invio:'Telematica',
+      validita:'10 anni (decade per modifiche significative)', rif:'DM 26/06/2015 · DM 28/10/2025 + D.Lgs 192/2005',
+      verifica_url:'https://www.mase.gov.it/portale/efficienza-energetica'},
+    {id:'piano_gestione_rifiuti', nome:'Piano gestione rifiuti C&D', tipo:'urbanistico', icon:'\u{267B}',
+      chi_firma:'DL + Impresa esecutrice', destinatario:'Comune + impianti destinazione', invio:'Documentale + FIR',
+      validita:'Per la durata dei lavori', rif:'D.Lgs 152/2006 + DM MASE 24/11/2025 CAM Edilizia',
+      verifica_url:'https://www.mase.gov.it/portale/cam-vigenti'},
+    /* BIM (DM 560/2017) */
+    {id:'bim_modello', nome:'Modello BIM (UNI 11337 + ISO 19650)', tipo:'urbanistico', icon:'\u{1F5A5}',
+      chi_firma:'BIM Manager/Coordinator (UNI 11337-7)', destinatario:'Stazione appaltante', invio:'CDE (Common Data Environment)',
+      validita:'Per la durata appalto + manutenzione', rif:'DM 560/2017 + UNI 11337 + ISO 19650-1/-2:2018',
+      verifica_url:'https://www.mit.gov.it/normativa/decreto-ministeriale-numero-560-del-01122017'}
+  ];
+
+  /* ============== FASI_LAVORO (UNI 11150-3/-4 + ISO 21502 + D.Lgs 36/2023) ============== */
+  const FASI_LAVORO = [
+    {id:'fase_1', ordine:1, nome:'Rilievo e diagnosi preliminare', icon:'\u{1F50D}',
+      obiettivo:'Conoscere lo stato di fatto, identificare patologie, formulare diagnosi differenziale, raccogliere dati per il progetto. Per beni vincolati: indagini storico-artistiche e diagnostiche obbligatorie.',
+      rif:'UNI 11150-3:2005 · UNI 11182:2006 · D.Lgs 42/2004 · ICOMOS Venice 1964 · ASTM E2018-24'},
+    {id:'fase_2', ordine:2, nome:'Progettazione (PFTE → esecutivo)', icon:'\u{1F4D0}',
+      obiettivo:'Tradurre la diagnosi in progetto tecnico conforme a norme cogenti, vincoli, CAM (se appalto pubblico). Definire fasi, materiali, costi.',
+      rif:'DPR 380/2001 · D.Lgs 36/2023 All. I.7 · D.Lgs 81/2008 art. 90-100 · NTC 2018 · UNI 11150-4:2005 · UNI 11337 · ISO 19650 · DM MASE 24/11/2025'},
+    {id:'fase_3', ordine:3, nome:'Esecuzione lavori', icon:'\u{1F477}',
+      obiettivo:'Realizzare i lavori conformemente al progetto esecutivo, alla normativa vigente, alle prescrizioni delle autorizzazioni. Garantire sicurezza, qualità, sostenibilità.',
+      rif:'DPR 380/2001 · D.Lgs 81/2008 art. 92-99 + Allegato XV · DURC · DM MASE 24/11/2025'},
+    {id:'fase_4', ordine:4, nome:'Collaudo e accettazione', icon:'\u{2705}',
+      obiettivo:'Verificare conformità al progetto, norme cogenti, contratto. Accertare corretta esecuzione tecnica, funzionale, prestazionale. Permettere la fruibilità dell’opera.',
+      rif:'L. 1086/1971 · NTC 2018 § 9 · DPR 380/2001 art. 24+65-67 · DM 26/06/2015 · DM 28/10/2025 (APE) · D.Lgs 42/2004 (beni vincolati)'},
+    {id:'fase_5', ordine:5, nome:'Manutenzione e monitoraggio post', icon:'\u{1F50D}',
+      obiettivo:'Garantire durabilità nel tempo. Monitorare la patologia trattata. Pianificare manutenzione ordinaria/straordinaria. Verificare efficacia trattamenti.',
+      rif:'UNI 10874 · DM 49/2018 · UNI 11150-4:2005 · D.Lgs 42/2004 art. 29 · ISO 21500/21502:2020'}
+  ];
+
+  const STATI_CANTIERE = [
+    {id:'pianificazione', nome:'In pianificazione'},
+    {id:'autorizzazioni', nome:'In autorizzazione'},
+    {id:'in_corso', nome:'In corso'},
+    {id:'sospeso', nome:'Sospeso'},
+    {id:'collaudo', nome:'In collaudo'},
+    {id:'chiuso', nome:'Chiuso'},
+    {id:'archiviato', nome:'Archiviato'}
+  ];
+
+  const TIPI_ATTIVITA = [
+    'Sopralluogo','Campionamento','Indagine diagnostica','Riunione','Consegna documento',
+    'Sopralluogo tecnico','Scadenza autorizzazione','Verifica DL','SAL','Collaudo','Altro'
+  ];
+
+  const STATI_DOC = [
+    {id:'non_richiesto', nome:'○ non richiesto'},
+    {id:'da_richiedere', nome:'⏳ da richiedere'},
+    {id:'in_lavorazione', nome:'✏ in lavorazione'},
+    {id:'inviato', nome:'✉ inviato/depositato'},
+    {id:'ottenuto', nome:'✅ ottenuto'},
+    {id:'scaduto', nome:'⚠ scaduto'},
+    {id:'non_applicabile', nome:'non applicabile'}
+  ];
+
+  /* Esponi cataloghi anche a scope superiore se serve report */
+  window.MX_CANTIERI = { TIPI_INTERVENTO, MODIFICATORI, DOC_CATALOG, FASI_LAVORO, STATI_CANTIERE, STATI_DOC, TIPI_ATTIVITA };
+
+  /* ============== STATE ============== */
+  const KEY = 'mx2::cantieri-multi-v1';
+  const LEGACY_KEY = 'mx2::cantieri-v1';
+
+  function newCantiereId(){ return 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+  function newAttId(){ return 'a_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
+  function nowIso(){ return new Date().toISOString(); }
+
+  function emptyCantiere(label){
+    return {
+      id: newCantiereId(),
+      label: label || 'Nuovo cantiere',
+      stato: 'pianificazione',
+      tipo_intervento: '',
+      modificatori: [],
+      dataApertura: '',
+      dataChiusura: '',
+      importoLavori: '',
+      note: '',
+      committente_label: '',
+      indirizzo_label: '',
+      regione: '',
+      comune: '',
+      gps_label: '',
+      attivita: [],
+      documenti: {},
+      fasi: {},
+      createdAt: nowIso(),
+      updatedAt: nowIso()
+    };
+  }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(raw){
+        var s = JSON.parse(raw);
+        if(s && s.schemaVersion === 1 && Array.isArray(s.list)) return s;
+      }
+    }catch(_){}
+    // Migrazione one-shot da v1 monolitico se presente
+    var migr = null;
+    try{
+      var legacy = localStorage.getItem(LEGACY_KEY);
+      if(legacy){
+        var lv = JSON.parse(legacy);
+        if(lv && Array.isArray(lv.tasks) && lv.tasks.length){
+          migr = emptyCantiere('Cantiere legacy v1');
+          migr.attivita = lv.tasks.map(function(t){
+            return { id: t.id || newAttId(), name: t.name||'', tipo:'Altro', due: t.due||'', prio: t.prio||'media', done: !!t.done, createdAt: t.createdAt || nowIso() };
+          });
+        }
+      }
+    }catch(_){}
+    var st = { schemaVersion:1, list: migr ? [migr] : [], activeId: migr ? migr.id : '', updatedAt: nowIso() };
+    return st;
+  }
+
+  function save(){
+    state.updatedAt = nowIso();
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(_){}
+  }
+
+  var state = load();
+
+  function activeCantiere(){
+    if(!state.activeId) return null;
+    return state.list.find(function(c){ return c.id === state.activeId; }) || null;
+  }
+
+  /* ============== ANAGRAFICA da Modulo #1 (locali-cantiere) ============== */
+  function readPerito(){
+    try{
+      // Multi-perito v2
+      var v2 = JSON.parse(localStorage.getItem('mx2::periti-v2'));
+      if(v2 && Array.isArray(v2.list) && v2.list.length){
+        var p = v2.list.find(function(x){return x.id === v2.activeId;}) || v2.list[0];
+        return p;
+      }
+    }catch(_){}
+    try{
+      // Legacy mx2::perito
+      var p1 = JSON.parse(localStorage.getItem('mx2::perito'));
+      if(p1) return p1;
+    }catch(_){}
+    return null;
+  }
+
+  function readLocali(){
+    try{
+      var s = JSON.parse(localStorage.getItem('mx2::locali-v1'));
+      if(s) return s;
+    }catch(_){}
+    return null;
+  }
+
+  function renderAna(){
+    var p = readPerito();
+    var l = readLocali();
+    var ana = l && l.ana ? l.ana : {};
+
+    var aP = document.getElementById('anaPerito');
+    var aC = document.getElementById('anaCliente');
+    if(p){
+      var nome = p.tipo_soggetto === 'PG' ? (p.ragione_sociale || p.nome || 'n.d.') : (p.nome || 'n.d.');
+      var sub = [];
+      if(p.titolo) sub.push(p.titolo);
+      if(p.albo) sub.push(p.albo + (p.numAlbo ? ' n. ' + p.numAlbo : ''));
+      if(p.studio) sub.push(p.studio);
+      aP.innerHTML = '<div class="h">Perito / tecnico</div><div class="n">'+esc(nome)+'</div><div class="m">'+esc(sub.join(' · '))+'</div>';
+    }else{
+      aP.innerHTML = '<div class="h">Perito / tecnico</div><div class="n">n.d.</div><div class="m">Nessun perito impostato in Dati del Cantiere</div>';
+    }
+
+    var cName = ana.TipoSoggetto === 'PG' ? (ana.RagSoc || ana.Nome || 'n.d.') : (ana.Nome || 'n.d.');
+    var cSub = [];
+    if(ana.Indirizzo) cSub.push(ana.Indirizzo);
+    if(ana.Comune) cSub.push(ana.Comune);
+    if(ana.Regione) cSub.push(ana.Regione);
+    aC.innerHTML = '<div class="h">Committente / immobile</div><div class="n">'+esc(cName)+'</div><div class="m">'+esc(cSub.join(' · '))+'</div>';
+
+    // Auto-sync etichetta committente nel cantiere attivo (solo se vuota)
+    var ac = activeCantiere();
+    if(ac){
+      var changed = false;
+      if(!ac.committente_label && cName && cName !== 'n.d.'){ ac.committente_label = cName; changed = true; }
+      if(!ac.indirizzo_label && ana.Indirizzo){ ac.indirizzo_label = ana.Indirizzo; changed = true; }
+      if(!ac.regione && ana.Regione){ ac.regione = ana.Regione; changed = true; }
+      if(!ac.comune && ana.Comune){ ac.comune = ana.Comune; changed = true; }
+      if(!ac.gps_label && ana.Gps){ ac.gps_label = ana.Gps; changed = true; }
+      if(changed){ ac.updatedAt = nowIso(); save(); }
+    }
+  }
+
+  /* ============== UTILS ============== */
+  function esc(s){ if(s===undefined||s===null) return ''; return String(s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+  function fmtDate(iso){ if(!iso) return ''; var d=new Date(iso); if(isNaN(d)) return iso; return d.toLocaleDateString('it-IT'); }
+  function todayIso(){ return new Date().toISOString().slice(0,10); }
+  function isOverdue(due, done){ return due && !done && new Date(due) < new Date(new Date().toDateString()); }
+
+  /* ============== RENDER UI ============== */
+  function renderMcBar(){
+    var sel = document.getElementById('mcActive');
+    sel.innerHTML = '';
+    if(!state.list.length){
+      var o = document.createElement('option');
+      o.value = ''; o.textContent = 'nessun cantiere';
+      sel.appendChild(o);
+    }else{
+      state.list.forEach(function(c){
+        var o = document.createElement('option');
+        o.value = c.id;
+        var stato = STATI_CANTIERE.find(function(s){return s.id===c.stato;}); 
+        var stLab = stato ? ' [' + stato.nome + ']' : '';
+        o.textContent = c.label + stLab;
+        if(c.id === state.activeId) o.selected = true;
+        sel.appendChild(o);
+      });
+    }
+    document.getElementById('mcCount').textContent = state.list.length + ' cantier' + (state.list.length === 1 ? 'e' : 'i');
+    var ac = activeCantiere();
+    document.getElementById('mcUpd').textContent = ac ? ('aggiornato ' + new Date(ac.updatedAt).toLocaleString('it-IT')) : 'n.d.';
+  }
+
+  function renderContainer(){
+    var cont = document.getElementById('cantiereContainer');
+    var c = activeCantiere();
+    if(!c){
+      cont.innerHTML = '<div class="empty">Crea un cantiere per iniziare. I dati anagrafici (perito · committente · immobile) sono presi dal modulo <a href="locali-cantiere.html">Dati del Cantiere</a>.</div>';
+      return;
+    }
+    cont.innerHTML = ''
+      + renderCard1(c)
+      + renderCard2(c)
+      + renderCard3(c)
+      + renderCard4(c);
+    bindCard1(c);
+    bindCard2(c);
+    bindCard3(c);
+    bindCard4(c);
+  }
+
+  /* ============ Card 1: Stato cantiere + tipo intervento + modificatori ============ */
+  function renderCard1(c){
+    var statoOpts = STATI_CANTIERE.map(function(s){
+      return '<label><input type="radio" name="c1_stato" value="'+s.id+'"'+(c.stato===s.id?' checked':'')+'>'+esc(s.nome)+'</label>';
+    }).join('');
+
+    var tipoOpts = '<option value="">seleziona tipo intervento (DPR 380/2001 art. 3)</option>' + TIPI_INTERVENTO.map(function(t){
+      return '<option value="'+t.id+'"'+(c.tipo_intervento===t.id?' selected':'')+'>'+t.icon+' '+esc(t.nome)+'</option>';
+    }).join('');
+
+    var modOpts = MODIFICATORI.map(function(m){
+      var on = c.modificatori && c.modificatori.indexOf(m.id) >= 0;
+      return '<label><input type="checkbox" data-mod="'+m.id+'"'+(on?' checked':'')+'> '+esc(m.nome)+'</label>';
+    }).join('');
+
+    return ''
+      +'<article class="card">'
+      +'  <h3><span class="num">1</span> Stato cantiere · Tipo intervento · Modificatori</h3>'
+      +'  <div class="body">'
+      +'    <div class="row"><label>Etichetta cantiere</label><div class="ctl"><input type="text" id="c1_label" value="'+esc(c.label)+'" placeholder="Es.: Via Roma 12, risanamento risalita"></div></div>'
+      +'    <div class="row"><label>Stato</label><div class="ctl"><div class="radio-row">'+statoOpts+'</div></div></div>'
+      +'    <div class="row"><label>Tipo intervento</label><div class="ctl"><select id="c1_tipo">'+tipoOpts+'</select><span class="hint">DPR 380/2001 art. 3, 7 categorie cogenti</span></div></div>'
+      +'    <div class="row"><label>Modificatori</label><div class="ctl"><div class="chkgrp">'+modOpts+'</div><span class="hint">Si sommano al tipo intervento. Aggiungono obblighi specifici (Soprintendenza · Genio Civile · CAM).</span></div></div>'
+      +'    <div class="row"><label>Data apertura</label><div class="ctl"><input type="date" id="c1_dataAp" value="'+esc(c.dataApertura)+'"></div></div>'
+      +'    <div class="row"><label>Data chiusura prevista</label><div class="ctl"><input type="date" id="c1_dataCh" value="'+esc(c.dataChiusura)+'"></div></div>'
+      +'    <div class="row"><label>Importo lavori (€)</label><div class="ctl"><input type="text" inputmode="decimal" id="c1_importo" value="'+esc(c.importoLavori)+'" placeholder="opzionale"></div></div>'
+      +'    <div class="row"><label>Note generali</label><div class="ctl"><textarea id="c1_note" placeholder="Annotazioni libere sul cantiere">'+esc(c.note)+'</textarea></div></div>'
+      +'    <div id="c1_titoli">'+renderTitoliBox(c)+'</div>'
+      +'  </div>'
+      +'</article>';
+  }
+
+  function renderTitoliBox(c){
+    if(!c.tipo_intervento && (!c.modificatori || !c.modificatori.length)){
+      return '<div class="note-box"><strong>Seleziona un tipo intervento</strong> per visualizzare titoli abilitativi attesi e documenti correlati.</div>';
+    }
+    var t = TIPI_INTERVENTO.find(function(x){return x.id===c.tipo_intervento;});
+    var mods = (c.modificatori||[]).map(function(id){return MODIFICATORI.find(function(m){return m.id===id;});}).filter(Boolean);
+
+    var html = '<div class="titoli-box"><div class="h">Titoli abilitativi e norme attese</div>';
+    if(t){
+      html += '<div class="tt"><strong>'+esc(t.nome)+'</strong>, '+esc(t.titolo)+'</div>';
+      html += '<div class="ref">'+esc(t.rif)+'</div>';
+      if(t.definizione){ html += '<div class="ref" style="margin-top:6px;font-style:normal;color:#5a4a3a">'+t.definizione+'</div>'; }
+    }
+    mods.forEach(function(m){
+      html += '<div class="tt" style="margin-top:8px"><strong>+ '+esc(m.nome)+'</strong>, '+m.titolo+'</div>';
+      html += '<div class="ref">'+esc(m.rif)+'</div>';
+    });
+
+    // Lista documenti obbligatori e condizionali
+    var obb = [], cond = [];
+    if(t){
+      (t.doc_obb||[]).forEach(function(d){if(obb.indexOf(d)<0)obb.push(d);});
+      (t.doc_cond||[]).forEach(function(dc){cond.push(dc);});
+    }
+    mods.forEach(function(m){
+      (m.doc_obb||[]).forEach(function(d){if(obb.indexOf(d)<0)obb.push(d);});
+      (m.doc_cond||[]).forEach(function(dc){cond.push(dc);});
+    });
+
+    if(obb.length){
+      html += '<h5 style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5e3370;margin:10px 0 4px;font-weight:800">Documenti obbligatori</h5>';
+      html += '<ul>';
+      obb.forEach(function(d){
+        var di = DOC_CATALOG.find(function(x){return x.id===d;});
+        html += '<li>' + (di ? esc(di.nome) + ' <span style="color:#8b7355">(' + esc(di.rif) + ')</span>' : esc(d)) + '</li>';
+      });
+      html += '</ul>';
+    }
+    /* Corretto il 19/11/2026: le condizioni uscivano col nome interno («se piu_imprese_o_200_ug») e lo stesso documento
+       poteva comparire due volte, oppure fra i condizionali pur essendo già fra gli obbligatori. */
+    var SE_TESTO = {
+      'sempre':'sempre',
+      'appalto_pubblico':'appalto pubblico',
+      'bene_vincolato':'bene culturale vincolato',
+      'bene_vincolato (PREVENTIVA OBBLIGATORIA)':'bene culturale vincolato (preventiva obbligatoria)',
+      'bene_vincolato (vincolo IMPEDISCE demolizione)':'bene culturale vincolato (il vincolo impedisce la demolizione)',
+      'bene_vincolato + decorazioni':'bene culturale vincolato con decorazioni',
+      'bene_vincolato_o_paesaggio':'bene culturale vincolato o vincolo paesaggistico',
+      'condizione_art99':'nei casi dell\'art. 99 del D.Lgs 81/2008',
+      'oltre_2mln_euro':'importo oltre 2 milioni di euro',
+      'piu_imprese_o_200_ug':'più imprese in cantiere o 200 uomini-giorno',
+      'presenza_amianto_certificata':'presenza di amianto certificata',
+      'restauro_decorazioni':'restauro di decorazioni',
+      'sopra_soglia':'sopra soglia',
+      'zona_1_o_2':'zona sismica 1 o 2', 'zona_sismica_1_2':'zona sismica 1 o 2',
+      'zona_3':'zona sismica 3', 'zona_sismica_3':'zona sismica 3'
+    };
+    var visti = {};
+    cond = cond.filter(function(dc){ if(obb.indexOf(dc.doc)>=0 || visti[dc.doc]) return false; visti[dc.doc] = 1; return true; });
+    if(cond.length){
+      html += '<h5 style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5e3370;margin:10px 0 4px;font-weight:800">Documenti condizionali</h5>';
+      html += '<ul>';
+      cond.forEach(function(dc){
+        var di = DOC_CATALOG.find(function(x){return x.id===dc.doc;});
+        html += '<li>' + (di ? esc(di.nome) : esc(dc.doc)) + ', <em>se</em> ' + esc(SE_TESTO[dc.se] || String(dc.se).replace(/_/g,' ')) + '</li>';
+      });
+      html += '</ul>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function bindCard1(c){
+    document.getElementById('c1_label').addEventListener('input', function(e){ c.label = e.target.value; c.updatedAt = nowIso(); save(); renderMcBar(); });
+    document.querySelectorAll('input[name="c1_stato"]').forEach(function(r){
+      r.addEventListener('change', function(){ c.stato = this.value; c.updatedAt = nowIso(); save(); renderMcBar(); });
+    });
+    document.getElementById('c1_tipo').addEventListener('change', function(e){
+      c.tipo_intervento = e.target.value; c.updatedAt = nowIso(); save();
+      document.getElementById('c1_titoli').innerHTML = renderTitoliBox(c);
+    });
+    document.querySelectorAll('input[data-mod]').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        var id = this.dataset.mod;
+        c.modificatori = c.modificatori || [];
+        var i = c.modificatori.indexOf(id);
+        if(this.checked){ if(i<0) c.modificatori.push(id); }
+        else{ if(i>=0) c.modificatori.splice(i,1); }
+        c.updatedAt = nowIso(); save();
+        document.getElementById('c1_titoli').innerHTML = renderTitoliBox(c);
+      });
+    });
+    document.getElementById('c1_dataAp').addEventListener('change', function(e){ c.dataApertura = e.target.value; c.updatedAt = nowIso(); save(); });
+    document.getElementById('c1_dataCh').addEventListener('change', function(e){ c.dataChiusura = e.target.value; c.updatedAt = nowIso(); save(); });
+    document.getElementById('c1_importo').addEventListener('input', function(e){ c.importoLavori = e.target.value; c.updatedAt = nowIso(); save(); });
+    document.getElementById('c1_note').addEventListener('input', function(e){ c.note = e.target.value; c.updatedAt = nowIso(); save(); });
+  }
+
+  /* ============ Card 2: Agenda attivita ============ */
+  var agendaFilter = 'all';
+
+  function renderCard2(c){
+    var tipiOpts = TIPI_ATTIVITA.map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+'</option>';}).join('');
+    var tot = c.attivita.length;
+    var done = c.attivita.filter(function(t){return t.done;}).length;
+    var open = c.attivita.filter(function(t){return !t.done;}).length;
+    var over = c.attivita.filter(function(t){return isOverdue(t.due, t.done);}).length;
+
+    return ''
+      +'<article class="card">'
+      +'  <h3><span class="num">2</span> Agenda attività</h3>'
+      +'  <div class="body">'
+      +'    <div class="stats">'
+      +'      <div class="stat"><div class="v">'+tot+'</div><div class="l">Totali</div></div>'
+      +'      <div class="stat"><div class="v ok">'+done+'</div><div class="l">Completate</div></div>'
+      +'      <div class="stat"><div class="v">'+open+'</div><div class="l">Aperte</div></div>'
+      +'      <div class="stat"><div class="v err">'+over+'</div><div class="l">Scadute</div></div>'
+      +'    </div>'
+      +'    <div class="ag-add">'
+      +'      <input type="text" id="ag_name" placeholder="Descrizione attività (es.: Sopralluogo iniziale)">'
+      +'      <select id="ag_tipo">'+tipiOpts+'</select>'
+      +'      <input type="date" id="ag_due">'
+      +'      <select id="ag_prio"><option value="bassa">Bassa</option><option value="media" selected>Media</option><option value="alta">Alta</option></select>'
+      +'      <button type="button" class="mx-tb-btn tb-compare" id="ag_add" style="font-size:10.5px;padding:9px 14px">+ Aggiungi</button>'
+      +'    </div>'
+      +'    <div class="filters" id="ag_filters">'
+      +'      <button type="button" data-f="all" class="'+(agendaFilter==='all'?'is-on':'')+'">Tutte</button>'
+      +'      <button type="button" data-f="open" class="'+(agendaFilter==='open'?'is-on':'')+'">Aperte</button>'
+      +'      <button type="button" data-f="done" class="'+(agendaFilter==='done'?'is-on':'')+'">Completate</button>'
+      +'      <button type="button" data-f="overdue" class="'+(agendaFilter==='overdue'?'is-on':'')+'">Scadute</button>'
+      +'    </div>'
+      +'    <div class="ag-list" id="ag_list"></div>'
+      +'  </div>'
+      +'</article>';
+  }
+
+  function renderAgendaList(c){
+    var lst = c.attivita.slice().sort(function(a,b){
+      if(a.done !== b.done) return a.done ? 1 : -1;
+      var av = a.due || '9999';
+      var bv = b.due || '9999';
+      return av.localeCompare(bv);
+    });
+    if(agendaFilter==='open') lst = lst.filter(function(t){return !t.done;});
+    else if(agendaFilter==='done') lst = lst.filter(function(t){return t.done;});
+    else if(agendaFilter==='overdue') lst = lst.filter(function(t){return isOverdue(t.due, t.done);});
+
+    var ag = document.getElementById('ag_list');
+    if(!lst.length){
+      ag.innerHTML = '<div class="empty">Nessuna attività in questo filtro.</div>';
+      return;
+    }
+    ag.innerHTML = lst.map(function(t){
+      var dueLabel = t.due ? ('scadenza ' + fmtDate(t.due)) : 'nessuna scadenza';
+      var dueCls = isOverdue(t.due, t.done) ? 'overdue' : '';
+      return '<div class="ag-item '+(t.done?'done':'')+'" data-prio="'+esc(t.prio||'media')+'" data-id="'+t.id+'">'
+        +'<input type="checkbox" class="chk" '+(t.done?'checked':'')+'>'
+        +'<div class="info"><div class="name">'+esc(t.name)+'</div>'
+        +'<div class="det"><span class="tp">'+esc(t.tipo||'Altro')+'</span><span>'+esc((t.prio||'media').toUpperCase())+'</span><span class="due '+dueCls+'">'+dueLabel+'</span></div></div>'
+        +'<button class="rm" type="button" aria-label="Elimina">&#10005;</button>'
+        +'</div>';
+    }).join('');
+    ag.querySelectorAll('.ag-item').forEach(function(el){
+      var id = el.dataset.id;
+      el.querySelector('.chk').addEventListener('change', function(e){
+        var t = c.attivita.find(function(x){return x.id===id;});
+        if(t){ t.done = e.target.checked; c.updatedAt = nowIso(); save(); renderContainer(); }
+      });
+      el.querySelector('.rm').addEventListener('click', function(){
+        if(!confirm('Eliminare questa attività?')) return;
+        c.attivita = c.attivita.filter(function(x){return x.id!==id;});
+        c.updatedAt = nowIso(); save(); renderContainer();
+      });
+    });
+  }
+
+  function bindCard2(c){
+    document.getElementById('ag_add').addEventListener('click', function(){
+      var name = document.getElementById('ag_name').value.trim();
+      if(!name) return;
+      var tipo = document.getElementById('ag_tipo').value;
+      var due = document.getElementById('ag_due').value;
+      var prio = document.getElementById('ag_prio').value;
+      c.attivita.push({ id:newAttId(), name:name, tipo:tipo, due:due, prio:prio, done:false, createdAt:nowIso() });
+      c.updatedAt = nowIso(); save();
+      document.getElementById('ag_name').value=''; document.getElementById('ag_due').value='';
+      renderContainer();
+    });
+    document.querySelectorAll('#ag_filters button').forEach(function(b){
+      b.addEventListener('click', function(){
+        agendaFilter = this.dataset.f;
+        document.querySelectorAll('#ag_filters button').forEach(function(x){x.classList.remove('is-on');});
+        this.classList.add('is-on');
+        renderAgendaList(c);
+      });
+    });
+    renderAgendaList(c);
+  }
+
+  /* ============ Card 3: Documenti cantiere (checklist con stato) ============ */
+  var docFilter = 'all';
+  var DOC_TIPI = [
+    {id:'all', nome:'Tutti'},
+    {id:'titolo_edilizio', nome:'Titolo edilizio'},
+    {id:'sicurezza', nome:'Sicurezza'},
+    {id:'contributivo', nome:'Contributivo'},
+    {id:'sismica', nome:'Sismica'},
+    {id:'soprintendenza', nome:'Soprintendenza'},
+    {id:'restauro', nome:'Restauro'},
+    {id:'appalto', nome:'Appalto'},
+    {id:'strutturale', nome:'Strutturale'},
+    {id:'urbanistico', nome:'Urbanistico'},
+    {id:'attesi', nome:'Solo attesi'},
+    {id:'mancanti', nome:'Mancanti'}
+  ];
+
+  function expectedDocIds(c){
+    var ids = [];
+    var t = TIPI_INTERVENTO.find(function(x){return x.id===c.tipo_intervento;});
+    if(t){
+      (t.doc_obb||[]).forEach(function(d){if(ids.indexOf(d)<0) ids.push(d);});
+      (t.doc_cond||[]).forEach(function(dc){if(ids.indexOf(dc.doc)<0) ids.push(dc.doc);});
+    }
+    (c.modificatori||[]).forEach(function(mid){
+      var m = MODIFICATORI.find(function(x){return x.id===mid;});
+      if(!m) return;
+      (m.doc_obb||[]).forEach(function(d){if(ids.indexOf(d)<0) ids.push(d);});
+      (m.doc_cond||[]).forEach(function(dc){if(ids.indexOf(dc.doc)<0) ids.push(dc.doc);});
+    });
+    return ids;
+  }
+
+  /* 19/11/2026: nome leggibile del tipo di documento (prima usciva l'identificativo interno, es. «titolo_edilizio») */
+  function docTipoNome(id){ var x = DOC_TIPI.find(function(t){return t.id===id;}); return x ? x.nome : String(id||'').replace(/_/g,' '); }
+
+  function renderCard3(c){
+    var tipiBtns = DOC_TIPI.map(function(t){
+      return '<button type="button" data-tipo="'+t.id+'" class="'+(docFilter===t.id?'is-on':'')+'">'+esc(t.nome)+'</button>';
+    }).join('');
+
+    var exp = expectedDocIds(c);
+    var done = 0; var miss = 0;
+    Object.keys(c.documenti||{}).forEach(function(k){
+      var st = c.documenti[k] && c.documenti[k].stato;
+      if(st==='ottenuto' || st==='inviato') done++;
+    });
+    exp.forEach(function(d){
+      var st = c.documenti[d] && c.documenti[d].stato;
+      if(!st || st==='non_richiesto' || st==='da_richiedere') miss++;
+    });
+
+    return ''
+      +'<article class="card">'
+      +'  <h3><span class="num">3</span> Documenti cantiere</h3>'
+      +'  <div class="body">'
+      +'    <div class="stats">'
+      +'      <div class="stat"><div class="v">'+exp.length+'</div><div class="l">Attesi</div></div>'
+      +'      <div class="stat"><div class="v ok">'+done+'</div><div class="l">Ottenuti/inviati</div></div>'
+      +'      <div class="stat"><div class="v warn">'+miss+'</div><div class="l">Mancanti dagli attesi</div></div>'
+      +'      <div class="stat"><div class="v">'+DOC_CATALOG.length+'</div><div class="l">Catalogo totale</div></div>'
+      +'    </div>'
+      +'    <div class="doc-filters" id="doc_filters">'+tipiBtns+'</div>'
+      +'    <div class="doc-list" id="doc_list"></div>'
+      +'    <div class="note-box" style="margin-top:14px"><strong>Riferimenti normativi verificati 2026-05-03</strong> · DPR 380/2001 (Bosetti &amp; Gatti) · D.Lgs 81/2008 (Olympus UniURB, TUSSL) · D.Lgs 42/2004 (SABAP/MiC) · D.Lgs 36/2023 (codiceappalti.it) · DM MASE 24/11/2025 (mase.gov.it). Cliccare il riferimento di ciascun documento per consultare la fonte autorevole.</div>'
+      +'  </div>'
+      +'</article>';
+  }
+
+  function renderDocList(c){
+    var exp = expectedDocIds(c);
+    var list = DOC_CATALOG.slice();
+    if(docFilter === 'attesi'){
+      list = list.filter(function(d){return exp.indexOf(d.id) >= 0;});
+    }else if(docFilter === 'mancanti'){
+      list = list.filter(function(d){
+        if(exp.indexOf(d.id) < 0) return false;
+        var st = c.documenti[d.id] && c.documenti[d.id].stato;
+        return !st || st==='non_richiesto' || st==='da_richiedere';
+      });
+    }else if(docFilter !== 'all'){
+      list = list.filter(function(d){return d.tipo === docFilter;});
+    }
+
+    var dl = document.getElementById('doc_list');
+    if(!list.length){ dl.innerHTML = '<div class="empty">Nessun documento in questo filtro.</div>'; return; }
+    dl.innerHTML = list.map(function(d){
+      var entry = c.documenti[d.id] || {};
+      var stato = entry.stato || 'non_richiesto';
+      var dataR = entry.dataRichiesta || '';
+      var dataO = entry.dataOttenimento || '';
+      var scad = entry.scadenza || '';
+      var note = entry.note || '';
+      var isAtteso = exp.indexOf(d.id) >= 0;
+      var clsExtra = '';
+      if(stato === 'ottenuto' || stato === 'inviato') clsExtra = ' is-done';
+      else if(isAtteso && (stato === 'non_richiesto' || stato === 'da_richiedere')) clsExtra = ' is-missing';
+      var statoOpts = STATI_DOC.map(function(s){return '<option value="'+s.id+'"'+(stato===s.id?' selected':'')+'>'+esc(s.nome)+'</option>';}).join('');
+      var atteso = isAtteso ? ' <span style="color:#a83232;font-weight:800;font-size:10px;letter-spacing:.08em">★ ATTESO</span>' : '';
+      var rifLink = d.verifica_url ? ('<a href="'+esc(d.verifica_url)+'" target="_blank" rel="noopener">'+esc(d.rif)+' &#8599;</a>') : esc(d.rif);
+
+      return '<div class="doc-item'+clsExtra+'" data-doc="'+d.id+'">'
+        +'<div class="top"><div class="nome">'+esc(d.icon||'')+' '+esc(d.nome)+atteso+'</div><div class="tipo">'+esc(docTipoNome(d.tipo))+'</div></div>'
+        +'<div class="meta"><strong>Chi firma:</strong> '+esc(d.chi_firma)+' · <strong>Destinatario:</strong> '+esc(d.destinatario)+' · <strong>Invio:</strong> '+esc(d.invio)+'<br><strong>Validità:</strong> '+esc(d.validita)+' · <strong>Riferimento:</strong> '+rifLink+'</div>'
+        +'<div class="stato-row">'
+          +'<span class="lab">Stato</span><select data-field="stato">'+statoOpts+'</select>'
+          +'<span class="lab" style="margin-left:6px">Richiesta</span><input type="date" data-field="dataRichiesta" value="'+esc(dataR)+'">'
+          +'<span class="lab">Ottenimento</span><input type="date" data-field="dataOttenimento" value="'+esc(dataO)+'">'
+          +'<span class="lab">Scadenza</span><input type="date" data-field="scadenza" value="'+esc(scad)+'">'
+        +'</div>'
+        +'<div style="margin-top:6px"><input type="text" data-field="note" value="'+esc(note)+'" placeholder="Note / protocollo / link archivio" style="width:100%;padding:6px 9px;border:1px solid var(--line);border-radius:7px;font:inherit;font-size:12px;background:#fff;color:var(--ink)"></div>'
+        +'</div>';
+    }).join('');
+
+    dl.querySelectorAll('.doc-item').forEach(function(el){
+      var docId = el.dataset.doc;
+      el.querySelectorAll('[data-field]').forEach(function(ctl){
+        ctl.addEventListener('change', function(){
+          if(!c.documenti[docId]) c.documenti[docId] = {};
+          c.documenti[docId][ctl.dataset.field] = ctl.value;
+          c.updatedAt = nowIso(); save();
+          renderContainer();
+        });
+        if(ctl.tagName === 'INPUT' && ctl.type === 'text'){
+          ctl.addEventListener('input', function(){
+            if(!c.documenti[docId]) c.documenti[docId] = {};
+            c.documenti[docId][ctl.dataset.field] = ctl.value;
+            c.updatedAt = nowIso(); save();
+          });
+        }
+      });
+    });
+  }
+
+  function bindCard3(c){
+    document.querySelectorAll('#doc_filters button').forEach(function(b){
+      b.addEventListener('click', function(){
+        docFilter = this.dataset.tipo;
+        document.querySelectorAll('#doc_filters button').forEach(function(x){x.classList.remove('is-on');});
+        this.classList.add('is-on');
+        renderDocList(c);
+      });
+    });
+    renderDocList(c);
+  }
+
+  /* ============ Card 4: Cronoprogramma fasi (UNI 11150-3/-4 + ISO 21502) ============ */
+  function renderCard4(c){
+    var totPct = 0;
+    FASI_LAVORO.forEach(function(f){
+      var p = (c.fasi[f.id] && typeof c.fasi[f.id].pct === 'number') ? c.fasi[f.id].pct : 0;
+      totPct += p;
+    });
+    var avgPct = Math.round(totPct / FASI_LAVORO.length);
+
+    var fasiHtml = FASI_LAVORO.map(function(f){
+      var entry = c.fasi[f.id] || {};
+      var pct = (typeof entry.pct === 'number') ? entry.pct : 0;
+      var note = entry.note || '';
+      return ''
+        +'<div class="fase-item" data-fase="'+f.id+'">'
+        +'  <div class="top"><div class="ord">'+f.ordine+'</div><div class="nome">'+f.icon+' '+esc(f.nome)+'</div><div class="pct-num"><span data-pct-num>'+pct+'</span>%</div></div>'
+        +'  <div class="obj">'+f.obiettivo+'</div>'
+        +'  <div class="pct-bar"><div class="pct-fill" style="width:'+pct+'%"></div></div>'
+        +'  <input type="range" min="0" max="100" step="5" value="'+pct+'" data-fase-pct>'
+        +'  <textarea placeholder="Note per questa fase (figure, criticità, scadenze)" data-fase-note>'+esc(note)+'</textarea>'
+        +'  <div class="ref" style="font-size:10.5px;color:#8b7355;margin-top:6px;font-style:italic">'+f.rif+'</div>'
+        +'</div>';
+    }).join('');
+
+    return ''
+      +'<article class="card">'
+      +'  <h3><span class="num">4</span> Cronoprogramma fasi</h3>'
+      +'  <div class="body">'
+      +'    <div class="stats">'
+      +'      <div class="stat"><div class="v">'+avgPct+'%</div><div class="l">Avanzamento medio</div></div>'
+      +'      <div class="stat"><div class="v ok">'+FASI_LAVORO.filter(function(f){return (c.fasi[f.id]&&c.fasi[f.id].pct||0)>=100;}).length+'</div><div class="l">Fasi completate</div></div>'
+      +'      <div class="stat"><div class="v warn">'+FASI_LAVORO.filter(function(f){var p=(c.fasi[f.id]&&c.fasi[f.id].pct||0);return p>0&&p<100;}).length+'</div><div class="l">In corso</div></div>'
+      +'      <div class="stat"><div class="v">'+FASI_LAVORO.filter(function(f){return !(c.fasi[f.id]&&c.fasi[f.id].pct);}).length+'</div><div class="l">Da avviare</div></div>'
+      +'    </div>'
+      +'    <div class="fasi-list">'+fasiHtml+'</div>'
+      +'  </div>'
+      +'</article>';
+  }
+
+  function bindCard4(c){
+    document.querySelectorAll('.fase-item').forEach(function(el){
+      var fid = el.dataset.fase;
+      var range = el.querySelector('[data-fase-pct]');
+      var noteEl = el.querySelector('[data-fase-note]');
+      range.addEventListener('input', function(){
+        var v = parseInt(this.value,10) || 0;
+        if(!c.fasi[fid]) c.fasi[fid] = {};
+        c.fasi[fid].pct = v;
+        c.updatedAt = nowIso();
+        el.querySelector('[data-pct-num]').textContent = v;
+        el.querySelector('.pct-fill').style.width = v + '%';
+      });
+      range.addEventListener('change', function(){ save(); renderContainer(); });
+      noteEl.addEventListener('input', function(){
+        if(!c.fasi[fid]) c.fasi[fid] = {};
+        c.fasi[fid].note = this.value;
+        c.updatedAt = nowIso(); save();
+      });
+    });
+  }
+
+  /* ============ MULTI-CANTIERI HANDLERS ============ */
+  function selectCantiere(id){
+    state.activeId = id || '';
+    save(); renderMcBar(); renderContainer(); renderAna();
+  }
+
+  function newCantiere(label){
+    var c = emptyCantiere(label);
+    // Sync iniziale da Modulo #1
+    var l = readLocali();
+    if(l && l.ana){
+      c.committente_label = (l.ana.TipoSoggetto==='PG' ? l.ana.RagSoc : l.ana.Nome) || '';
+      c.indirizzo_label = l.ana.Indirizzo || '';
+      c.regione = l.ana.Regione || '';
+      c.comune = l.ana.Comune || '';
+      c.gps_label = l.ana.Gps || '';
+    }
+    state.list.push(c);
+    state.activeId = c.id;
+    save(); renderMcBar(); renderContainer(); renderAna();
+  }
+
+/* 20/11/2026: le domande si fanno in una finestra dentro la pagina (window.mxChiedi, nel file condiviso
+   _shared/mx-switcher.js) e non più nelle finestrelle del browser. Se quel file non fosse stato caricato si torna
+   alle finestrelle di prima. _mxChiedi risponde con una promessa; _mxTesto chiede un solo testo. */
+function _mxChiedi(titolo, cfg){
+  if(window.mxChiedi) return window.mxChiedi(titolo, cfg);
+  cfg = cfg || {};
+  if(cfg.scelte){
+    var buone = cfg.scelte.filter(function(s){ return !s[2]; });
+    var r = prompt(titolo + '\n\n' + buone.map(function(s, i){ return (i+1) + '. ' + s[1]; }).join('\n') + '\n\nScrivi il numero:', '1');
+    var k = parseInt(r, 10) - 1;
+    return Promise.resolve(buone[k] ? buone[k][0] : null);
+  }
+  var out = [], campi = cfg.campi || [];
+  for(var i = 0; i < campi.length; i++){
+    var v = prompt(titolo + (campi[i][0] ? ('\n' + campi[i][0]) : ''), campi[i][1] == null ? '' : campi[i][1]);
+    if(v === null) return Promise.resolve(null);
+    out.push(v);
+  }
+  return Promise.resolve(out);
+}
+function _mxTesto(titolo, pre){ return _mxChiedi(titolo, {campi:[['', pre]]}).then(function(r){ return r ? r[0] : null; }); }
+  async function renameCantiere(){
+    var c = activeCantiere(); if(!c) return;
+    var nv = await _mxTesto('Nuovo nome del cantiere', c.label);   /* 20/11/2026: finestra dentro la pagina */
+    if(nv === null) return;
+    nv = nv.trim(); if(!nv) return;
+    c.label = nv; c.updatedAt = nowIso();
+    save(); renderMcBar(); renderContainer();
+  }
+
+  function duplicateCantiere(){
+    var c = activeCantiere(); if(!c) return;
+    var copy = JSON.parse(JSON.stringify(c));
+    copy.id = newCantiereId();
+    copy.label = c.label + ' (copia)';
+    copy.createdAt = nowIso();
+    copy.updatedAt = nowIso();
+    // Reset documenti e fasi se serve? Lasciamo i dati per accelerare. L'utente può ripulire.
+    state.list.push(copy);
+    state.activeId = copy.id;
+    save(); renderMcBar(); renderContainer();
+  }
+
+  function archiveCantiere(){
+    var c = activeCantiere(); if(!c) return;
+    c.stato = (c.stato === 'archiviato') ? 'chiuso' : 'archiviato';
+    c.updatedAt = nowIso();
+    save(); renderMcBar(); renderContainer();
+  }
+
+  function deleteCantiere(){
+    var c = activeCantiere(); if(!c) return;
+    if(!confirm('Eliminare definitivamente il cantiere "'+c.label+'"? Operazione irreversibile.')) return;
+    state.list = state.list.filter(function(x){return x.id !== c.id;});
+    state.activeId = state.list.length ? state.list[0].id : '';
+    save(); renderMcBar(); renderContainer();
+  }
+
+  /* ============ ANTEPRIMA / EXPORT ============ */
+  function buildPreviewHtml(c){
+    if(!c) return '<div class="empty">Nessun cantiere attivo.</div>';
+    var p = readPerito();
+    var l = readLocali(); var ana = l && l.ana ? l.ana : {};
+    var t = TIPI_INTERVENTO.find(function(x){return x.id===c.tipo_intervento;});
+    var mods = (c.modificatori||[]).map(function(id){return MODIFICATORI.find(function(m){return m.id===id;});}).filter(Boolean);
+    var stato = STATI_CANTIERE.find(function(s){return s.id===c.stato;});
+
+    var html = '<h4>Cantiere</h4>';
+    html += '<table>';
+    html += '<tr><th style="width:38%">Etichetta</th><td>'+esc(c.label)+'</td></tr>';
+    html += '<tr><th>Stato</th><td>'+esc(stato?stato.nome:c.stato)+'</td></tr>';
+    if(t){ html += '<tr><th>Tipo intervento</th><td>'+esc(t.nome)+' <br><small>'+esc(t.rif)+'</small></td></tr>'; html += '<tr><th>Titolo abilitativo</th><td>'+t.titolo+'</td></tr>'; }
+    if(mods.length){ html += '<tr><th>Modificatori</th><td>'+mods.map(function(m){return esc(m.nome)+' <small>('+esc(m.rif)+')</small>';}).join('<br>')+'</td></tr>'; }
+    if(c.dataApertura) html += '<tr><th>Data apertura</th><td>'+fmtDate(c.dataApertura)+'</td></tr>';
+    if(c.dataChiusura) html += '<tr><th>Data chiusura prevista</th><td>'+fmtDate(c.dataChiusura)+'</td></tr>';
+    if(c.importoLavori) html += '<tr><th>Importo lavori</th><td>'+esc(c.importoLavori)+' €</td></tr>';
+    if(c.note) html += '<tr><th>Note</th><td>'+esc(c.note).replace(/\n/g,'<br>')+'</td></tr>';
+    html += '</table>';
+
+    html += '<h4>Anagrafica (da Modulo Dati del Cantiere)</h4><table>';
+    if(p){
+      var pn = p.tipo_soggetto==='PG' ? (p.ragione_sociale||p.nome||'n.d.') : (p.nome||'n.d.');
+      html += '<tr><th>Perito/Tecnico</th><td>'+esc(pn)+(p.titolo?' · '+esc(p.titolo):'')+(p.albo?' · '+esc(p.albo)+(p.numAlbo?' n. '+esc(p.numAlbo):''):'')+'</td></tr>';
+    }
+    var cn = ana.TipoSoggetto==='PG' ? (ana.RagSoc||ana.Nome||'n.d.') : (ana.Nome||'n.d.');
+    html += '<tr><th>Committente</th><td>'+esc(cn)+'</td></tr>';
+    if(ana.Indirizzo) html += '<tr><th>Immobile</th><td>'+esc(ana.Indirizzo)+(ana.Comune?' · '+esc(ana.Comune):'')+(ana.Regione?' · '+esc(ana.Regione):'')+'</td></tr>';
+    if(ana.Catasto) html += '<tr><th>Catasto</th><td>'+esc(ana.Catasto)+'</td></tr>';
+    html += '</table>';
+
+    if(c.attivita && c.attivita.length){
+      html += '<h4>Agenda attività</h4><table><tr><th>Stato</th><th>Tipo</th><th>Attività</th><th>Scadenza</th><th>Priorità</th></tr>';
+      var sorted = c.attivita.slice().sort(function(a,b){var av=a.due||'9999';var bv=b.due||'9999';return av.localeCompare(bv);});
+      sorted.forEach(function(t2){
+        html += '<tr><td>'+(t2.done?'✅':'⏳')+'</td><td>'+esc(t2.tipo||'')+'</td><td>'+esc(t2.name)+'</td><td>'+(t2.due?fmtDate(t2.due):'n.d.')+(isOverdue(t2.due,t2.done)?' <strong style="color:#a83232">SCADUTA</strong>':'')+'</td><td>'+esc((t2.prio||'media').toUpperCase())+'</td></tr>';
+      });
+      html += '</table>';
+    }
+
+    var exp = expectedDocIds(c);
+    if(exp.length || Object.keys(c.documenti||{}).length){
+      html += '<h4>Documenti</h4><table><tr><th>Documento</th><th>Tipo</th><th>Stato</th><th>Date</th><th>Riferimento</th></tr>';
+      // Mostriamo prima gli attesi + tutti i compilati
+      var ids = exp.slice();
+      Object.keys(c.documenti||{}).forEach(function(k){if(ids.indexOf(k)<0 && c.documenti[k] && c.documenti[k].stato && c.documenti[k].stato!=='non_richiesto') ids.push(k);});
+      ids.forEach(function(id){
+        var d = DOC_CATALOG.find(function(x){return x.id===id;}); if(!d) return;
+        var e = c.documenti[id] || {};
+        var stt = STATI_DOC.find(function(s){return s.id===(e.stato||'non_richiesto');});
+        var dt = [];
+        if(e.dataRichiesta) dt.push('rich. '+fmtDate(e.dataRichiesta));
+        if(e.dataOttenimento) dt.push('ott. '+fmtDate(e.dataOttenimento));
+        if(e.scadenza) dt.push('scad. '+fmtDate(e.scadenza));
+        html += '<tr><td>'+esc(d.nome)+(exp.indexOf(id)>=0?' <strong style="color:#a83232">★</strong>':'')+'</td><td>'+esc(docTipoNome(d.tipo))+'</td><td>'+esc(stt?stt.nome:'')+'</td><td>'+esc(dt.join(' · '))+'</td><td><small>'+esc(d.rif)+'</small></td></tr>';
+      });
+      html += '</table>';
+    }
+
+    var anyF = FASI_LAVORO.some(function(f){return c.fasi[f.id]&&(c.fasi[f.id].pct||c.fasi[f.id].note);});
+    if(anyF){
+      html += '<h4>Cronoprogramma fasi (UNI 11150-3/-4 · ISO 21502)</h4><table><tr><th>Fase</th><th>%</th><th>Note</th></tr>';
+      FASI_LAVORO.forEach(function(f){
+        var e = c.fasi[f.id] || {};
+        html += '<tr><td>'+f.ordine+'. '+esc(f.nome)+'</td><td>'+(e.pct||0)+'%</td><td>'+esc(e.note||'').replace(/\n/g,'<br>')+'</td></tr>';
+      });
+      html += '</table>';
+    }
+
+    html += '<h4>Fonti normative</h4>';
+    html += '<p style="font-size:12px;color:#5a4a3a;line-height:1.6">'
+      +'<strong>DPR 380/2001</strong> art. 3 (categorie intervento) · <strong>D.Lgs 81/2008</strong> Titolo IV + Allegato XV (sicurezza cantieri) · <strong>D.Lgs 42/2004</strong> art. 21 (beni vincolati · Soprintendenza) · <strong>D.Lgs 36/2023</strong> art. 57 c.2 + <strong>DM MASE 24/11/2025</strong> (CAM Edilizia, vigore 02/02/2026) · <strong>NTC 2018</strong> §§ 7-8 (zone sismiche · Genio Civile) · <strong>UNI 11150-3/-4:2005</strong> (qualificazione processo intervento) · <strong>ISO 21502:2020</strong> (project management). Verifiche aggiornate al 2026-05-03 su fonti Bosetti &amp; Gatti, Olympus UniURB, MASE, ANIT, UNI Store, codiceappalti.it, SABAP/MiC.</p>';
+    return html;
+  }
+
+  function openPreview(){
+    var c = activeCantiere();
+    document.getElementById('modalBody').innerHTML = buildPreviewHtml(c);
+    document.getElementById('modalPreview').classList.add('is-open');
+  }
+  function closePreview(){ document.getElementById('modalPreview').classList.remove('is-open'); }
+
+  /* ============ EXPORT WORD / PDF / JSON ============ */
+  function exportWord(){
+    var c = activeCantiere(); if(!c){ alert('Nessun cantiere attivo.'); return; }
+    var html = buildPreviewHtml(c);
+    var head = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Cantiere '+esc(c.label)+'</title>'
+      +'<style>body{font-family:Georgia,serif;font-size:11pt;color:#2c1810;line-height:1.5}'
+      +'h4{font-family:Georgia,serif;color:#5e3370;border-bottom:1px solid #8e44ad;padding-bottom:3px;margin-top:18px}'
+      +'h5{font-family:Arial;font-size:10.5pt;color:#5e3370;text-transform:uppercase;letter-spacing:0.1em;margin:10px 0 4px}'
+      +'table{width:100%;border-collapse:collapse;margin:8px 0}'
+      +'td,th{padding:5px 8px;border:1px solid #b8a880;vertical-align:top}'
+      +'th{background:#f0e8d8;color:#5e3370;font-weight:bold}</style></head><body>'
+      +'<h2 style="font-family:Georgia,serif;color:#5e3370">Cantiere, '+esc(c.label)+'</h2>'
+      +'<p style="color:#8b7355;font-size:10pt">Estratto: '+new Date().toLocaleString('it-IT')+' · Mixando v4</p>';
+    var foot = '</body></html>';
+    var blob = new Blob(['﻿'+head+html+foot], {type:'application/msword'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'cantiere-'+slug(c.label)+'-'+todayIso()+'.doc';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);document.body.removeChild(a);},100);
+  }
+
+  function exportPdf(){
+    var c = activeCantiere(); if(!c){ alert('Nessun cantiere attivo.'); return; }
+    var html = buildPreviewHtml(c);
+    var w = window.open('','_blank');
+    if(!w){ alert('Abilita i popup per esportare in PDF (Stampa → Salva come PDF).'); return; }
+    w.document.write('<html><head><meta charset="utf-8"><title>Cantiere '+esc(c.label)+'</title>'
+      +'<style>body{font-family:Georgia,serif;font-size:11pt;color:#2c1810;line-height:1.5;padding:24px;max-width:800px;margin:0 auto}'
+      +'h2{font-family:Georgia,serif;color:#5e3370;font-style:italic}'
+      +'h4{font-family:Georgia,serif;color:#5e3370;border-bottom:1px solid #8e44ad;padding-bottom:3px;margin-top:18px}'
+      +'table{width:100%;border-collapse:collapse;margin:8px 0;font-size:10.5pt}'
+      +'td,th{padding:5px 8px;border:1px solid #b8a880;vertical-align:top}'
+      +'th{background:#f0e8d8;color:#5e3370;font-weight:bold;text-align:left}'
+      +'@media print{body{padding:0}}</style></head><body>'
+      +'<h2>Cantiere, '+esc(c.label)+'</h2>'
+      +'<p style="color:#8b7355;font-size:10pt">Estratto: '+new Date().toLocaleString('it-IT')+' · Mixando v4</p>'
+      +html+'<script>setTimeout(function(){window.print();},300);<\/script></body></html>');
+    w.document.close();
+  }
+
+  function exportJson(){
+    var c = activeCantiere(); if(!c){ alert('Nessun cantiere attivo.'); return; }
+    var snapshot = {
+      module: 'cantieri',
+      version: 4,
+      schemaVersion: 1,
+      exportedAt: nowIso(),
+      cantiere: c
+    };
+    var blob = new Blob([JSON.stringify(snapshot,null,2)], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'cantiere-'+slug(c.label)+'-'+todayIso()+'.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);document.body.removeChild(a);},100);
+  }
+
+  function exportAllJson(){
+    var blob = new Blob([JSON.stringify({module:'cantieri',version:4,schemaVersion:1,exportedAt:nowIso(),state:state},null,2)], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'cantieri-tutti-'+todayIso()+'.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);document.body.removeChild(a);},100);
+  }
+
+  function importJson(file){
+    var rd = new FileReader();
+    rd.onload = function(e){
+      try{
+        var obj = JSON.parse(e.target.result);
+        if(obj.cantiere){
+          // Import singolo cantiere
+          var c = obj.cantiere;
+          if(!c.id) c.id = newCantiereId();
+          // Verifica duplicati
+          if(state.list.some(function(x){return x.id===c.id;})){
+            c.id = newCantiereId();
+            c.label = (c.label||'Cantiere') + ' (importato)';
+          }
+          state.list.push(c);
+          state.activeId = c.id;
+        }else if(obj.state && Array.isArray(obj.state.list)){
+          // Import bulk
+          if(!confirm('Sostituire tutti i cantieri attuali con quelli importati? Operazione non annullabile.')) return;
+          state = obj.state;
+          if(state.schemaVersion !== 1) state.schemaVersion = 1;
+        }else{
+          alert('File JSON non valido (manca campo "cantiere" o "state").');
+          return;
+        }
+        save(); renderMcBar(); renderContainer(); renderAna();
+        alert('Importazione completata.');
+      }catch(err){
+        alert('Errore lettura JSON: ' + err.message);
+      }
+    };
+    rd.readAsText(file);
+  }
+
+  function slug(s){ return String(s||'cantiere').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,50) || 'cantiere'; }
+
+  function resetActive(){
+    var c = activeCantiere(); if(!c){ alert('Nessun cantiere attivo.'); return; }
+    if(!confirm('Azzerare tutti i dati di "'+c.label+'" (attività, documenti, fasi, tipo intervento)? L\u2019etichetta viene mantenuta.')) return;
+    var label = c.label;
+    var idx = state.list.findIndex(function(x){return x.id===c.id;});
+    var fresh = emptyCantiere(label);
+    fresh.id = c.id;
+    state.list[idx] = fresh;
+    save(); renderMcBar(); renderContainer(); renderAna();
+  }
+
+  /* ============ INIT ============ */
+  function bindGlobal(){
+    document.getElementById('mcActive').addEventListener('change', function(e){ selectCantiere(e.target.value); });
+    document.getElementById('mcNew').addEventListener('click', async function(){
+      var n = await _mxTesto('Nome del nuovo cantiere', '');   /* 20/11/2026: finestra dentro la pagina */
+      if(n === null) return;
+      n = n.trim(); if(!n) n = 'Cantiere ' + (state.list.length + 1);
+      newCantiere(n);
+    });
+    document.getElementById('mcRename').addEventListener('click', renameCantiere);
+    document.getElementById('mcDuplicate').addEventListener('click', duplicateCantiere);
+    document.getElementById('mcArchive').addEventListener('click', archiveCantiere);
+    document.getElementById('mcDelete').addEventListener('click', deleteCantiere);
+
+    document.getElementById('btnReloadAna').addEventListener('click', renderAna);
+
+    document.getElementById('btnPreview').addEventListener('click', openPreview);
+    document.getElementById('btnWord').addEventListener('click', exportWord);
+    document.getElementById('btnPdf').addEventListener('click', exportPdf);
+    document.getElementById('btnJson').addEventListener('click', exportJson);
+    document.getElementById('btnReset').addEventListener('click', resetActive);
+    document.getElementById('btnSnap').addEventListener('click', exportAllJson);
+    document.getElementById('btnOpenSnap').addEventListener('click', function(){ document.getElementById('fileOpen').click(); });
+    document.getElementById('fileOpen').addEventListener('change', function(e){
+      var f = e.target.files && e.target.files[0]; if(f) importJson(f);
+      e.target.value = '';
+    });
+
+    document.getElementById('modalClose').addEventListener('click', closePreview);
+    document.getElementById('m_btnClose').addEventListener('click', closePreview);
+    document.getElementById('m_btnWord').addEventListener('click', exportWord);
+    document.getElementById('m_btnPdf').addEventListener('click', exportPdf);
+    document.getElementById('m_btnJson').addEventListener('click', exportJson);
+    document.getElementById('modalPreview').addEventListener('click', function(e){ if(e.target === this) closePreview(); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closePreview(); });
+  }
+
+  /* Auto-crea primo cantiere se archivio vuoto, etichetta da indirizzo/comune Modulo #1 */
+  function autoCreateFirstIfEmpty(){
+    if(state.list.length) return;
+    var l = readLocali();
+    var ana = (l && l.ana) ? l.ana : {};
+    var lab = '';
+    if(ana.Indirizzo) lab = ana.Indirizzo + (ana.Comune ? ', ' + ana.Comune : '');
+    else if(ana.Comune) lab = 'Cantiere ' + ana.Comune;
+    else if(ana.Nome || ana.RagSoc) lab = 'Cantiere ' + (ana.RagSoc || ana.Nome);
+    else lab = 'Primo cantiere';
+    newCantiere(lab);
+  }
+
+  bindGlobal();
+  renderAna();
+  autoCreateFirstIfEmpty();
+  renderMcBar();
+  renderContainer();
+
+  // Cross-modulo: ricarica anagrafica quando la finestra torna in focus (utile dopo edit in Modulo #1)
+  window.addEventListener('focus', renderAna);
+  window.addEventListener('storage', function(e){
+    if(e.key === 'mx2::locali-v1' || e.key === 'mx2::periti-v2' || e.key === 'mx2::perito'){
+      renderAna();
+    }
+  });
+
+})();
+</script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

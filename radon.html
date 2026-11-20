@@ -1,0 +1,2823 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Radon">
+<title>Mixando Lab · Diagnosi Radon, Wizard</title>
+<style>
+:root{
+  --mx-accent:#B89220; --mx-accent-soft:rgba(184,146,32,.10); --mx-accent-strong:#8b6f10; --mx-accent-glow:rgba(184,146,32,.28);
+  --bg:#f5f1e8; --bg-grad:linear-gradient(135deg,#f5f1e8 0%,#ede5d0 100%);
+  --paper:#fff; --paper-soft:#fbf8ef;
+  --ink:#2c1810; --ink-soft:#6b5c4c; --ink-mute:#8b7355;
+  --line:#e6e0d2; --ok:#1f7a4d; --warn:#b07820; --err:#a83232;
+  --r:14px;
+  --ff-serif:Georgia,"Cambria","Times New Roman",serif;
+  --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg-grad);background-attachment:fixed;color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:0px}
+
+/* Topbar con sfumatura sottile */
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;background:linear-gradient(180deg,#fff 0%,#fdfbf4 100%);border-bottom:3px solid var(--mx-accent);box-shadow:0 2px 10px rgba(20,20,40,.06)}
+.mx-bar .em{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;background:radial-gradient(circle at 30% 30%,#d4a528,var(--mx-accent) 70%);color:#fff;box-shadow:0 2px 6px var(--mx-accent-glow)}
+.mx-bar .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mx-accent);line-height:1}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:14px;color:var(--ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:6px 12px;border:1px solid var(--mx-accent);border-radius:8px;transition:all .15s}
+.mx-bar a.back:hover{background:var(--mx-accent);color:#fff;box-shadow:0 2px 8px var(--mx-accent-glow)}
+/* Strip anagrafica perito+committente (allineamento Glaser/Risalita) */
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto 8px;max-width:1080px}
+.ana-strip .pc{padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700;color:var(--ink)}
+.ana-strip .pc .m{font-size:11.5px;color:var(--ink-mute);margin-top:2px}
+.ana-actions{text-align:center;margin:0 auto 16px;max-width:1080px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ana-actions a,.ana-actions button{font-size:12px;color:var(--mx-accent);font-weight:700;text-decoration:none;border:1px solid var(--mx-accent);padding:6px 13px;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit}
+@media (max-width:760px){.ana-strip{grid-template-columns:1fr}}
+
+
+main{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+
+/* Hero */
+.hero{padding:8px 6px 14px;text-align:center}
+.hero h2{margin:0 0 4px;font-family:var(--ff-serif);font-size:clamp(22px,4.4vw,30px);color:var(--ink);font-weight:700;letter-spacing:-.01em}
+.hero h2 em{color:var(--mx-accent);font-style:italic;text-shadow:0 1px 0 var(--mx-accent-glow)}
+.hero p{margin:6px auto 0;max-width:660px;color:var(--ink-soft);font-size:13.5px;line-height:1.55}
+.mode-toggle{display:inline-flex;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:3px;margin-top:10px;box-shadow:0 2px 8px rgba(20,20,40,.04)}
+.mode-toggle button{appearance:none;background:transparent;border:0;padding:7px 16px;font:inherit;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink-soft);cursor:pointer;border-radius:999px;transition:all .15s}
+.mode-toggle button.is-on{background:var(--mx-accent);color:#fff;box-shadow:0 2px 8px var(--mx-accent-glow)}
+
+/* Step indicator, con progress bar sotto */
+.steps-wrap{margin:14px 0 18px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:0 1px 3px rgba(20,20,40,.04)}
+.steps{display:flex;flex-wrap:wrap;gap:4px}
+.steps .step{flex:1 1 0;min-width:60px;padding:9px 6px;font-size:10.5px;font-weight:700;text-align:center;color:var(--ink-mute);border-radius:8px;cursor:pointer;letter-spacing:.04em;line-height:1.2;transition:all .15s;position:relative}
+.steps .step:hover{background:var(--mx-accent-soft);color:var(--mx-accent-strong)}
+.steps .step.is-current{color:#fff;background:linear-gradient(180deg,#18a4b0,#0e7c87 55%,#0a5b64);box-shadow:0 2px 7px rgba(14,124,135,.34),inset 0 1px 0 rgba(255,255,255,.34);text-shadow:0 1px 1px rgba(0,0,0,.22)}
+.steps .step.is-done{background:var(--mx-accent-soft);color:var(--mx-accent-strong)}
+.progress{height:3px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--mx-accent),#d4a528);transition:width .35s ease;border-radius:2px}
+
+/* Card */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 8px 24px rgba(20,20,40,.05);margin-bottom:14px;overflow:hidden}
+.card>.head{padding:14px 18px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,var(--mx-accent-soft) 0%,var(--paper) 100%);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.card>.head .num{display:inline-flex;width:32px;height:32px;border-radius:9px;background:radial-gradient(circle at 30% 30%,#d4a528,var(--mx-accent) 70%);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800;box-shadow:0 2px 6px var(--mx-accent-glow)}
+.card>.head h3{margin:0;font-family:var(--ff-serif);font-size:17px;color:var(--ink);font-weight:700;flex:1;min-width:0;letter-spacing:-.005em}
+.card>.head .src{font-size:10.5px;color:var(--ink-mute);font-style:italic;font-weight:400}
+.card>.body{padding:18px}
+.card>.body p.intro{margin:0 0 14px;font-size:13.5px;color:var(--ink-soft);line-height:1.55}
+.card>.body h4{margin:18px 0 10px;font-family:var(--ff-serif);font-size:14.5px;color:var(--ink);font-weight:700}
+.card>.body h4:first-child{margin-top:0}
+
+/* Choice cards */
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.choice{padding:14px;background:linear-gradient(180deg,#fff,#fdfbf4);border:2px solid var(--line);border-radius:10px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:4px;text-align:left;font-family:inherit;color:inherit;width:100%;position:relative;overflow:hidden}
+.choice::before{content:"";position:absolute;left:0;top:0;width:0;height:100%;background:linear-gradient(180deg,var(--mx-accent),var(--mx-accent-strong));transition:width .18s}
+.choice:hover{border-color:var(--mx-accent);background:linear-gradient(180deg,#fff,var(--mx-accent-soft));transform:translateY(-1px);box-shadow:0 4px 12px rgba(20,20,40,.06)}
+.choice:hover::before{width:4px}
+.choice.is-sel{border-color:var(--mx-accent);background:linear-gradient(180deg,var(--mx-accent-soft),#fff);box-shadow:0 0 0 2px var(--mx-accent-soft),0 4px 14px var(--mx-accent-glow)}
+.choice.is-sel::before{width:4px}
+.choice .t{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.2;padding-left:6px}
+.choice .v{font-size:12.5px;color:var(--mx-accent-strong);font-weight:600;padding-left:6px}
+.choice .n{font-size:11px;color:var(--ink-mute);font-style:italic;padding-left:6px}
+
+/* Form fields */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:600px){.row2,.row3{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em}
+.field .row{display:flex;align-items:stretch}
+.field input,.field select{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:14px;background:var(--paper);color:var(--ink);outline:none;-moz-appearance:textfield;min-width:0;width:100%;transition:all .15s}
+.field input.with-unit{border-right:0;border-radius:9px 0 0 9px}
+.field .unit{display:inline-flex;align-items:center;padding:0 12px;border:1px solid var(--line);border-radius:0 9px 9px 0;background:#faf8f3;color:var(--ink-mute);font-size:12.5px;font-weight:600;white-space:nowrap}
+.field input:focus,.field select:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.field .help{font-size:10.5px;color:var(--ink-mute);font-style:italic;margin-top:2px}
+
+/* Alert */
+.alert{margin-top:14px;padding:14px 16px;border-radius:10px;border-left:5px solid var(--alert-c,#888);background:var(--alert-bg,#f8f6f1);line-height:1.55;box-shadow:0 2px 8px rgba(20,20,40,.04)}
+.alert .h{font-weight:800;font-size:13.5px;color:var(--alert-c,var(--ink));margin-bottom:4px;letter-spacing:.02em}
+.alert .d{font-size:13px;color:var(--ink)}
+.alert .src{font-size:11.5px;color:var(--ink-mute);font-style:italic;margin-top:6px}
+.alert .src a{color:var(--alert-c,var(--ink));text-decoration:underline}
+.alert .nm{font-size:11px;color:var(--ink-mute);margin-top:4px}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.kpi{padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#fff,#fdfbf4);display:flex;flex-direction:column;gap:4px;box-shadow:0 1px 3px rgba(20,20,40,.04);transition:all .18s}
+.kpi:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(20,20,40,.08)}
+.kpi .l{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);font-weight:700}
+.kpi .v{font-family:var(--ff-serif);font-size:24px;font-weight:700;color:var(--ink);line-height:1.1}
+.kpi .s{font-size:11.5px;color:var(--ink-soft)}
+.kpi.is-ok .v{color:var(--ok)} .kpi.is-ok{background:linear-gradient(180deg,#f0f8f3,#e6f1ea);border-color:#cce6d8}
+.kpi.is-warn .v{color:var(--warn)} .kpi.is-warn{background:linear-gradient(180deg,#fdf6ec,#f5ead4);border-color:#f0e0c4}
+.kpi.is-err .v{color:var(--err)} .kpi.is-err{background:linear-gradient(180deg,#fbf0f0,#f3dcdc);border-color:#e6c8c8}
+
+/* Verdict */
+.verdict{margin-top:14px;padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--paper);font-size:13.5px;line-height:1.55;color:var(--ink-soft)}
+.verdict strong{color:var(--ink)}
+.verdict.is-ok{background:linear-gradient(180deg,#f0f8f3,#e6f1ea);border-color:#cce6d8}
+.verdict.is-warn{background:linear-gradient(180deg,#fdf6ec,#f5ead4);border-color:#f0e0c4}
+.verdict.is-err{background:linear-gradient(180deg,#fbf0f0,#f3dcdc);border-color:#e6c8c8}
+
+/* Bullet rules list (UNI ISO) */
+.rules{list-style:none;padding:0;margin:8px 0}
+.rules li{padding:10px 14px;background:var(--paper-soft);border-left:4px solid var(--mx-accent);border-radius:6px;margin-bottom:6px;font-size:13px;line-height:1.5;display:flex;gap:10px}
+.rules li::before{content:"✓";color:var(--mx-accent);font-weight:800;flex-shrink:0;font-size:16px}
+
+/* Wizard nav */
+.wnav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;padding:14px;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 2px 10px rgba(20,20,40,.04)}
+.wnav .pos{font-size:11.5px;color:var(--ink-mute);font-weight:700;letter-spacing:.04em}
+.wnav .pos b{color:var(--ink)}
+.wnav button{appearance:none;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:10px 18px;border-radius:9px;cursor:pointer;min-width:110px;transition:all .15s}
+.wnav button:hover:not(:disabled){background:var(--mx-accent-soft);border-color:var(--mx-accent);color:var(--mx-accent-strong);transform:translateY(-1px);box-shadow:0 3px 8px rgba(20,20,40,.06)}
+.wnav button:disabled{opacity:.35;cursor:not-allowed}
+.wnav button.primary{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));color:#fff;border-color:var(--mx-accent);box-shadow:0 2px 8px var(--mx-accent-glow)}
+.wnav button.primary:hover{filter:brightness(1.08)}
+
+.placeholder{padding:30px;text-align:center;background:var(--paper-soft);border:1px dashed var(--line);border-radius:10px}
+.placeholder .ic{font-size:34px;margin-bottom:10px}
+.placeholder .h{font-weight:700;color:var(--ink);margin-bottom:4px;font-size:15px}
+.placeholder .d{font-size:12.5px;color:var(--ink-mute);max-width:480px;margin:0 auto}
+
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+
+/* Detail box (strumento, mitigazione) */
+.detail{margin-top:14px;padding:14px 18px;background:linear-gradient(135deg,var(--mx-accent-soft),var(--paper));border:1px solid var(--mx-accent);border-radius:12px;box-shadow:0 2px 12px var(--mx-accent-glow)}
+.detail .title{font-family:var(--ff-serif);font-size:16px;font-weight:700;color:var(--ink);margin:0 0 6px}
+.detail .row{font-size:12.5px;color:var(--ink-soft);margin:3px 0;line-height:1.5}
+.detail .row b{color:var(--ink);font-weight:700}
+.detail .pro{color:var(--ok)} .detail .contro{color:var(--err)}
+
+/* Multi-select chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{padding:6px 12px;border:1.5px solid var(--line);border-radius:999px;background:var(--paper);font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:all .15s}
+.chip:hover{border-color:var(--mx-accent);color:var(--mx-accent-strong)}
+.chip.is-on{background:var(--mx-accent);color:#fff;border-color:var(--mx-accent)}
+
+/* MX-TOOLBAR INLINE */
+/* =====================================================================
+ * MX Toolbar standard, 7 pulsanti gradient + modal anteprima full-screen
+ * Da includere in ogni modulo Mixando v3.
+ * MX-BUILD: 2026-05-24-toolbar-v2 pulsanti VIVACI (3-stop + shimmer + scale)
+ * ===================================================================== */
+
+/* ================== TOOLBAR STICKY BOTTOM ================== */
+/* === TOOLBAR INTEGRATA (card), uniformata a Glaser/Termo/Risalita === */
+.mx-toolbar{background:#fff;border:1px solid #e6e0d2;border-radius:14px;box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden;margin-top:18px}
+.mx-toolbar-head{margin:0;padding:13px 18px;font-family:Georgia,serif;font-size:15px;color:#2c1810;font-weight:700;border-bottom:1px solid #e6e0d2;background:linear-gradient(180deg,rgba(212,165,40,.10),#fff);display:flex;align-items:center;gap:10px}
+.mx-toolbar-head .ico-wrap{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.mx-toolbar-head .title{flex:1}
+.mx-toolbar-head .title small{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-style:italic;font-size:11.5px;color:#8b7355;font-weight:500;letter-spacing:0;margin-top:2px}
+.mx-toolbar-body{padding:14px 18px 16px}
+.mx-toolbar-hint{text-align:center;font-size:12px;color:#8b7355;font-style:italic;margin-bottom:10px;padding:6px 10px;background:#fffbef;border-radius:7px;border:1px dashed #e0d7b8;display:none}
+.mx-toolbar-inner{max-width:1080px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.mx-tb-btn{
+  appearance:none; border:0; color:#fff;
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.02em;
+  padding:12px 18px; border-radius:12px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:7px;
+  position:relative; overflow:hidden;
+  text-shadow:0 1px 2px rgba(0,0,0,.20);
+  box-shadow:
+    0 3px 8px rgba(0,0,0,.18),
+    0 1px 2px rgba(0,0,0,.10),
+    inset 0 1px 0 rgba(255,255,255,.30),
+    inset 0 -2px 4px rgba(0,0,0,.12);
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, filter .15s ease, background-position .35s ease;
+  background-size:180% 180%;
+  background-position:0% 0%;
+  white-space:nowrap; min-width:0;
+}
+.mx-tb-btn::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg, transparent 25%, rgba(255,255,255,.40) 48%, rgba(255,255,255,.40) 52%, transparent 75%);
+  transform:translateX(-130%); transition:transform .6s ease;
+}
+.mx-tb-btn:hover{
+  transform:translateY(-2px) scale(1.03);
+  background-position:100% 100%;
+  filter:brightness(1.08) saturate(1.15);
+}
+.mx-tb-btn:hover::before{ transform:translateX(130%) }
+.mx-tb-btn:active{ transform:translateY(0) scale(.98); transition-duration:.05s }
+.mx-tb-btn:disabled{ opacity:.45; cursor:not-allowed; filter:grayscale(.6) }
+.mx-tb-btn .ico{ font-size:16px; line-height:1; filter:drop-shadow(0 1px 2px rgba(0,0,0,.25)) }
+
+/* Gradient ricchi 3-stop con ombra colorata d'accent */
+.mx-tb-btn.tb-save{
+  background-image:linear-gradient(135deg,#64b5f6 0%,#1976d2 45%,#0d47a1 100%);
+  box-shadow:0 3px 10px rgba(25,118,210,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-load{
+  background-image:linear-gradient(135deg,#ffb74d 0%,#f57c00 45%,#bf360c 100%);
+  box-shadow:0 3px 10px rgba(245,124,0,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-compare{
+  background-image:linear-gradient(135deg,#ba68c8 0%,#7b1fa2 45%,#311b92 100%);
+  box-shadow:0 3px 10px rgba(123,31,162,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-word{
+  background-image:linear-gradient(135deg,#5a9bd8 0%,#2b579a 45%,#0c2e5e 100%);
+  box-shadow:0 3px 10px rgba(43,87,154,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-pdf{
+  background-image:linear-gradient(135deg,#ef5350 0%,#c62828 45%,#7f0000 100%);
+  box-shadow:0 3px 10px rgba(198,40,40,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-report{
+  background-image:linear-gradient(135deg,#ffd54f 0%,#f9a825 45%,#e65100 100%);
+  color:#3e2e00; text-shadow:0 1px 0 rgba(255,255,255,.45);
+  box-shadow:0 3px 10px rgba(249,168,37,.50), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 4px rgba(0,0,0,.10);
+}
+.mx-tb-btn.tb-reset{
+  background-image:linear-gradient(135deg,#9e9e9e 0%,#616161 45%,#212121 100%);
+  box-shadow:0 3px 10px rgba(97,97,97,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+
+/* Mobile: nascondi label tieni solo icone */
+@media (max-width:680px){
+  .mx-tb-btn{ padding:11px 13px; font-size:12px }
+  .mx-tb-btn .label{ display:none }
+  .mx-tb-btn .ico{ font-size:17px }
+}
+
+/* ================== MODAL ANTEPRIMA FULL-SCREEN ================== */
+.mx-modal{
+  position:fixed; inset:0; z-index:200;
+  background:rgba(20,20,40,.55); backdrop-filter:blur(4px);
+  display:none; align-items:stretch; justify-content:center;
+  padding:18px;
+}
+.mx-modal.is-open{ display:flex }
+.mx-modal-frame{
+  width:100%; max-width:1280px;
+  background:#fff; border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.mx-modal-head{
+  display:flex; align-items:center; gap:14px; padding:14px 20px;
+  border-bottom:1px solid #e6e0d2;
+  background:linear-gradient(180deg,#fdfbf4,#fff);
+}
+.mx-modal-head h2{
+  margin:0; font-family:Georgia,serif; font-style:italic; font-size:18px; color:#2c1810; flex:1
+}
+.mx-modal-head .x{
+  appearance:none; border:0; background:#f5f1e8; color:#6b5c4c;
+  width:36px; height:36px; border-radius:10px; cursor:pointer;
+  font-size:18px; font-weight:700; line-height:1;
+}
+.mx-modal-head .x:hover{ background:#ede5d0; color:#2c1810 }
+.mx-modal-body{
+  flex:1; display:grid; grid-template-columns:320px 1fr; gap:0; min-height:0;
+}
+.mx-modal-side{
+  background:#faf8f3; border-right:1px solid #e6e0d2;
+  padding:16px 18px; overflow-y:auto;
+}
+.mx-modal-side h3{
+  margin:0 0 8px; font-family:Georgia,serif; font-size:14px; font-style:italic; color:#2c1810;
+  border-bottom:1px solid #e6e0d2; padding-bottom:6px;
+}
+.mx-modal-side h3:not(:first-child){ margin-top:18px }
+.mx-modal-side .mx-fld{ display:flex; flex-direction:column; gap:3px; margin-bottom:8px }
+.mx-modal-side .mx-fld label{ font-size:10.5px; font-weight:700; color:#6b5c4c; letter-spacing:.04em }
+.mx-modal-side .mx-fld input,
+.mx-modal-side .mx-fld textarea{
+  padding:7px 9px; border:1px solid #e6e0d2; border-radius:7px;
+  font:inherit; font-size:12.5px; color:#2c1810; background:#fff; outline:none; min-width:0; width:100%;
+}
+.mx-modal-side .mx-fld textarea{ min-height:60px; resize:vertical; font-family:inherit }
+.mx-modal-side .mx-fld input:focus,
+.mx-modal-side .mx-fld textarea:focus{ border-color:#2c5d7c; box-shadow:0 0 0 2px rgba(44,93,124,.18) }
+.mx-modal-side .mx-info{
+  background:#e8f2fa; border-left:3px solid #2c5d7c;
+  padding:8px 10px; border-radius:6px; font-size:11px; color:#1a3d52; line-height:1.5; margin-bottom:10px
+}
+.mx-modal-side .mx-warn{
+  background:#fff3e0; border-left:3px solid #f57c00;
+  padding:8px 10px; border-radius:6px; font-size:11px; color:#5d3a00; line-height:1.5; margin-bottom:10px
+}
+.mx-modal-side .mx-info b, .mx-modal-side .mx-warn b{ color:#0a1f2e }
+.mx-modal-side .mx-link{
+  appearance:none; border:1px solid #2c5d7c; background:#fff; color:#2c5d7c;
+  font:inherit; font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:7px; cursor:pointer; letter-spacing:.04em
+}
+.mx-modal-side .mx-link:hover{ background:#2c5d7c; color:#fff }
+.mx-modal-side .mx-sections label{
+  display:flex; align-items:center; gap:8px; padding:5px 0; font-size:12.5px; color:#2c1810; cursor:pointer
+}
+.mx-modal-side .mx-sections input[type="checkbox"]{ width:16px; height:16px; cursor:pointer; accent-color:#2c5d7c }
+.mx-modal-preview{
+  flex:1; overflow-y:auto; padding:24px; background:#ece9df;
+  display:flex; justify-content:center;
+}
+.mx-modal-paper{
+  width:100%; max-width:780px;
+  background:#fff;
+  box-shadow:0 4px 14px rgba(0,0,0,.12);
+  padding:42px 48px 56px; min-height:100%;
+  font-family:Georgia,serif; color:#2c1810; font-size:13px; line-height:1.55;
+  overflow-x:hidden;
+}
+@media (max-width:780px){
+  .mx-modal-body{ grid-template-columns:1fr }
+  .mx-modal-side{ border-right:0; border-bottom:1px solid #e6e0d2; max-height:280px }
+  .mx-modal-paper{ padding:24px 22px }
+}
+.mx-doc{ word-wrap:break-word; overflow-wrap:break-word }
+.mx-doc-head{ display:flex; gap:18px; margin-bottom:22px; padding-bottom:16px; border-bottom:2px solid #2c1810; flex-wrap:wrap }
+.mx-doc-head .logo img{ max-height:64px; max-width:120px }
+.mx-doc-head .doc-meta{ flex:1; min-width:180px; font-size:11.5px; line-height:1.5; color:#6b5c4c }
+.mx-doc-head .doc-meta strong{ color:#2c1810; font-size:13px }
+.mx-doc-head .doc-meta .perito-name{ font-size:14px; color:#2c1810; font-weight:700 }
+.mx-doc h1{ font-size:22px; margin:14px 0 14px; color:#2c1810; font-weight:700; font-style:italic; line-height:1.25; page-break-after:avoid }
+.mx-doc h2{ font-size:16px; margin:26px 0 10px; color:#2c5d7c; border-bottom:1px solid #d8d3c4; padding-bottom:5px; line-height:1.3; page-break-after:avoid; clear:both }
+.mx-doc h3{ font-size:14px; margin:18px 0 8px; color:#2c1810; line-height:1.35; page-break-after:avoid }
+.mx-doc p{ margin:8px 0; line-height:1.55 }
+.mx-doc p[style*="monospace"]{ overflow-x:auto; max-width:100%; padding:10px 14px !important; font-size:11.5px; word-break:break-all }
+.mx-doc table{ width:100%; border-collapse:collapse; margin:12px 0; font-size:11.5px; table-layout:auto; word-break:break-word }
+.mx-doc table th, .mx-doc table td{ padding:6px 8px; border-bottom:1px solid #e6e0d2; text-align:left; vertical-align:top; line-height:1.45 }
+.mx-doc table th{ background:#faf8f3; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#6b5c4c }
+.mx-doc table td b, .mx-doc table td strong{ color:#2c1810 }
+.mx-doc ul{ margin:8px 0; padding-left:24px }
+.mx-doc ul li{ margin:4px 0; line-height:1.5 }
+.mx-doc sub, .mx-doc sup{ font-size:9.5px; line-height:0 }
+.mx-doc-note{ background:#fffbef; border:1px solid #f0e0c4; padding:10px 14px; margin:12px 0; border-radius:6px; font-style:italic; font-size:12px }
+.mx-doc .ver-ok{ background:#f0f8f3; border-left:3px solid #1f7a4d; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc .ver-warn{ background:#fdf6ec; border-left:3px solid #b07820; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc .ver-err{ background:#fbf0f0; border-left:3px solid #a83232; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc .ver-crit{ background:#f5e6f9; border-left:3px solid #7b1fa2; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc-note{ background:#fffbef; border:1px solid #f0e0c4; padding:10px 12px; margin:10px 0; border-radius:6px; font-style:italic; font-size:12px }
+.mx-doc-footer{ margin-top:24px; padding-top:14px; border-top:1px solid #d8d3c4; font-size:10.5px; color:#8b7355; text-align:center; line-height:1.6 }
+
+/* Bottoni in fondo al modal */
+.mx-modal-foot{
+  display:flex; gap:8px; padding:12px 20px; border-top:1px solid #e6e0d2;
+  background:linear-gradient(180deg,#fff,#fdfbf4); flex-wrap:wrap;
+}
+.mx-modal-foot .left{ flex:1; display:flex; gap:8px; flex-wrap:wrap }
+.mx-modal-foot .right{ display:flex; gap:8px; flex-wrap:wrap }
+
+/* ================== TOAST ================== */
+.mx-toast{
+  position:fixed; left:50%; bottom:120px; transform:translateX(-50%);
+  background:#2c1810; color:#fff; padding:11px 18px; border-radius:24px;
+  font-size:13px; box-shadow:0 6px 18px rgba(0,0,0,.30); z-index:300;
+  opacity:0; transition:opacity .25s ease;
+  pointer-events:none; max-width:90vw; text-align:center;
+}
+.mx-toast.show{ opacity:1 }
+
+/* ================== DIALOG SAVE (mini) ================== */
+.mx-dialog{ position:fixed; inset:0; background:rgba(20,20,40,.55); backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center; z-index:250; padding:16px }
+.mx-dialog.is-open{ display:flex }
+.mx-dialog-card{ width:100%; max-width:480px; background:#fff; border-radius:14px; box-shadow:0 18px 50px rgba(0,0,0,.40);
+  padding:22px 24px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif }
+.mx-dialog-card h3{ margin:0 0 8px; font-family:Georgia,serif; font-style:italic; font-size:17px; color:#2c1810 }
+.mx-dialog-card p{ margin:0 0 12px; font-size:13px; color:#6b5c4c }
+.mx-dialog-card .mx-fld{ display:flex; flex-direction:column; gap:4px; margin-bottom:10px }
+.mx-dialog-card .mx-fld label{ font-size:11.5px; font-weight:700; color:#6b5c4c; letter-spacing:.04em }
+.mx-dialog-card .mx-fld input, .mx-dialog-card .mx-fld textarea{
+  padding:9px 11px; border:1px solid #e6e0d2; border-radius:8px; font:inherit; font-size:13.5px; outline:none; width:100% }
+.mx-dialog-card .mx-fld textarea{ min-height:60px; resize:vertical }
+.mx-dialog-card .mx-fld input:focus, .mx-dialog-card .mx-fld textarea:focus{ border-color:#1976d2; box-shadow:0 0 0 2px rgba(25,118,210,.18) }
+.mx-dialog-foot{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px }
+.mx-dialog-foot button{ appearance:none; border:1px solid #d8d3c4; background:#fff; color:#2c1810; font:inherit; font-size:13px; font-weight:700; padding:9px 14px; border-radius:9px; cursor:pointer; letter-spacing:.04em }
+.mx-dialog-foot button.primary{ border-color:#1976d2; background:linear-gradient(135deg,#1976d2,#1565c0); color:#fff }
+.mx-dialog-foot button.danger{ border-color:#c62828; color:#c62828 }
+.mx-dialog-foot button:hover{ filter:brightness(.94) }
+
+/* ================== LIST SAVED ================== */
+.mx-saves-list{ display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:340px; overflow-y:auto }
+.mx-save-row{ display:flex; gap:8px; padding:10px 12px; border:1px solid #e6e0d2; border-radius:9px; background:#fff; align-items:center }
+.mx-save-row .info{ flex:1; min-width:0 }
+.mx-save-row .info .nm{ font-weight:700; color:#2c1810; font-size:13.5px }
+.mx-save-row .info .meta{ font-size:11px; color:#8b7355 }
+.mx-save-row button{ appearance:none; border:1px solid #d8d3c4; background:#fff; border-radius:7px; padding:6px 10px; font-size:11.5px; font-weight:700; cursor:pointer }
+.mx-save-row button.load{ color:#f57c00; border-color:#f57c00 }
+.mx-save-row button.load:hover{ background:#f57c00; color:#fff }
+.mx-save-row button.cmp{ color:#7b1fa2; border-color:#7b1fa2 }
+.mx-save-row button.cmp:hover{ background:#7b1fa2; color:#fff }
+.mx-save-row button.del{ color:#c62828; border-color:#c62828 }
+.mx-save-row button.del:hover{ background:#c62828; color:#fff }
+
+/* ================== STAMPA (PDF via window.print) ================== */
+@media print {
+  body * { visibility:hidden !important }
+  .mx-print, .mx-print * { visibility:visible !important }
+  .mx-print{ position:absolute; left:0; top:0; width:100%; padding:24px; box-shadow:none !important; max-width:none !important }
+  .mx-modal, .mx-toolbar, .mx-bar, .mx-modal-side, .mx-modal-head, .mx-modal-foot, .mx-toast, .mx-dialog { display:none !important }
+  .mx-doc h2{ break-after:avoid }
+  .mx-doc table, .mx-doc .ver-ok, .mx-doc .ver-warn, .mx-doc .ver-err{ break-inside:avoid }
+}
+
+
+/* === Stile vivace anche per bottoni di azione dei moduli (Esempio, Reset, Bio, Export) === */
+.actions button, button.cta, button.primary, button.danger, button.btn-add, .add-form button {
+  position:relative; overflow:hidden;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, filter .15s ease;
+  text-shadow:0 1px 2px rgba(0,0,0,.18);
+  box-shadow:0 3px 8px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.25), inset 0 -2px 4px rgba(0,0,0,.10);
+}
+.actions button:hover, button.cta:hover, button.primary:hover, button.danger:hover, button.btn-add:hover, .add-form button:hover {
+  transform:translateY(-2px) scale(1.03);
+  filter:brightness(1.08) saturate(1.12);
+}
+.actions button:active, button.cta:active, button.primary:active, button.danger:active, button.btn-add:active, .add-form button:active {
+  transform:translateY(0) scale(.98); transition-duration:.05s;
+}
+.actions button::before, button.cta::before, button.primary::before, button.danger::before, button.btn-add::before, .add-form button::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg, transparent 25%, rgba(255,255,255,.35) 48%, rgba(255,255,255,.35) 52%, transparent 75%);
+  transform:translateX(-130%); transition:transform .6s ease;
+}
+.actions button:hover::before, button.cta:hover::before, button.primary:hover::before, button.danger:hover::before, button.btn-add:hover::before, .add-form button:hover::before {
+  transform:translateX(130%);
+}
+
+/* END MX-TOOLBAR */
+.mx-logo-mini{height:32px;width:32px;border-radius:8px;background:#fff;padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.12);object-fit:contain;flex-shrink:0;display:none;border:1px solid var(--line,#e6e0d2)}
+.mx-bar.has-logo .em{display:none}
+
+.mx-bar{position:relative}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}}
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:0px !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:0px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+
+.mx-shimmer-pill::before{ content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg, transparent 25%, rgba(255,255,255,.45) 48%, rgba(255,255,255,.45) 52%, transparent 75%); transform:translateX(-130%); transition:transform .65s ease; z-index:1; }
+.mx-shimmer-pill:hover::before{ transform:translateX(130%) }
+.mx-shimmer-pill > *{ position:relative; z-index:2 }
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab"><img id="mxLogoPerito" class="mx-logo-mini" alt="Logo perito">
+  <div class="meta"><span class="tag">Salubrità</span><h1 class="ti">Diagnosi Radon</h1></div>
+  <a class="back" href="suite.html">&larr; Suite</a>
+</header>
+<main>
+  <section class="hero">
+    <h2>Diagnosi <em>Gas Radon</em></h2>
+    <p>Wizard di valutazione del rischio radon ai sensi del <strong>D.Lgs 101/2020</strong> e del PNAR 2023-2032. Soglie WHO 2009, coefficienti dose ICRP Pub. 137, dati epidemiologici Darby 2005.</p>
+    <div style="margin:12px 0 4px"><a href="assistente.html?skill=radon" target="_blank" rel="noopener" style="display:inline-block;background-image:linear-gradient(135deg,#18a4b0,#0e7c87 55%,#0a5b64);color:#fff;font-weight:800;font-size:13.5px;text-decoration:none;padding:11px 18px;border-radius:10px;box-shadow:0 3px 10px rgba(14,124,135,.34)">💬 Assistente radon: dammi la misura, ti dico soglia, dose e rischio</a></div>
+    <div class="mode-toggle">
+      <button type="button" id="modeOp">Operatore (5 step)</button>
+      <button type="button" id="modeTe" class="is-on">Tecnico (11 step)</button>
+    </div>
+  </section>
+  <div class="ana-strip">
+    <div class="pc" id="anaPerito"><div class="h">Perito / tecnico</div><div class="n">n.d.</div><div class="m"></div></div>
+    <div class="pc" id="anaCliente"><div class="h">Committente / immobile</div><div class="n">n.d.</div><div class="m"></div></div>
+  </div>
+  <div class="ana-actions">
+    <a href="locali-cantiere.html" target="_blank">⚙ Modifica in Locali-Cantiere</a>
+    <button type="button" id="btnReloadAna">↻ Ricarica anagrafica</button>
+  </div>
+
+  <div class="steps-wrap">
+    <nav class="steps" id="stepsNav"></nav>
+    <div class="progress"><i id="progressBar" style="width:0%"></i></div>
+  </div>
+  <article class="card">
+    <div class="head">
+      <span class="num" id="hNum">1</span>
+      <h3 id="hTitle">n.d.</h3>
+      <span class="src" id="hSrc">n.d.</span>
+    </div>
+    <div class="body" id="stepBody"></div>
+  </article>
+  <div class="wnav">
+    <button type="button" id="btnPrev">&larr; Indietro</button>
+    <span class="pos">Step <b id="posCur">1</b>/<b id="posTot">11</b></span>
+    <button type="button" id="btnNext" class="primary">Avanti &rarr;</button>
+  </div>
+  <footer class="ft"><strong>Mixando · Radon v3.7</strong> &middot; Algoritmi verificati &middot; D.Lgs 101/2020 · UNI ISO 11665-4:2021 · ICRP Pub. 137 · WHO 2009 · Darby et al. BMJ 2005 · ANSI/AARST SGM-SF · ASTM E2121-21</footer>
+</main>
+
+<!-- MX TOOLBAR LIBRARY -->
+<script>
+/* =====================================================================
+ * MX Toolbar, Libreria condivisa Mixando v3
+ * Pulsanti standard + modal anteprima + Word/.doc + PDF (print) + report aggregato
+ * MX-BUILD: 2026-05-24-toolbar-v1.1 sempre visibile + needs-result
+ * ===================================================================== */
+(function(){
+'use strict';
+/* Mini-logo perito da mx2::perito.logoData */
+(function(){
+  function loadLg(){
+    try{
+      var p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");
+      var img=document.getElementById("mxLogoPerito");
+      var bar=document.querySelector(".mx-bar");
+      if(img && p && p.logoData){ img.src=p.logoData; img.style.display="block"; if(bar)bar.classList.add("has-logo"); }
+      else { if(img)img.style.display="none"; if(bar)bar.classList.remove("has-logo"); }
+    }catch(e){}
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",loadLg);
+  else loadLg();
+})();
+
+
+window.MX = window.MX || {};
+
+/* =====================================================================
+ * STORAGE HELPERS
+ * ===================================================================== */
+function loadJSON(key, def){
+  try{ var s = JSON.parse(localStorage.getItem(key)); return (s != null) ? s : def; }
+  catch(_){ return def; }
+}
+function saveJSON(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); return true; }catch(_){ return false; }
+}
+
+MX.getPerito = MX.getPerito || function(){ return loadJSON('mx2::perito', {}); };
+MX.getImmobile = MX.getImmobile || function(){ return loadJSON('mx2::locali-v1', {ana:{}, locali:[]}); };
+
+/* =====================================================================
+ * UTILITY
+ * ===================================================================== */
+function esc(s){
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  });
+}
+function fmtDate(d){
+  if (!d) return '';
+  if (typeof d === 'string' && d.length === 10) {
+    var p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0];
+  }
+  var dt = new Date(d);
+  return dt.getDate().toString().padStart(2,'0')+'/'+(dt.getMonth()+1).toString().padStart(2,'0')+'/'+dt.getFullYear();
+}
+function fmtNow(){
+  var d = new Date();
+  return d.getDate().toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getFullYear()+' '+
+         d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+}
+function toast(msg, ms){
+  var t = document.querySelector('.mx-toast');
+  if (!t){
+    t = document.createElement('div');
+    t.className = 'mx-toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tmr);
+  t._tmr = setTimeout(function(){ t.classList.remove('show'); }, ms||2400);
+}
+
+/* =====================================================================
+ * MODULE CONFIG (set via initToolbar)
+ * ===================================================================== */
+var CFG = null;
+
+/* =====================================================================
+ * INTESTAZIONE DOCUMENTO (header standard Word/PDF/Report)
+ * ===================================================================== */
+function buildDocHead(meta){
+  var perito = MX.getPerito() || {};
+  var imm = MX.getImmobile() || {ana:{}};
+  var ana = imm.ana || {};
+  var logoHtml = perito.logoData
+    ? '<div class="logo"><img src="'+esc(perito.logoData)+'" alt="Logo"></div>'
+    : '';
+  return ''+
+    '<div class="mx-doc-head">'+
+      logoHtml+
+      '<div class="doc-meta">'+
+        (perito.nome ? '<div class="perito-name">'+esc(perito.titolo||'')+' '+esc(perito.nome)+'</div>' : '<div class="perito-name" style="color:#a83232">⚠ Anagrafica perito non compilata</div>')+
+        (perito.studio ? '<div>'+esc(perito.studio)+'</div>' : '')+
+        (perito.albo ? '<div>'+esc(perito.albo)+(perito.numAlbo?' n. '+esc(perito.numAlbo):'')+'</div>' : '')+
+        (perito.piva ? '<div>P.IVA/C.F.: '+esc(perito.piva)+'</div>' : '')+
+        ((perito.tel||perito.email) ? '<div>'+(perito.tel?'Tel.: '+esc(perito.tel):'')+(perito.tel&&perito.email?' · ':'')+(perito.email?esc(perito.email):'')+'</div>' : '')+
+      '</div>'+
+      '<div class="doc-meta" style="text-align:right">'+
+        '<strong>Relazione tecnica</strong>'+
+        '<div style="font-size:12px;font-style:italic;color:#2c5d7c">'+esc(CFG.moduleName)+'</div>'+
+        '<div style="margin-top:6px">Emissione: '+fmtNow()+'</div>'+
+        (ana.DataSopr ? '<div>Sopralluogo: '+fmtDate(ana.DataSopr)+'</div>' : '')+
+        (ana.Incarico ? '<div>Incarico: '+esc(ana.Incarico)+'</div>' : '')+
+      '</div>'+
+    '</div>'+
+    '<h1>'+esc(meta.titolo || CFG.moduleName)+'</h1>'+
+    (ana.Nome || ana.Indirizzo ? ''+
+      '<table style="margin-top:0">'+
+        '<tr><th style="width:30%">Committente</th><td>'+esc(ana.Nome||'n.d.')+(ana.CF?' · C.F./P.IVA: '+esc(ana.CF):'')+'</td></tr>'+
+        '<tr><th>Immobile</th><td>'+esc(ana.Indirizzo||'n.d.')+(ana.Catasto?' · '+esc(ana.Catasto):'')+(ana.Anno?' · costruzione '+esc(ana.Anno):'')+'</td></tr>'+
+        (ana.Oggetto ? '<tr><th>Oggetto</th><td>'+esc(ana.Oggetto)+'</td></tr>' : '')+
+        (meta.note ? '<tr><th>Note del perito</th><td>'+esc(meta.note).replace(/\n/g,'<br>')+'</td></tr>' : '')+
+      '</table>' : (meta.note ? '<div class="mx-doc-note">'+esc(meta.note).replace(/\n/g,'<br>')+'</div>' : ''));
+}
+
+function buildDocFooter(){
+  return '<div class="mx-doc-footer">Relazione generata da <strong>Mixando v3</strong> · '+fmtNow()+' · '+esc(CFG.moduleName)+'<br>Algoritmi conformi alle normative vigenti citate nelle sezioni di tracciabilità tecnica.</div>';
+}
+
+/* =====================================================================
+ * BUILD PREVIEW DOCUMENT (riusabile per Word/PDF/Report)
+ * ===================================================================== */
+function buildFullDoc(selections, note){
+  var meta = { titolo: CFG.moduleName, note: note };
+  var html = '<div class="mx-doc">';
+  html += buildDocHead(meta);
+  if (typeof CFG.getDocSections === 'function'){
+    html += CFG.getDocSections(selections || {});
+  } else {
+    html += '<p><em>Il modulo non ha ancora definito il contenuto del report.</em></p>';
+  }
+  html += buildDocFooter();
+  html += '</div>';
+  return html;
+}
+
+/* =====================================================================
+ * MODAL ANTEPRIMA
+ * ===================================================================== */
+var $modal = null;
+function ensureModal(){
+  if ($modal) return $modal;
+  var m = document.createElement('div');
+  m.className = 'mx-modal';
+  m.innerHTML = ''+
+    '<div class="mx-modal-frame">'+
+      '<div class="mx-modal-head">'+
+        '<h2 id="mx-modal-title">Anteprima documento</h2>'+
+        '<button type="button" class="x" data-act="close" aria-label="Chiudi">&times;</button>'+
+      '</div>'+
+      '<div class="mx-modal-body">'+
+        '<aside class="mx-modal-side">'+
+          '<div class="mx-info" id="mx-perito-info">…</div>'+
+          '<button type="button" class="mx-link" data-act="open-anagrafica">&#9881; Modifica anagrafica perito/cliente</button>'+
+          '<button type="button" class="mx-link" data-act="refresh-anagrafica" style="margin-left:6px">&#8635; Ricarica</button>'+
+          '<h3>Note del perito (libere)</h3>'+
+          '<div class="mx-fld"><textarea id="mx-note" placeholder="Eventuali osservazioni, condizioni del sopralluogo, segnalazioni al committente..."></textarea></div>'+
+          '<h3>Sezioni incluse</h3>'+
+          '<div class="mx-sections" id="mx-sections"></div>'+
+          '<div style="margin-top:14px"><button type="button" class="mx-link" data-act="refresh-preview">&#8635; Aggiorna anteprima</button></div>'+
+        '</aside>'+
+        '<section class="mx-modal-preview">'+
+          '<div class="mx-modal-paper mx-print" id="mx-preview"></div>'+
+        '</section>'+
+      '</div>'+
+      '<div class="mx-modal-foot">'+
+        '<div class="left">'+
+          '<button type="button" class="mx-tb-btn tb-word" data-act="export-word"><span class="ico">&#128221;</span><span class="label">Salva Word</span></button>'+
+          '<button type="button" class="mx-tb-btn tb-pdf" data-act="export-pdf"><span class="ico">&#128196;</span><span class="label">Stampa / PDF</span></button>'+
+          '<button type="button" class="mx-tb-btn tb-report" data-act="export-report"><span class="ico">&#128230;</span><span class="label">Aggiungi al report</span></button>'+
+          '<button type="button" class="mx-tb-btn tb-save" data-act="export-json" title="Scarica un file .json con dati input+output (backup tecnico)"><span class="ico">&#128190;</span><span class="label">JSON</span></button>'+
+        '</div>'+
+        '<div class="right">'+
+          '<button type="button" class="mx-tb-btn tb-reset" data-act="close"><span class="ico">&#10005;</span><span class="label">Chiudi</span></button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(m);
+  $modal = m;
+  /* event delegation */
+  m.addEventListener('click', function(ev){
+    var el = ev.target.closest('[data-act]');
+    if (!el) return;
+    var act = el.dataset.act;
+    if (act === 'close') closeModal();
+    else if (act === 'refresh-anagrafica' || act === 'refresh-preview') refreshPreview();
+    else if (act === 'open-anagrafica') window.open('locali-cantiere.html', '_blank');
+    else if (act === 'export-word') doExportWord();
+    else if (act === 'export-pdf') doExportPDF();
+    else if (act === 'export-report') doAddToReport();
+    else if (act === 'export-json') doExportJSON();
+  });
+  return m;
+}
+function openModal(){
+  ensureModal();
+  /* render perito info */
+  var p = MX.getPerito() || {};
+  var imm = MX.getImmobile() || {ana:{}};
+  var ana = imm.ana || {};
+  var pInfo = document.getElementById('mx-perito-info');
+  var ok = !!(p.nome && p.studio);
+  pInfo.className = ok ? 'mx-info' : 'mx-warn';
+  pInfo.innerHTML = ok
+    ? '<b>'+esc(p.titolo||'')+' '+esc(p.nome)+'</b><br>'+esc(p.studio||'')+(ana.Nome?'<br><b>Committente:</b> '+esc(ana.Nome):'')+(ana.Indirizzo?'<br><b>Immobile:</b> '+esc(ana.Indirizzo):'')
+    : '<b>Anagrafica incompleta.</b> I dati del perito e del committente non sono compilati. Clicca <em>Modifica anagrafica</em> per integrare.';
+  /* sections checkboxes */
+  var def = CFG.defaultSections || {};
+  var sec = document.getElementById('mx-sections');
+  sec.innerHTML = '';
+  Object.keys(def).forEach(function(k){
+    var lab = document.createElement('label');
+    lab.innerHTML = '<input type="checkbox" data-k="'+esc(k)+'"' + (def[k].on ? ' checked' : '') + '> '+esc(def[k].label);
+    sec.appendChild(lab);
+  });
+  sec.querySelectorAll('input').forEach(function(inp){
+    inp.addEventListener('change', refreshPreview);
+  });
+  document.getElementById('mx-note').value = '';
+  refreshPreview();
+  $modal.classList.add('is-open');
+}
+function closeModal(){ if ($modal) $modal.classList.remove('is-open'); }
+function readSelections(){
+  var out = {};
+  document.querySelectorAll('#mx-sections input').forEach(function(inp){
+    out[inp.dataset.k] = inp.checked;
+  });
+  return out;
+}
+function refreshPreview(){
+  var sel = readSelections();
+  var note = document.getElementById('mx-note').value;
+  document.getElementById('mx-preview').innerHTML = buildFullDoc(sel, note);
+}
+
+/* =====================================================================
+ * EXPORT, WORD (.doc HTML con MIME application/msword)
+ * ===================================================================== */
+/* 19/11/2026: Word non disegna i grafici SVG (ne stampa le scritte alla rinfusa). Prima di scaricare il documento
+   ogni disegno diventa un'immagine; le curve animate vanno al loro stato finale; i tasti dell'interfaccia si tolgono. */
+function _mxSvgInImmagini(html, fatto){
+  var host = document.createElement('div'); host.innerHTML = html;
+  [].slice.call(host.querySelectorAll('button')).forEach(function(b){ if (b.parentNode) b.parentNode.removeChild(b); });
+  var svgs = [].slice.call(host.querySelectorAll('svg'));
+  var restano = svgs.length;
+  if (!restano){ fatto(host.innerHTML); return; }
+  var chiudi = function(){ if (--restano === 0) fatto(host.innerHTML); };
+  svgs.forEach(function(svg){
+    try {
+      var vb = (svg.getAttribute('viewBox') || '').split(/[ ,]+/).map(Number);
+      var w = parseFloat(svg.getAttribute('width')) || vb[2] || 800;
+      var h = parseFloat(svg.getAttribute('height')) || vb[3] || 400;
+      [].slice.call(svg.querySelectorAll('animate,set,animateTransform,animateMotion')).forEach(function(a){
+        try { var an = a.getAttribute('attributeName'), to = a.getAttribute('to'); if (an && to != null && a.parentNode && !/transform|motion/i.test(a.tagName)) a.parentNode.setAttribute(an, to); } catch(e){}
+        if (a.parentNode) a.parentNode.removeChild(a);
+      });
+      svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      svg.setAttribute('width', w); svg.setAttribute('height', h);
+      var xml = new XMLSerializer().serializeToString(svg);
+      var img = new Image();
+      img.onload = function(){
+        try {
+          var sc = Math.min(2, 1800 / w); if (w < 64) sc = 4;
+          var c = document.createElement('canvas'); c.width = Math.round(w * sc); c.height = Math.round(h * sc);
+          var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+          var out = document.createElement('img'); out.src = c.toDataURL('image/png');
+          var lw = (w < 64) ? 14 : Math.min(600, w); out.setAttribute('width', Math.round(lw)); out.setAttribute('height', Math.round(h * lw / w));
+          svg.parentNode.replaceChild(out, svg);
+        } catch(e){}
+        chiudi();
+      };
+      img.onerror = chiudi;
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+    } catch(e){ chiudi(); }
+  });
+}
+function doExportWord(){
+  var sel = readSelections();
+  var note = document.getElementById('mx-note').value;
+  _mxSvgInImmagini(buildFullDoc(sel, note), function(bodyHtml){   /* 19/11/2026: grafici come immagini */
+  /* Stili minimi inline per il file .doc */
+  var docHtml =
+    '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'+
+    '<head><meta charset="utf-8"><title>'+esc(CFG.moduleName)+'</title>'+
+    '<style>'+
+      'body{font-family:Georgia,serif;color:#2c1810;font-size:12pt;line-height:1.5}'+
+      'h1{font-size:18pt;color:#2c1810;font-style:italic;border-bottom:2px solid #2c1810;padding-bottom:6pt}'+
+      'h2{font-size:14pt;color:#2c5d7c;border-bottom:1px solid #d8d3c4;padding-bottom:3pt;margin-top:18pt}'+
+      'h3{font-size:12pt;color:#2c1810;margin-top:12pt}'+
+      'table{border-collapse:collapse;width:100%;margin:6pt 0;font-size:10pt}'+
+      'th,td{border:1px solid #999;padding:4pt 6pt;text-align:left;vertical-align:top}'+
+      'th{background:#f0eada;font-weight:700}'+
+      '.mx-doc-head{display:table;width:100%;margin-bottom:12pt;border-bottom:2pt solid #2c1810;padding-bottom:8pt}'+
+      '.mx-doc-head>div{display:table-cell;vertical-align:top}'+
+      '.mx-doc-head .perito-name{font-size:13pt;font-weight:700;color:#2c1810}'+
+      '.mx-doc-footer{margin-top:18pt;padding-top:8pt;border-top:1pt solid #999;font-size:9pt;color:#8b7355;text-align:center}'+
+      '.ver-ok{background:#f0f8f3;border-left:3pt solid #1f7a4d;padding:6pt 10pt;margin:6pt 0}'+
+      '.ver-warn{background:#fdf6ec;border-left:3pt solid #b07820;padding:6pt 10pt;margin:6pt 0}'+
+      '.ver-err{background:#fbf0f0;border-left:3pt solid #a83232;padding:6pt 10pt;margin:6pt 0}'+
+      '.ver-crit{background:#f5e6f9;border-left:3pt solid #7b1fa2;padding:6pt 10pt;margin:6pt 0}'+
+      '.mx-doc-note{background:#fffbef;border:1px solid #f0e0c4;padding:6pt 10pt;margin:6pt 0;font-style:italic;font-size:10.5pt}'+
+    '</style></head>'+
+    '<body>'+ bodyHtml +'</body></html>';
+  var blob = new Blob(['﻿', docHtml], { type:'application/msword;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var imm = MX.getImmobile() || {ana:{}};
+  var slug = (imm.ana && imm.ana.Nome ? imm.ana.Nome.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : 'analisi');
+  var a = document.createElement('a');
+  a.href = url; a.download = CFG.moduleId+'-'+slug+'-'+(new Date().toISOString().slice(0,10))+'.doc';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 300);
+  toast('File Word generato, apri con Word');
+  });
+}
+
+/* =====================================================================
+ * EXPORT, PDF (window.print)
+ * ===================================================================== */
+function doExportPDF(){
+  /* la classe .mx-print del paper limita la stampa a quel blocco via @media print */
+  window.print();
+}
+
+/* =====================================================================
+ * AGGIUNGI AL REPORT (snapshot in mx2::reports)
+ * ===================================================================== */
+function doAddToReport(){
+  var sel = readSelections();
+  var note = document.getElementById('mx-note').value;
+  var snap = {
+    schemaVersion: 1,
+    moduleId: CFG.moduleId,
+    moduleName: CFG.moduleName,
+    timestamp: new Date().toISOString(),
+    input: (typeof CFG.getInput === 'function') ? CFG.getInput() : null,
+    output: (typeof CFG.getOutput === 'function') ? CFG.getOutput() : null,
+    svg: (typeof CFG.getSvgHTML === 'function') ? CFG.getSvgHTML() : null,
+    note: note,
+    sections: sel,
+    docHtml: buildFullDoc(sel, note)
+  };
+  var reports = loadJSON('mx2::reports', []);
+  reports.push(snap);
+  saveJSON('mx2::reports', reports);
+  toast('Analisi aggiunta al Report (' + reports.length + ' totali)');
+  closeModal();
+}
+
+/* =====================================================================
+ * EXPORT, JSON (backup tecnico file scaricato)
+ * ===================================================================== */
+function doExportJSON(){
+  var sel = readSelections();
+  var note = document.getElementById('mx-note').value;
+  var snap = {
+    schemaVersion: 1,
+    moduleId: CFG.moduleId,
+    moduleName: CFG.moduleName,
+    exportedAt: new Date().toISOString(),
+    perito: MX.getPerito ? MX.getPerito() : null,
+    immobile: MX.getImmobile ? MX.getImmobile() : null,
+    input: (typeof CFG.getInput === 'function') ? CFG.getInput() : null,
+    output: (typeof CFG.getOutput === 'function') ? CFG.getOutput() : null,
+    svg: (typeof CFG.getSvgHTML === 'function') ? CFG.getSvgHTML() : null,
+    note: note,
+    sections: sel
+  };
+  var blob = new Blob([JSON.stringify(snap, null, 2)], {type:'application/json;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var imm = MX.getImmobile ? MX.getImmobile() : {ana:{}};
+  var slug = (imm && imm.ana && imm.ana.Nome) ? imm.ana.Nome.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : 'analisi';
+  var a = document.createElement('a');
+  a.href = url; a.download = CFG.moduleId+'-'+slug+'-'+(new Date().toISOString().slice(0,10))+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 300);
+  toast('File JSON scaricato (backup tecnico)');
+}
+
+/* =====================================================================
+ * DIALOG SALVA (mini), chiede nome e note
+ * ===================================================================== */
+var $dlg = null;
+function ensureDialog(){
+  if ($dlg) return $dlg;
+  $dlg = document.createElement('div');
+  $dlg.className = 'mx-dialog';
+  $dlg.innerHTML = '<div class="mx-dialog-card" id="mx-dlg-card"></div>';
+  document.body.appendChild($dlg);
+  return $dlg;
+}
+function openSaveDialog(){
+  ensureDialog();
+  var imm = MX.getImmobile() || {ana:{}};
+  var defName = (imm.ana && imm.ana.Nome ? imm.ana.Nome+' - ' : '') + fmtNow();
+  var card = document.getElementById('mx-dlg-card');
+  card.innerHTML = ''+
+    '<h3>&#128190; Salva analisi</h3>'+
+    '<p>Dai un nome al salvataggio. Potrai ricaricarlo o confrontarlo con uno futuro (es. al ritorno sul cantiere).</p>'+
+    '<div class="mx-fld"><label>Nome</label><input type="text" id="mx-dlg-name" value="'+esc(defName)+'"></div>'+
+    '<div class="mx-fld"><label>Note (opzionali)</label><textarea id="mx-dlg-note"></textarea></div>'+
+    '<div class="mx-dialog-foot">'+
+      '<button type="button" data-act="dlg-cancel">Annulla</button>'+
+      '<button type="button" class="primary" data-act="dlg-save">&#128190; Salva</button>'+
+    '</div>';
+  $dlg.classList.add('is-open');
+  card.querySelector('[data-act="dlg-cancel"]').addEventListener('click', function(){ $dlg.classList.remove('is-open'); });
+  card.querySelector('[data-act="dlg-save"]').addEventListener('click', function(){
+    var nm = document.getElementById('mx-dlg-name').value.trim();
+    if (!nm){ alert('Inserisci un nome.'); return; }
+    var nt = document.getElementById('mx-dlg-note').value.trim();
+    var saves = loadJSON('mx2::'+CFG.moduleId+'-saves', []);
+    saves.push({
+      schemaVersion: 1,
+      nome: nm,
+      note: nt,
+      timestamp: new Date().toISOString(),
+      input: (typeof CFG.getInput === 'function') ? CFG.getInput() : null,
+      output: (typeof CFG.getOutput === 'function') ? CFG.getOutput() : null,
+      svg: (typeof CFG.getSvgHTML === 'function') ? CFG.getSvgHTML() : null
+    });
+    saveJSON('mx2::'+CFG.moduleId+'-saves', saves);
+    $dlg.classList.remove('is-open');
+    toast('Analisi salvata ('+saves.length+' totali per questo modulo)');
+  });
+}
+
+/* =====================================================================
+ * DIALOG CARICA, lista dei salvataggi
+ * ===================================================================== */
+function openLoadDialog(){
+  ensureDialog();
+  var saves = loadJSON('mx2::'+CFG.moduleId+'-saves', []);
+  var card = document.getElementById('mx-dlg-card');
+  if (saves.length === 0){
+    card.innerHTML = '<h3>&#128194; Carica analisi</h3><p>Non ci sono analisi salvate per questo modulo. Calcola, poi clicca <em>Salva analisi</em> per crearne una.</p><div class="mx-dialog-foot"><button type="button" class="primary" data-act="dlg-cancel">OK</button></div>';
+  } else {
+    var rows = saves.map(function(s, i){
+      return '<div class="mx-save-row">'+
+        '<div class="info"><div class="nm">'+esc(s.nome)+'</div><div class="meta">'+fmtDate(s.timestamp)+' '+(new Date(s.timestamp).toTimeString().slice(0,5))+(s.note?' &middot; '+esc(s.note):'')+'</div></div>'+
+        '<button type="button" class="load" data-i="'+i+'" data-act="load">Carica</button>'+
+        '<button type="button" class="del" data-i="'+i+'" data-act="del">&times;</button>'+
+      '</div>';
+    }).join('');
+    card.innerHTML = '<h3>&#128194; Carica analisi salvata</h3><p>Scegli un\'analisi salvata in precedenza. Verr&agrave; ricaricata sostituendo i dati attuali.</p>'+
+      '<div class="mx-saves-list">'+rows+'</div>'+
+      '<div class="mx-dialog-foot"><button type="button" data-act="dlg-cancel">Chiudi</button></div>';
+  }
+  $dlg.classList.add('is-open');
+  card.querySelectorAll('[data-act="dlg-cancel"]').forEach(function(b){ b.addEventListener('click', function(){ $dlg.classList.remove('is-open'); }); });
+  card.querySelectorAll('[data-act="load"]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var i = parseInt(b.dataset.i, 10);
+      var saves2 = loadJSON('mx2::'+CFG.moduleId+'-saves', []);
+      var s = saves2[i];
+      if (!s) return;
+      if (typeof CFG.applyData === 'function'){
+        CFG.applyData(s.input);
+        $dlg.classList.remove('is-open');
+        toast('Analisi caricata: '+s.nome);
+      } else {
+        alert('Il modulo non supporta il caricamento di dati salvati.');
+      }
+    });
+  });
+  card.querySelectorAll('[data-act="del"]').forEach(function(b){
+    b.addEventListener('click', function(){
+      if (!confirm('Eliminare questo salvataggio?')) return;
+      var i = parseInt(b.dataset.i, 10);
+      var saves2 = loadJSON('mx2::'+CFG.moduleId+'-saves', []);
+      saves2.splice(i, 1);
+      saveJSON('mx2::'+CFG.moduleId+'-saves', saves2);
+      openLoadDialog();
+    });
+  });
+}
+
+/* =====================================================================
+ * DIALOG CONFRONTA, side-by-side con una salvata
+ * ===================================================================== */
+function openCompareDialog(){
+  ensureDialog();
+  var saves = loadJSON('mx2::'+CFG.moduleId+'-saves', []);
+  var card = document.getElementById('mx-dlg-card');
+  if (saves.length === 0){
+    card.innerHTML = '<h3>&#9974; Confronta</h3><p>Non ci sono analisi salvate da confrontare. Salva prima un\'analisi (caso d\'uso tipico: ritorno sul cantiere dopo settimane/mesi e confronto T0 vs T1).</p><div class="mx-dialog-foot"><button type="button" class="primary" data-act="dlg-cancel">OK</button></div>';
+    $dlg.classList.add('is-open');
+    card.querySelector('[data-act="dlg-cancel"]').addEventListener('click', function(){ $dlg.classList.remove('is-open'); });
+    return;
+  }
+  var rows = saves.map(function(s, i){
+    return '<div class="mx-save-row">'+
+      '<div class="info"><div class="nm">'+esc(s.nome)+'</div><div class="meta">'+fmtDate(s.timestamp)+' '+(new Date(s.timestamp).toTimeString().slice(0,5))+'</div></div>'+
+      '<button type="button" class="cmp" data-i="'+i+'" data-act="cmp">Confronta</button>'+
+    '</div>';
+  }).join('');
+  card.innerHTML = '<h3>&#9974; Confronta con analisi precedente</h3><p>Scegli l\'analisi salvata da confrontare con quella corrente.</p>'+
+    '<div class="mx-saves-list">'+rows+'</div>'+
+    '<div class="mx-dialog-foot"><button type="button" data-act="dlg-cancel">Annulla</button></div>';
+  $dlg.classList.add('is-open');
+  card.querySelectorAll('[data-act="dlg-cancel"]').forEach(function(b){ b.addEventListener('click', function(){ $dlg.classList.remove('is-open'); }); });
+  card.querySelectorAll('[data-act="cmp"]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var i = parseInt(b.dataset.i, 10);
+      var s = saves[i];
+      if (!s) return;
+      showCompareView(s);
+      $dlg.classList.remove('is-open');
+    });
+  });
+}
+
+function showCompareView(savedSnap){
+  /* costruisco una vista a 2 colonne: T0 (snapshot) vs T1 (corrente) */
+  var curOut = (typeof CFG.getOutput === 'function') ? CFG.getOutput() : null;
+  var t0_out = savedSnap.output || {};
+  var t1_out = curOut || {};
+  var keysT0 = Object.keys(t0_out).filter(function(k){ return typeof t0_out[k] !== 'object' || t0_out[k] === null; });
+  var keysT1 = Object.keys(t1_out).filter(function(k){ return typeof t1_out[k] !== 'object' || t1_out[k] === null; });
+  var allKeys = Array.from(new Set(keysT0.concat(keysT1)));
+  /* 19/11/2026: nomi leggibili e numeri arrotondati (prima uscivano i nomi interni, es. «Rtot_m2KW», e quindici decimali) */
+  var _CMP_NOMI = {
+    Rtot_m2KW:'Resistenza termica totale Rtot (m²K/W)', U_Wm2K:'Trasmittanza U (W/m²K)', Sd_m:'Sd totale (m)', fRsi:'Fattore di temperatura fRsi',
+    fRsi_OK:'fRsi rispetta il riferimento 0,72', Tsi_design_C:'T superficiale interna di progetto (°C)', URsi_perc:'UR alla superficie interna (%)',
+    Td_int_C:'Punto di rugiada interno (°C)', hasCondensation:'Condensa interstiziale', condensationPoints:'Interfacce con condensa (n.)',
+    Td_C:'Punto di rugiada Td (°C)', UR_surf_perc:'UR alla superficie (%)', UR_crit_perc:'UR critica (%)', LIM_crit_perc:'LIM critica (%)',
+    VPD_kPa:'VPD (kPa)', VTT_M1_days:'VTT, giorni a M=1', W_gkg:'Umidità specifica W (g/kg)', h_kJkg:'Entalpia h (kJ/kg)',
+    Tw_C:'Temperatura di bulbo umido Tw (°C)', v_m3kg:'Volume specifico v (m³/kg)',
+    media_Bq_m3:'Media annua (Bq/m³)', semestre1:'Semestre 1', semestre2:'Semestre 2', regione:'Regione', comune:'Comune', piano:'Piano'
+  };
+  function _cmpNome(k){ return _CMP_NOMI[k] || String(k).replace(/_/g,' '); }
+  function _cmpVal(v){ if(v==null||v==='') return 'n.d.'; if(v===true) return 'sì'; if(v===false) return 'no'; if(typeof v==='number') return isFinite(v) ? String(+v.toFixed(3)) : 'n.d.'; return String(v); }
+  var rows = allKeys.map(function(k){
+    var v0 = t0_out[k]; var v1 = t1_out[k];
+    var diff = '';
+    if (typeof v0 === 'number' && typeof v1 === 'number'){
+      var d = v1 - v0;
+      diff = (d>=0?'+':'')+d.toFixed(3);
+    } else if (v0 === v1){
+      diff = 'invariato';
+    } else {
+      diff = 'modificato';
+    }
+    return '<tr><td><b>'+esc(_cmpNome(k))+'</b></td><td>'+esc(_cmpVal(v0))+'</td><td>'+esc(_cmpVal(v1))+'</td><td>'+esc(diff)+'</td></tr>';
+  }).join('');
+  ensureModal();
+  var sel = {};
+  if (CFG.defaultSections) Object.keys(CFG.defaultSections).forEach(function(k){ sel[k] = CFG.defaultSections[k].on; });
+  var doc = '<div class="mx-doc">'+
+    buildDocHead({ titolo: 'Confronto: '+esc(savedSnap.nome)+' vs analisi attuale', note:'' })+
+    '<h2>Confronto T0 vs T1</h2>'+
+    '<p><strong>T0 (salvata):</strong> '+esc(savedSnap.nome)+' &middot; '+fmtDate(savedSnap.timestamp)+'<br>'+
+    '<strong>T1 (corrente):</strong> '+fmtNow()+'</p>'+
+    '<table>'+
+      '<thead><tr><th>Grandezza</th><th>T0 (precedente)</th><th>T1 (attuale)</th><th>Differenza</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody>'+
+    '</table>'+
+    '<div class="mx-doc-note">Il confronto evidenzia le variazioni tra il sopralluogo precedente e quello attuale. Utile per documentare evoluzioni nel tempo (efficacia di interventi, peggioramenti, monitoraggi temporali).</div>'+
+    buildDocFooter()+
+    '</div>';
+  document.getElementById('mx-preview').innerHTML = doc;
+  document.getElementById('mx-modal-title').textContent = 'Confronto T0 vs T1';
+  /* nascondo sezioni-side perché in confronto non hanno senso */
+  document.getElementById('mx-sections').innerHTML = '<div style="font-size:12px;color:#8b7355;font-style:italic">Modalità Confronto: le sezioni opzionali sono disabilitate.</div>';
+  document.getElementById('mx-note').value = 'Confronto con: '+savedSnap.nome;
+  $modal.classList.add('is-open');
+}
+
+/* =====================================================================
+ * RESET, chiede conferma e chiama callback del modulo
+ * ===================================================================== */
+function doReset(){
+  if (typeof CFG.onReset === 'function'){
+    CFG.onReset();
+  }
+}
+
+/* =====================================================================
+ * BUILD TOOLBAR DOM
+ * ===================================================================== */
+function buildToolbar(){
+  if (document.querySelector('.mx-toolbar')) return;
+  var bar = document.createElement('div');
+  bar.className = 'mx-toolbar';
+  /* v3.5: toolbar sempre attiva, niente needs-result al carico */
+  bar.innerHTML = ''+
+    '<h3 class="mx-toolbar-head"><span class="ico-wrap">&#128190;</span><span class="title">Salvataggio &amp; esportazione<small>Salva l\'analisi, ricarica un\'analisi precedente o esporta in Word/PDF per la relazione tecnica</small></span></h3>'+
+    '<div class="mx-toolbar-body">'+
+    '<div class="mx-toolbar-hint">&#9432; Esegui il calcolo per attivare i pulsanti di salvataggio ed esportazione</div>'+
+    '<div class="mx-toolbar-inner">'+
+      '<button type="button" class="mx-tb-btn tb-save"    data-act="save"    data-needs="result"><span class="ico">&#128190;</span><span class="label">Salva</span></button>'+
+      '<button type="button" class="mx-tb-btn tb-load"    data-act="load"><span class="ico">&#128194;</span><span class="label">Carica</span></button>'+
+      '<button type="button" class="mx-tb-btn tb-compare" data-act="compare" data-needs="result"><span class="ico">&#9974;</span><span class="label">Confronta</span></button>'+
+      '<button type="button" class="mx-tb-btn tb-word"    data-act="word"    data-needs="result"><span class="ico">&#128221;</span><span class="label">Word</span></button>'+
+      '<button type="button" class="mx-tb-btn tb-pdf"     data-act="pdf"     data-needs="result"><span class="ico">&#128196;</span><span class="label">PDF</span></button>'+
+      '<button type="button" class="mx-tb-btn tb-report"  data-act="report"  data-needs="result"><span class="ico">&#128230;</span><span class="label">Al report</span></button>'+
+      '<button type="button" class="mx-tb-btn tb-reset"   data-act="reset"><span class="ico">&#8634;</span><span class="label">Reset</span></button>'+
+    '</div>'+
+    '</div>';
+  var main = document.querySelector('main');
+  var footer = main ? main.querySelector('footer.ft') : null;
+  if (main && footer){ main.insertBefore(bar, footer); }
+  else if (main){ main.appendChild(bar); }
+  else { document.body.appendChild(bar); }
+  bar.addEventListener('click', function(ev){
+    var el = ev.target.closest('[data-act]');
+    if (!el) return;
+    var act = el.dataset.act;
+    /* Per esporre Word/PDF/Report apre il modal anteprima */
+    /* Blocca azioni che richiedono lastResult quando non c'è */
+    var needs = el.dataset.needs;
+    if (needs === 'result' && bar.classList.contains('needs-result')){
+      toast('Esegui prima il calcolo per usare questa funzione');
+      return;
+    }
+    if (act === 'word' || act === 'pdf' || act === 'report'){
+      openModal();
+    } else if (act === 'save'){
+      openSaveDialog();
+    } else if (act === 'load'){
+      openLoadDialog();
+    } else if (act === 'compare'){
+      openCompareDialog();
+    } else if (act === 'reset'){
+      if (confirm('Sicuro di voler azzerare l\'analisi corrente?')) doReset();
+    }
+  });
+}
+
+/* =====================================================================
+ * API PUBBLICA: initToolbar(config) + setActive(bool)
+ * ===================================================================== */
+/* 19/11/2026: porta d'ingresso per «Apri snapshot»: rimette nel modulo i dati d'ingresso di un file esportato,
+   per la stessa strada del tasto «Carica». Risponde 'ok', 'altro' (file di un altro modulo) oppure 'no'. */
+MX.applyData = function(input, moduleId){
+  if (!CFG || typeof CFG.applyData !== 'function') return 'no';
+  if (moduleId && CFG.moduleId && String(moduleId) !== String(CFG.moduleId)) return 'altro';
+  CFG.applyData(input);
+  return 'ok';
+};
+MX.initToolbar = function(config){
+  CFG = Object.assign({
+    moduleId: 'modulo',
+    moduleName: 'Modulo',
+    moduleColor: '#2c5d7c',
+    defaultSections: {},
+    getInput: function(){ return null; },
+    getOutput: function(){ return null; },
+    getSvgHTML: function(){ return null; },
+    getDocSections: function(){ return ''; },
+    applyData: function(){},
+    onReset: function(){}
+  }, config || {});
+  buildToolbar();
+};
+
+MX.toolbarActive = function(active){
+  var bar = document.querySelector('.mx-toolbar');
+  if (!bar) return;
+  if (active){
+    bar.classList.add('is-active');
+    bar.classList.remove('needs-result');
+  } else {
+    bar.classList.remove('is-active');
+    /* v3.5: toolbar sempre attiva, niente needs-result al carico */
+  }
+};
+
+/* Esporto helper toast */
+MX.toast = toast;
+})();
+
+</script>
+<!-- END MX TOOLBAR LIBRARY -->
+
+<script>
+
+(function(){
+'use strict';
+
+/* ===== DATI VERIFICATI ===== */
+var SOGLIE_AMBIENTE = {
+  abitazione_esistente:{ val:300, lab:'Abitazione esistente', norma:'D.Lgs 101/2020 Art. 12 c.1' },
+  abitazione_nuova:    { val:200, lab:'Abitazione nuova (da dicembre 2024)', norma:'D.Lgs 101/2020 Art. 12 c.1' },
+  luogo_lavoro:        { val:300, lab:'Luogo di lavoro', norma:'D.Lgs 101/2020 Art. 17' },
+  scuola:              { val:300, lab:'Scuola / edificio pubblico', norma:'D.Lgs 101/2020 Art. 17 + UNI/PdR 122:2022' }
+};
+var COEF_DOSE = 6.7e-6;   // ICRP Pub. 137 (2017) mSv/(Bq·h/m³), F=0.4
+var WHO_LIVELLO = 100;
+var EPA_LIVELLO = 148;    // 4 pCi/L = 148 Bq/m³
+var DOSE_LIMITE_PUBBLICO = 1;       // mSv/anno, ICRP Pub. 103 (2007) + D.Lgs 101/2020 art. 146
+var DOSE_LIMITE_LAVORATORE = 6;     // mSv/anno, ICRP Pub. 126 (2014) categoria B
+var DOSE_LIMITE_LAVORATORE_CAT_A = 20; // mSv/anno, D.Lgs 101/2020 art. 146 (max 50/anno, media 5 anni)
+
+/* Tabella soglie internazionali con descrizioni complete (per usi professionali normati) */
+var SOGLIE_INT = [
+  { id:'who',  val:100, lab:'WHO Handbook 2009 (raccomandato ALARA)', norma:'WHO Handbook on Indoor Radon 2009', desc:'Livello di riferimento internazionale raccomandato. Nazioni possono adottare soglie più alte fino a 300 Bq/m³.' },
+  { id:'epa',  val:148, lab:'US EPA Action Level (4 pCi/L)', norma:'EPA 402-K-12-002 (rev. 2016)', desc:'Livello d\'azione raccomandato USA. EPA raccomanda valutare interventi anche tra 2-4 pCi/L (74-148).' },
+  { id:'icrp', val:300, lab:'ICRP Pub. 126 (livello massimo)', norma:'ICRP Publication 126 (2014)', desc:'Livello massimo raccomandato come soglia operativa per intervento.' },
+  { id:'dlgs_esistenti', val:300, lab:'D.Lgs 101/2020 (luoghi lavoro + abitazioni esistenti)', norma:'D.Lgs 101/2020 art. 12 c.1', desc:'Soglia cogente italiana per ambienti di lavoro e abitazioni esistenti.' },
+  { id:'dlgs_nuove',     val:200, lab:'D.Lgs 101/2020 (abitazioni nuove dal 31/12/2024)', norma:'D.Lgs 101/2020 art. 12 c.1', desc:'Soglia più severa per le abitazioni costruite dopo il 31/12/2024 (nuova edilizia).' }
+];
+
+/* Coefficienti dose ICRP Pub. 137 (2017), multipli scenari */
+var ICRP137 = {
+  general:       { val:6.7e-6, unit:'mSv/(Bq·h/m³)', desc:'Ambienti generali (fattore di equilibrio F=0.4)' },
+  workplaces:    { val:3.0,    unit:'mSv/(mJ·h·m⁻³)', wlm:10,  desc:'Ambienti di lavoro standard (10 mSv/WLM)' },
+  mines:         { val:3.3,    unit:'mSv/(mJ·h·m⁻³)', wlm:12,  desc:'Miniere (12 mSv/WLM)' },
+  indoor:        { val:5.7,    unit:'mSv/(mJ·h·m⁻³)', wlm:20,  desc:'Ambienti lavorativi indoor (20 mSv/WLM)' },
+  caves:         { val:6.7,    unit:'mSv/(mJ·h·m⁻³)', wlm:24,  desc:'Grotte turistiche (24 mSv/WLM)' },
+  office:        { val:4.0,    unit:'mSv/(mJ·h·m⁻³)', wlm:14,  desc:'Occupazioni sedentarie / uffici (valore indicativo, non specificato in ICRP 137; voce non utilizzata nei calcoli)' }
+};
+
+/* Coefficienti rischio Darby et al. BMJ 2005, case-control 13 studi in 9 paesi europei */
+var DARBY_RISK = {
+  nonSmoker:  { perc100:5,   perc800:10,  baseline:4,   desc:'Rischio cumulativo morte cancro polmone a 75 anni per 1000 (non-fumatori)' },
+  smoker:     { perc100:120, perc800:220, baseline:100, desc:'Rischio cumulativo morte cancro polmone a 75 anni per 1000 (fumatori attivi)' },
+  attribuibile:'~2% delle morti per cancro in Europa attribuibili a radon',
+  fonte:'Darby S. et al. BMJ 2005;330:223 - 13 case-control studies pooled'
+};
+
+var PIANI = [
+  { id:'interrato',     label:'Interrato / seminterrato',  mult:'3-5×',    factor:4.0 },
+  { id:'piano_terra',   label:'Piano terra',                mult:'2-3×',    factor:2.5 },
+  { id:'piano_1',       label:'Primo piano',                mult:'~1×',     factor:1.0 },
+  { id:'piano_2_o_sup', label:'Secondo piano o superiore',  mult:'0,3-0,5×',factor:0.4 }
+];
+var SOLAI = [
+  { id:'contro_terra', label:'Solaio direttamente contro terra', risk:'alto' },
+  { id:'vespaio',      label:'Vespaio aerato',                   risk:'medio' },
+  { id:'pilastri',     label:'Edificio su pilastri (rialzato)',  risk:'basso' },
+  { id:'nessuno',      label:'Non applicabile (piano alto)',     risk:'minimo' }
+];
+
+/* Strumenti misura, UNI ISO 11665-4:2021 */
+var STRUMENTI = [
+  {id:'cr39',famiglia:'passivo_integrato',nome:'Dosimetro a tracce CR-39 (PADC)',durata:'3-12 mesi (tipico 6)',precisione:'±10-25%',soglia_min:'5 Bq/m³',pro:'Economico, passivo, integra il valore medio.',contro:'Richiede laboratorio per lettura.'},
+  {id:'eperm',famiglia:'passivo_integrato',nome:'Camera ad elettrete',durata:'2 gg - 12 mesi',precisione:'±10-20%',soglia_min:'10 Bq/m³',pro:'Lettura immediata, riutilizzabile.',contro:'Più costoso, voltmetro dedicato.'},
+  {id:'carbone',famiglia:'passivo_breve',nome:'Canister a carbone attivo',durata:'2-7 giorni',precisione:'±20-30%',soglia_min:'20 Bq/m³',pro:'Veloce, indicato per screening.',contro:'NON sostituisce media annua; sensibile a UR.'},
+  {id:'alphaguard',famiglia:'attivo_continuo',nome:'Monitor attivo a camera di ionizzazione',durata:'Tempo reale (10 min)',precisione:'±3-5%',soglia_min:'2 Bq/m³',pro:'Risoluzione temporale, sorgenti, post-mitigazione.',contro:'Costoso, richiede operatore.'},
+  {id:'rad7',famiglia:'attivo_continuo',nome:'Monitor attivo con rivelatore alfa a stato solido',durata:'Tempo reale (1 ora)',precisione:'±5-10%',soglia_min:'4 Bq/m³',pro:'Discrimina Rn-222 da Rn-220, identifica sorgenti.',contro:'Costoso.'}
+];
+var FAMIGLIE = [
+  {id:'passivo_integrato',label:'Passivi integrati (CR-39, elettreti)',desc:'Standard misura media annua. Posa 6-12 mesi.'},
+  {id:'passivo_breve',    label:'Passivi a breve termine (carbone)', desc:'Screening rapido 2-7 gg. NON sostituisce media annua.'},
+  {id:'attivo_continuo',  label:'Attivi continui',desc:'Diagnosi sorgenti, test post-mitigazione.'}
+];
+
+/* Regole posizionamento UNI ISO 11665-4:2021 §5.3 */
+var REGOLE_POSIZIONAMENTO = [
+  'Altezza dal pavimento: 1-2 m (zona di respirazione)',
+  'Distanza minima 50 cm da finestre, porte, prese d\'aria',
+  'Distanza minima 1 m da fonti di calore (radiatori, camini, lampade)',
+  'Lontano da correnti d\'aria, ventilatori, condizionatori',
+  'In ambienti > 50 m² o > 100 m³ → raddoppiare il numero di dosimetri',
+  'In ambienti con UR > 80% (cantine umide) usare un contenitore protettivo permeabile al radon (tessuto non tessuto di polietilene)',
+  'Etichettare con: id ambiente, data inizio esposizione, posizione esatta',
+  'Documentazione fotografica del posizionamento per ogni dosimetro',
+  'Evitare interrati allagati o ambienti chiusi senza ricambi (falsa rappresentazione)'
+];
+
+/* Mitigazione, tecniche ANSI/AARST SGM-SF + ASTM E2121-21 */
+var MITIGAZIONE = [
+  {id:'ssd',nome:'Sub-Slab Depressurization (SSD)',it:'Depressurizzazione sotto solaio',desc:'Pozzetto nel solaio contro terra + tubo + ventilatore in copertura. Crea depressione e intercetta il radon prima dell\'ingresso.',efficacia:'50-99% (gold standard)',indicato:'Solaio contro terra, cantine, soletta su massetto',norma:'ANSI/AARST SGM-SF §5.1 · ASTM E2121-21 §6'},
+  {id:'smd',nome:'Sub-Membrane Depressurization (SMD)',it:'Depressurizzazione sotto membrana',desc:'Membrana impermeabile sul terreno del vespaio, sigillata ai muri. Tubo + ventilatore creano depressione sotto la membrana.',efficacia:'70-95%',indicato:'Vespaio aerato, crawl space, edifici su pilastri',norma:'ANSI/AARST SGM-SF §5.2 · ASTM E2121-21 §7'},
+  {id:'dbd',nome:'Drain Tile / Block Wall Depressurization',it:'Depressurizzazione drenaggi o muri cavi',desc:'Sfrutta canalizzazioni di drenaggio perimetrale o cavità di muri a blocchi cavi per estrarre aria dal sottosuolo.',efficacia:'50-90%',indicato:'Cantine con muri in blocchi cavi, drenaggio francese',norma:'ANSI/AARST SGM-SF §5.3'},
+  {id:'sigillatura',nome:'Sigillatura crepe e penetrazioni',it:'Sigillatura',desc:'Sigillatura sistematica di crepe nel solaio, giunti, passaggi impianti, pozzetti di scarico.',efficacia:'5-25% (da sola insufficiente, complementare)',indicato:'Sempre come complemento ad altra tecnica',norma:'ANSI/AARST SGM-SF §5.4'},
+  {id:'ventilazione',nome:'Ventilazione meccanica controllata (VMC)',it:'VMC con scambiatore di calore',desc:'Aumento del ricambio d\'aria con VMC a doppio flusso. Diluisce la concentrazione di radon negli ambienti.',efficacia:'30-60% (varia con n ricambi)',indicato:'Edifici a bassa permeabilità, integrazione PnZEB',norma:'UNI EN 16798-1:2019 (ricambi aria minimi)'}
+];
+
+/* REGIONI (sintesi DGR/atti) */
+var REGIONI = {
+  'Toscana':{pubblicata:true,n:11,atto:'DGR Toscana 23/12/2024 n. 1579',url:'https://www.arpat.toscana.it/radon-cosa-fare/',comuni:['Abbadia San Salvatore','Piancastagnaio','Arcidosso','Castel del Piano','Pitigliano','Roccastrada','Santa Fiora','Sorano','Marciana','Marciana Marina','Isola del Giglio']},
+  'Puglia':{pubblicata:true,n:8,atto:'DGR Puglia 22/10/2025 n. 1523',url:'https://www.arpa.puglia.it/pagina2842_radon.html',comuni:['Casarano','Surbo','Minervino di Lecce','Campi Salentina','Maglie','Zollino','Copertino','Lecce']},
+  'Veneto':{pubblicata:true,n:21,atto:'DGR Veneto 02/05/2025 n. 464',url:'https://www.arpa.veneto.it/temi-ambientali/radioattivita/radon/il-radon-in-veneto',comuni:['Borca di Cadore','Cibiana di Cadore','Ospitale di Cadore','Perarolo di Cadore','Rivamonte Agordino','San Vito di Cadore','Tambre','Cinto Euganeo','Torreglia',"Vo'",'Fonte','Ponzano Veneto','Vedelago','Selva di Progno','Dueville','Foza','Lusiana Conco','Schio','Valdagno','Valdastico','Valli del Pasubio']},
+  'Friuli-Venezia Giulia':{pubblicata:true,n:51,atto:'DGR FVG 31/10/2024 n. 1622 (BUR 46 del 13/11/2024; GU n. 299 del 21/12/2024)',url:'https://www.arpa.fvg.it/temi/temi/radiazioni/sezioni-principali/radon/aree-prioritarie/',comuni:['Ampezzo','Andreis','Arba','Aviano','Barcis','Bicinicco','Campoformido','Cimolais','Claut','Codroipo','Cordenons','Coseano','Dogna','Duino Aurisina','Enemonzo','Flaibano','Fogliano Redipuglia','Forgaria nel Friuli','Forni Avoltri','Lusevera','Malborghetto Valbruna','Maniago','Martignacco','Mereto di Tomba','Moggio Udinese','Montereale Valcellina','Mortegliano','Ovaro','Pasian di Prato','Pavia di Udine','Polcenigo','Pozzuolo del Friuli','Prato Carnico',"Rive d'Arcano",'Roveredo in Piano','San Quirino','Sauris','Sequals','Sgonico','Socchieve','Spilimbergo','Sutrio','Talmassons','Tarvisio','Tavagnacco','Tramonti di Sopra','Tramonti di Sotto','Travesio','Trivignano Udinese','Vajont','Visco']},
+  'Sardegna':{pubblicata:true,n:162,atto:'DGR Sardegna 30/06/2022 n. 20/71',url:'https://delibere.regione.sardegna.it/delibera/60493',comuni:['Aggius','Aglientu','Alà dei Sardi','Albagiara','Ales','Anela','Arbus','Aritzo','Arzachena','Arzana','Atzara','Austis','Badesi','Ballao','Banari','Baradili','Baressa','Bari Sardo'],note:'162 comuni totali, lista parziale verificata. Per elenco completo: consultare allegato A della DGR 20/71/2022 (link fonte).'},
+  'Piemonte':{pubblicata:true,n:37,atto:'Atto pubblicato, verificare via ARPA Piemonte',url:'https://www.arpa.piemonte.it/temi/radioattivita-radiazioni-ionizzanti/radon',comuni:[]},
+  'Lombardia':{pubblicata:true,n:90,atto:'Atto pubblicato, verificare via ARPA Lombardia',url:'https://www.arpalombardia.it/temi-ambientali/radioattivita/il-radon/aree-prioritarie-in-italia/',comuni:[]},
+  'Liguria':{pubblicata:true,n:16,atto:'Atto pubblicato, verificare via ARPA Liguria',url:'https://www.arpal.liguria.it/',comuni:[]},
+  'Emilia-Romagna':{pubblicata:true,n:0,verifica_negativa:true,atto:"Presa d'atto regionale, nessun comune supera 15% sopra 300 Bq/m³",url:'https://www.arpae.it/it/temi-ambientali/radioattivita/radon-indoor',comuni:[]},
+  'Lazio':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpalazio.it/'},
+  'Campania':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpacampania.it/'},
+  'Marche':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpa.marche.it/'},
+  'Basilicata':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpab.it/'},
+  'Calabria':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpacal.it/'},
+  'Abruzzo':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.artaabruzzo.it/'},
+  'Molise':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpamolise.it/'},
+  'Umbria':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpa.umbria.it/'},
+  'Sicilia':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpa.sicilia.it/'},
+  'Trento':{pubblicata:false,atto:'In attesa, Provincia Autonoma',url:'https://appa.provincia.tn.it/'},
+  'Bolzano':{pubblicata:false,atto:'In attesa, Provincia Autonoma',url:'https://ambiente.provincia.bz.it/it/radiazioni/radon'}
+};
+
+function classifyRadon(reg,com){
+  var c=(com||'').trim().toLowerCase().replace(/[\s'’`]/g,'');
+  if(!reg) return null;
+  var d=REGIONI[reg]; if(!d) return null;
+  if(d.verifica_negativa) return {livello:3,titolo:'Verifica negativa regionale, basso rischio',colore:'#1f7a4d',bg:'#f0f8f3',icona:'✅',descr:'La Regione '+reg+' ha pubblicato presa d\'atto: nessun comune supera il criterio del 15% di edifici sopra il livello di riferimento. Misurazione raccomandata solo per cautela.',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3 · PNAR 2023-2032'};
+  if(d.pubblicata){
+    if(reg==='Friuli-Venezia Giulia' && c==='trieste') return {livello:1,titolo:'AREA PRIORITARIA, solo circoscrizioni',colore:'#c0392b',bg:'#fbf0f0',icona:'⚠️',descr:'A Trieste il rischio prioritario riguarda SOLO le circoscrizioni <strong>Altopiano Ovest</strong> e <strong>Altopiano Est</strong>, NON l\'intero comune.',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3'};
+    var trovato=(d.comuni||[]).some(function(x){return x.toLowerCase().replace(/[\s'’`]/g,'')===c;});
+    if(trovato) return {livello:1,titolo:'AREA PRIORITARIA RADON, obblighi di legge',colore:'#c0392b',bg:'#fbf0f0',icona:'🔴',descr:'Il comune di '+com+' ('+reg+') è classificato AREA PRIORITARIA RADON. Obbligo di misurazione negli ambienti di lavoro al piano terra/seminterrato. Per abitazioni: misura raccomandata.',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3'};
+    if(c) return {livello:2,titolo:'Regione con elenco pubblicato, comune NON prioritario',colore:'#b07820',bg:'#fdf6ec',icona:'🟡',descr:'La Regione '+reg+' ha pubblicato l\'elenco ufficiale ('+d.n+' comuni prioritari) e il comune di '+com+' NON è incluso. Misurazione facoltativa (raccomandata WHO).',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3'};
+    return {livello:2,titolo:'Regione con '+d.n+' comuni prioritari pubblicati',colore:'#b07820',bg:'#fdf6ec',icona:'🟡',descr:'La Regione '+reg+' ha pubblicato l\'elenco ufficiale. Inserisci il comune per classificazione puntuale.',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3'};
+  }
+  return {livello:0,titolo:'Regione in attesa di delibera ufficiale',colore:'#7a6a55',bg:'#faf6ec',icona:'⏳',descr:'La Regione '+reg+' non ha ancora pubblicato l\'elenco dei comuni area prioritaria (in attesa secondo PNAR 2023-2032). Misurazione raccomandata in via cautelativa.',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3 · PNAR 2023-2032'};
+}
+
+/* Coefficiente moltiplicatore Darby 2005, lifetime risk lung cancer
+   Pendenza: +16% per ogni 100 Bq/m³ di esposizione media a lungo termine */
+function calcLifetimeRisk(media, fumatore){
+  if(!media) return null;
+  var ER = 0.16 * (media/100);  // excess relative risk per 100 Bq/m³ (Darby BMJ 2005)
+  /* rischio assoluto di base a 75 anni (0 Bq/m³), Darby BMJ 2005: 0,4 % non fumatori, 10 % fumatori attivi.
+     Per gli ex fumatori Darby non fornisce un valore: si restituisce l'intervallo fra i due. */
+  var baseline = {no:0.4, si:10};   // %
+  if(fumatore==='ex'){
+    return {baseline:null, ER:ER*100, lifetime:null, lo:0.4*(1+ER), hi:10*(1+ER), intervallo:true};
+  }
+  var b = baseline[fumatore];
+  if(b==null) return null;
+  return {baseline:b, ER:ER*100, lifetime:b*(1+ER), intervallo:false};
+}
+
+/* ===== WIZARD ===== */
+var STEPS_ALL = [
+  { id:'ambiente',     label:'1. Ambiente',     title:'Identificazione ambiente',   src:'D.Lgs 101/2020 Art. 12 + UNI ISO 11665-4:2021' },
+  { id:'edificio',     label:'2. Edificio',     title:'Caratterizzazione edificio', src:'PNAR 2023-2032 + WHO 2009 §2.3' },
+  { id:'strategia',    label:'3. Strategia',    title:'Strategia di campionamento', src:'UNI ISO 11665-4:2021 §5.2' },
+  { id:'posizione',    label:'4. Dosimetri',    title:'Posizionamento dosimetri',   src:'UNI ISO 11665-4:2021 §5.3' },
+  { id:'periodo',      label:'5. Periodo',      title:'Periodo di misura',          src:'UNI ISO 11665-4:2021 + ARPA: 2 semestri annui' },
+  { id:'risultato',    label:'6. Media',        title:'Calcolo media annua',        src:'D.Lgs 101/2020 Art. 12: media annua' },
+  { id:'verdetto',     label:'7. Verdetto',     title:'Verdetto soglie',            src:'D.Lgs 101 + WHO 2009 + EPA + ICRP 65/126' },
+  { id:'dose',         label:'8. Dose',         title:'Stima dose individuale',     src:'ICRP Pub. 137 (2017) coef. 6,7·10⁻⁶' },
+  { id:'salute',       label:'9. Salute',       title:'Rischi salute',              src:'IARC 100D + Darby et al. BMJ 2005 + WHO 2009' },
+  { id:'mitigazione',  label:'10. Mitigazione', title:'Piano mitigazione',          src:'ANSI/AARST SGM-SF + ASTM E2121-21' },
+  { id:'monitoraggio', label:'11. Monitoraggio',title:'Piano monitoraggio',         src:'PNAR 2023-2032 + WHO 2009 §4' }
+];
+var OPERATORE_IDS = ['ambiente','posizione','periodo','risultato','verdetto'];
+
+var KEY='mx2::radon-v3';
+function loadState(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(_){return{};}}
+function saveState(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(_){}}
+var state=Object.assign({
+  mode:'tecnico',cur:0,
+  ambiente:'',regione:'',comune:'',
+  piano:'',tipo_solaio:'',anno_costruzione:null,
+  famiglia_misura:'',tipo_misura:'',
+  posizionamento_ok:[],
+  durata_giorni:365,sem1:null,sem2:null,
+  ore_anno:7000,
+  fumatore:'',coabitanti:null,bambini:null,
+  mitigazione_scelta:[]
+},loadState());
+  try{ window._mxAggancia_getDati = function(){ return state; }; }catch(_){}
+
+function activeSteps(){return state.mode==='operatore'?STEPS_ALL.filter(function(s){return OPERATORE_IDS.indexOf(s.id)>=0;}):STEPS_ALL;}
+function num(v){var n=parseFloat(v);return isNaN(n)?null:n;}
+function fmt(n,dec){return (n==null||isNaN(n))?'n.d.':Number(n).toFixed(dec||1);}
+
+/* ====== STEP 1: AMBIENTE ====== */
+function renderStep_ambiente(host){
+  var d=state;
+  var amb=Object.keys(SOGLIE_AMBIENTE).map(function(k){
+    var t=SOGLIE_AMBIENTE[k];
+    var sel=(d.ambiente===k)?'is-sel':'';
+    return '<button type="button" class="choice '+sel+'" data-amb="'+k+'"><div class="t">'+t.lab+'</div><div class="v">Soglia cogente: <b>'+t.val+' Bq/m³</b></div><div class="n">'+t.norma+'</div></button>';
+  }).join('');
+  var regOpts='<option value="">seleziona regione</option>';
+  Object.keys(REGIONI).sort(function(a,b){return a.localeCompare(b,'it');}).forEach(function(r){
+    regOpts+='<option value="'+r+'"'+(d.regione===r?' selected':'')+'>'+r+'</option>';
+  });
+  host.innerHTML=
+    '<p class="intro">Tipologia ambiente da diagnosticare. Determina il <strong>livello di riferimento cogente</strong> ai sensi del D.Lgs 101/2020.</p>'+
+    '<div class="choices">'+amb+'</div>'+
+    '<h4>Localizzazione cantiere</h4>'+
+    '<div class="row2">'+
+    ' <div class="field"><label>Regione</label><select id="fRegione">'+regOpts+'</select><span class="help">Per classificazione AREA PRIORITARIA RADON (D.Lgs 101/2020 art. 11 c.3)</span></div>'+
+    ' <div class="field"><label>Comune</label><input type="text" id="fComune" value="'+(d.comune||'').replace(/"/g,'&quot;')+'" placeholder="es. Lecce"><span class="help">Confronto con elenco DGR / ARPA regionale</span></div>'+
+    '</div>'+
+    '<div id="alertBox"></div>';
+  host.querySelectorAll('.choice[data-amb]').forEach(function(b){
+    b.addEventListener('click',function(){
+      state.ambiente=b.dataset.amb;saveState();
+      host.querySelectorAll('.choice[data-amb]').forEach(function(x){x.classList.remove('is-sel');});
+      b.classList.add('is-sel');
+    });
+  });
+  var rSel=host.querySelector('#fRegione'),cInp=host.querySelector('#fComune');
+  function renderAlert(){
+    var info=classifyRadon(state.regione,state.comune);
+    var box=host.querySelector('#alertBox');
+    if(!info){box.innerHTML='';return;}
+    var html='<div class="alert" style="--alert-c:'+info.colore+';--alert-bg:'+info.bg+'"><div class="h">'+info.icona+' '+info.titolo+'</div><div class="d">'+info.descr+'</div>';
+    if(info.fonte) html+='<div class="src">Fonte: '+info.fonte+' · <a href="'+info.url+'" target="_blank" rel="noopener">verifica fonte ARPA</a></div>';
+    if(info.norma) html+='<div class="nm">Norma: '+info.norma+'</div>';
+    box.innerHTML=html+'</div>';
+  }
+  rSel.addEventListener('change',function(){state.regione=rSel.value;saveState();renderAlert();});
+  cInp.addEventListener('input',function(){state.comune=cInp.value;saveState();renderAlert();});
+  renderAlert();
+}
+
+/* ====== STEP 2: EDIFICIO ====== */
+function renderStep_edificio(host){
+  var d=state;
+  var pH=PIANI.map(function(p){
+    var sel=(d.piano===p.id)?'is-sel':'';
+    return '<button type="button" class="choice '+sel+'" data-piano="'+p.id+'"><div class="t" style="display:flex;justify-content:space-between"><span>'+p.label+'</span><span style="color:var(--mx-accent-strong);font-weight:700">'+p.mult+'</span></div></button>';
+  }).join('');
+  var sH=SOLAI.map(function(s){
+    var sel=(d.tipo_solaio===s.id)?'is-sel':'';
+    var col={alto:'var(--err)',medio:'var(--warn)',basso:'var(--ok)',minimo:'var(--ink-mute)'}[s.risk];
+    return '<button type="button" class="choice '+sel+'" data-solaio="'+s.id+'"><div class="t">'+s.label+'</div><div class="v" style="color:'+col+'">Rischio: '+s.risk+'</div></button>';
+  }).join('');
+  host.innerHTML=
+    '<p class="intro">Caratteristiche costruttive che influenzano la concentrazione di radon. Riferimento: <strong>WHO 2009 §2.3</strong>.</p>'+
+    '<h4>Piano dell\'ambiente</h4><div class="choices">'+pH+'</div>'+
+    '<div style="font-size:11px;color:var(--ink-mute);font-style:italic;margin-top:6px">Concentrazioni relative al piano 1 (WHO Handbook on Indoor Radon 2009 §2.3).</div>'+
+    '<h4>Tipo di solaio contro terra</h4><div class="choices">'+sH+'</div>'+
+    '<h4>Anno di costruzione</h4>'+
+    '<div class="row2" style="max-width:520px">'+
+    ' <div class="field"><label>Anno</label><input type="number" min="1800" max="2100" id="fAnno" value="'+(d.anno_costruzione||'')+'" placeholder="es. 1980"><span class="help">Edifici dal 1/1/2025 → soglia 200 Bq/m³ (D.Lgs 101 art. 12 c.1 lett. b)</span></div>'+
+    ' <div class="field"><label>Soglia applicabile</label><div id="annoSoglia" style="padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--paper-soft);font-size:13px;color:var(--ink-soft)">n.d.</div></div>'+
+    '</div>';
+  function updateSoglia(){
+    var box=host.querySelector('#annoSoglia');
+    if(!state.anno_costruzione){box.textContent='n.d.';return;}
+    if(state.anno_costruzione>=2025) box.innerHTML='<strong style="color:var(--err)">200 Bq/m³</strong> (nuova)';
+    else box.innerHTML='<strong style="color:var(--warn)">300 Bq/m³</strong> (esistente)';
+  }
+  host.querySelectorAll('.choice[data-piano]').forEach(function(b){b.addEventListener('click',function(){state.piano=b.dataset.piano;saveState();host.querySelectorAll('.choice[data-piano]').forEach(function(x){x.classList.remove('is-sel');});b.classList.add('is-sel');});});
+  host.querySelectorAll('.choice[data-solaio]').forEach(function(b){b.addEventListener('click',function(){state.tipo_solaio=b.dataset.solaio;saveState();host.querySelectorAll('.choice[data-solaio]').forEach(function(x){x.classList.remove('is-sel');});b.classList.add('is-sel');});});
+  host.querySelector('#fAnno').addEventListener('input',function(e){var n=parseInt(e.target.value,10);state.anno_costruzione=isNaN(n)?null:n;saveState();updateSoglia();});
+  updateSoglia();
+}
+
+/* ====== STEP 3: STRATEGIA ====== */
+function renderStep_strategia(host){
+  var d=state;
+  var famH=FAMIGLIE.map(function(f){
+    var sel=(d.famiglia_misura===f.id)?'is-sel':'';
+    return '<button type="button" class="choice '+sel+'" data-fam="'+f.id+'"><div class="t">'+f.label+'</div><div class="n">'+f.desc+'</div></button>';
+  }).join('');
+  /* Strumenti filtrati per famiglia selezionata */
+  var strH='';
+  if(d.famiglia_misura){
+    var listFiltered = STRUMENTI.filter(function(s){return s.famiglia===d.famiglia_misura;});
+    strH = '<h4>Strumenti della famiglia selezionata</h4><div class="choices">' + listFiltered.map(function(s){
+      var sel=(d.tipo_misura===s.id)?'is-sel':'';
+      return '<button type="button" class="choice '+sel+'" data-str="'+s.id+'"><div class="t">'+s.nome+'</div><div class="v">Durata: '+s.durata+'</div><div class="n">Precisione: '+s.precisione+'</div></button>';
+    }).join('') + '</div>';
+  }
+  /* Dettaglio strumento selezionato */
+  var detH='';
+  if(d.tipo_misura){
+    var sel = STRUMENTI.filter(function(s){return s.id===d.tipo_misura;})[0];
+    if(sel){
+      detH = '<div class="detail"><div class="title">'+sel.nome+'</div>'+
+             '<div class="row"><b>Durata:</b> '+sel.durata+'</div>'+
+             '<div class="row"><b>Precisione:</b> '+sel.precisione+'</div>'+
+             '<div class="row"><b>Soglia minima:</b> '+sel.soglia_min+'</div>'+
+             '<div class="row pro"><b>Pro:</b> '+sel.pro+'</div>'+
+             '<div class="row contro"><b>Contro:</b> '+sel.contro+'</div></div>';
+    }
+  }
+  host.innerHTML='<p class="intro">Selezione dello strumento di misura. Riferimento: <strong>UNI ISO 11665-4:2021 §5.2</strong>.</p>'+
+    '<h4>Famiglia di strumento</h4><div class="choices">'+famH+'</div>'+strH+detH;
+  host.querySelectorAll('.choice[data-fam]').forEach(function(b){
+    b.addEventListener('click',function(){
+      state.famiglia_misura=b.dataset.fam;
+      if(!STRUMENTI.some(function(s){return s.id===state.tipo_misura && s.famiglia===state.famiglia_misura;})) state.tipo_misura='';
+      saveState(); renderStep_strategia(host);
+    });
+  });
+  host.querySelectorAll('.choice[data-str]').forEach(function(b){
+    b.addEventListener('click',function(){
+      state.tipo_misura=b.dataset.str;saveState();renderStep_strategia(host);
+    });
+  });
+}
+
+/* ====== STEP 4: POSIZIONAMENTO ====== */
+function renderStep_posizione(host){
+  var d=state;
+  var checked=d.posizionamento_ok||[];
+  var list=REGOLE_POSIZIONAMENTO.map(function(r,i){
+    var on=checked.indexOf(i)>=0?'is-on':'';
+    return '<li><span class="chip '+on+'" data-i="'+i+'">'+(on?'✓':'')+'</span><span style="flex:1">'+r+'</span></li>';
+  }).join('');
+  /* Counter */
+  var done=checked.length, tot=REGOLE_POSIZIONAMENTO.length;
+  var cls=done===tot?'is-ok':(done>=tot*.5?'is-warn':'is-err');
+  host.innerHTML='<p class="intro">Regole di posizionamento secondo <strong>UNI ISO 11665-4:2021 §5.3</strong>. Spunta ogni regola applicata.</p>'+
+    '<div class="kpis" style="margin-bottom:14px"><div class="kpi '+cls+'"><span class="l">Conformità posizionamento</span><span class="v">'+done+'/'+tot+'</span><span class="s">regole UNI ISO verificate</span></div></div>'+
+    '<ul class="rules" style="list-style:none">'+list+'</ul>';
+  host.querySelectorAll('.chip[data-i]').forEach(function(c){
+    c.addEventListener('click',function(){
+      var i=parseInt(c.dataset.i,10);
+      var arr=state.posizionamento_ok||[];
+      var idx=arr.indexOf(i);
+      if(idx>=0) arr.splice(idx,1); else arr.push(i);
+      state.posizionamento_ok=arr;
+      saveState(); renderStep_posizione(host);
+    });
+  });
+}
+
+/* ====== STEP 5: PERIODO MISURA ====== */
+function renderStep_periodo(host){
+  var d=state;
+  var modi=[
+    {id:365, label:'2 semestri (12 mesi)',   desc:'Standard per media annua. Cattura variabilità stagionale (inverno/estate).', norma:'D.Lgs 101/2020 Art. 12 - "media annua"'},
+    {id:180, label:'1 semestre (6 mesi)',    desc:'Misura semestrale. Da raddoppiare con un secondo semestre per media annua.', norma:'UNI ISO 11665-4:2021'},
+    {id:30,  label:'1 mese (esplorativo)',   desc:'Solo screening/triage. NON valido per D.Lgs 101. Da confermare con misura annuale.', norma:'Non normato come misura cogente'},
+    {id:7,   label:'Settimana (con carbone)',desc:'Solo canister a carbone attivo. NON sostituisce misura annua.', norma:'EPA 402-R-93-003 (storico)'}
+  ];
+  var cH=modi.map(function(m){
+    var sel=(d.durata_giorni===m.id)?'is-sel':'';
+    return '<button type="button" class="choice '+sel+'" data-dur="'+m.id+'"><div class="t">'+m.label+'</div><div class="n">'+m.desc+'</div><div class="v" style="font-size:11px">'+m.norma+'</div></button>';
+  }).join('');
+  host.innerHTML='<p class="intro">Durata complessiva della misura. Riferimento: <strong>UNI ISO 11665-4:2021 §5.4</strong>. ARPA raccomanda 2 semestri annui per cogliere la stagionalità.</p>'+
+    '<div class="choices">'+cH+'</div>'+
+    '<h4>Periodo consigliato</h4>'+
+    '<ul class="rules" style="list-style:none">'+
+    '<li><strong>Semestre 1 raccomandato: novembre → aprile</strong> (stagione fredda, ventilazione ridotta, concentrazioni tipicamente alte)</li>'+
+    '<li><strong>Semestre 2 raccomandato: maggio → ottobre</strong> (stagione calda, ventilazione naturale, concentrazioni tipicamente basse)</li>'+
+    '<li>Etichettare con data inizio/fine esatta e ID locale</li>'+
+    '</ul>';
+  host.querySelectorAll('.choice[data-dur]').forEach(function(b){
+    b.addEventListener('click',function(){
+      state.durata_giorni=parseInt(b.dataset.dur,10);saveState();
+      host.querySelectorAll('.choice[data-dur]').forEach(function(x){x.classList.remove('is-sel');});
+      b.classList.add('is-sel');
+    });
+  });
+}
+
+/* ====== STEP 6: MEDIA ANNUA ====== */
+function renderStep_risultato(host){
+  var d=state;
+  var media=null;
+  if(d.sem1!=null && d.sem2!=null) media=(d.sem1+d.sem2)/2;
+  else if(d.sem1!=null) media=d.sem1;
+  else if(d.sem2!=null) media=d.sem2;
+  var cls=null;
+  if(media!=null){
+    var sg=SOGLIE_AMBIENTE[d.ambiente];
+    var soglia=sg?sg.val:300;
+    if(media>soglia) cls='err';
+    else if(media>WHO_LIVELLO) cls='warn';
+    else cls='ok';
+  }
+  host.innerHTML='<p class="intro">Inserisci le concentrazioni di radon misurate. La <strong>media annua</strong> è il valore di confronto cogente del D.Lgs 101/2020 Art. 12.</p>'+
+    '<div class="row2">'+
+    ' <div class="field"><label>Semestre 1 (Bq/m³)</label><div class="row"><input type="number" min="0" step="1" id="fSem1" class="with-unit" value="'+(d.sem1!=null?d.sem1:'')+'" placeholder="180"><span class="unit">Bq/m³</span></div><span class="help">Tipico: stagione fredda</span></div>'+
+    ' <div class="field"><label>Semestre 2 (Bq/m³)</label><div class="row"><input type="number" min="0" step="1" id="fSem2" class="with-unit" value="'+(d.sem2!=null?d.sem2:'')+'" placeholder="240"><span class="unit">Bq/m³</span></div><span class="help">Tipico: stagione calda</span></div>'+
+    '</div>'+
+    '<div class="kpis" style="margin-top:14px">'+
+    '<div class="kpi '+(cls?'is-'+cls:'')+'"><span class="l">Media annua</span><span class="v" id="kMedia">'+(media!=null?fmt(media,1):'n.d.')+'</span><span class="s">Bq/m³</span></div>'+
+    '<div class="kpi"><span class="l">Soglia ambiente</span><span class="v">'+(SOGLIE_AMBIENTE[d.ambiente]?SOGLIE_AMBIENTE[d.ambiente].val:'?')+'</span><span class="s">Bq/m³ (D.Lgs 101)</span></div>'+
+    '<div class="kpi"><span class="l">Raccomandazione WHO</span><span class="v">'+WHO_LIVELLO+'</span><span class="s">Bq/m³ (WHO 2009)</span></div>'+
+    '</div>';
+  function update(){
+    var s1=num(document.getElementById('fSem1').value);
+    var s2=num(document.getElementById('fSem2').value);
+    state.sem1=s1; state.sem2=s2; saveState();
+    renderStep_risultato(host);
+  }
+  host.querySelector('#fSem1').addEventListener('change',update);
+  host.querySelector('#fSem2').addEventListener('change',update);
+}
+
+
+/* === MIXANDO v3 · Risanamento Radon: dataset embedded === */
+const SOL_RADON = [{id:"soil_suction_depressurization_",nome:"Soil Suction Depressurization (SSD) - aspirazione sotto pavimento",categoria:"Mitigazione attiva",invasivita:"media",tempistica:"1-3 giorni",norma:"ANSI/AARST SGM-SF-2023",normeSec:["D.Lgs 101/2020 art.12 + art.17", "WHO Handbook Indoor Radon 2009 \u00a75"],sintesi:"Realizzazione di un pozzetto di aspirazione (\u00d8 15-25 cm) sotto la soletta di base + ventilatore in linea (50-150 m\u00b3/h, prevalenza 100-300 Pa) + tubazione di scarico fuori dall'edificio sopra colmo. Crea depressione sotto il pavimento (-5/-10 Pa) intercettando il gas radon prima dell'ingresso. \u00c8 la tecnica di prima scelta in 80% dei casi.",limit:"Efficacia 70-95% se ben installato. Richiede misura post-mitigation con monitor attivo continuo (UNI ISO 11665-5:2020) per verifica."},{id:"vespaio_aerato_attivo_/_passiv",nome:"Vespaio aerato attivo / passivo",categoria:"Mitigazione strutturale",invasivita:"alta (nuovo) / media (esistente)",tempistica:"fase costruttiva o 2-4 settimane",norma:"ANSI/AARST CCAH-2020 Rev.5/23",normeSec:["UNI EN ISO 13370:2018", "D.Lgs 101/2020 art.12"],sintesi:"Vespaio ventilato (casseri a perdere) sotto il piano di posa, con bocchette di aerazione perimetrali (1500 mm\u00b2/m secondo ARPAT-Reg.Lombardia DGR 25596/1989) oppure aspirazione meccanica forzata. Il gas radon viene diluito e espulso prima di raggiungere l'involucro abitato.",limit:"Su edificio esistente richiede demolizione pavimento (per esecuzione). Costo elevato. Necessaria verifica post-installazione."},{id:"sigillatura_crepe_e_penetrazio",nome:"Sigillatura crepe e penetrazioni",categoria:"Mitigazione passiva",invasivita:"bassa",tempistica:"1-3 giorni",norma:"ANSI/AARST SGM-SF-2023 \u00a75",normeSec:["ASTM C920", "BS 8485:2015+A1:2019", "UNI EN ISO 11600:2011"],sintesi:"Identificazione e sigillatura di tutte le crepe pavimento-parete, giunzioni tubazioni, scarichi, ingressi cavi con sigillanti elastomerici tipo F classe 25LM (UNI EN ISO 11600:2011) + membrane radon-resistant in LDPE (sd>1500 m) sotto la soletta.",limit:"Efficacia limitata (30-60%) se applicata da sola. Va sempre verificata post-intervento."},{id:"ventilazione_meccanica_aumenta",nome:"Ventilazione meccanica aumentata (sovrappressione)",categoria:"Diluizione",invasivita:"bassa",tempistica:"5-15 giorni",norma:"D.Lgs 101/2020 art.17",normeSec:["UNI EN 16798-1:2019", "ANSI/AARST SGM-SF-2023"],sintesi:"Aumento del ricambio d'aria mediante VMC con immissione in sovrappressione (+5/+10 Pa) per inibire l'ingresso del radon dal sottosuolo. Combinato con monitoraggio continuo CO\u2082 NDIR per garantire ricambio adeguato senza sovraconsumo energetico.",limit:"Costi energetici elevati. Non \u00e8 sempre efficace su concentrazioni alte (>1000 Bq/m\u00b3)."}];
+const DPI_RADON = [{"item": "DPI standard misura indoor", "norma": "D.Lgs 101/2020 art.17", "note": "Per misura indoor non sono necessari DPI radio-protezione (sotto soglia 6 mSv/anno)"}, {"item": "Dosimetria personale", "norma": "D.Lgs 101/2020 (servizio dosimetrico riconosciuto)", "note": "Solo per operatori scavi/laboratori con conc. >10.000 Bq/m3"}, {"item": "Mascherina FFP3", "norma": "UNI EN 149:2001+A1:2009", "note": "Se sigillatura/scavo in suoli alto potenziale radon (>50 kBq/m3)"}];
+const STRUMENTI_RADON = [{"nome": "Rivelatore CR-39 (track-etch)", "norma": "UNI ISO 11665-4:2021", "uso": "Misura passiva integrata 3-12 mesi (riferimento normativo D.Lgs 101/2020)"}, {"nome": "Elettrete EPCC", "norma": "UNI ISO 11665-4:2021 + ANSI/AARST MS-PC-2022", "uso": "Misura passiva breve 2-7 gg / lunga 1-12 mesi"}, {"nome": "Monitor radon attivo continuo", "norma": "UNI ISO 11665-5:2020", "uso": "Lettura oraria real-time per pre/post bonifica"}, {"nome": "Sonda soil-gas", "norma": "UNI EN ISO 11665-11:2019", "uso": "Misura radon nei gas interstiziali del suolo (progetto vespai)"}];
+
+function _calcRadonScores(){
+  // Tutte primarie per default - moduli senza decision tree fine
+  const sc = {};
+  SOL_RADON.forEach(s=>{ sc[s.id] = {pri:true, why:'Applicabile al caso - verificare prerequisiti su norma cardine'}; });
+  return sc;
+}
+
+function _renderRisanamentoRadon(){
+  const sc = _calcRadonScores();
+  let html = '';
+  html += '<section data-pat="radon" data-sec="risanamento" style="margin-top:14px;padding:16px 18px;background:linear-gradient(180deg,#eef9f1,#fff);border:1px solid #bce5c8;border-left:5px solid #2e7d52;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#1b5532;font-family:Georgia,serif;font-size:16px">\ud83d\udee0 Risanamento consigliato</h4>';
+  html += '<p style="margin:0 0 10px;font-size:12px;color:#1b5532;font-style:italic">Tecniche normate per la patologia. Verificare prerequisiti caso per caso.</p>';
+  html += '<div style="display:grid;gap:8px">';
+  SOL_RADON.forEach(s=>{
+    const x = sc[s.id];
+    html += '<div data-sol="'+s.id+'" style="background:#fff;border:1px solid #d8e8db;border-left:4px solid #d4a017;border-radius:10px;padding:11px 13px">'
+      + '<div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
+        + '<span style="font-size:9.5px;font-weight:800;letter-spacing:.14em;padding:3px 9px;border-radius:11px;background:linear-gradient(135deg,#f5d164,#d4a017);color:#3a2c00">\u2b50 APPLICABILE</span>'
+        + '<strong style="flex:1;min-width:200px;font-family:Georgia,serif;font-size:14px;color:#2c1810">'+s.nome+'</strong>'
+        + '<span style="font-size:10.5px;color:#fff;background:#475569;padding:2px 8px;border-radius:9px;font-family:JetBrains Mono,monospace">'+s.tempistica+'</span>'
+      + '</div>'
+      + '<div style="font-size:12.5px;color:#5d4a30;line-height:1.5;margin-bottom:5px">'+s.sintesi+'</div>'
+      + '<div style="font-family:JetBrains Mono,monospace;font-size:11px;color:#1b5532;background:#eef9f1;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:5px"><b>Norma cardine:</b> '+s.norma+'</div>'
+      + (s.normeSec.length?'<div style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#666;margin-bottom:5px"><b>Secondarie:</b> '+s.normeSec.join(' \u00b7 ')+'</div>':'')
+      + '<div style="font-size:11.5px;color:#7f1d1d;background:#fff5f3;padding:5px 9px;border-radius:6px;border-left:3px solid #c0392b"><b>\u26a0 Limitazioni:</b> '+s.limit+'</div>'
+    + '</div>';
+  });
+  html += '</div></section>';
+  html += '<section data-pat="radon" data-sec="dpi" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#fff5f3,#fff);border:1px solid #fdd;border-left:5px solid #c0392b;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#7f1d1d;font-family:Georgia,serif;font-size:15px">\ud83e\udd7a DPI obbligatori (D.Lgs 81/2008)</h4>';
+  html += '<div style="display:grid;gap:6px">';
+  DPI_RADON.forEach(p=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #fdd;border-left:3px solid #c0392b;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+p.item+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#c0392b;background:#fff5f3;padding:2px 7px;border-radius:9px;margin-left:6px">'+p.norma+'</span><div style="font-size:11px;color:#5d1a14;margin-top:3px">'+p.note+'</div></div>';
+  });
+  html += '</div></section>';
+  html += '<section data-pat="radon" data-sec="strumenti" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#e3f3f5,#fff);border:1px solid #b3dde2;border-left:5px solid #0e7c87;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#075863;font-family:Georgia,serif;font-size:15px">\ud83d\udd2c Strumenti per verifica</h4>';
+  html += '<div style="display:grid;gap:6px">';
+  STRUMENTI_RADON.forEach(s=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #b3dde2;border-left:3px solid #0e7c87;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+s.nome+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#075863;background:#e3f3f5;padding:2px 7px;border-radius:9px;margin-left:6px">'+s.norma+'</span><div style="font-size:11px;color:#0f3a3f;margin-top:3px">'+s.uso+'</div></div>';
+  });
+  html += '</div></section>';
+  return html;
+}
+
+function calcMedia(){
+  if(state.sem1!=null && state.sem2!=null) return (state.sem1+state.sem2)/2;
+  if(state.sem1!=null) return state.sem1;
+  if(state.sem2!=null) return state.sem2;
+  return null;
+}
+
+/* ====== STEP 7: VERDETTO ====== */
+function renderStep_verdetto(host){
+  var media=calcMedia();
+  if(media==null){
+    host.innerHTML='<p class="intro">Inserisci prima i valori al passo 6 per ottenere il verdetto.</p>';
+    return;
+  }
+  var sg=SOGLIE_AMBIENTE[state.ambiente];
+  var soglia=sg?sg.val:300;
+  var verdict, cls;
+  if(media>soglia){
+    cls='err';
+    verdict='<strong>Sopra il livello di riferimento ('+soglia+' Bq/m³).</strong> Obbligo di adottare misure di mitigazione (D.Lgs 101/2020 Art. 17 per luoghi di lavoro). Per abitazioni: risanamento raccomandato.';
+  } else if(media>WHO_LIVELLO){
+    cls='warn';
+    verdict='<strong>Sotto la soglia cogente ('+soglia+') ma sopra la raccomandazione WHO ('+WHO_LIVELLO+').</strong> Mitigazione raccomandata in via cautelativa (WHO Handbook 2009).';
+  } else {
+    cls='ok';
+    verdict='<strong>Sotto tutte le soglie di riferimento.</strong> Misurazione di verifica periodica raccomandata (PNAR 2023-2032).';
+  }
+  var bench=[
+    {l:'D.Lgs 101/2020',v:soglia+' Bq/m³',cls:media>soglia?'err':'ok'},
+    {l:'WHO 2009',v:WHO_LIVELLO+' Bq/m³',cls:media>WHO_LIVELLO?'warn':'ok'},
+    {l:'EPA (4 pCi/L)',v:EPA_LIVELLO+' Bq/m³',cls:media>EPA_LIVELLO?'warn':'ok'},
+    {l:'ICRP 126',v:'300 (livello di riferimento)',cls:media>200?(media>300?'err':'warn'):'ok'}
+  ];
+  // === Tabella Soglie Internazionali ===
+  var soglieTbl = '<div style="margin-top:18px;padding:14px 16px;background:#fbf8ef;border:1px solid #e6e0d2;border-radius:10px">'+
+    '<h4 style="margin:0 0 10px;font-family:Georgia,serif;font-style:italic;color:#2c1810;font-size:14px;font-weight:700">Soglie internazionali a confronto</h4>'+
+    '<div style="font-size:11px;color:#6b5c4c;line-height:1.5;margin-bottom:10px">Confronto della media misurata <b>'+fmt(media,1)+' Bq/m³</b> con le 6 soglie di riferimento. Dati verificati su fonti istituzionali ufficiali.</div>'+
+    '<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+      '<thead><tr style="background:#f5f1e8;border-bottom:2px solid #d8d3c4">'+
+        '<th style="text-align:left;padding:6px 8px;font-weight:700;color:#2c1810">Norma</th>'+
+        '<th style="text-align:right;padding:6px 8px;font-weight:700;color:#2c1810">Soglia</th>'+
+        '<th style="text-align:center;padding:6px 8px;font-weight:700;color:#2c1810">Esito</th>'+
+        '<th style="text-align:left;padding:6px 8px;font-weight:700;color:#2c1810">Descrizione</th>'+
+      '</tr></thead><tbody>';
+  SOGLIE_INT.forEach(function(sg){
+    var statusCol = (media > sg.val) ? '#c62828' : '#1f7a4d';
+    var statusTxt = (media > sg.val) ? '✗ Supera' : '✓ Rispetta';
+    soglieTbl += '<tr style="border-bottom:1px solid #ece8de">'+
+      '<td style="padding:6px 8px;color:#2c1810"><b>'+sg.norma+'</b><br><span style="font-size:10.5px;color:#6b5c4c">'+sg.lab+'</span></td>'+
+      '<td style="padding:6px 8px;text-align:right;font-family:monospace;color:#2c1810"><b>'+sg.val+'</b> Bq/m³</td>'+
+      '<td style="padding:6px 8px;text-align:center;color:'+statusCol+';font-weight:700">'+statusTxt+'</td>'+
+      '<td style="padding:6px 8px;font-size:11px;color:#6b5c4c;line-height:1.4">'+sg.desc+'</td>'+
+    '</tr>';
+  });
+  soglieTbl += '</tbody></table></div>';
+
+  host.innerHTML='<p class="intro">Confronto della media annua con le soglie di riferimento internazionali. Riferimenti: D.Lgs 101/2020, WHO 2009, EPA, ICRP.</p>'+
+    '<div class="kpis">'+bench.map(function(b){return '<div class="kpi is-'+b.cls+'"><span class="l">'+b.l+'</span><span class="v">'+fmt(media,1)+'</span><span class="s">vs '+b.v+'</span></div>';}).join('')+'</div>'+
+    '<div class="verdict is-'+cls+'" style="margin-top:14px">'+verdict+'</div>'+
+    soglieTbl+
+    renderNeonChart(state.sem1, state.sem2, media, soglia);
+  /* Salvo SVG verdetto per export Word/PDF anche dopo che si è cambiato step */
+  setTimeout(function(){
+    try {
+      var svgs = host.querySelectorAll('svg');
+      if (svgs.length){
+        var best = svgs[0], ba = 0;
+        svgs.forEach(function(s){ var vb=s.getAttribute('viewBox'); if(vb){ var pp=vb.split(' '); var ar=parseFloat(pp[2])*parseFloat(pp[3]); if(ar>ba){ba=ar;best=s;} } });
+        window._radonLastSvg = best.outerHTML;
+      }
+    } catch(_e){}
+  }, 50);
+  if (window.MX && window.MX.toolbarActive) window.MX.toolbarActive(true);
+}
+
+/* ====== GRAFICO SVG NEON-GLOW (vista diagnostica) ====== */
+
+function _radonRedrawVerdict(){
+  var host = document.querySelector('[data-step-host="verdetto"]') || document.querySelector('#stepBody') || document.querySelector('.stepbody') || document.querySelector('#stepContent');
+  if (host && typeof renderStep_verdetto === 'function'){
+    try{ renderStep_verdetto(host); }catch(e){ console.error('Radon redraw:', e); }
+  } else {
+    console.warn('Host step verdetto non trovato, il toggle richiede ricalcolo manuale.');
+  }
+}
+// Espongo su window per onclick handler inline (l'IIFE rende la funzione non globale)
+if (typeof window !== 'undefined'){ window._radonRedrawVerdict = _radonRedrawVerdict; }
+
+function renderNeonChart(s1, s2, media, soglia){
+  // Mixando theme toggle (Radon)
+  var THEME = (function(){ try{ return localStorage.getItem('mx2::chartTheme') || 'classic'; }catch(_){ return 'classic'; } })();
+  var TH_n = { wrapBg:'linear-gradient(180deg,#04101a,#0a1f2e)', wrapBorder:'#1f4d5c', wrapShadow:'0 8px 30px rgba(0,0,0,.4),inset 0 0 80px rgba(0,229,255,.05)', titleColor:'#00E5FF', titleShadow:'0 0 12px rgba(0,229,255,.5)', titleRule:'linear-gradient(90deg,#00E5FF,transparent)', metaColor:'#7da9b8', btnBg:'rgba(0,229,255,.15)', btnBorder:'#00E5FF', btnText:'#00E5FF' };
+  var TH_c = { wrapBg:'#ffffff', wrapBorder:'#d0d0d0', wrapShadow:'0 2px 6px rgba(0,0,0,.08)', titleColor:'#2c5d7c', titleShadow:'none', titleRule:'linear-gradient(90deg,#2c5d7c,transparent)', metaColor:'#6b5c4c', btnBg:'#fbf8ef', btnBorder:'#2c5d7c', btnText:'#2c5d7c' };
+  var TH = (THEME==='neon') ? TH_n : TH_c;
+  var vals = [s1, s2, media, soglia, WHO_LIVELLO, EPA_LIVELLO].filter(function(x){return x!=null && !isNaN(x);});
+  if (vals.length === 0) return '';
+  var d = state;
+  var vMax = Math.max.apply(null, vals) * 1.30;
+  var W=900, H=380, PADL=60, PADR=40, PADT=30, PADB=80;
+
+  /* Colori fascia di rischio (4 zone) */
+  var C_RED='#FF1744', C_ORG='#FF9100', C_GRN='#00E676', C_FUC='#E040FB';
+  var COL_LINE = { soglia:'#FF1744', epa:'#FF9100', who:'#00E676' };
+
+  function yPos(v){ return PADT + (H - PADT - PADB) - (v/vMax) * (H - PADT - PADB); }
+  function pX(frac){ return PADL + (W-PADL-PADR)*frac; }
+  var xS1 = pX(0.30), xS2 = pX(0.50), xMd = pX(0.70);
+
+  /* Y assolute delle soglie, usate per le stop del gradient di rischio sui picchi */
+  var ySog = yPos(soglia);
+  var yEpa = yPos(EPA_LIVELLO);
+  var yWho = yPos(WHO_LIVELLO);
+
+  /* Colore "categoria" del picco (in base al valore massimo), usato per
+     dot, etichette e badge. La LINEA del picco usa il gradient di rischio
+     per cambiare colore in base all'altezza Y attraversata. 4 fasce: */
+  function peakColor(v){
+    if (v == null) return C_GRN;
+    if (v >= soglia) return C_FUC;        /* sopra D.Lgs → fucsia */
+    if (v >= EPA_LIVELLO) return C_RED;    /* tra EPA e D.Lgs → rosso */
+    if (v >= WHO_LIVELLO) return C_ORG;    /* tra WHO e EPA → arancio */
+    return C_GRN;                          /* sotto WHO → verde */
+  }
+
+  /* Picchi: solo lo STROKE (nessun fill/ombra). Il colore varia con l'altezza
+     grazie al gradient userSpaceOnUse "riskGrad" definito nei <defs>. */
+  function peakPath(cx, cy, v, delay){
+    var w = 70;
+    var path = 'M'+(cx-w)+' '+(H-PADB)+' Q'+(cx-w/2)+' '+(H-PADB-10)+' '+(cx-w/3)+' '+(cy+(H-PADB-cy)/2)+' Q'+cx+' '+cy+' '+(cx+w/3)+' '+(cy+(H-PADB-cy)/2)+' Q'+(cx+w/2)+' '+(H-PADB-10)+' '+(cx+w)+' '+(H-PADB);
+    return '<path d="'+path+'" fill="none" stroke="url(#riskGrad)" stroke-width="3" stroke-linecap="round" filter="url(#glow-peak)" stroke-dasharray="1500" stroke-dashoffset="1500">'+
+           '<animate attributeName="stroke-dashoffset" from="1500" to="0" dur="2s" begin="'+delay+'s" fill="freeze" calcMode="spline" keySplines="0.25 0.1 0.25 1"/>'+
+           '</path>';
+  }
+
+  function hline(v, color, label, val, delay){
+    var y = yPos(v);
+    return '<line x1="'+PADL+'" y1="'+y+'" x2="'+(W-PADR)+'" y2="'+y+'" stroke="'+color+'" stroke-width="2.5" stroke-dasharray="12 6" opacity="0" filter="url(#glow-line)">'+
+           '<animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="'+delay+'s" fill="freeze"/></line>';
+  }
+
+  function dot(x,y,col,delay){
+    return '<g opacity="0">'+
+           '<circle cx="'+x+'" cy="'+y+'" r="5" fill="'+col+'" filter="url(#glow-dot)"/>'+
+           '<circle cx="'+x+'" cy="'+y+'" r="2.5" fill="#fff"/>'+
+           '<animate attributeName="opacity" from="0" to="1" dur="0.3s" begin="'+(delay+1.1)+'s" fill="freeze"/></g>';
+  }
+  /* Colore di label e pallino: combina "linea soglia appena superata" e
+     una soglia di "ben oltre D.Lgs" per il fucsia (≥ 1.5× soglia → ~450 Bq/m³).
+     Sceltà visiva (non normativa): serve a distinguere "appena oltre" (305)
+     da "ben oltre" (500). */
+  function valColor(v){
+    if (v == null) return C_GRN;
+    if (v >= soglia * 1.5) return C_FUC;   /* ben oltre D.Lgs (≥ 1.5×) → fucsia */
+    if (v >= soglia)       return C_RED;    /* sopra D.Lgs → rosso (linea D.Lgs appena superata) */
+    if (v >= EPA_LIVELLO)  return C_ORG;    /* sopra EPA → arancio (linea EPA appena superata) */
+    return C_GRN;                          /* sotto EPA → verde (incl. fascia WHO-EPA) */
+  }
+  function topLab(x,y,t,vNum,delay){
+    var c = valColor(vNum);
+    return '<text x="'+x+'" y="'+(y-14)+'" text-anchor="middle" fill="'+c+'" font-size="14" font-family="Georgia,serif" font-weight="700" filter="url(#glow-soft)" opacity="0">'+t+'<animate attributeName="opacity" from="0" to="1" dur="0.4s" begin="'+(delay+1.2)+'s" fill="freeze"/></text>';
+  }
+  function botLab(x,t){ return '<text x="'+x+'" y="'+(H-PADB+22)+'" text-anchor="middle" fill="#FFFFFF" font-size="11" font-family="monospace" letter-spacing=".10em" font-weight="700" opacity="0.9">'+t+'</text>'; }
+  function botLabSub(x,t,vNum){
+    var c = valColor(vNum);
+    return '<text x="'+x+'" y="'+(H-PADB+40)+'" text-anchor="middle" fill="'+c+'" font-size="10" font-family="monospace" letter-spacing=".04em">'+t+'</text>';
+  }
+  function crossBadge(cx,val,delay){
+    if (val == null || val <= soglia) return '';
+    var y = yPos(val);
+    return '<g opacity="0"><circle cx="'+(cx+45)+'" cy="'+y+'" r="9" fill="'+C_RED+'" filter="url(#glow-soft)"/>'+
+           '<text x="'+(cx+45)+'" y="'+(y+3.5)+'" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">!</text>'+
+           '<animate attributeName="opacity" from="0" to="1" dur="0.4s" begin="'+(delay+1.4)+'s" fill="freeze"/></g>';
+  }
+
+  /* Asse Y con tick numerici */
+  var axisY = '';
+  for (var k=0; k<=5; k++){
+    var vTick = (vMax * k / 5);
+    var yTick = yPos(vTick);
+    axisY += '<text x="'+(PADL-8)+'" y="'+(yTick+3)+'" text-anchor="end" fill="#7da9b8" font-size="9.5" font-family="monospace" opacity="0.6">'+Math.round(vTick)+'</text>'+
+             '<line x1="'+(PADL-3)+'" y1="'+yTick+'" x2="'+PADL+'" y2="'+yTick+'" stroke="#7da9b8" stroke-width="0.5" opacity="0.4"/>';
+  }
+  var yAxis = '<line x1="'+PADL+'" y1="'+PADT+'" x2="'+PADL+'" y2="'+(H-PADB)+'" stroke="#1f4d5c" stroke-width="1" opacity="0.5"/>';
+  var xAxis = '<line x1="'+PADL+'" y1="'+(H-PADB)+'" x2="'+(W-PADR)+'" y2="'+(H-PADB)+'" stroke="#1f4d5c" stroke-width="1" opacity="0.5"/>';
+
+  var grid = '';
+  for (var i=1; i<5; i++){
+    var y = PADT + (i*(H-PADT-PADB)/5);
+    grid += '<line x1="'+PADL+'" y1="'+y+'" x2="'+(W-PADR)+'" y2="'+y+'" stroke="#1f4d5c" stroke-width="0.4" opacity="0.2"/>';
+  }
+
+  /* Solo lo stroke dei picchi (niente fill colorato sotto la linea).
+     Animazione rallentata 2s con delay 0.2/0.8/1.4 → ingresso scaglionato. */
+  var picchi = '';
+  if (s1!=null){ picchi += peakPath(xS1, yPos(s1), s1, 0.2); }
+  if (s2!=null){ picchi += peakPath(xS2, yPos(s2), s2, 0.8); }
+  if (media!=null){ picchi += peakPath(xMd, yPos(media), media, 1.4); }
+
+  var dots = '';
+  if (s1!=null) dots += dot(xS1, yPos(s1), valColor(s1), 0.2);
+  if (s2!=null) dots += dot(xS2, yPos(s2), valColor(s2), 0.8);
+  if (media!=null) dots += dot(xMd, yPos(media), valColor(media), 1.4);
+
+  var crossBadges = crossBadge(xS1, s1, 0.2) + crossBadge(xS2, s2, 0.8) + crossBadge(xMd, media, 1.4);
+
+  var labels = '';
+  if (s1!=null){ labels += topLab(xS1, yPos(s1), fmt(s1,0), s1, 0.2); labels += botLab(xS1, 'SEM. 1'); labels += botLabSub(xS1, fmt(s1,0)+' Bq/m³', s1); }
+  if (s2!=null){ labels += topLab(xS2, yPos(s2), fmt(s2,0), s2, 0.8); labels += botLab(xS2, 'SEM. 2'); labels += botLabSub(xS2, fmt(s2,0)+' Bq/m³', s2); }
+  if (media!=null){ labels += topLab(xMd, yPos(media), fmt(media,0), media, 1.4); labels += botLab(xMd, 'MEDIA ANNUA'); labels += botLabSub(xMd, fmt(media,0)+' Bq/m³', media); }
+
+  /* Soglie ordinate per valore decrescente con anti-collisione.
+     Le soglie sono valori FISSI di normativa: linee orizzontali nette con
+     "punti fermi" (pin) ai due estremi per ribadire che sono riferimenti
+     normativi e NON derivati dai dati misurati. */
+  var sogliarr = [
+    {v:soglia, c:COL_LINE.soglia, l:'D.Lgs 101', delay:0.6},
+    {v:EPA_LIVELLO, c:COL_LINE.epa, l:'EPA', delay:0.7},
+    {v:WHO_LIVELLO, c:COL_LINE.who, l:'WHO 2009', delay:0.8}
+  ];
+  sogliarr.sort(function(a,b){return b.v - a.v;});
+  var lastY = -Infinity;
+  var lines = '';      /* solo le righe orizzontali, disegnate SOTTO i picchi */
+  var pins  = '';      /* pin/ancore, disegnati SOPRA i picchi */
+  sogliarr.forEach(function(s){
+    var y = yPos(s.v);
+    var textY = y - 7;
+    if (textY - lastY < 16) textY = lastY + 16;
+    lastY = textY;
+
+    /* Linea orizzontale NETTA: solida, sottile, senza glow ondulato */
+    lines +=
+      '<line x1="'+PADL+'" y1="'+y+'" x2="'+(W-PADR)+'" y2="'+y+'" '+
+      'stroke="'+s.c+'" stroke-width="1.4" stroke-linecap="round" opacity="0">'+
+      '<animate attributeName="opacity" from="0" to="0.95" dur="0.4s" begin="'+s.delay+'s" fill="freeze"/></line>';
+
+    /* PIN sinistro INTERNO al chart: "ancora" col valore numerico */
+    var pinW = 56, pinH = 16;
+    pins +=
+      '<g opacity="0">'+
+        '<rect x="'+(PADL+4)+'" y="'+(y-pinH/2)+'" width="'+pinW+'" height="'+pinH+'" rx="3" '+
+          'fill="'+s.c+'" stroke="'+s.c+'" stroke-width="1"/>'+
+        '<text x="'+(PADL+4+pinW/2)+'" y="'+(y+3.5)+'" text-anchor="middle" '+
+          'fill="#0a1f2e" font-size="10.5" font-family="monospace" font-weight="800" letter-spacing=".02em">'+s.v+' Bq</text>'+
+        '<animate attributeName="opacity" from="0" to="1" dur="0.4s" begin="'+(s.delay+0.05)+'s" fill="freeze"/>'+
+      '</g>';
+
+    /* PIN destro: punto fermo (dot ancora) + etichetta normativa */
+    pins +=
+      '<g opacity="0">'+
+        '<circle cx="'+(W-PADR)+'" cy="'+y+'" r="3.5" fill="'+s.c+'" stroke="#0a1f2e" stroke-width="1"/>'+
+        '<text x="'+(W-PADR-8)+'" y="'+textY+'" text-anchor="end" fill="'+s.c+'" '+
+          'font-size="11.5" font-family="monospace" font-weight="800" letter-spacing=".04em">'+s.l+' · normativa</text>'+
+        '<animate attributeName="opacity" from="0" to="1" dur="0.4s" begin="'+(s.delay+0.1)+'s" fill="freeze"/>'+
+      '</g>';
+  });
+
+  /* Verdetto badge (4 livelli coerenti col gradient) */
+  var verdBadge = '';
+  if (media != null){
+    var bcol, btxt;
+    if (media > soglia){ bcol = C_FUC; btxt = '⛔ OLTRE D.LGS'; }
+    else if (media > EPA_LIVELLO){ bcol = C_RED; btxt = '⚠ OLTRE EPA'; }
+    else if (media > WHO_LIVELLO){ bcol = C_ORG; btxt = '⚡ OLTRE WHO'; }
+    else { bcol = C_GRN; btxt = '✓ CONFORME'; }
+    verdBadge =
+      '<rect x="'+(W-PADR-170)+'" y="'+(PADT-5)+'" width="170" height="26" rx="13" fill="'+bcol+'" opacity="0">'+
+      '<animate attributeName="opacity" from="0" to="0.30" dur="0.5s" begin="1.6s" fill="freeze"/></rect>'+
+      '<text x="'+(W-PADR-85)+'" y="'+(PADT+12)+'" text-anchor="middle" fill="'+bcol+'" font-size="12" font-family="monospace" font-weight="800" letter-spacing=".10em" opacity="0">'+btxt+
+      '<animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="1.7s" fill="freeze"/></text>';
+  }
+
+  /* Badge dati input */
+  var badges = [];
+  if (d.ambiente && SOGLIE_AMBIENTE[d.ambiente]) badges.push({lbl:'Ambiente', val:SOGLIE_AMBIENTE[d.ambiente].lab, col:'#00E5FF'});
+  if (d.regione) badges.push({lbl:'Regione', val:d.regione + (d.comune?' · '+d.comune:''), col:'#69F0AE'});
+  if (d.piano){
+    var pInfo = PIANI.filter(function(p){return p.id===d.piano;})[0];
+    if (pInfo) badges.push({lbl:'Piano', val:pInfo.label+' ('+pInfo.mult+')', col:'#FFEA00'});
+  }
+  if (d.tipo_solaio){
+    var sInfo = SOLAI.filter(function(x){return x.id===d.tipo_solaio;})[0];
+    if (sInfo) badges.push({lbl:'Solaio', val:sInfo.label, col:'#FF1744'});
+  }
+  if (d.anno_costruzione) badges.push({lbl:'Anno', val:d.anno_costruzione, col:'#FF80AB'});
+  if (d.tipo_misura){
+    var mInfo = STRUMENTI.filter(function(x){return x.id===d.tipo_misura;})[0];
+    if (mInfo) badges.push({lbl:'Strumento', val:mInfo.nome.split('(')[0].trim(), col:'#E040FB'});
+  }
+  var badgeRow = '';
+  if (badges.length > 0){
+    badgeRow = '<div style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 4px 6px;margin-top:4px">';
+    badges.forEach(function(b,i){
+      badgeRow += '<span style="font-family:monospace;font-size:10.5px;color:'+b.col+';padding:4px 9px;background:'+b.col+'1f;border:1px solid '+b.col+'66;border-radius:5px;letter-spacing:.03em;opacity:0;animation:badgeIn .4s ease '+(0.05*i)+'s forwards;text-shadow:0 0 8px '+b.col+'80"><strong style="font-weight:700">'+b.lbl+':</strong> '+b.val+'</span>';
+    });
+    badgeRow += '</div>';
+  }
+
+  /* "Come leggere" FUORI dal pannello scuro */
+  var howRead = '<div style="margin-top:10px;padding:12px 14px;background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--mx-accent);border-radius:8px;font-size:12.5px;color:var(--ink-soft);line-height:1.6">'+
+    '<strong style="color:var(--ink);font-family:Georgia,serif;font-style:italic">Come leggere il grafico:</strong> ogni picco cambia colore <em>man mano che attraversa le soglie</em>, '+
+    '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#00E676;vertical-align:middle;margin:0 4px;box-shadow:0 0 6px #00E676"></span> <strong>verde</strong> sotto WHO ('+WHO_LIVELLO+' Bq/m³) · '+
+    '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF9100;vertical-align:middle;margin:0 4px;box-shadow:0 0 6px #FF9100"></span> <strong>arancione</strong> WHO-EPA ('+WHO_LIVELLO+'-'+EPA_LIVELLO+') · '+
+    '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF1744;vertical-align:middle;margin:0 4px;box-shadow:0 0 6px #FF1744"></span> <strong>rosso</strong> EPA-D.Lgs ('+EPA_LIVELLO+'-'+soglia+') · '+
+    '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#E040FB;vertical-align:middle;margin:0 4px;box-shadow:0 0 6px #E040FB"></span> <strong>fucsia</strong> sopra D.Lgs ('+soglia+' Bq/m³).<br>'+
+    'Le <strong>3 linee orizzontali</strong> con i <em>pin colorati</em> ai due estremi sono le <strong>soglie fisse di normativa</strong> (riferimenti, non dati misurati).'+
+    '</div>';
+
+  return '<style>@keyframes badgeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}</style>'+
+    '<div style="margin-top:16px;background:'+TH.wrapBg+';border-radius:14px;padding:14px 14px 12px;border:1px solid '+TH.wrapBorder+';box-shadow:'+TH.wrapShadow+'">'+
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;padding:0 8px"><span style="font-family:Georgia,serif;font-size:14px;font-style:italic;color:'+TH.titleColor+';text-shadow:'+TH.titleShadow+'">Vista diagnostica</span><span style="flex:1;height:1px;background:'+TH.titleRule+';opacity:.5"></span><span style="font-family:monospace;font-size:10px;color:'+TH.metaColor+';letter-spacing:.12em;text-transform:uppercase">profilo radon</span></div>'+
+    badgeRow +
+    '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block">'+
+    '<defs>'+
+    '<filter id="glow-peak" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5"/><feMerge><feMergeNode/><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+    '<filter id="glow-soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+    '<filter id="glow-line" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+    '<filter id="glow-dot" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="5"/><feMerge><feMergeNode/><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+    /* GRADIENT DI RISCHIO a 4 zone, transizione netta alle Y delle soglie.
+       Sopra D.Lgs = FUCSIA · EPA-D.Lgs = ROSSO · WHO-EPA = ARANCIO · sotto WHO = VERDE */
+    '<linearGradient id="riskGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="'+H+'">'+
+    '<stop offset="0%" stop-color="'+C_FUC+'"/>'+
+    '<stop offset="'+((ySog/H)*100).toFixed(3)+'%" stop-color="'+C_FUC+'"/>'+
+    '<stop offset="'+((ySog/H)*100).toFixed(3)+'%" stop-color="'+C_RED+'"/>'+
+    '<stop offset="'+((yEpa/H)*100).toFixed(3)+'%" stop-color="'+C_RED+'"/>'+
+    '<stop offset="'+((yEpa/H)*100).toFixed(3)+'%" stop-color="'+C_ORG+'"/>'+
+    '<stop offset="'+((yWho/H)*100).toFixed(3)+'%" stop-color="'+C_ORG+'"/>'+
+    '<stop offset="'+((yWho/H)*100).toFixed(3)+'%" stop-color="'+C_GRN+'"/>'+
+    '<stop offset="100%" stop-color="'+C_GRN+'"/>'+
+    '</linearGradient>'+
+    '</defs>'+
+    grid + yAxis + xAxis + axisY + lines + picchi + dots + pins + crossBadges + labels + verdBadge +
+    '</svg>'+
+    '<div style="margin-top:10px;padding:6px 10px 0;display:flex;justify-content:flex-end;align-items:center">'+
+      (function(){
+        var togIcon, togLabel, togTitle;
+        if (THEME==='neon'){
+          togIcon = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;vertical-align:-3px;flex-shrink:0"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.4" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.6"/><line x1="2.4" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.6" y2="12"/><line x1="4.9" y1="4.9" x2="7" y2="7"/><line x1="17" y1="17" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="7" y2="17"/><line x1="17" y1="7" x2="19.1" y2="4.9"/></svg>';
+          togLabel = 'CHIARO'; togTitle = 'Passa al tema chiaro (professionale)';
+        } else {
+          togIcon = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;vertical-align:-3px;flex-shrink:0"><path d="M20.6 13.2A8.4 8.4 0 1 1 10.8 3.4a6.6 6.6 0 0 0 9.8 9.8z"/></svg>';
+          togLabel = 'SCURO'; togTitle = 'Passa al tema scuro (presentazione)';
+        }
+        return '<button type="button" id="_radonToggleBtn" class="mx-shimmer-pill" title="'+togTitle+'" onclick="(function(){var c=(localStorage.getItem(\'mx2::chartTheme\')||\'classic\');localStorage.setItem(\'mx2::chartTheme\',(c===\'neon\'?\'classic\':\'neon\'));_radonRedrawVerdict();})()" style="appearance:none;border:1.5px solid '+TH.btnBorder+';background:'+TH.btnBg+';color:'+TH.btnText+';font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.16em;padding:9px 16px 9px 13px;border-radius:20px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;position:relative;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.10)">'+togIcon+'<span>'+togLabel+'</span></button>';
+      })()+
+    '</div>'+
+    '</div>'+ howRead;
+}
+
+/* ====== STEP 8: DOSE ====== */
+function renderStep_dose(host){
+  var d=state;
+  var media=calcMedia();
+  var ore=d.ore_anno||7000;
+  var dose=(media!=null)?media*ore*COEF_DOSE:null;
+  var cls=null;
+  if(dose!=null){
+    if(dose>DOSE_LIMITE_LAVORATORE) cls='err';
+    else if(dose>DOSE_LIMITE_PUBBLICO) cls='warn';
+    else cls='ok';
+  }
+  host.innerHTML='<p class="intro">Stima della dose efficace individuale annua. Coefficiente: <strong>ICRP Pub. 137 (2017) = 6,7·10⁻⁶ mSv/(Bq·h/m³)</strong> per ambienti abitativi (fattore di equilibrio F=0,4).</p>'+
+    '<div class="row2" style="max-width:520px">'+
+    ' <div class="field"><label>Ore di occupazione/anno</label><div class="row"><input type="number" min="0" max="8760" step="100" id="fOre" class="with-unit" value="'+ore+'"><span class="unit">h/anno</span></div><span class="help">Tipico abitazione: 7000 h (~80% del tempo) · Lavoro: 1800 h</span></div>'+
+    ' <div class="field"><label>Media annua misurata</label><div style="padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--paper-soft);font-size:13.5px;font-weight:700">'+(media!=null?fmt(media,1)+' Bq/m³':'n.d.')+'</div></div>'+
+    '</div>'+
+    '<div class="kpis" style="margin-top:14px">'+
+    '<div class="kpi '+(cls?'is-'+cls:'')+'"><span class="l">Dose efficace annua</span><span class="v">'+(dose!=null?fmt(dose,2):'n.d.')+'</span><span class="s">mSv/anno</span></div>'+
+    '<div class="kpi"><span class="l">Limite popolazione</span><span class="v">'+DOSE_LIMITE_PUBBLICO+'</span><span class="s">mSv/anno (ICRP)</span></div>'+
+    '<div class="kpi"><span class="l">Limite lavoratori esposti</span><span class="v">'+DOSE_LIMITE_LAVORATORE+'</span><span class="s">mSv/anno (D.Lgs 101)</span></div>'+
+    '</div>'+
+    '<div class="verdict" style="margin-top:14px"><strong>Formula:</strong> Dose [mSv/anno] = Concentrazione [Bq/m³] × Ore esposizione [h/anno] × 6,7·10⁻⁶ [mSv/(Bq·h/m³)]. Fonte: <em>ICRP Publication 137 (2017), Occupational Intakes of Radionuclides, Part 3</em>.</div>';
+  host.querySelector('#fOre').addEventListener('change',function(e){state.ore_anno=parseFloat(e.target.value)||7000;saveState();renderStep_dose(host);});
+}
+
+/* ====== STEP 9: SALUTE ====== */
+function renderStep_salute(host){
+  var d=state;
+  var media=calcMedia();
+  var fumOpt=[
+    {id:'no',label:'Non fumatore',mult:'0,4'},
+    {id:'ex',label:'Ex fumatore (≥10 anni)',mult:'fra 0,4 e 10'},
+    {id:'si',label:'Fumatore attivo',mult:'10'}
+  ];
+  var fH=fumOpt.map(function(f){
+    var sel=(d.fumatore===f.id)?'is-sel':'';
+    return '<button type="button" class="choice '+sel+'" data-fum="'+f.id+'"><div class="t">'+f.label+'</div><div class="v">Rischio base: '+f.mult+'%</div></button>';
+  }).join('');
+  var risk=null;
+  if(media!=null && d.fumatore){
+    risk=calcLifetimeRisk(media,d.fumatore);
+  }
+  // === Riquadro Darby BMJ 2005, dati certificati ===
+  var darbyBox = '<div style="margin-bottom:14px;padding:14px 16px;background:linear-gradient(180deg,#fdf6ec,#faf0e0);border-left:4px solid #b07820;border-radius:10px">'+
+    '<h4 style="margin:0 0 8px;font-family:Georgia,serif;font-style:italic;color:#2c1810;font-size:14px;font-weight:700">Studio Darby BMJ 2005, Rischio cumulativo a 75 anni (per 1000)</h4>'+
+    '<div style="font-size:11.5px;color:#6b5c4c;line-height:1.55;margin-bottom:10px">'+DARBY_RISK.fonte+'. '+DARBY_RISK.attribuibile+'.</div>'+
+    '<table style="width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;border-radius:6px;overflow:hidden">'+
+      '<thead><tr style="background:#f5e8d4">'+
+        '<th style="text-align:left;padding:7px 10px;color:#3a2e25">Esposizione media annua</th>'+
+        '<th style="text-align:center;padding:7px 10px;color:#1f7a4d">Non-fumatori</th>'+
+        '<th style="text-align:center;padding:7px 10px;color:#c62828">Fumatori attivi</th>'+
+      '</tr></thead><tbody>'+
+        '<tr style="border-bottom:1px solid #ece8de"><td style="padding:7px 10px"><b>0 Bq/m³</b> (baseline)</td><td style="padding:7px 10px;text-align:center;font-family:monospace">'+DARBY_RISK.nonSmoker.baseline+'</td><td style="padding:7px 10px;text-align:center;font-family:monospace">'+DARBY_RISK.smoker.baseline+'</td></tr>'+
+        '<tr style="border-bottom:1px solid #ece8de"><td style="padding:7px 10px"><b>100 Bq/m³</b> (soglia WHO)</td><td style="padding:7px 10px;text-align:center;font-family:monospace">'+DARBY_RISK.nonSmoker.perc100+'</td><td style="padding:7px 10px;text-align:center;font-family:monospace;color:#c62828;font-weight:700">'+DARBY_RISK.smoker.perc100+'</td></tr>'+
+        '<tr><td style="padding:7px 10px"><b>800 Bq/m³</b> (esposizione alta)</td><td style="padding:7px 10px;text-align:center;font-family:monospace;color:#b07820;font-weight:700">'+DARBY_RISK.nonSmoker.perc800+'</td><td style="padding:7px 10px;text-align:center;font-family:monospace;color:#c62828;font-weight:700">'+DARBY_RISK.smoker.perc800+'</td></tr>'+
+      '</tbody></table>'+
+      '<div style="margin-top:8px;font-size:10.5px;color:#6b5c4c;font-style:italic">Il rischio relativo radon è lo stesso per fumatori e non-fumatori, ma il rischio assoluto è ~25× maggiore nei fumatori a causa della baseline cancro polmone già elevata. Effetto sinergico moltiplicativo.</div>'+
+    '</div>';
+  host.innerHTML=darbyBox+
+    '<p class="intro">Stima del rischio sanitario a lungo termine. Riferimento: <strong>Darby et al. BMJ 2005</strong> (collaborative analysis 13 European studies), il radon causa il +16% di rischio relativo per ogni 100 Bq/m³.</p>'+
+    '<h4>Profilo abitudini fumo</h4><div class="choices">'+fH+'</div>'+
+    '<h4>Composizione famigliare (opzionale)</h4>'+
+    '<div class="row3">'+
+    ' <div class="field"><label>Coabitanti adulti</label><input type="number" min="0" max="20" id="fCoab" value="'+(d.coabitanti!=null?d.coabitanti:'')+'" placeholder="es. 3"></div>'+
+    ' <div class="field"><label>Bambini (&lt; 14 anni)</label><input type="number" min="0" max="20" id="fBam" value="'+(d.bambini!=null?d.bambini:'')+'" placeholder="es. 1"></div>'+
+    ' <div class="field"><label>Esposizione bambini</label><div style="padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--paper-soft);font-size:12.5px;color:var(--ink-soft)">Sensibilità maggiore (ICRP 103). Priorità mitigazione.</div></div>'+
+    '</div>';
+  if(risk){
+    var ltMax=risk.intervallo?risk.hi:risk.lifetime;
+    var cls=ltMax>15?'is-err':(ltMax>5?'is-warn':'is-ok');
+    var baseTxt=risk.intervallo?'0,4-10':fmt(risk.baseline,1);
+    var lifeTxt=risk.intervallo?(fmt(risk.lo,1)+'-'+fmt(risk.hi,1)):fmt(risk.lifetime,1);
+    host.innerHTML+='<div class="kpis" style="margin-top:14px">'+
+      '<div class="kpi"><span class="l">Excess Relative Risk</span><span class="v">+'+fmt(risk.ER,1)+'%</span><span class="s">da esposizione radon</span></div>'+
+      '<div class="kpi"><span class="l">Rischio base (no radon)</span><span class="v">'+baseTxt+'%</span><span class="s">a 75 anni, Darby 2005</span></div>'+
+      '<div class="kpi '+cls+'"><span class="l">Rischio stimato a 75 anni</span><span class="v">'+lifeTxt+'%</span><span class="s">cancro polmonare</span></div>'+
+      '</div>'+
+      (risk.intervallo?'<div style="margin-top:8px;font-size:11.5px;color:#6b5c4c">Per gli ex fumatori Darby 2005 non fornisce un valore assoluto: si mostra l\'intervallo fra non fumatore e fumatore attivo.</div>':'')+
+      '<div class="verdict" style="margin-top:14px">Il radon è classificato <strong>cancerogeno gruppo 1 (IARC Monograph 100D)</strong>. Combinazione fumo + radon ha effetto sinergico moltiplicativo. WHO 2009: il radon è la seconda causa di tumore polmonare dopo il fumo.</div>';
+  }
+  host.querySelectorAll('.choice[data-fum]').forEach(function(b){b.addEventListener('click',function(){state.fumatore=b.dataset.fum;saveState();renderStep_salute(host);});});
+  host.querySelector('#fCoab').addEventListener('change',function(e){state.coabitanti=parseInt(e.target.value,10)||null;saveState();});
+  host.querySelector('#fBam').addEventListener('change',function(e){state.bambini=parseInt(e.target.value,10)||null;saveState();});
+}
+
+/* ====== STEP 10: MITIGAZIONE ====== */
+function renderStep_mitigazione(host){
+  var d=state;
+  var scelti=d.mitigazione_scelta||[];
+  var mH=MITIGAZIONE.map(function(m){
+    var sel=(scelti.indexOf(m.id)>=0)?'is-sel':'';
+    return '<button type="button" class="choice '+sel+'" data-mit="'+m.id+'">'+
+           '<div class="t">'+m.nome+'</div>'+
+           '<div class="v">'+m.it+'</div>'+
+           '<div class="n">'+m.desc+'</div>'+
+           '<div style="margin-top:6px;font-size:11px;padding:4px 8px;background:var(--mx-accent-soft);border-radius:6px;color:var(--mx-accent-strong);font-weight:600;display:inline-block">'+m.efficacia+'</div>'+
+           '</button>';
+  }).join('');
+  /* Dettaglio per ognuno scelto */
+  var detH='';
+  scelti.forEach(function(id){
+    var m=MITIGAZIONE.filter(function(x){return x.id===id;})[0];
+    if(!m) return;
+    detH+='<div class="detail"><div class="title">'+m.nome+'</div>'+
+          '<div class="row"><b>Efficacia:</b> '+m.efficacia+'</div>'+
+          '<div class="row"><b>Indicato per:</b> '+m.indicato+'</div>'+
+          '<div class="row"><b>Norma di riferimento:</b> '+m.norma+'</div></div>';
+  });
+  host.innerHTML='<p class="intro">Tecniche di mitigazione del radon. Riferimenti: <strong>ANSI/AARST SGM-SF</strong> (standard nordamericano), <strong>ASTM E2121-21</strong>. Selezione multipla, più tecniche possono essere combinate.</p>'+
+    '<div class="choices">'+mH+'</div>'+detH;
+  host.querySelectorAll('.choice[data-mit]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var id=b.dataset.mit;
+      var arr=state.mitigazione_scelta||[];
+      var i=arr.indexOf(id);
+      if(i>=0) arr.splice(i,1); else arr.push(id);
+      state.mitigazione_scelta=arr;
+      saveState(); renderStep_mitigazione(host);
+    });
+  });
+}
+
+/* ====== STEP 11: MONITORAGGIO ====== */
+function renderStep_monitoraggio(host){
+  var media=calcMedia();
+  var sg=SOGLIE_AMBIENTE[state.ambiente];
+  var soglia=sg?sg.val:300;
+  var fuoriSoglia = (media!=null && media>soglia);
+  host.innerHTML='<p class="intro">Piano di monitoraggio post-misura e post-intervento. Riferimento: <strong>PNAR 2023-2032</strong> + <strong>WHO 2009 §4</strong> + <strong>UNI ISO 11665-4:2021</strong>.</p>'+
+    '<h4>Cadenze consigliate</h4>'+
+    '<ul class="rules" style="list-style:none">'+
+    (fuoriSoglia ?
+      '<li><strong>POST-MITIGAZIONE</strong>: nuova misura semestrale immediata + verifica annua per 2 anni consecutivi (PNAR § 4.3)</li>'+
+      '<li><strong>Test pressione differenziale</strong>: ΔP > 5 Pa sotto soletta dopo SSD (ANSI/AARST SGM-SF §6.2)</li>'+
+      '<li>Documentazione fotografica + report tecnico post-intervento</li>'
+      :
+      '<li><strong>Routine (no superamento)</strong>: nuova misura annua semestrale ogni <strong>8 anni</strong> (PNAR 2023-2032)</li>'
+    )+
+    '<li><strong>Cambio destinazione d\'uso</strong>: nuova misura entro 12 mesi dal cambio</li>'+
+    '<li><strong>Ristrutturazioni rilevanti</strong>: nuova misura entro 6 mesi dal fine lavori (modifica vie di ingresso radon)</li>'+
+    '<li>Conservazione documenti almeno 10 anni (D.Lgs 101/2020 Art. 130)</li>'+
+    '</ul>'+
+    '<div class="verdict '+(fuoriSoglia?'is-err':'is-ok')+'" style="margin-top:14px">'+
+    (fuoriSoglia ?
+      '<strong>Esito misura: sopra soglia ('+fmt(media,0)+' > '+soglia+' Bq/m³).</strong> Procedere con piano di mitigazione (step 10) e ri-misurare immediatamente dopo l\'intervento per verifica efficacia.'
+      :
+      '<strong>Esito misura: conforme.</strong> Mantenere il monitoraggio periodico secondo PNAR 2023-2032. In caso di cambi strutturali, ripetere la misura.'
+    )+'</div>';
+}
+
+/* ====== PLACEHOLDER ====== */
+function renderStep_placeholder(host,id){
+  host.innerHTML='<div class="placeholder"><div class="ic">🚧</div><div class="h">Step in costruzione: '+id+'</div><div class="d">Il contenuto verrà aggiunto nelle prossime sessioni.</div></div>';
+}
+
+/* ====== RENDER WIZARD ====== */
+var stepsNav=document.getElementById('stepsNav');
+var hNum=document.getElementById('hNum'),hTitle=document.getElementById('hTitle'),hSrc=document.getElementById('hSrc');
+var stepBody=document.getElementById('stepBody');
+var posCur=document.getElementById('posCur'),posTot=document.getElementById('posTot');
+var btnPrev=document.getElementById('btnPrev'),btnNext=document.getElementById('btnNext');
+var progressBar=document.getElementById('progressBar');
+
+function renderNav(){
+  var steps=activeSteps();
+  stepsNav.innerHTML=steps.map(function(s,i){
+    var cls=(i===state.cur)?'is-current':(i<state.cur?'is-done':'');
+    return '<div class="step '+cls+'" data-i="'+i+'">'+s.label+'</div>';
+  }).join('');
+  stepsNav.querySelectorAll('.step').forEach(function(el){
+    el.addEventListener('click',function(){state.cur=parseInt(el.dataset.i,10);saveState();render();});
+  });
+  posCur.textContent=state.cur+1;
+  posTot.textContent=steps.length;
+  btnPrev.disabled=(state.cur===0);
+  btnNext.disabled=false; /* sempre attivo: all'ultimo step "Concludi" apre l'anteprima */
+  btnNext.textContent=(state.cur===steps.length-1)?'Concludi ✓':'Avanti →';
+  /* Progress bar */
+  var pct=((state.cur+1)/steps.length)*100;
+  progressBar.style.width=pct+'%';
+}
+function render(){
+  var steps=activeSteps();
+  var s=steps[state.cur];
+  if(!s){state.cur=0;saveState();return render();}
+  hNum.textContent=state.cur+1;
+  hTitle.textContent=s.title;
+  hSrc.textContent=s.src;
+  var fn={
+    'ambiente':renderStep_ambiente,'edificio':renderStep_edificio,'strategia':renderStep_strategia,
+    'posizione':renderStep_posizione,'periodo':renderStep_periodo,'risultato':renderStep_risultato,
+    'verdetto':renderStep_verdetto,'dose':renderStep_dose,'salute':renderStep_salute,
+    'mitigazione':renderStep_mitigazione,'monitoraggio':renderStep_monitoraggio
+  }[s.id];
+  if(fn) fn(stepBody); else renderStep_placeholder(stepBody,s.id);
+  renderNav();
+}
+btnPrev.addEventListener('click',function(){if(state.cur>0){state.cur--;saveState();render();window.scrollTo({top:0,behavior:'smooth'});}});
+btnNext.addEventListener('click',function(){
+    var _s = activeSteps();
+    if(state.cur === _s.length-1){
+      /* ULTIMO step Concludi: attiva la toolbar, scrolla, mostra TOAST esplicativo */
+      if (window.MX && window.MX.toolbarActive) window.MX.toolbarActive(true);
+      var tb = document.querySelector('.mx-toolbar');
+      if (tb){
+        tb.scrollIntoView({behavior:'smooth', block:'center'});
+        tb.style.transition = 'box-shadow .3s ease';
+        tb.style.boxShadow = '0 0 0 4px rgba(192,57,43,.35), 0 8px 30px rgba(0,0,0,.20)';
+        setTimeout(function(){ tb.style.boxShadow = ''; }, 2400);
+      }
+      /* Toast esplicativo che resta visibile 5 sec */
+      if (window.MX && window.MX.toast){
+        window.MX.toast('\u2705 Analisi completata. Scegli azione dalla toolbar qui sotto: Salva, Word, PDF o Aggiungi al Report', 5500);
+      } else {
+        /* Fallback: alert se per qualche motivo MX.toast non c'è */
+        setTimeout(function(){ alert('Analisi completata.\n\nUsa la toolbar in fondo per: Salvare l\'analisi, esportare in Word/PDF o aggiungerla al Report unificato.'); }, 300);
+      }
+      return;
+    }
+    if(state.cur < _s.length-1){
+      state.cur++; saveState(); render();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+  });
+
+var modeOp=document.getElementById('modeOp'),modeTe=document.getElementById('modeTe');
+function setMode(m){
+  state.mode=m;state.cur=0;saveState();
+  modeOp.classList.toggle('is-on',m==='operatore');
+  modeTe.classList.toggle('is-on',m==='tecnico');
+  render();
+}
+modeOp.addEventListener('click',function(){setMode('operatore');});
+modeTe.addEventListener('click',function(){setMode('tecnico');});
+if(state.mode==='operatore'){modeOp.classList.add('is-on');modeTe.classList.remove('is-on');}
+
+render();
+
+/* ============== MX TOOLBAR INTEGRATION ============== */
+try {
+  window._radonBuildDoc = function(sel){ return buildDocSectionsForRadon(sel); };
+  window._radonApplySnap = function(inp){ return applyRadonSnapshot(inp); };
+} catch(_e){}
+
+function buildDocSectionsForRadon(sel){
+  var s = state;
+  var media = calcMedia();
+  var classificazione = (s.regione && s.comune) ? classifyRadon(s.regione, s.comune) : null;
+  var html = '';
+
+  if (sel.identificazione !== false){
+    html += '<h2>1. Identificazione</h2>';
+    html += '<table>'+
+      '<tr><th>Parametro</th><th>Valore</th><th>Note</th></tr>'+
+      '<tr><td>Tipo ambiente</td><td>'+(s.ambiente || 'n.d.')+'</td><td>residenziale / lavorativo</td></tr>'+
+      '<tr><td>Regione</td><td>'+(s.regione || 'n.d.')+'</td><td>classificazione radon-prone</td></tr>'+
+      '<tr><td>Comune</td><td>'+(s.comune || 'n.d.')+'</td><td>liste comuni a rischio</td></tr>'+
+      (classificazione ? '<tr><td>Classificazione</td><td><b>'+classificazione.label+'</b></td><td>'+(classificazione.note||'')+'</td></tr>' : '')+
+      '</table>';
+  }
+
+  if (sel.edificio !== false){
+    html += '<h2>2. Caratterizzazione edificio</h2>';
+    html += '<table>'+
+      '<tr><th>Parametro</th><th>Valore</th></tr>'+
+      '<tr><td>Piano misura</td><td>'+(s.piano || 'n.d.')+'</td></tr>'+
+      '<tr><td>Tipo solaio</td><td>'+(s.tipo_solaio || 'n.d.')+'</td></tr>'+
+      '<tr><td>Anno costruzione</td><td>'+(s.anno_costruzione || 'n.d.')+'</td></tr>'+
+      '<tr><td><b>Soglia di riferimento</b></td><td><b>300 Bq/m&sup3;</b> (D.Lgs 101/2020 art. 12)</td></tr>'+
+      '</table>';
+  }
+
+  if (sel.strategia !== false){
+    html += '<h2>3. Strategia di misura</h2>';
+    html += '<table>'+
+      '<tr><th>Parametro</th><th>Valore</th></tr>'+
+      '<tr><td>Tipo strumento</td><td>'+(s.tipo_misura || 'n.d.')+'</td></tr>'+
+      '<tr><td>Locale</td><td>'+(s.locale || 'n.d.')+'</td></tr>'+
+      '<tr><td>Posizione rivelatore</td><td>'+(s.posizione || 'n.d.')+'</td></tr>'+
+      '<tr><td>Durata complessiva</td><td>'+(s.durata_giorni || 'n.d.')+' giorni</td></tr>'+
+      '</table>';
+    html += '<p style="font-size:11.5px;color:#6b5c4c;font-style:italic">Riferimenti: UNI ISO 11665-8:2020 (rivelatori passivi), ANSI/AARST SGM-SF-2023, WHO Handbook 2009.</p>';
+  }
+
+  if (sel.risultati !== false){
+    html += '<h2>4. Risultati delle misure</h2>';
+    html += '<table>'+
+      '<tr><th>Semestre</th><th>Concentrazione</th><th>Note</th></tr>'+
+      '<tr><td>S1 (semestre invernale)</td><td>'+(s.sem1 != null ? fmt(s.sem1, 0)+' Bq/m&sup3;' : 'n.d.')+'</td><td>periodo a piu alta concentrazione</td></tr>'+
+      '<tr><td>S2 (semestre estivo)</td><td>'+(s.sem2 != null ? fmt(s.sem2, 0)+' Bq/m&sup3;' : 'n.d.')+'</td><td>periodo a piu bassa concentrazione</td></tr>'+
+      '<tr><td><b>Media annuale</b></td><td><b>'+(media != null ? fmt(media, 0)+' Bq/m&sup3;' : 'n.d.')+'</b></td><td>(S1+S2)/2 - valore di confronto</td></tr>'+
+      '</table>';
+  }
+
+  if (sel.grafico !== false){
+    var svgHtml = null;
+    if (window._radonLastSvg) {
+      svgHtml = window._radonLastSvg;
+    } else {
+      var allSvg = document.querySelectorAll('svg');
+      var best = null, bestArea = 0;
+      allSvg.forEach(function(s){
+        var vb = s.getAttribute('viewBox');
+        var w = vb ? parseFloat(vb.split(' ')[2]) : 0;
+        var h = vb ? parseFloat(vb.split(' ')[3]) : 0;
+        var area = w*h;
+        if (area > bestArea){ bestArea = area; best = s; }
+      });
+      if (best) svgHtml = best.outerHTML;
+    }
+    if (svgHtml){
+      html += '<h2>5. Diagramma neon Radon, misure vs soglie normative</h2>';
+      html += '<div style="text-align:center;margin:14px 0;padding:14px 12px;border:1px solid #d8d3c4;border-radius:10px;background:linear-gradient(180deg,#04101a,#0a1f2e);page-break-inside:avoid"><div style="max-width:100%;overflow:hidden"><div style="width:100%">' + svgHtml + '</div></div></div>';
+      html += '<p style="font-size:11.5px;color:#6b5c4c;font-style:italic;text-align:center;margin-top:6px">Diagramma neon Radon &middot; picchi colorati per gradient 4 zone in funzione del valore &middot; soglie normative orizzontali: WHO 100 Bq/m&sup3;, EPA 148 Bq/m&sup3;, D.Lgs/ICRP 300 Bq/m&sup3;</p>';
+    }
+  }
+
+  if (sel.verdetto !== false){
+    html += '<h2>6. Verdetto e valutazione del rischio</h2>';
+    if (media != null){
+      // Tabella soglie internazionali (per usi professionali normati)
+      html += '<p><b>Soglie internazionali a confronto:</b></p>';
+      html += '<table>';
+      html += '<tr><th>Norma</th><th>Soglia (Bq/m³)</th><th>Esito misura</th><th>Note</th></tr>';
+      SOGLIE_INT.forEach(function(sg){
+        var statusTxt = (media > sg.val) ? '✗ Supera' : '✓ Rispetta';
+        html += '<tr><td><b>'+sg.norma+'</b><br><i>'+sg.lab+'</i></td><td style="text-align:right">'+sg.val+'</td><td>'+statusTxt+'</td><td style="font-size:10.5px">'+sg.desc+'</td></tr>';
+      });
+      html += '</table>';
+      if (media >= 300){
+        html += '<div class="ver-crit"><strong>SUPERAMENTO DEL LIVELLO DI RIFERIMENTO D.Lgs 101/2020.</strong> Media '+fmt(media,0)+' Bq/m&sup3; &ge; 300 Bq/m&sup3;. Nei luoghi di lavoro: <b>misure correttive entro due anni</b> e nuova misurazione, poi ripetuta ogni quattro anni (art. 17). Nelle abitazioni il decreto non impone obblighi: risanamento raccomandato.</div>';
+      } else if (media >= 200){
+        html += '<div class="ver-err"><strong>VALORE ELEVATO.</strong> Media '+fmt(media,0)+' Bq/m&sup3; (200-300). Sopra 200 Bq/m³ (soglia nuove abitazioni, D.Lgs 101/2020 art. 12); entro 300 (livello di riferimento ICRP 126).</div>';
+      } else if (media >= 148){
+        html += '<div class="ver-warn"><strong>VALORE MODERATO.</strong> Media '+fmt(media,0)+' Bq/m&sup3; (sopra EPA action level 148).</div>';
+      } else if (media >= 100){
+        html += '<div class="ver-warn"><strong>VALORE LIEVE.</strong> Media '+fmt(media,0)+' Bq/m&sup3; (sopra WHO reference 100).</div>';
+      } else {
+        html += '<div class="ver-ok"><strong>VALORE BASSO.</strong> Media '+fmt(media,0)+' Bq/m&sup3; &lt; 100 Bq/m&sup3; (WHO 2009).</div>';
+      }
+      var dose = (media * 7000 * 6.7e-6).toFixed(2);
+      html += '<p><b>Dose efficace stimata (ICRP Publication 137, 2017):</b></p>';
+      html += '<table><tr><th>Dose (mSv/anno)</th><th>Calcolo</th></tr>'+
+        '<tr><td><b>'+dose+'</b></td><td>'+media+' &times; 7000 h &times; 6,7&middot;10<sup>-6</sup> mSv/(Bq&middot;h/m&sup3;)</td></tr>'+
+        '</table>';
+      html += '<p style="font-size:11px;color:#6b5c4c;font-style:italic">Il coefficiente ICRP 137 incorpora gi&agrave; il fattore di equilibrio F=0,4 (nessun ulteriore &times;0,4). La dose da inalazione non dipende dal fumo, che agisce sul <b>rischio</b> (tabella seguente), non sulla dose.</p>';
+      try {
+        var risk_no = calcLifetimeRisk(media, 'no');
+        var risk_si = calcLifetimeRisk(media, 'si');
+        html += '<p><b>Rischio tumore polmonare nella vita (Darby et al. 2005 BMJ):</b></p>';
+        html += '<table><tr><th>Soggetto</th><th>Rischio nella vita (%)</th></tr>'+
+          '<tr><td>Non fumatore</td><td>'+(risk_no?risk_no.lifetime.toFixed(2):'n.d.')+'</td></tr>'+
+          '<tr><td>Fumatore</td><td>'+(risk_si?risk_si.lifetime.toFixed(2):'n.d.')+'</td></tr>'+
+          '</table>';
+      } catch(_e){}
+    } else {
+      html += '<p><em>Inserisci S1 e S2 per generare il verdetto.</em></p>';
+    }
+  }
+
+  if (sel.tracciabilita !== false){
+    html += '<h2>7. Tracciabilit&agrave; tecnica e riferimenti normativi</h2>';
+    html += '<h3>7.1 Metodo</h3>';
+    html += '<p>Misura concentrazione radon-222 indoor mediante 2 rivelatori passivi a tracce in 2 semestri consecutivi, calcolo media annuale, confronto con soglie normative.</p>';
+    html += '<h3>7.2 Riferimenti normativi</h3>';
+    html += '<table>'+
+      '<tr><td>D.Lgs 101/2020 art. 12</td><td>livello di riferimento 300 Bq/m&sup3; abitazioni esistenti e luoghi di lavoro, 200 Bq/m&sup3; abitazioni costruite dopo il 31/12/2024</td></tr>'+
+      '<tr><td>D.Lgs 203/2022</td><td>modifica D.Lgs 101 (Direttiva 2013/59/Euratom)</td></tr>'+
+      '<tr><td>ICRP Publication 126 (2014)</td><td>radon residenziale, livello riferimento 300 Bq/m&sup3;</td></tr>'+
+      '<tr><td>ICRP Publication 137 (2017)</td><td>coefficienti dose 6,7&middot;10<sup>-6</sup> mSv/(Bq&middot;h/m&sup3;)</td></tr>'+
+      '<tr><td>WHO Handbook on Indoor Radon (2009)</td><td>reference level 100 Bq/m&sup3;</td></tr>'+
+      '<tr><td>EPA 402-K-12-002</td><td>action level 148 Bq/m&sup3; (4 pCi/L)</td></tr>'+
+      '<tr><td>UNI ISO 11665-8:2020</td><td>rivelatori passivi a tracce</td></tr>'+
+      '<tr><td>ANSI/AARST SGM-SF-2023</td><td>protocollo misura residenziale</td></tr>'+
+      '<tr><td>Darby et al. 2005 BMJ 330:223</td><td>rischio epidemiologico (+16% per 100 Bq/m&sup3;)</td></tr>'+
+      '</table>';
+    html += '<h3>7.3 Limiti</h3>';
+    html += '<p>La misura semestrale non sostituisce verifica continuativa pluriennale. In caso di superamento, ripetere il semestre successivo prima di pianificare interventi.</p>';
+  }
+  return html;
+}
+
+function applyRadonSnapshot(input){
+  if (!input) return;
+  Object.keys(input).forEach(function(k){ if (input[k] != null) state[k] = input[k]; });
+  saveState();
+  setTimeout(function(){ location.reload(); }, 80);
+}
+
+function onResetRadon(){
+  /* 20/11/2026: la conferma l'ha già chiesta la barra («Sicuro di voler azzerare l'analisi corrente?»);
+     qui ce n'era una seconda di fila. */
+  localStorage.removeItem(KEY);
+  location.reload();
+}
+
+if (window.MX && MX.initToolbar){
+  try {
+    MX.initToolbar({
+      moduleId: 'radon',
+      moduleName: 'Radon, Misura D.Lgs 101/2020',
+      moduleColor: '#c0392b',
+      defaultSections: {
+        identificazione: { label: 'Identificazione', on: true },
+        edificio:        { label: 'Caratterizzazione edificio + soglia', on: true },
+        strategia:       { label: 'Strategia di misura', on: true },
+        risultati:       { label: 'Risultati S1+S2+media', on: true },
+        grafico:         { label: 'Diagramma neon Radon', on: true },
+        verdetto:        { label: 'Verdetto + dose ICRP + rischio Darby', on: true },
+        tracciabilita:   { label: 'Tracciabilità normativa', on: true }
+      },
+      getInput: function(){ return JSON.parse(JSON.stringify(state)); },
+      getOutput: function(){
+        return {
+          media_Bq_m3: calcMedia(),
+          semestre1: state.sem1,
+          semestre2: state.sem2,
+          regione: state.regione,
+          comune: state.comune,
+          piano: state.piano
+        };
+      },
+      getSvgHTML: function(){
+        if (window._radonLastSvg) return window._radonLastSvg;
+        var s=document.querySelectorAll('main svg');
+        return s.length ? s[s.length-1].outerHTML : null;
+      },
+      getDocSections: buildDocSectionsForRadon,
+      applyData: applyRadonSnapshot,
+      onReset: onResetRadon
+    });
+  } catch(e){ console.error('[Radon] initToolbar:', e); }
+}
+
+})();
+
+</script>
+
+<!-- FALLBACK TOOLBAR INIT (post IIFE) -->
+<script>
+(function(){
+  function tryInit(){
+    if (document.querySelector('.mx-toolbar')) return;
+    if (!window.MX || !MX.initToolbar) return;
+    try{
+      MX.initToolbar({
+        moduleId: 'radon',
+        moduleName: 'Radon, Misura D.Lgs 101/2020',
+        defaultSections: {
+          identificazione: { label: 'Identificazione', on: true },
+          edificio:        { label: 'Edificio + soglia', on: true },
+          strategia:       { label: 'Strategia di misura', on: true },
+          risultati:       { label: 'Risultati S1+S2', on: true },
+          grafico:         { label: 'Diagramma neon', on: true },
+          verdetto:        { label: 'Verdetto + dose', on: true },
+          tracciabilita:   { label: 'Tracciabilità normativa', on: true }
+        },
+        getDocSections: function(sel){
+          if (window._radonBuildDoc){ try { return window._radonBuildDoc(sel); } catch(e){ console.error(e); } }
+          return '<p><em>Completa il wizard per generare il documento.</em></p>';
+        },
+        applyData: function(input){
+          if (window._radonApplySnap){ try { window._radonApplySnap(input); return; } catch(e){ console.error(e); } }
+        },
+        getSvgHTML: function(){ var s=document.querySelectorAll('main svg'); return s.length?s[s.length-1].outerHTML:null; },
+        onReset: function(){ location.reload(); }
+      });
+    } catch(e){ console.error('[Radon fallback]', e); }
+  }
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', tryInit);
+  else setTimeout(tryInit, 80);
+})();
+
+
+/* === ALLINEAMENTO v3.4: strip anagrafica perito+committente === */
+(function(){
+  function loadAnaR(){
+    var p={},i={};
+    try{ p=JSON.parse(localStorage.getItem("mx2::perito")||"{}"); }catch(e){}
+    try{ var l=JSON.parse(localStorage.getItem("mx2::locali-v1")||"{}"); i=l.ana||{}; }catch(e){}
+    return {perito:p,immobile:i};
+  }
+  function escR(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  function renderAnaR(){
+    var a=loadAnaR(),p=a.perito,c=a.immobile;
+    var pe=document.getElementById("anaPerito"), ce=document.getElementById("anaCliente");
+    if(!pe||!ce) return;
+    var pName=p.nome||"n.d.";
+    var pMeta=[p.titolo,p.albo&&(p.albo+(p.numAlbo?" n. "+p.numAlbo:"")),p.tel,p.email].filter(Boolean).join(" · ");
+    var cName=c.Nome||"n.d.";
+    var cMeta=[c.Indirizzo,c.Catasto,c.DataSopr&&("Sopralluogo "+c.DataSopr)].filter(Boolean).join(" · ");
+    pe.querySelector(".n").textContent=pName;
+    pe.querySelector(".m").textContent=pMeta;
+    ce.querySelector(".n").textContent=cName;
+    ce.querySelector(".m").textContent=cMeta;
+  }
+  window.__renderAnaR=renderAnaR;
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){
+    renderAnaR();
+    var b=document.getElementById("btnReloadAna");
+    if(b) b.addEventListener("click",function(){renderAnaR();});
+  });
+  else { renderAnaR(); var b=document.getElementById("btnReloadAna"); if(b) b.addEventListener("click",function(){renderAnaR();}); }
+})();
+</script>
+
+<!-- MX-BUILD: 2026-05-24-radon-v3.4.7 + JSON nel modal -->
+<script>
+/* === MX SNAPSHOT IMPORTER (auto-install, Mixando v3) ===
+ * Aggiunge bottone "Apri snapshot" accanto al "JSON" della toolbar.
+ * Importa .json esportato dallo stesso modulo, ricarica la pagina.
+ * Riconosce pattern lite (STATE.cur/finished/data → *-draft) e
+ * pattern rich (state diretto → *-vN). NON modifica codice esistente.
+ * ====================================================== */
+(function(){
+  'use strict';
+  if (window.__mxSnapImportInstalled) return;
+  window.__mxSnapImportInstalled = true;
+  function findHostBtn(){
+    return document.querySelector('button[data-act="export-json"]')
+        || document.getElementById('btnJSON')
+        || document.getElementById('btnExportJSON')
+        || document.querySelector('.mx-tb-btn.tb-save');
+  }
+  function makeBtn(){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mx-tb-btn tb-load';
+    b.id = 'btnOpenSnap';
+    b.title = 'Apri uno snapshot .json esportato in precedenza da questo modulo (sostituirà i dati correnti).';
+    b.innerHTML = '<span class="ico">\u{1F4C2}</span><span class="label">Apri snapshot</span>';
+    return b;
+  }
+  function detectModuleKeys(){
+    /* 19/11/2026: solo le chiavi di QUESTO modulo, cioè quelle che il modulo nomina nel suo codice.
+       Prima prendeva le chiavi di tutti i moduli e lo snapshot finiva nella bozza del primo trovato
+       (un file dei Sali, aperto dal modulo Sali, sovrascriveva la bozza della Risalita). */
+    var src = '';
+    try { [].forEach.call(document.scripts, function(s){ if (!s.src) src += s.textContent; }); } catch(_){}
+    var condivise = {'mx2::perito':1,'mx2::periti-v2':1,'mx2::locali-v1':1,'mx2::reports':1,'mx2::indagini':1,'mx2::strumentazione':1,'mx2::chartTheme':1,'mx2::showPhysicalScale':1,'mx2::report-meta':1,'mx2::last-backup':1};
+    var mie = {}, re = /mx2::[A-Za-z0-9_-]+/g, m;
+    while ((m = re.exec(src))) { if (!condivise[m[0]]) mie[m[0]] = 1; }
+    return Object.keys(mie);
+  }
+  /* 20/11/2026: nomi con cui un file dichiara di venire da questo modulo (in «moduleId», in «module» o nella
+     sigla di «schemaVersion», per esempio 'sali-v3.1'). Servono a non aprire qui il file di un altro modulo. */
+  var _MX_MIEI = ['radon'];
+  function _mxFileDiAltroModulo(obj){
+    if (!obj || typeof obj !== 'object') return '';
+    if (typeof obj._format === 'string' && obj._format.indexOf('mixando-backup') === 0) return 'Questo file è un backup generale di Mixando: si ripristina dalla pagina «Backup tecnico», non da qui.';
+    var d = obj.moduleId || obj.module || (typeof obj.schemaVersion === 'string' ? obj.schemaVersion : '');
+    if (typeof d !== 'string' || !d) return '';   /* il file non dice da dove viene: lo giudicano i controlli più sotto */
+    var n = d.toLowerCase().replace(/-v[\d.]+$/, '').replace(/_/g, '-');
+    if (_MX_MIEI.indexOf(n) >= 0) return '';
+    return 'Questo file viene da un altro modulo (' + (obj.moduleName || d) + ').';
+  }
+  function pickTargetKey(keys, payload){
+    var draftKeys = keys.filter(function(k){ return /-draft$/.test(k); });
+    var liteHint = payload && (payload.currentStep !== undefined || payload.data !== undefined);
+    if (liteHint && draftKeys.length){ return { key: draftKeys[0], kind: 'lite' }; }
+    var primaryKeys = keys.filter(function(k){ return !/-(saves|draft|prefs)$/.test(k); });
+    if (primaryKeys.length === 1) return { key: primaryKeys[0], kind: 'rich' };
+    if (primaryKeys.length > 1){
+      var sortable = primaryKeys.map(function(k){ try { return [k, (localStorage.getItem(k)||'').length]; } catch(_){ return [k, 0]; } });
+      sortable.sort(function(a,b){ return b[1] - a[1]; });
+      return { key: sortable[0][0], kind: 'rich' };
+    }
+    if (draftKeys.length) return { key: draftKeys[0], kind: 'lite' };
+    return null;
+  }
+  function openImportDialog(){
+    var f = document.createElement('input');
+    f.type = 'file'; f.accept = 'application/json';
+    f.style.display = 'none';
+    f.addEventListener('change', function(e){
+      var file = e.target.files && e.target.files[0]; if (!file) return;
+      var rd = new FileReader();
+      rd.onload = function(ev){
+        try {
+          var obj = JSON.parse(ev.target.result);
+          /* 20/11/2026: il tasto riapre solo i file di QUESTO modulo. Prima accettava, dopo una conferma, anche il file
+             di un altro modulo o il backup generale, e il lavoro del modulo aperto andava perso (provato: file dei Sali
+             nel Radon, file del Radon e della Risalita nei Sali). */
+          var _altro = _mxFileDiAltroModulo(obj);
+          if (_altro){ alert(_altro + '\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          /* 19/11/2026: file esportato da un modulo con la barra nuova (Glaser, Termoigrometria, Radon). Porta i dati
+             d'ingresso in «input», in una forma diversa da quella tenuta in memoria: scriverlo in memoria azzerava
+             il modulo. Qui si usa la stessa strada del tasto «Carica». */
+          if (obj && obj.input && window.MX && typeof window.MX.applyData === 'function'){
+            if (!confirm('Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.moduleName || obj.moduleId || '?') + '\n\nI dati correnti del modulo verranno SOSTITUITI.')) return;
+            var _esito = window.MX.applyData(obj.input, obj.moduleId);
+            if (_esito === 'ok') alert('Snapshot importato.');
+            else if (_esito === 'altro') alert('Questo file viene da un altro modulo (' + (obj.moduleName || obj.moduleId) + '): non importato.');
+            else alert('Il modulo non sa ricaricare questo file.');
+            return;
+          }
+          /* 20/11/2026: nei moduli con la barra nuova il solo file che si sa riaprire è quello con la voce «input».
+             Un file diverso, scritto in memoria così com'era, azzerava il modulo. */
+          if (window.MX && typeof window.MX.applyData === 'function'){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var keys = detectModuleKeys();
+          if (!keys.length){
+            alert('Nessuna chiave di lavoro trovata per questo modulo nello storage corrente.\nSuggerimento: apri il modulo, fai almeno un\'interazione, poi riprova.');
+            return;
+          }
+          var target = pickTargetKey(keys, obj);
+          if (!target){ alert('Non sono riuscito a individuare la chiave di salvataggio. Snapshot non importato.'); return; }
+          /* 20/11/2026: un file senza i dati dei passi svuotava la bozza */
+          if (target.kind === 'lite' && !(obj && (obj.data || obj.state))){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var msg = 'Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.module || obj.schemaVersion || '?') + '\n• Destinazione: ' + target.key + ' (' + target.kind + ')\n\nI dati correnti del modulo verranno SOSTITUITI.\nConsiglio: prima fai "JSON" per backup di sicurezza.\n\nProcedere?';
+          if (!confirm(msg)) return;
+          var toWrite;
+          if (target.kind === 'lite'){
+            toWrite = { ts: Date.now(), state: { cur: (obj.currentStep !== undefined ? obj.currentStep : 0), finished: !!obj.finished, data: (obj.data || obj.state || {}) } };
+          } else {
+            toWrite = obj.state || obj;
+          }
+          try { localStorage.setItem(target.key, JSON.stringify(toWrite)); }
+          catch (err) { alert('Errore scrittura storage: ' + (err.message || err)); return; }
+          alert('Snapshot importato in "' + target.key + '". Pagina in ricaricamento…');
+          location.reload();
+        } catch (err) { alert('Errore lettura JSON: ' + err.message); }
+      };
+      rd.readAsText(file);
+    });
+    document.body.appendChild(f); f.click(); setTimeout(function(){ try{ document.body.removeChild(f); }catch(_){} }, 1500);
+  }
+  function install(){
+    if (document.getElementById('btnOpenSnap')) return;
+    if (!detectModuleKeys().length) return;   /* 19/11/2026: il modulo non tiene dati in memoria, il tasto non potrebbe funzionare */
+    var host = findHostBtn();
+    if (!host || !host.parentNode){ return setTimeout(install, 250); }
+    var btn = makeBtn();
+    host.parentNode.insertBefore(btn, host.nextSibling);
+    btn.addEventListener('click', openImportDialog);
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(install, 150); });
+  } else {
+    setTimeout(install, 150);
+  }
+})();
+
+/* === Integrazione mappa-indagini (aggancio bidirezionale), universal === */
+function _mxIndaginiList(){ try{ var raw=localStorage.getItem('mx2::indagini'); if(!raw) return []; var a=JSON.parse(raw); return Array.isArray(a)?a:[]; } catch(e){ return []; } }
+function _mxIndaginiSaveAll(list){ try{ localStorage.setItem('mx2::indagini', JSON.stringify(list||[])); return true; } catch(e){ return false; } }
+function _mxIndaginiNewId(){ return 'ind_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
+
+// Mapping generico universale: estrae campi standard se presenti, salva tutto in schedaCompleta
+function _mxBuildDatiUniversal(state){
+  state = state || {};
+  var out = { schedaCompleta: JSON.parse(JSON.stringify(state)) };
+  ['tInt','urInt','tSup','tempC','urPerc','co2_ppm','pm25','pm10','tvoc','hcho','co','no2',
+   'co2','tempC2','tempInt','T_int','T_ext','UR_int','UR_ext','Ta','UR'].forEach(function(k){
+    if(state[k] != null) out[k] = state[k];
+  });
+  if(state.note) out.note = state.note;
+  if(state.noteFinali) out.note = state.noteFinali;
+  return out;
+}
+
+/* 20/11/2026: le domande si fanno in una finestra dentro la pagina (window.mxChiedi, nel file condiviso
+   _shared/mx-switcher.js) e non più nelle finestrelle del browser. Se quel file non fosse stato caricato si torna
+   alle finestrelle di prima. _mxChiedi risponde con una promessa; _mxTesto chiede un solo testo. */
+function _mxChiedi(titolo, cfg){
+  if(window.mxChiedi) return window.mxChiedi(titolo, cfg);
+  cfg = cfg || {};
+  if(cfg.scelte){
+    var buone = cfg.scelte.filter(function(s){ return !s[2]; });
+    var r = prompt(titolo + '\n\n' + buone.map(function(s, i){ return (i+1) + '. ' + s[1]; }).join('\n') + '\n\nScrivi il numero:', '1');
+    var k = parseInt(r, 10) - 1;
+    return Promise.resolve(buone[k] ? buone[k][0] : null);
+  }
+  var out = [], campi = cfg.campi || [];
+  for(var i = 0; i < campi.length; i++){
+    var v = prompt(titolo + (campi[i][0] ? ('\n' + campi[i][0]) : ''), campi[i][1] == null ? '' : campi[i][1]);
+    if(v === null) return Promise.resolve(null);
+    out.push(v);
+  }
+  return Promise.resolve(out);
+}
+function _mxTesto(titolo, pre){ return _mxChiedi(titolo, {campi:[['', pre]]}).then(function(r){ return r ? r[0] : null; }); }
+async function _mxAggancialMappa(){
+  var cat = 'radon';
+  var moduloFile = 'radon.html';
+  var fileLabel = 'Radon';
+
+  // Ottiene lo stato della scheda: usa hook se la scheda lo ha popolato, altrimenti fallback "vuoto"
+  var stateData = (typeof window._mxAggancia_getDati === 'function') ? window._mxAggancia_getDati() : null;
+  if(!stateData){
+    // Fallback: tenta lettura da localStorage standard
+    try{
+      var keys = Object.keys(localStorage).filter(function(k){ return k.startsWith('mx2::') && (k.indexOf('-draft')>=0 || k.indexOf('-state')>=0); });
+      if(keys.length){
+        var raw = localStorage.getItem(keys[0]);
+        if(raw){ var parsed = JSON.parse(raw); stateData = (parsed.state && parsed.state.data) ? parsed.state.data : parsed; }
+      }
+    }catch(e){}
+    if(!stateData) stateData = {};
+  }
+
+  var dati = _mxBuildDatiUniversal(stateData);
+
+  var lista = _mxIndaginiList();
+  var stessoCat = lista.filter(function(r){ return r.categoria === cat; });
+
+  /* 20/11/2026: scelta dentro la pagina (prima si scriveva 1, 2 o 3 in una finestrella del browser) */
+  var mode = await _mxChiedi('Aggancia la scheda '+fileLabel.toUpperCase()+' alla Mappa Indagini', {scelte:[['1','Nuovo punto sulla mappa'],['2','Aggiorna un punto esistente ('+(stessoCat.length?(stessoCat.length+' disponibili'):'nessuno disponibile')+')', !stessoCat.length]]});
+  if(!mode) return;
+
+  if(mode === '1'){
+    var _nn = await _mxChiedi('Nuovo punto sulla mappa', {campi:[['Nome del punto', fileLabel+' '+new Date().toLocaleDateString('it-IT')],['Stanza (facoltativa)','']], conferma:'Crea il punto'});
+    if(!_nn || !String(_nn[0]).trim()) return;
+    var nome = String(_nn[0]).trim(), stanza = String(_nn[1]||'').trim();
+    var rec = {
+      id: _mxIndaginiNewId(),
+      schemaVer: 1, categoria: cat, piano: 0, x: 0.5, y: 0.5,
+      stanza: stanza || '', nome: nome,
+      posizione: 'Da posizionare sulla mappa (apri Mappa Indagini e trascina il pin)',
+      dataCreazione: new Date().toISOString(), dataModifica: new Date().toISOString(),
+      dati: dati, note: 'Rilievo creato da scheda '+moduloFile,
+      foto: [], termogrammi: [],
+      linkScheda: moduloFile+':'+Date.now(), layerId: ''
+    };
+    lista.push(rec);
+    _mxIndaginiSaveAll(lista);
+    var msgOK = '✓ Punto "'+nome+'" creato sulla mappa indagini';
+    if(typeof showToast === 'function') showToast(msgOK,'ok');
+    else if(typeof toast === 'function') toast(msgOK);
+    else alert(msgOK);
+    setTimeout(function(){
+      if(confirm('Punto "'+nome+'" creato sulla Mappa Indagini.\nVuoi aprire ora la Mappa per posizionarlo?')){
+        window.location.href = 'mappa-indagini.html';
+      }
+    }, 500);
+  } else if(mode === '2'){
+    if(!stessoCat.length){ alert('Nessun punto di categoria '+fileLabel+' esistente sulla mappa.'); return; }
+    var ch = await _mxChiedi('Quale punto vuoi aggiornare?', {scelte: stessoCat.map(function(r, i){ return [String(i+1), r.nome+' ('+(r.stanza||'senza stanza')+')']; })});
+    if(!ch) return;
+    var idx = parseInt(ch)-1;
+    if(isNaN(idx) || idx<0 || idx>=stessoCat.length){ alert('Selezione non valida'); return; }
+    var target = stessoCat[idx];
+    target.dati = dati;
+    target.dataModifica = new Date().toISOString();
+    target.linkScheda = moduloFile+':'+Date.now();
+    target.note = (target.note || '') + (target.note ? ' · ':'') + 'Aggiornato da '+moduloFile+' il '+new Date().toLocaleDateString('it-IT');
+    for(var i=0;i<lista.length;i++){ if(lista[i].id === target.id){ lista[i] = target; break; } }
+    _mxIndaginiSaveAll(lista);
+    var msgUp = '✓ Punto "'+target.nome+'" aggiornato';
+    if(typeof showToast === 'function') showToast(msgUp,'ok');
+    else if(typeof toast === 'function') toast(msgUp);
+    else alert(msgUp);
+  }
+}
+
+// Aggiunge automaticamente il pulsante "Aggancia alla mappa" alla toolbar (per schede dinamiche con pulsanti generati a runtime)
+function _mxInjectButton(){
+  var existing = document.getElementById('btnAggancia');
+  if(existing) return;
+  // Trova qualsiasi pulsante "tb-reset" come riferimento
+  var resetBtn = document.querySelector('.mx-tb-btn.tb-reset');
+  if(!resetBtn) return;
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'mx-tb-btn';
+  btn.id = 'btnAggancia';
+  btn.style.cssText = 'background-image:linear-gradient(135deg,#26a69a,#00897b 45%,#004d40);box-shadow:0 3px 10px rgba(0,137,123,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)';
+  btn.innerHTML = '<span class="ico">\ud83d\udccd</span><span class="label">Aggancia alla mappa</span>';
+  btn.onclick = _mxAggancialMappa;
+  resetBtn.parentNode.insertBefore(btn, resetBtn);
+}
+
+// Init: prova subito + MutationObserver per ricomparse della toolbar
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', function(){ _mxInjectButton(); });
+} else {
+  setTimeout(_mxInjectButton, 100);
+}
+// Observer per pulsanti rigenerati dinamicamente
+try{
+  var _mxObs = new MutationObserver(function(){
+    if(!document.getElementById('btnAggancia')) _mxInjectButton();
+  });
+  setTimeout(function(){ _mxObs.observe(document.body, {childList:true, subtree:true}); }, 300);
+}catch(e){}
+
+</script>
+<script src="_shared/mx-biblio.js" data-mod="radon" defer></script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

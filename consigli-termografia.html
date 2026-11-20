@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Consigli">
+<title>Mixando Lab · Consigli di Termografia</title>
+<style>
+:root{
+  --mx-accent:#5b86c9; --mx-accent-soft:rgba(91,134,201,.12);
+  --bg:#f5f1e8; --paper:#fff; --ink:#2c1810; --ink-soft:#6b5c4c; --ink-mute:#8b7355;
+  --line:#e6e0d2; --r:14px;
+  --ff-serif:Georgia,"Cambria","Times New Roman",serif;
+  --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:48px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--paper);border-bottom:3px solid var(--mx-accent);box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.mx-bar .em{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--mx-accent);color:#fff}
+.mx-bar .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mx-accent);line-height:1}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:14px;color:var(--ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:6px 12px;border:1px solid var(--mx-accent);border-radius:8px}
+.mx-bar a.back:hover{background:var(--mx-accent);color:#fff}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 22px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:680px;color:var(--ink-soft);font-size:14px}
+.search{width:100%;padding:12px 16px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14.5px;background:#fff;outline:none;margin-bottom:14px}
+.search:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:12px;overflow:hidden}
+.card>h3{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),var(--paper));display:flex;align-items:center;gap:10px}
+.card>h3 .num{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:var(--ff-sans)}
+.card .body{padding:14px 18px}
+.tips{display:grid;gap:10px}
+.tip{padding:12px 14px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--mx-accent);border-radius:8px;line-height:1.55}
+.tip strong{color:var(--ink);display:block;margin-bottom:3px;font-size:13.5px}
+.tip span{font-size:12.5px;color:var(--ink-soft)}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+
+.mx-bar{position:relative}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}}
+
+/* Anagrafica perito+committente, pattern Mixando standard */
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto 8px;max-width:1080px}
+.ana-strip .pc{padding:10px 12px;background:#fff;border:1px solid #e6e0d2;border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6b5c4c;margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700;color:#2c1810}
+.ana-strip .pc .m{font-size:11.5px;color:#8b7355;margin-top:2px}
+.ana-actions{text-align:center;margin:0 auto 16px;max-width:1080px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ana-actions a,.ana-actions button{font-size:12px;font-weight:700;text-decoration:none;padding:6px 13px;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;border:1px solid currentColor}
+.ana-actions a{color:var(--mx-accent,#2c5d7c)}
+.ana-actions button.mx-reload{background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);color:#fff;border:0;box-shadow:0 3px 10px rgba(46,125,50,.42)}
+@media (max-width:760px){.ana-strip{grid-template-columns:1fr}}
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:0 !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:50px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab">
+  <div class="meta"><span class="tag">Termografia</span><h1 class="ti">Trucchi &amp; Consigli</h1></div>
+  <a class="back" href="suite.html">&larr; Suite</a>
+</header>
+
+<main>
+  
+
+  <section class="hero">
+    <h2>Suggerimenti pratici <em>per il termografo</em></h2>
+    <p>Accorgimenti di campo per migliorare la qualità e l'affidabilità delle indagini termografiche in edilizia. Riferimenti normativi cogenti e best practice peer-reviewed (BINDT, ASNT).</p>
+  </section>
+
+  <div style="background:linear-gradient(180deg,rgba(91,134,201,.10),#fff);border:1px solid rgba(91,134,201,.30);border-left:4px solid #5b86c9;border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:#2c1810;line-height:1.55">
+    <strong>📦 Moduli collegati:</strong> per applicare termografia in pratica, vedi: <a href="termo-neon.html" target="_blank" style="color:#0d4870;font-weight:800">→ Termografia, Analisi termogrammi</a> (calcolatore Td/UR superficie/LIM) · <a href="storia-termografia.html" target="_blank" style="color:#0d4870;font-weight:800">→ Storia della Termografia</a> · <a href="condensa-glaser.html" target="_blank" style="color:#0d4870;font-weight:800">→ Glaser (ponti termici)</a> · <a href="termoigrometria.html" target="_blank" style="color:#0d4870;font-weight:800">→ Termoigrometria</a>.
+  </div>
+
+  <input type="search" class="search" id="qSearch" placeholder="Cerca consiglio... (es. emissività, riflessi, ΔT)">
+  <div id="qVuoto" style="display:none;background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:14px;color:var(--ink-soft)">Nessun consiglio contiene «<strong id="qVuotoTxt"></strong>». Prova con un'altra parola, oppure cancella la ricerca per rivederli tutti.</div>
+
+  <article class="card">
+    <h3><span class="num">1</span> Preparazione del rilievo</h3>
+    <div class="body"><div class="tips" data-cat="prep">
+      <div class="tip"><strong>ΔT minima 10 °C</strong><span>UNI EN ISO 6781-1:2023 (gia UNI EN 13187:2000 (ritirata 2023, oggi UNI EN ISO 6781-1:2023)) raccomanda ΔT tra interno ed esterno di almeno 10 °C, mantenuta per ~12 h prima del rilievo, per garantire un flusso termico stabilizzato.</span></div>
+      <div class="tip"><strong>Niente sole battente</strong><span>Evita rilievi su facciate appena illuminate dal sole: la radiazione solare riflessa e l'inerzia termica falsano le misure. Aspetta almeno 2-3 h dopo il tramonto o lavora di mattina presto.</span></div>
+      <div class="tip"><strong>Niente pioggia, niente vento &gt; 5 m/s</strong><span>L'acqua sulla superficie raffredda per evaporazione; il vento aumenta il coefficiente convettivo. Entrambi mascherano i difetti termici. Posticipa di 6-12 h dopo la pioggia.</span></div>
+      <div class="tip"><strong>Stabilizza la termocamera</strong><span>Lascia la termocamera in equilibrio termico nell'ambiente di rilievo per almeno 15 minuti prima delle misure (riduzione drift del sensore microbolometrico).</span></div>
+    </div></div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">2</span> Impostazioni di misura</h3>
+    <div class="body"><div class="tips" data-cat="set">
+      <div class="tip"><strong>Emissività ε</strong><span>Intonaco: 0,93-0,95 · Mattone: 0,93 · Calcestruzzo: 0,92 · Vetro: 0,90-0,95 · Metalli ossidati: 0,80 · Metalli lucidi: 0,05-0,30 (problematici, applicare nastro nero opaco con ε=0,95 come riferimento).</span></div>
+      <div class="tip"><strong>Temperatura riflessa (Treflected)</strong><span>Misurala con il "metodo crumpled aluminium": appallottola un foglio di alluminio, distendilo, misura con ε=1 la temperatura del foglio puntando lo stesso angolo di osservazione del target.</span></div>
+      <div class="tip"><strong>Distanza e atmosfera</strong><span>A distanze &lt; 5 m gli effetti di umidità atmosferica sono trascurabili. Oltre, imposta UR e T atmosferica nel software. Verifica IFOV (campo di vista istantaneo) sufficiente per il dettaglio cercato.</span></div>
+      <div class="tip"><strong>Range di palette adeguato</strong><span>Limita il range alla zona d'interesse (es. 14-22 °C in inverno indoor) per esaltare i contrasti utili. Cambia palette (Iron, Rainbow, Grayscale) in base al tipo di difetto: termofreddi → Iron, contrasti netti → Grayscale.</span></div>
+    </div></div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">3</span> Posizionamento e composizione</h3>
+    <div class="body"><div class="tips" data-cat="pos">
+      <div class="tip"><strong>Angolo di osservazione &lt; 60°</strong><span>Sopra i 60° dall'asse normale alla superficie, l'emissività apparente cala drasticamente e aumentano i riflessi. Cerca sempre l'angolo più frontale possibile.</span></div>
+      <div class="tip"><strong>Coppia foto IR + visibile</strong><span>Scatta sempre coppia: termogramma + foto visibile dallo stesso punto. Indispensabile per la documentazione e l'individuazione di marker fisici (chiodi, prese, segni).</span></div>
+      <div class="tip"><strong>Marker fisici sul target</strong><span>Per documentare anomalie estese (muffa, distacco), applica un nastro adesivo o piccoli marker visibili a temperatura nota (es. mano del rilevatore = ~32 °C, utile come riferimento).</span></div>
+      <div class="tip"><strong>Cornice di campo nota</strong><span>Includi nel termogramma almeno un elemento di temperatura nota (radiatore, finestra aperta, mano) per validare l'impostazione di emissività e Treflected.</span></div>
+    </div></div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">4</span> Interpretazione e refertazione</h3>
+    <div class="body"><div class="tips" data-cat="int">
+      <div class="tip"><strong>Confronto interno ↔ esterno</strong><span>Per la stessa anomalia: ponte termico si vede caldo dall'esterno, freddo dall'interno. Infiltrazione d'aria si vede fredda da entrambi i lati. Umidità solitamente fredda (evaporazione) ma può essere calda se condensa attiva.</span></div>
+      <div class="tip"><strong>Calcola la "temperatura di superficie minima accettabile"</strong><span>Per evitare condensa: Tsi &gt; Td (punto rugiada). Per evitare muffa: Tsi tale che UR superficie &lt; 80% (Sedlbauer 2001).</span></div>
+      <div class="tip"><strong>Distingui difetti termici reali da artefatti</strong><span>Riflesso = la macchia si sposta col punto di vista. Difetto reale = stabile. Effetto bordo = anomalie ai margini del campo visivo. Effetto Narcissus = riflesso del corpo dell'operatore.</span></div>
+      <div class="tip"><strong>Patentino livello UNI EN 473</strong><span>L'esame termografico in edilizia richiede operatore di livello 2 o 3 secondo <strong>UNI EN ISO 9712:2022</strong> / EN 473 per la refertazione professionale. In Italia certificazione gestita da CICPND, RINA, BINDT.</span></div>
+    </div></div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">5</span> Errori comuni, 10 trabocchetti</h3>
+    <div class="body"><div class="tips" data-cat="errori">
+      <div class="tip"><strong>1. Emissività generica ε=0,95</strong><span>Errore tipico del principiante: lasciare ε=0,95 default sulla termocamera. Su metalli lucidi (ε≈0,1) si legge Treflected, non la T del target. Sempre verificare il materiale e regolare ε puntualmente.</span></div>
+      <div class="tip"><strong>2. Ignorare Treflected su edifici esterni</strong><span>Una facciata sud al tramonto "vede" il cielo notturno freddo (T≈−40°C) e altre facciate vicine calde. Treflected non è la T ambiente. Misura sempre con metodo crumpled foil (UNI EN ISO 6781-1:2023, gia UNI EN 13187, §6.3).</span></div>
+      <div class="tip"><strong>3. Pretendere quantitativi da camera qualitativa</strong><span>UNI EN ISO 6781-1:2023 (gia UNI EN 13187:2000 (ritirata 2023, oggi UNI EN ISO 6781-1:2023)) è esplicita: la termografia edile è QUALITATIVA (rivelazione irregolarità termiche). Per stimare U-value servono norme dedicate (UNI ISO 9869-1:2015 metodo HFM, ISO 9869-2 per IR). Non scrivere "U=0,35 W/m²K da termografia": è scorretto.</span></div>
+      <div class="tip"><strong>4. Confondere riflesso con difetto</strong><span>Test rapido: sposta di 30 cm a destra → se la macchia si sposta è riflesso, se resta è difetto reale. Riflessi di radiatori, persone, luci sono i falsi positivi più frequenti.</span></div>
+      <div class="tip"><strong>5. Scattare con sole basso (ombre)</strong><span>Le ombre create dal sole (gronde, balconi) producono pattern termici che imitano ponti termici. Posticipa di 2 h dopo il tramonto o lavora prima dell'alba (UNI EN ISO 6781-1:2023, gia UNI EN 13187, §5.5).</span></div>
+      <div class="tip"><strong>6. Saturazione (over-range)</strong><span>Termogrammi su radiatori, lampade, finestre col sole → saturazione del sensore. La camera mostra zone "rosse piatte" che nascondono la T reale. Estendi il range manualmente sulla termocamera o ripeti la misura.</span></div>
+      <div class="tip"><strong>7. Distanza eccessiva (IFOV insufficiente)</strong><span>Una termocamera 320×240 con FOV 25°×19° ha IFOV ≈ 1,36 mrad. A 10 m vede un "pixel" di 1,4 cm. Per misurare correttamente un dettaglio servono 3×3 pixel: cioè minimo 4 cm. Riavvicinati se il difetto è più piccolo.</span></div>
+      <div class="tip"><strong>8. Refertazione "didascalica"</strong><span>Il termogramma DEVE essere accompagnato da: foto visibile della stessa zona, parametri impostati (ε, Treflected, distanza, UR), legenda della scala, indicazione dei punti misurati con coordinate spot/area. UNI EN ISO 6781-1:2023, gia UNI EN 13187, § 7 + UNI 11867:2022.</span></div>
+      <div class="tip"><strong>9. Termocamera "fredda" → drift</strong><span>Il sensore microbolometrico (non raffreddato) richiede 10-15 min di stabilizzazione termica nell'ambiente di rilievo. Le prime acquisizioni sono affette da drift di 1-2°C. Sempre acclimatare e ripetere il NUC (Non-Uniformity Correction) prima di misure quantitative.</span></div>
+      <div class="tip"><strong>10. Documentare senza GPS/data/ora</strong><span>Per uso probatorio il termogramma deve avere metadati: data/ora con secondi, condizioni meteo (T int/ext, UR, vento, sole), localizzazione GPS della camera e del target. Senza questi il termogramma ha scarso valore probatorio.</span></div>
+    </div></div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">6</span> Formule e tabelle di riferimento</h3>
+    <div class="body"><div class="tips" data-cat="formule">
+      <div class="tip"><strong>Legge di Stefan-Boltzmann</strong><span>M = ε·σ·T⁴ dove σ = 5,67×10⁻⁸ W/m²·K⁴. La radianza M emessa da un corpo dipende da ε (emissività) e T⁴ (Kelvin). Variazione di 1°C su un target a 20°C → variazione di ~5,4 W/m² (microbolometri rilevano già 0,05°C).</span></div>
+      <div class="tip"><strong>Apparent Temperature</strong><span>T_apparent = [ε·σ·T_obj⁴ + (1−ε)·σ·T_refl⁴]^(1/4). Se ε ≪ 1, la T misurata è una media pesata tra T target e T riflessa. Per ε=0,3 e T_refl molto diversa da T_obj, l'errore può essere ±10°C.</span></div>
+      <div class="tip"><strong>Atmospheric transmission</strong><span>τ_atm = e^(−α·d) dove α dipende da UR e CO₂. A d=10 m e UR=50% il segnale perde ~5%. Il software della termocamera lo compensa se inserisci d, T_atm, UR_atm.</span></div>
+      <div class="tip"><strong>Tabella emissività edilizia (FLIR Reference Guide 2024)</strong><span>Intonaco grezzo 0,93 · Intonaco verniciato 0,90 · Mattone laterizio 0,93 · Cemento ruvido 0,94 · Cemento liscio 0,90 · Marmo lucido 0,89-0,93 · Legno (vernice opaca) 0,90 · Vetro 0,92 · Acciaio inox lucido 0,15 · Alluminio anodizzato 0,77 · Rame ossidato 0,78. Verifica sempre col metodo del nastro nero ε=0,95 (UNI EN ISO 6781-1:2023, gia UNI EN 13187, §6.2).</span></div>
+      <div class="tip"><strong>IFOV vs distanza (microbolometro 17 µm, ottica 25°×19°)</strong><span>320×240: IFOV ≈ 1,36 mrad → spot 1,4 mm/m. 640×480: IFOV ≈ 0,68 mrad → spot 0,7 mm/m. A 5 m con 320×240 vedi dettagli da 7 mm minimo (3×3 pixel). Per ponti termici 5×5 cm a 10 m serve almeno 640×480.</span></div>
+      <div class="tip"><strong>NETD (Noise-Equivalent Temperature Difference)</strong><span>Sensibilità termica: 50 mK sulle termocamere per telefono, 30 mK su una termocamera professionale, 20 mK sui microbolometri scientifici. Più basso = capacità di vedere differenze più sottili. Per edilizia 50 mK è sufficiente, per IAQ/aeronautica serve &lt;30 mK.</span></div>
+    </div></div>
+  </article>
+
+  <footer class="ft"><strong>Mixando &middot; Consigli Termografia v2</strong> &middot; Riferimenti normativi cogenti: <strong>UNI EN ISO 6781-1:2023 (gia UNI EN 13187:2000 (ritirata 2023, oggi UNI EN ISO 6781-1:2023))</strong> (rilievi termografici edifici, qualitativo) &middot; <strong>UNI EN ISO 6781-3:2015</strong> &middot; <strong>UNI EN 16714-1:2016</strong> (PND termografia, principi generali) &middot; <strong>UNI 11867:2022</strong> (PND prove non distruttive: termografia per professionisti) &middot; <strong>UNI EN ISO 9712:2022</strong> (qualifica operatori NDT, livelli 1/2/3) &middot; <strong>UNI ISO 9869-1:2015</strong> (metodo HFM per U-value in opera) &middot; <strong>ISO 18434-1:2008</strong> (PND termografia maintenance industriale) &middot; <strong>ASTM E1933-99a</strong> (compensazione emissività) &middot; <strong>ASTM E1543-19</strong> (qualifica imaging IR) &middot; <strong>ASTM E1213-19</strong> (performance imaging radiometers) &middot; <strong>ASNT-TC-1A</strong> &middot; <strong>BINDT</strong> (British Institute of NDT) &middot; <strong>CICPND/RINA</strong> certificazione italiana.</footer>
+</main>
+
+<script>
+(function(){
+  var search = document.getElementById('qSearch');
+  search.addEventListener('input',function(){
+    var q = search.value.toLowerCase().trim();
+    document.querySelectorAll('.tip').forEach(function(t){
+      var txt = t.textContent.toLowerCase();
+      t.style.display = (!q || txt.indexOf(q)>=0) ? '' : 'none';
+    });
+    document.querySelectorAll('.card').forEach(function(c){
+      var visible = c.querySelectorAll('.tip:not([style*="display: none"])').length;
+      c.style.display = (!q || visible>0) ? '' : 'none';
+    });
+    /* 20/11/2026: ricerca senza risultati, la pagina lo dice (prima restava vuota) */
+    var trovati = document.querySelectorAll('.tip:not([style*="display: none"])').length;
+    var vuoto = document.getElementById('qVuoto');
+    if (vuoto){
+      document.getElementById('qVuotoTxt').textContent = search.value.trim();
+      vuoto.style.display = (q && !trovati) ? '' : 'none';
+    }
+  });
+})();
+</script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

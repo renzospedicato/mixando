@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mixando">
+<title>Mixando Lab · Diagnostica Edile e Salubrità del Costruito</title>
+<style>
+:root{
+  --bg:#f5f0e6;
+  --paper:#ffffff;
+  --ink:#2c1810;
+  --ink-soft:#5a4a3a;
+  --ink-mute:#8b7355;
+  --line:#e6dfd0;
+  --line-soft:#f0eadc;
+  --brand:#1e3f63;
+  --brand2:#34699e;
+  --gold:#d4a017;
+  --shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);
+  --shadow-lg:0 16px 48px rgba(20,20,40,.22);
+  --r:14px;
+  --ff-serif:Georgia,"Cambria","Times New Roman",serif;
+  --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+
+/* ====== Hero (top) ====== */
+.hero{text-align:center;max-width:900px;margin:0 auto;padding:34px 16px 22px}
+.hero .lockup{display:block;margin:0 auto;max-height:100px;max-width:92%;width:auto;height:auto;object-fit:contain}
+.hero .tag{margin:18px 0 0;font-family:var(--ff-serif);font-weight:700;font-size:clamp(17px,2.6vw,23px);color:var(--ink);line-height:1.2}
+.hero .tag em{color:var(--brand2);font-style:italic}
+.hero .sub{margin:12px auto 0;max-width:640px;color:var(--ink-soft);font-size:13.5px;line-height:1.55}
+.hero .firma{margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.hero .firma-logo{height:104px;width:auto;object-fit:contain;display:block;filter:drop-shadow(0 3px 9px rgba(20,20,40,.20))}
+.hero .firma-name{font-family:var(--ff-serif);font-style:italic;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em}
+.hero .firma-perito{font-size:11.5px;color:var(--ink-mute)}
+.hero .firma-perito:empty{display:none}
+.hero .meta{display:flex;justify-content:center;gap:9px;align-items:center;margin-top:14px;font-size:11.5px;color:var(--ink-mute);letter-spacing:.04em}
+.hero .meta .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block}
+
+/* ====== Grid container ====== */
+main{max-width:1180px;margin:0 auto;padding:0 16px 60px}
+
+/* Sezione categoria */
+.cat{margin-top:18px}
+
+/* === TESSERA · IDENTICA PER TUTTI: solo --accent cambia === */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.tile{
+  --accent:#666; --accent-bg:#f0f0f0; --accent-ink:#333;
+  position:relative;
+  background:var(--accent-bg);
+  border:2px solid var(--accent);
+  border-radius:14px;
+  padding:14px 14px 14px;
+  cursor:pointer;
+  transition:transform .15s ease,box-shadow .2s ease;
+  box-shadow:0 1px 2px rgba(20,20,40,.04),0 4px 14px rgba(20,20,40,.05);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  min-height:230px;
+  text-align:left;
+  width:100%;
+  font-family:inherit;
+  color:inherit;
+  outline:none;
+}
+.tile:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(20,20,40,.12)}
+.tile:active{transform:translateY(-1px)}
+.tile:focus-visible{box-shadow:0 0 0 3px rgba(0,0,0,.10),0 8px 22px rgba(20,20,40,.12)}
+
+/* Badge categoria (pillola in alto) */
+.tile .badge{
+  align-self:flex-start;
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 10px;
+  border-radius:999px;
+  background:var(--accent);
+  color:#fff;
+  font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:10px;
+}
+/* Icona */
+.tile .ic{
+  width:38px;height:38px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  color:var(--accent-ink);
+  margin:2px 0 8px 0;
+}
+/* Titolo (sempre stesso font, peso, dimensione) */
+.tile .t{
+  font-family:var(--ff-serif);
+  font-size:15px;font-weight:700;
+  color:var(--ink);
+  line-height:1.2;margin:0 0 4px;
+}
+/* Sotto-titolo (sempre stesso stile) */
+.tile .s{
+  font-size:11.5px;font-weight:600;
+  color:var(--accent-ink);
+  margin:0 0 6px;
+  font-style:italic;
+}
+/* Descrizione (sempre stesso stile, flex grow) */
+.tile .d{
+  font-size:11.5px;
+  color:var(--ink-soft);
+  line-height:1.45;
+  margin:0;flex:1;
+}
+/* CTA in fondo (sempre stesso stile) */
+.tile .go{
+  margin-top:10px;
+  font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent-ink);font-weight:800;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.tile .go::after{content:"→";transition:transform .2s ease}
+.tile:hover .go::after{transform:translateX(3px)}
+
+/* ====== Modal (frame uniforme per tutti i moduli) ====== */
+.modal{
+  --accent:#666; --accent-bg:#f0f0f0;
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  display:none;
+  background:rgba(20,15,8,.55);
+  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+  z-index:100;padding:0;
+}
+.modal.show{display:flex}
+.modal .dlg{position:relative;background:var(--paper);width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;border-top:6px solid var(--accent)}
+@media (min-width:900px){
+  .modal{padding:18px}
+  .modal .dlg{border-radius:14px;max-width:1380px;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);margin:auto;box-shadow:var(--shadow-lg);border:1px solid var(--line);border-top:6px solid var(--accent)}
+}
+.modal .bar{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--accent-bg),var(--paper));min-height:54px;flex:0 0 auto}
+.modal .em{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--accent);color:#fff;flex:0 0 auto}
+.modal .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.modal .tag{align-self:flex-start;padding:2px 9px;border-radius:999px;background:var(--accent);color:#fff;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;margin-bottom:2px}
+.modal .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:16px;color:var(--ink);margin:0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal button.act{appearance:none;background:var(--paper);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:11px;letter-spacing:.10em;text-transform:uppercase;font-weight:700;padding:7px 11px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.modal button.act:hover{background:var(--accent-bg);border-color:var(--accent);color:var(--accent-ink,var(--ink))}
+.modal button.act.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.modal button.act.primary:hover{filter:brightness(.92)}
+.modal button.act.added{background:#27ae60;color:#fff;border-color:#27ae60}
+.modal .x{width:34px;height:34px;padding:0;font-size:16px;border-radius:9px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal .x:hover{background:var(--accent-bg);border-color:var(--accent)}
+.modal .host{position:relative;flex:1;background:var(--paper);overflow:hidden}
+.modal .host iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--paper)}
+.modal .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:11.5px;letter-spacing:.20em;text-transform:uppercase;gap:10px;background:var(--paper)}
+.modal .loading.hide{display:none}
+.modal .loading .sp{width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ====== Footer ====== */
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);letter-spacing:.04em;padding:18px 16px 0;border-top:1px solid var(--line);line-height:1.6}
+footer.ft strong{color:var(--ink)}
+footer.ft code{font-family:"JetBrains Mono","Courier New",monospace;font-size:10.5px;background:var(--line-soft);padding:1px 6px;border-radius:6px}
+
+@media (max-width:600px){
+  .hero{padding:24px 16px 18px}
+  .grid{grid-template-columns:1fr 1fr;gap:10px}
+  .tile{min-height:200px;padding:12px 12px}
+  .tile .ic{width:32px;height:32px;font-size:18px}
+  .tile .t{font-size:14px}
+  .tile .d{font-size:11px}
+}
+@media (max-width:380px){ .grid{grid-template-columns:1fr} }
+/* === Shimmer + gradient hover su .tile (pattern Mixando) === */
+.tile{position:relative;overflow:hidden;background-size:180% 180%;background-position:0% 0%;transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background-position .35s ease,border-color .2s}
+.tile::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.42) 48%,rgba(255,255,255,.42) 52%,transparent 75%);transform:translateX(-130%);transition:transform .7s ease;z-index:1}
+.tile:hover::before{transform:translateX(130%)}
+.tile:hover{transform:translateY(-3px) scale(1.02);background-position:100% 100%;box-shadow:0 8px 24px rgba(20,20,40,.18),0 2px 6px rgba(20,20,40,.10);filter:brightness(1.04) saturate(1.12)}
+.tile:active{transform:translateY(0) scale(.99);transition-duration:.05s}
+.tile > *{position:relative;z-index:2}
+
+/* === Tile tutte uguali e compatte; descrizione nascosta, in hover la tile si allunga e la mostra (senza far saltare la griglia) === */
+.grid{grid-auto-rows:200px;align-items:start}
+.tile{height:200px;min-height:0;background-color:var(--paper);background-image:linear-gradient(0deg,var(--accent-bg),var(--accent-bg))}
+.tile .d{flex:0 0 auto;max-height:0;opacity:0;margin:0;overflow:hidden;transition:max-height .3s ease,opacity .22s ease,margin-top .3s ease}
+.tile .go{margin-top:auto}
+.tile:hover{height:auto;min-height:200px;z-index:30;box-shadow:0 16px 40px rgba(20,20,40,.28),0 4px 12px rgba(20,20,40,.16)}
+.tile:hover .d{max-height:320px;opacity:1;margin-top:8px}
+@media (hover:none){.grid{grid-auto-rows:auto}.tile{height:auto;min-height:200px}.tile .d{max-height:none;opacity:1;margin-top:8px}}
+@media (prefers-reduced-motion:reduce){.tile,.tile .d{transition:none}.tile:hover{transform:none}}
+
+/* === Numeri animati (contatori) + reveal delle tile allo scroll === */
+.hero .stats{display:flex;justify-content:center;gap:30px;margin-top:22px;flex-wrap:wrap}
+.hero .stat{position:relative;display:flex;flex-direction:column;align-items:center;line-height:1;padding:0 6px}
+.hero .stat+.stat::before{content:"";position:absolute;left:-15px;top:6px;bottom:8px;width:1px;background:var(--line)}
+.hero .stat .num{font-family:var(--ff-serif);font-weight:700;font-size:clamp(28px,4.4vw,42px);color:var(--brand);font-variant-numeric:tabular-nums}
+.hero .stat .lbl{margin-top:6px;font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-mute)}
+@keyframes mxReveal{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.tile.reveal{opacity:0}
+.tile.revealed{animation:mxReveal .6s cubic-bezier(.22,.61,.36,1) backwards}
+@media (prefers-reduced-motion:reduce){.tile.reveal{opacity:1}.tile.revealed{animation:none}}
+
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:56px !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:50px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+
+<header class="hero">
+  <img class="lockup" src="mixando_lab_lockup.png" alt="Mixando Lab, Patologia edilizia">
+  <h1 class="tag">Diagnostica edile e <em>salubrità del costruito</em></h1>
+  <p class="sub">Suite di strumenti per la diagnosi delle patologie edilizie (umidità, sali, biodeteriogeni, condensa, infiltrazioni), la salubrità ambientale (radon, qualità dell'aria, microclima) e la termografia.</p>
+  <div class="firma">
+    <img class="firma-logo" src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome">
+    <span class="firma-name">Renzo-ArtHome</span>
+    <span class="firma-perito" id="peritoSlot"></span>
+  </div>
+  <div class="stats" id="statStrip">
+    <div class="stat"><span class="num" data-stat="moduli" data-to="28">0</span><span class="lbl">moduli</span></div>
+    <div class="stat"><span class="num" data-to="15">0</span><span class="lbl">patologie</span></div>
+    <div class="stat"><span class="num" data-to="71">0</span><span class="lbl">strumenti</span></div>
+    <div class="stat"><span class="num" data-to="166">0</span><span class="lbl">norme</span></div>
+  </div>
+  <span class="meta"><span class="dot"></span>Mixando Lab · v2 · 2026</span>
+</header>
+
+<div id="bkpReminder" style="max-width:900px;margin:0 auto;padding:0 16px"></div>
+
+<main id="grid"></main>
+
+<footer class="ft">
+  <strong>Mixando Suite v2</strong> &middot; <!--mxVERSIONE--><span class="mx-versione" title="Versione di questa copia: apri VERSIONE.txt o esegui VERIFICA-COPIA.bat">copia del 20/11/2026</span><!--/mxVERSIONE--> &middot; I moduli sono file <code>.html</code> standalone. Per aggiungere un modulo, modifica <code>modules.js</code> nella stessa cartella.
+</footer>
+<script>
+/* Promemoria backup: i dati sono solo in localStorage del browser. */
+(function(){
+  try{
+    var el=document.getElementById('bkpReminder'); if(!el) return;
+    var n=0,sz=0;
+    for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf('mx2::')===0){ n++; sz+=(localStorage.getItem(k)||'').length; } }
+    if(n===0){ el.style.display='none'; return; }
+    var lb=localStorage.getItem('mx2::last-backup');
+    var days=null; if(lb){ var t=new Date(lb).getTime(); if(!isNaN(t)) days=Math.floor((new Date().getTime()-t)/86400000); }
+    var kb=Math.round(sz/1024);
+    var warn=(!lb)||(days!=null&&days>=7);
+    var txt=lb?('ultimo backup '+(days<=0?'oggi':(days+' giorni fa'))):'mai eseguito';
+    el.innerHTML='<div style="padding:9px 14px;border-radius:10px;font-size:12.5px;line-height:1.5;background:'+(warn?'#fdf3e3':'#eef7f0')+';border:1px solid '+(warn?'#e8c98a':'#cfe3d4')+';color:#5a4d3f">'+(warn?'&#9888; ':'&#128190; ')+'<b>Dati locali:</b> '+kb+' KB in '+n+' chiavi &middot; <b>Backup:</b> '+txt+' &middot; <a href="backup.html" style="color:#0e7c87;font-weight:700;text-decoration:none">Esporta backup ora &rarr;</a></div>';
+  }catch(e){}
+})();
+</script>
+
+<!-- Modal frame uniforme -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTi">
+  <div class="dlg">
+    <div class="bar">
+      <span class="em" id="mEm">·</span>
+      <div class="meta">
+        <span class="tag" id="mTag">App</span>
+        <h2 class="ti" id="mTi">&nbsp;</h2>
+      </div>
+      <button class="act" id="mX" type="button" aria-label="Chiudi" style="width:34px;height:34px;padding:0;font-size:16px">&#10005;</button>
+    </div>
+    <div class="host" id="mHost">
+      <div class="loading" id="mLoad"><span class="sp"></span>Caricamento</div>
+    </div>
+  </div>
+</div>
+
+<script src="modules.js"></script>
+<script>
+// Personalizzazione perito: NON tocca MAI il logo Renzo-ArtHome (fisso). Popola solo lo slot dedicato.
+(function loadPerito(){
+  try{
+    var p = JSON.parse(localStorage.getItem("mx2::perito") || "{}");
+    var slot = document.getElementById("peritoSlot");
+    if(!slot) return;
+    var nome = (p && (p.nome || p.studio || p.ragioneSociale)) || "";
+    var html = "";
+    if(p && p.logoData){ html += '<img src="'+p.logoData+'" alt="" style="height:16px;width:auto;object-fit:contain;vertical-align:-3px;margin-right:5px;border-radius:3px">'; }
+    if(nome){ html += 'strumento di: ' + String(nome).replace(/[<>]/g,''); }
+    slot.innerHTML = html;
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  /* Tinta soft del colore accent */
+  function softColor(hex, opacity){
+    if(!hex) return 'rgba(0,0,0,'+(opacity||.10)+')';
+    var c = hex.replace('#','').trim();
+    if(c.length===3) c = c.split('').map(function(x){return x+x;}).join('');
+    if(c.length!==6) return 'rgba(0,0,0,'+(opacity||.10)+')';
+    var r=parseInt(c.substr(0,2),16), g=parseInt(c.substr(2,2),16), b=parseInt(c.substr(4,2),16);
+    return 'rgba('+r+','+g+','+b+','+(opacity||.10)+')';
+  }
+  function darkerColor(hex){
+    // Per "accent-ink" · colore scuro derivato
+    if(!hex) return '#333';
+    var c = hex.replace('#','').trim();
+    if(c.length===3) c = c.split('').map(function(x){return x+x;}).join('');
+    if(c.length!==6) return '#333';
+    var r=Math.round(parseInt(c.substr(0,2),16)*0.55);
+    var g=Math.round(parseInt(c.substr(2,2),16)*0.55);
+    var b=Math.round(parseInt(c.substr(4,2),16)*0.55);
+    return 'rgb('+r+','+g+','+b+')';
+  }
+
+  /* ====== Render dashboard ====== */
+  function renderGrid(){
+    var cats = (window.MIXANDO_CATEGORIES||[]).slice().sort(function(a,b){return (a.order||99)-(b.order||99);});
+    var grouped = {};
+    (window.MIXANDO_MODULES||[]).forEach(function(m){
+      var c = m.category || 'altro';
+      (grouped[c] = grouped[c] || []).push(m);
+    });
+    var host = document.getElementById('grid');
+    host.innerHTML = '';
+    cats.forEach(function(cat){
+      var list = grouped[cat.id]; if(!list || !list.length) return;
+      var sec = document.createElement('section');
+      sec.className = 'cat';
+      var grid = document.createElement('div');
+      grid.className = 'grid';
+      list.forEach(function(m){
+        var t = document.createElement('button');
+        t.type = 'button';
+        t.className = 'tile';
+        var acc = m.color || '#666';
+        t.style.setProperty('--accent', acc);
+        t.style.setProperty('--accent-bg', softColor(acc, .14));
+        t.style.setProperty('--accent-ink', darkerColor(acc));
+        t.setAttribute('data-mod', m.id);
+        t.innerHTML =
+          '<span class="badge">'+ (cat.label||'') +'</span>' +
+          '<div class="ic">'+ (m.icon||'•') +'</div>' +
+          '<h3 class="t">'+ m.label +'</h3>' +
+          '<div class="s">'+ (m.sub||'') +'</div>' +
+          '<p class="d">'+ (m.desc||'') +'</p>' +
+          '<span class="go">Apri</span>';
+        t.addEventListener('click', function(){ openMod(m.id); });
+        grid.appendChild(t);
+      });
+      sec.appendChild(grid);
+      host.appendChild(sec);
+    });
+  }
+
+  /* ====== Modal ====== */
+  var modal = document.getElementById('modal'),
+      host  = document.getElementById('mHost'),
+      loadEl= document.getElementById('mLoad'),
+      bEm   = document.getElementById('mEm'),
+      bTag  = document.getElementById('mTag'),
+      bTi   = document.getElementById('mTi');
+  var iframes = {};
+
+  function openMod(id){
+    var m = (window.MIXANDO_MODULES||[]).find(function(x){return x.id===id;});
+    if(!m) return;
+
+    /* === FIX file:// · apertura in nuova scheda se non siamo su http(s) === */
+    /* Su file:// gli iframe spesso non caricano altri file:// per security ==> nuova scheda */
+    if (location.protocol === 'file:'){
+      var w = window.open(m.file, '_blank');
+      if (!w){
+        /* Popup bloccato → fallback navigate stessa scheda */
+        alert('Il browser ha bloccato l\'apertura di una nuova scheda.\nPremi OK per aprire il modulo qui.');
+        window.location.href = m.file;
+      }
+      return;
+    }
+
+    /* Su http(s) usa il modal+iframe (più immersivo) */
+    var acc = m.color || '#666';
+    modal.style.setProperty('--accent', acc);
+    modal.style.setProperty('--accent-bg', softColor(acc,.14));
+    var cat = (window.MIXANDO_CATEGORIES||[]).find(function(c){return c.id===m.category;});
+    bTag.textContent = (cat && cat.label) || (m.category||'Modulo');
+    bTi.textContent  = m.label;
+    var _mEmIc = m.icon || '•'; if((''+_mEmIc).indexOf('<svg')===0){ bEm.innerHTML = _mEmIc; } else { bEm.textContent = _mEmIc; }
+    loadEl.classList.remove('hide');
+    var ifr = iframes[id];
+    if(!ifr){
+      ifr = document.createElement('iframe');
+      ifr.title = m.label;
+      ifr.referrerPolicy = 'no-referrer';
+      ifr.addEventListener('load', function(){ loadEl.classList.add('hide'); });
+      ifr.src = m.file;
+      host.appendChild(ifr);
+      iframes[id] = ifr;
+    } else {
+      loadEl.classList.add('hide');
+    }
+    Object.keys(iframes).forEach(function(k){
+      iframes[k].style.display = (k===id) ? 'block' : 'none';
+    });
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    try{ history.replaceState(null,'','#'+id); }catch(_){}
+  }
+  function closeMod(){
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    if(location.hash){ try{ history.replaceState(null,'',location.pathname); }catch(_){} }
+  }
+  document.getElementById('mX').addEventListener('click', closeMod);
+  modal.addEventListener('click', function(e){ if(e.target===modal) closeMod(); });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape' && modal.classList.contains('show')) closeMod();
+  });
+  /* 20/11/2026: «← Suite» dei moduli. Il modulo chiede a chi l'ha aperto se è la suite, e la suite risponde.
+     Al clic su «← Suite» il modulo aperto nel riquadro chiede di chiuderlo (come la ×); quello aperto in una
+     scheda nuova chiude la sua scheda. Prima il link caricava una seconda suite. */
+  window.addEventListener('message', function(ev){
+    var d = ev.data;
+    if (!d || typeof d !== 'object') return;
+    if (d.mx === 'sei-la-suite?'){ try{ ev.source.postMessage({mx:'sono-la-suite'}, '*'); }catch(_){} }
+    else if (d.mx === 'chiudi-modulo'){ if (modal.classList.contains('show')) closeMod(); }
+  });
+
+  /* ====== Boot ====== */
+  if(!window.MIXANDO_MODULES || !window.MIXANDO_CATEGORIES){
+    document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#a83232">Errore: <code>modules.js</code> non caricato.</div>';
+    return;
+  }
+  renderGrid();
+  var h = (location.hash||'').replace('#','');
+  if(h && (window.MIXANDO_MODULES||[]).find(function(m){return m.id===h;})){
+    setTimeout(function(){ openMod(h); }, 50);
+  }
+})();
+</script>
+<script>
+/* === Dinamismo home: numeri animati + reveal delle tile allo scroll === */
+(function(){
+  var reduce=false; try{ reduce=matchMedia('(prefers-reduced-motion:reduce)').matches; }catch(e){}
+  /* numero moduli reale dalla lista */
+  try{ var mEl=document.querySelector('.hero .num[data-stat="moduli"]'); if(mEl && window.MIXANDO_MODULES) mEl.dataset.to=window.MIXANDO_MODULES.length; }catch(e){}
+  /* contatori che salgono (con fallback se i frame non scorrono) */
+  [].forEach.call(document.querySelectorAll('.hero .num'),function(el){
+    var to=parseInt(el.dataset.to,10)||0;
+    if(reduce){ el.textContent=to; return; }
+    var done=false,t0=null;
+    function step(ts){ if(done)return; if(!t0)t0=ts; var p=Math.min(1,(ts-t0)/1200); el.textContent=Math.round(to*(1-Math.pow(1-p,3))); if(p<1)requestAnimationFrame(step); else { el.textContent=to; done=true; } }
+    requestAnimationFrame(step);
+    setTimeout(function(){ if(!done){ done=true; el.textContent=to; } },1700);
+  });
+  /* reveal delle tile mentre scorri (a cascata), con fallback */
+  var tiles=[].slice.call(document.querySelectorAll('.tile'));
+  if(!reduce && 'IntersectionObserver' in window && tiles.length){
+    tiles.forEach(function(t){ t.classList.add('reveal'); });
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ var t=e.target; t.style.animationDelay=((t._mxi||0)%6*50)+'ms'; t.classList.remove('reveal'); t.classList.add('revealed'); io.unobserve(t); } });
+    },{rootMargin:'0px 0px -6% 0px',threshold:.05});
+    tiles.forEach(function(t,i){ t._mxi=i; io.observe(t); });
+    setTimeout(function(){ tiles.forEach(function(t){ if(t.classList.contains('reveal')) t.classList.remove('reveal'); }); },1800);
+  }
+})();
+</script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

@@ -1,0 +1,2947 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Termoigrometria">
+<title>Mixando Lab · Termoigrometria, LIM Sedlbauer + Magnus-Tetens + ASHRAE 2025</title>
+<style>
+:root{
+  --mx-accent:#c0392b; --mx-accent-soft:rgba(192,57,43,.10); --mx-accent-strong:#922a1f; --mx-accent-glow:rgba(192,57,43,.28);
+  --bg:#f5f1e8; --bg-grad:linear-gradient(135deg,#f5f1e8 0%,#ede5d0 100%);
+  --paper:#fff; --paper-soft:#fbf8ef;
+  --ink:#2c1810; --ink-soft:#6b5c4c; --ink-mute:#8b7355;
+  --line:#e6e0d2; --ok:#1f7a4d; --warn:#b07820; --err:#a83232;
+  --r:14px;
+  --ff-serif:Georgia,"Cambria","Times New Roman",serif;
+  --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg-grad);background-attachment:fixed;color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:0px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;background:linear-gradient(180deg,#fff 0%,#fdfbf4 100%);border-bottom:3px solid var(--mx-accent);box-shadow:0 2px 10px rgba(20,20,40,.06)}
+.mx-bar .em{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;background:radial-gradient(circle at 30% 30%,#d65543,var(--mx-accent) 70%);color:#fff;box-shadow:0 2px 6px var(--mx-accent-glow)}
+.mx-bar .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mx-accent);line-height:1}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:14px;color:var(--ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:6px 12px;border:1px solid var(--mx-accent);border-radius:8px;transition:all .15s}
+.mx-bar a.back:hover{background:var(--mx-accent);color:#fff;box-shadow:0 2px 8px var(--mx-accent-glow)}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:8px 6px 14px;text-align:center}
+.hero h2{margin:0 0 4px;font-family:var(--ff-serif);font-size:clamp(22px,4.4vw,30px);color:var(--ink);font-weight:700;letter-spacing:-.01em}
+.hero h2 em{color:var(--mx-accent);font-style:italic;text-shadow:0 1px 0 var(--mx-accent-glow)}
+.hero p{margin:6px auto 0;max-width:680px;color:var(--ink-soft);font-size:13.5px;line-height:1.55}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card>h3{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),var(--paper));display:flex;align-items:center;gap:10px}
+.card>h3 .num{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:var(--ff-sans)}
+.card .body{padding:16px 18px}
+.subs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
+@media (max-width:680px){ .subs{grid-template-columns:1fr} }
+.sub-btn{appearance:none;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left;font-family:inherit;color:var(--ink);transition:all .15s}
+.sub-btn:hover{border-color:var(--mx-accent);background:var(--mx-accent-soft)}
+.sub-btn.is-on{border-color:var(--mx-accent);background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));color:#fff;box-shadow:0 2px 10px var(--mx-accent-glow)}
+.sub-btn .lab{font-weight:700;font-size:13px;display:block;margin-bottom:3px}
+.sub-btn .lab small{display:block;font-size:11px;opacity:.85;font-weight:600;margin-top:2px}
+.sub-btn .desc{font-size:10.5px;opacity:.85;line-height:1.4}
+.sliders{display:flex;flex-direction:column;gap:11px}
+.sl{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:10px 14px;align-items:center;padding:11px 14px 13px;background:#fdfcf9;border:1px solid var(--line);border-radius:12px;transition:border-color .2s ease,box-shadow .2s ease}
+.sl:hover{border-color:color-mix(in srgb,var(--thumb,#1f7a4d) 50%,var(--line));box-shadow:0 3px 12px color-mix(in srgb,var(--thumb,#1f7a4d) 13%,transparent)}
+.sl .sl-lab{grid-column:1/2;grid-row:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.sl .sl-lab b{color:var(--ink);font-size:13.5px;font-weight:700;letter-spacing:.01em;line-height:1.2}
+.sl .sl-lab small{color:var(--ink-soft);font-size:11px;font-weight:600;font-style:normal;letter-spacing:.01em;line-height:1.2}
+.sl input[type="range"]{
+  grid-column:1/3;grid-row:2;
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:8px;border-radius:999px;
+  background:linear-gradient(90deg,var(--thumb,#1f7a4d) 0%,var(--thumb,#1f7a4d) var(--val,50%),#e7e0cf var(--val,50%),#e7e0cf 100%);
+  outline:none;cursor:pointer;
+  box-shadow:inset 0 1px 3px rgba(15,23,42,.13);
+  transition:height .15s ease;
+}
+.sl input[type="range"]:hover{height:10px}
+.sl input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:22px;height:22px;border-radius:50%;
+  background:#fff;border:3px solid var(--thumb,#1f7a4d);
+  box-shadow:0 1px 5px color-mix(in srgb,var(--thumb,#1f7a4d) 42%,transparent),0 1px 2px rgba(0,0,0,.16);
+  cursor:grab;transition:transform .12s cubic-bezier(.34,1.56,.64,1);
+}
+.sl input[type="range"]:hover::-webkit-slider-thumb,.sl input[type="range"]:active::-webkit-slider-thumb{transform:scale(1.16)}
+.sl input[type="range"]:active::-webkit-slider-thumb{cursor:grabbing}
+.sl input[type="range"]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--thumb,#1f7a4d);box-shadow:0 1px 5px color-mix(in srgb,var(--thumb,#1f7a4d) 42%,transparent),0 1px 2px rgba(0,0,0,.16);cursor:grab;transition:transform .12s ease}
+.sl input[type="range"]:hover::-moz-range-thumb{transform:scale(1.16)}
+.sl .sl-num{grid-column:2/3;grid-row:1;display:flex;align-items:stretch;border:1.5px solid color-mix(in srgb,var(--thumb,#1f7a4d) 40%,var(--line));border-radius:9px;overflow:hidden;background:#fff;min-width:94px;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.sl .sl-num input{flex:1;border:0;padding:7px 8px;font:inherit;font-size:15px;font-weight:700;text-align:right;color:var(--ink);background:transparent;outline:none;min-width:0;width:100%;-moz-appearance:textfield}
+.sl .sl-num input::-webkit-outer-spin-button,.sl .sl-num input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.sl .sl-num span{display:inline-flex;align-items:center;padding:0 10px;background:color-mix(in srgb,var(--thumb,#1f7a4d) 13%,#fff);color:color-mix(in srgb,var(--thumb,#1f7a4d) 78%,#2c2c2c);font-size:11.5px;font-weight:800;border-left:1px solid color-mix(in srgb,var(--thumb,#1f7a4d) 24%,var(--line));white-space:nowrap}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px}
+.kpi{padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;display:flex;flex-direction:column;gap:3px}
+.kpi .l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);font-weight:700}
+.kpi .v{font-family:var(--ff-serif);font-size:22px;font-weight:700;color:var(--ink);line-height:1.1}
+.kpi .s{font-size:10.5px;color:var(--ink-soft)}
+.kpi.is-ok   .v{color:var(--ok)}    .kpi.is-ok  {background:#f0f8f3;border-color:#cce6d8}
+.kpi.is-warn .v{color:var(--warn)}  .kpi.is-warn{background:#fdf6ec;border-color:#f0e0c4}
+.kpi.is-err  .v{color:var(--err)}   .kpi.is-err {background:#fbf0f0;border-color:#e6c8c8}
+.verdict{margin-top:14px;padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--paper);font-size:13.5px;line-height:1.6;color:var(--ink-soft)}
+.verdict strong{color:var(--ink)}
+.verdict.is-ok{background:#f0f8f3;border-color:#cce6d8}
+.verdict.is-warn{background:#fdf6ec;border-color:#f0e0c4}
+.verdict.is-err{background:#fbf0f0;border-color:#e6c8c8}
+.verdict.is-crit{background:#f5e6f9;border-color:#d8b4e0}
+.verdict h4{margin:0 0 6px;font-family:Georgia,serif;font-size:14.5px;color:var(--ink);font-style:italic}
+.verdict ul{margin:8px 0 0;padding-left:20px}
+.verdict li{margin:3px 0}
+.formula{margin-top:10px;padding:10px 14px;border-radius:9px;background:#fafaf3;border-left:3px solid var(--mx-accent);font-size:12px;color:var(--ink-soft);line-height:1.6;font-family:"JetBrains Mono","Courier New",monospace}
+.formula strong{color:var(--ink);font-family:var(--ff-sans)}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.actions button{appearance:none;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-family:inherit;font-size:12px;letter-spacing:.10em;text-transform:uppercase;font-weight:700;padding:9px 14px;border-radius:10px;cursor:pointer}
+.actions button:hover{background:var(--mx-accent-soft);border-color:var(--mx-accent);color:var(--mx-accent)}
+.actions button.primary{background:var(--mx-accent);color:#fff;border-color:var(--mx-accent)}
+.actions button.primary:hover{filter:brightness(.92)}
+.actions button.cta{background:linear-gradient(135deg,#558b2f,#33691e);color:#fff;border-color:#33691e}
+.actions button.cta:hover{filter:brightness(1.08)}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);letter-spacing:.04em;padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+
+/* MX-TOOLBAR INLINE */
+/* =====================================================================
+ * MX Toolbar standard, 7 pulsanti gradient + modal anteprima full-screen
+ * Da includere in ogni modulo Mixando v3.
+ * MX-BUILD: 2026-05-24-toolbar-v1
+ * ===================================================================== */
+
+/* ================== TOOLBAR STICKY BOTTOM ================== */
+.mx-toolbar{
+  background:#fff;
+  border:1px solid #e6e0d2;
+  border-radius:14px;
+  box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);
+  margin:18px 0 14px;
+  overflow:hidden;
+  display:block;
+}
+.mx-toolbar-head{margin:0;padding:13px 18px;font-family:Georgia,serif;font-size:15px;color:#2c1810;font-weight:700;border-bottom:1px solid #e6e0d2;background:linear-gradient(180deg,rgba(25,118,210,.10),#fff);display:flex;align-items:center;gap:10px}
+.mx-toolbar-head .ico-wrap{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent,#1976d2);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.mx-toolbar-head .title{flex:1}
+.mx-toolbar-head .title small{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-style:italic;font-size:11.5px;color:#8b7355;font-weight:500;letter-spacing:0;margin-top:2px}
+.mx-toolbar-body{padding:14px 18px 16px}
+
+.mx-toolbar.is-active{ display:block }
+.mx-toolbar.needs-result .mx-tb-btn[data-needs="result"]{ opacity:.4; cursor:not-allowed; filter:grayscale(.5) }
+.mx-toolbar-hint{
+  text-align:center; font-size:11.5px; color:#8b7355; font-style:italic; margin-bottom:6px;
+}
+.mx-toolbar.is-active .mx-toolbar-hint{ display:none }
+
+.mx-toolbar-inner{
+  max-width:1080px; margin:0 auto;
+  display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center;
+}
+.mx-tb-btn{
+  appearance:none; border:0; color:#fff;
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.02em;
+  padding:12px 18px; border-radius:12px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:7px;
+  position:relative; overflow:hidden;
+  text-shadow:0 1px 2px rgba(0,0,0,.20);
+  box-shadow:
+    0 3px 8px rgba(0,0,0,.18),
+    0 1px 2px rgba(0,0,0,.10),
+    inset 0 1px 0 rgba(255,255,255,.30),
+    inset 0 -2px 4px rgba(0,0,0,.12);
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, filter .15s ease, background-position .35s ease;
+  background-size:180% 180%;
+  background-position:0% 0%;
+  white-space:nowrap; min-width:0;
+}
+.mx-tb-btn::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg, transparent 25%, rgba(255,255,255,.40) 48%, rgba(255,255,255,.40) 52%, transparent 75%);
+  transform:translateX(-130%); transition:transform .6s ease;
+}
+.mx-tb-btn:hover{
+  transform:translateY(-2px) scale(1.03);
+  background-position:100% 100%;
+  filter:brightness(1.08) saturate(1.15);
+}
+.mx-tb-btn:hover::before{ transform:translateX(130%) }
+.mx-tb-btn:active{ transform:translateY(0) scale(.98); transition-duration:.05s }
+.mx-tb-btn:disabled{ opacity:.45; cursor:not-allowed; filter:grayscale(.6) }
+.mx-tb-btn .ico{ font-size:16px; line-height:1; filter:drop-shadow(0 1px 2px rgba(0,0,0,.25)) }
+
+/* Gradient ricchi 3-stop con ombra colorata d'accent */
+.mx-tb-btn.tb-save{
+  background-image:linear-gradient(135deg,#64b5f6 0%,#1976d2 45%,#0d47a1 100%);
+  box-shadow:0 3px 10px rgba(25,118,210,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-load{
+  background-image:linear-gradient(135deg,#ffb74d 0%,#f57c00 45%,#bf360c 100%);
+  box-shadow:0 3px 10px rgba(245,124,0,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-compare{
+  background-image:linear-gradient(135deg,#ba68c8 0%,#7b1fa2 45%,#311b92 100%);
+  box-shadow:0 3px 10px rgba(123,31,162,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-word{
+  background-image:linear-gradient(135deg,#5a9bd8 0%,#2b579a 45%,#0c2e5e 100%);
+  box-shadow:0 3px 10px rgba(43,87,154,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-pdf{
+  background-image:linear-gradient(135deg,#ef5350 0%,#c62828 45%,#7f0000 100%);
+  box-shadow:0 3px 10px rgba(198,40,40,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+.mx-tb-btn.tb-report{
+  background-image:linear-gradient(135deg,#ffd54f 0%,#f9a825 45%,#e65100 100%);
+  color:#3e2e00; text-shadow:0 1px 0 rgba(255,255,255,.45);
+  box-shadow:0 3px 10px rgba(249,168,37,.50), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 4px rgba(0,0,0,.10);
+}
+.mx-tb-btn.tb-reset{
+  background-image:linear-gradient(135deg,#9e9e9e 0%,#616161 45%,#212121 100%);
+  box-shadow:0 3px 10px rgba(97,97,97,.42), 0 1px 2px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -2px 4px rgba(0,0,0,.18);
+}
+
+/* Mobile: nascondi label tieni solo icone */
+@media (max-width:680px){
+  .mx-tb-btn{ padding:11px 13px; font-size:12px }
+  .mx-tb-btn .label{ display:none }
+  .mx-tb-btn .ico{ font-size:17px }
+}
+
+/* ================== MODAL ANTEPRIMA FULL-SCREEN ================== */
+.mx-modal{
+  position:fixed; inset:0; z-index:200;
+  background:rgba(20,20,40,.55); backdrop-filter:blur(4px);
+  display:none; align-items:stretch; justify-content:center;
+  padding:18px;
+}
+.mx-modal.is-open{ display:flex }
+.mx-modal-frame{
+  width:100%; max-width:1280px;
+  background:#fff; border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.mx-modal-head{
+  display:flex; align-items:center; gap:14px; padding:14px 20px;
+  border-bottom:1px solid #e6e0d2;
+  background:linear-gradient(180deg,#fdfbf4,#fff);
+}
+.mx-modal-head h2{
+  margin:0; font-family:Georgia,serif; font-style:italic; font-size:18px; color:#2c1810; flex:1
+}
+.mx-modal-head .x{
+  appearance:none; border:0; background:#f5f1e8; color:#6b5c4c;
+  width:36px; height:36px; border-radius:10px; cursor:pointer;
+  font-size:18px; font-weight:700; line-height:1;
+}
+.mx-modal-head .x:hover{ background:#ede5d0; color:#2c1810 }
+.mx-modal-body{
+  flex:1; display:grid; grid-template-columns:320px 1fr; gap:0; min-height:0;
+}
+.mx-modal-side{
+  background:#faf8f3; border-right:1px solid #e6e0d2;
+  padding:16px 18px; overflow-y:auto;
+}
+.mx-modal-side h3{
+  margin:0 0 8px; font-family:Georgia,serif; font-size:14px; font-style:italic; color:#2c1810;
+  border-bottom:1px solid #e6e0d2; padding-bottom:6px;
+}
+.mx-modal-side h3:not(:first-child){ margin-top:18px }
+.mx-modal-side .mx-fld{ display:flex; flex-direction:column; gap:3px; margin-bottom:8px }
+.mx-modal-side .mx-fld label{ font-size:10.5px; font-weight:700; color:#6b5c4c; letter-spacing:.04em }
+.mx-modal-side .mx-fld input,
+.mx-modal-side .mx-fld textarea{
+  padding:7px 9px; border:1px solid #e6e0d2; border-radius:7px;
+  font:inherit; font-size:12.5px; color:#2c1810; background:#fff; outline:none; min-width:0; width:100%;
+}
+.mx-modal-side .mx-fld textarea{ min-height:60px; resize:vertical; font-family:inherit }
+.mx-modal-side .mx-fld input:focus,
+.mx-modal-side .mx-fld textarea:focus{ border-color:#2c5d7c; box-shadow:0 0 0 2px rgba(44,93,124,.18) }
+.mx-modal-side .mx-info{
+  background:#e8f2fa; border-left:3px solid #2c5d7c;
+  padding:8px 10px; border-radius:6px; font-size:11px; color:#1a3d52; line-height:1.5; margin-bottom:10px
+}
+.mx-modal-side .mx-warn{
+  background:#fff3e0; border-left:3px solid #f57c00;
+  padding:8px 10px; border-radius:6px; font-size:11px; color:#5d3a00; line-height:1.5; margin-bottom:10px
+}
+.mx-modal-side .mx-info b, .mx-modal-side .mx-warn b{ color:#0a1f2e }
+.mx-modal-side .mx-link{
+  appearance:none; border:1px solid #2c5d7c; background:#fff; color:#2c5d7c;
+  font:inherit; font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:7px; cursor:pointer; letter-spacing:.04em
+}
+.mx-modal-side .mx-link:hover{ background:#2c5d7c; color:#fff }
+.mx-modal-side .mx-sections label{
+  display:flex; align-items:center; gap:8px; padding:5px 0; font-size:12.5px; color:#2c1810; cursor:pointer
+}
+.mx-modal-side .mx-sections input[type="checkbox"]{ width:16px; height:16px; cursor:pointer; accent-color:#2c5d7c }
+.mx-modal-preview{
+  flex:1; overflow-y:auto; padding:24px; background:#ece9df;
+  display:flex; justify-content:center;
+}
+.mx-modal-paper{
+  width:100%; max-width:780px;
+  background:#fff;
+  box-shadow:0 4px 14px rgba(0,0,0,.12);
+  padding:42px 48px 56px; min-height:100%;
+  font-family:Georgia,serif; color:#2c1810; font-size:13px; line-height:1.55;
+  overflow-x:hidden;
+}
+@media (max-width:780px){
+  .mx-modal-body{ grid-template-columns:1fr }
+  .mx-modal-side{ border-right:0; border-bottom:1px solid #e6e0d2; max-height:280px }
+  .mx-modal-paper{ padding:24px 22px }
+}
+.mx-doc{ word-wrap:break-word; overflow-wrap:break-word }
+.mx-doc-head{ display:flex; gap:18px; margin-bottom:22px; padding-bottom:16px; border-bottom:2px solid #2c1810; flex-wrap:wrap }
+.mx-doc-head .logo img{ max-height:64px; max-width:120px }
+.mx-doc-head .doc-meta{ flex:1; min-width:180px; font-size:11.5px; line-height:1.5; color:#6b5c4c }
+.mx-doc-head .doc-meta strong{ color:#2c1810; font-size:13px }
+.mx-doc-head .doc-meta .perito-name{ font-size:14px; color:#2c1810; font-weight:700 }
+.mx-doc h1{ font-size:22px; margin:14px 0 14px; color:#2c1810; font-weight:700; font-style:italic; line-height:1.25; page-break-after:avoid }
+.mx-doc h2{ font-size:16px; margin:26px 0 10px; color:#2c5d7c; border-bottom:1px solid #d8d3c4; padding-bottom:5px; line-height:1.3; page-break-after:avoid; clear:both }
+.mx-doc h3{ font-size:14px; margin:18px 0 8px; color:#2c1810; line-height:1.35; page-break-after:avoid }
+.mx-doc p{ margin:8px 0; line-height:1.55 }
+.mx-doc p[style*="monospace"]{ overflow-x:auto; max-width:100%; padding:10px 14px !important; font-size:11.5px; word-break:break-all }
+.mx-doc table{ width:100%; border-collapse:collapse; margin:12px 0; font-size:11.5px; table-layout:auto; word-break:break-word }
+.mx-doc table th, .mx-doc table td{ padding:6px 8px; border-bottom:1px solid #e6e0d2; text-align:left; vertical-align:top; line-height:1.45 }
+.mx-doc table th{ background:#faf8f3; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#6b5c4c }
+.mx-doc table td b, .mx-doc table td strong{ color:#2c1810 }
+.mx-doc ul{ margin:8px 0; padding-left:24px }
+.mx-doc ul li{ margin:4px 0; line-height:1.5 }
+.mx-doc sub, .mx-doc sup{ font-size:9.5px; line-height:0 }
+.mx-doc-note{ background:#fffbef; border:1px solid #f0e0c4; padding:10px 14px; margin:12px 0; border-radius:6px; font-style:italic; font-size:12px }
+.mx-doc .ver-ok{ background:#f0f8f3; border-left:3px solid #1f7a4d; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc .ver-warn{ background:#fdf6ec; border-left:3px solid #b07820; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc .ver-err{ background:#fbf0f0; border-left:3px solid #a83232; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc .ver-crit{ background:#f5e6f9; border-left:3px solid #7b1fa2; padding:8px 12px; margin:8px 0; border-radius:0 6px 6px 0 }
+.mx-doc-note{ background:#fffbef; border:1px solid #f0e0c4; padding:10px 12px; margin:10px 0; border-radius:6px; font-style:italic; font-size:12px }
+.mx-doc-footer{ margin-top:24px; padding-top:14px; border-top:1px solid #d8d3c4; font-size:10.5px; color:#8b7355; text-align:center; line-height:1.6 }
+
+/* Bottoni in fondo al modal */
+.mx-modal-foot{
+  display:flex; gap:8px; padding:12px 20px; border-top:1px solid #e6e0d2;
+  background:linear-gradient(180deg,#fff,#fdfbf4); flex-wrap:wrap;
+}
+.mx-modal-foot .left{ flex:1; display:flex; gap:8px; flex-wrap:wrap }
+.mx-modal-foot .right{ display:flex; gap:8px; flex-wrap:wrap }
+
+/* ================== TOAST ================== */
+.mx-toast{
+  position:fixed; left:50%; bottom:120px; transform:translateX(-50%);
+  background:#2c1810; color:#fff; padding:11px 18px; border-radius:24px;
+  font-size:13px; box-shadow:0 6px 18px rgba(0,0,0,.30); z-index:300;
+  opacity:0; transition:opacity .25s ease;
+  pointer-events:none; max-width:90vw; text-align:center;
+}
+.mx-toast.show{ opacity:1 }
+
+/* ================== DIALOG SAVE (mini) ================== */
+.mx-dialog{ position:fixed; inset:0; background:rgba(20,20,40,.55); backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center; z-index:250; padding:16px }
+.mx-dialog.is-open{ display:flex }
+.mx-dialog-card{ width:100%; max-width:480px; background:#fff; border-radius:14px; box-shadow:0 18px 50px rgba(0,0,0,.40);
+  padding:22px 24px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif }
+.mx-dialog-card h3{ margin:0 0 8px; font-family:Georgia,serif; font-style:italic; font-size:17px; color:#2c1810 }
+.mx-dialog-card p{ margin:0 0 12px; font-size:13px; color:#6b5c4c }
+.mx-dialog-card .mx-fld{ display:flex; flex-direction:column; gap:4px; margin-bottom:10px }
+.mx-dialog-card .mx-fld label{ font-size:11.5px; font-weight:700; color:#6b5c4c; letter-spacing:.04em }
+.mx-dialog-card .mx-fld input, .mx-dialog-card .mx-fld textarea{
+  padding:9px 11px; border:1px solid #e6e0d2; border-radius:8px; font:inherit; font-size:13.5px; outline:none; width:100% }
+.mx-dialog-card .mx-fld textarea{ min-height:60px; resize:vertical }
+.mx-dialog-card .mx-fld input:focus, .mx-dialog-card .mx-fld textarea:focus{ border-color:#1976d2; box-shadow:0 0 0 2px rgba(25,118,210,.18) }
+.mx-dialog-foot{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px }
+.mx-dialog-foot button{ appearance:none; border:1px solid #d8d3c4; background:#fff; color:#2c1810; font:inherit; font-size:13px; font-weight:700; padding:9px 14px; border-radius:9px; cursor:pointer; letter-spacing:.04em }
+.mx-dialog-foot button.primary{ border-color:#1976d2; background:linear-gradient(135deg,#1976d2,#1565c0); color:#fff }
+.mx-dialog-foot button.danger{ border-color:#c62828; color:#c62828 }
+.mx-dialog-foot button:hover{ filter:brightness(.94) }
+
+/* ================== LIST SAVED ================== */
+.mx-saves-list{ display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:340px; overflow-y:auto }
+.mx-save-row{ display:flex; gap:8px; padding:10px 12px; border:1px solid #e6e0d2; border-radius:9px; background:#fff; align-items:center }
+.mx-save-row .info{ flex:1; min-width:0 }
+.mx-save-row .info .nm{ font-weight:700; color:#2c1810; font-size:13.5px }
+.mx-save-row .info .meta{ font-size:11px; color:#8b7355 }
+.mx-save-row button{ appearance:none; border:1px solid #d8d3c4; background:#fff; border-radius:7px; padding:6px 10px; font-size:11.5px; font-weight:700; cursor:pointer }
+.mx-save-row button.load{ color:#f57c00; border-color:#f57c00 }
+.mx-save-row button.load:hover{ background:#f57c00; color:#fff }
+.mx-save-row button.cmp{ color:#7b1fa2; border-color:#7b1fa2 }
+.mx-save-row button.cmp:hover{ background:#7b1fa2; color:#fff }
+.mx-save-row button.del{ color:#c62828; border-color:#c62828 }
+.mx-save-row button.del:hover{ background:#c62828; color:#fff }
+
+/* ================== STAMPA (PDF via window.print) ================== */
+@media print {
+  body * { visibility:hidden !important }
+  .mx-print, .mx-print * { visibility:visible !important }
+  .mx-print{ position:absolute; left:0; top:0; width:100%; padding:24px; box-shadow:none !important; max-width:none !important }
+  .mx-modal, .mx-toolbar, .mx-bar, .mx-modal-side, .mx-modal-head, .mx-modal-foot, .mx-toast, .mx-dialog { display:none !important }
+  .mx-doc h2{ break-after:avoid }
+  .mx-doc table, .mx-doc .ver-ok, .mx-doc .ver-warn, .mx-doc .ver-err{ break-inside:avoid }
+}
+
+
+/* === Stile vivace anche per bottoni di azione dei moduli (Esempio, Reset, Bio, Export) === */
+.actions button, button.cta, button.primary, button.danger, button.btn-add, .add-form button {
+  position:relative; overflow:hidden;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, filter .15s ease;
+  text-shadow:0 1px 2px rgba(0,0,0,.18);
+  box-shadow:0 3px 8px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.25), inset 0 -2px 4px rgba(0,0,0,.10);
+}
+.actions button:hover, button.cta:hover, button.primary:hover, button.danger:hover, button.btn-add:hover, .add-form button:hover {
+  transform:translateY(-2px) scale(1.03);
+  filter:brightness(1.08) saturate(1.12);
+}
+.actions button:active, button.cta:active, button.primary:active, button.danger:active, button.btn-add:active, .add-form button:active {
+  transform:translateY(0) scale(.98); transition-duration:.05s;
+}
+.actions button::before, button.cta::before, button.primary::before, button.danger::before, button.btn-add::before, .add-form button::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg, transparent 25%, rgba(255,255,255,.35) 48%, rgba(255,255,255,.35) 52%, transparent 75%);
+  transform:translateX(-130%); transition:transform .6s ease;
+}
+.actions button:hover::before, button.cta:hover::before, button.primary:hover::before, button.danger:hover::before, button.btn-add:hover::before, .add-form button:hover::before {
+  transform:translateX(130%);
+}
+
+/* END MX-TOOLBAR */
+.mx-logo-mini{height:32px;width:32px;border-radius:8px;background:#fff;padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.12);object-fit:contain;flex-shrink:0;display:none;border:1px solid var(--line,#e6e0d2)}
+.mx-bar.has-logo .em{display:none}
+
+.mx-bar{position:relative}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}}
+
+/* Anagrafica perito+committente, pattern Mixando standard */
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto 8px;max-width:1080px}
+.ana-strip .pc{padding:10px 12px;background:#fff;border:1px solid #e6e0d2;border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6b5c4c;margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700;color:#2c1810}
+.ana-strip .pc .m{font-size:11.5px;color:#8b7355;margin-top:2px}
+.ana-actions{text-align:center;margin:0 auto 16px;max-width:1080px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ana-actions a,.ana-actions button{font-size:12px;font-weight:700;text-decoration:none;padding:6px 13px;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;border:1px solid currentColor}
+.ana-actions a{color:var(--mx-accent,#2c5d7c)}
+.ana-actions button.mx-reload{background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);color:#fff;border:0;box-shadow:0 3px 10px rgba(46,125,50,.42)}
+@media (max-width:760px){.ana-strip{grid-template-columns:1fr}}
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:0px !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:0px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+
+.mx-shimmer-pill::before{ content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg, transparent 25%, rgba(255,255,255,.45) 48%, rgba(255,255,255,.45) 52%, transparent 75%); transform:translateX(-130%); transition:transform .65s ease; z-index:1; }
+.mx-shimmer-pill:hover::before{ transform:translateX(130%) }
+.mx-shimmer-pill > *{ position:relative; z-index:2 }
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab"><img id="mxLogoPerito" class="mx-logo-mini" alt="Logo perito">
+  <div class="meta">
+    <span class="tag">Diagnostica</span>
+    <h1 class="ti">Termoigrometria, LIM · Td · Psicrometrico</h1>
+  </div>
+  <a class="back" href="suite.html">&larr; Suite</a>
+</header>
+
+<main>
+  <div class="ana-strip">
+    <div class="pc" id="anaPerito"><div class="h">Perito / tecnico</div><div class="n">n.d.</div><div class="m"></div></div>
+    <div class="pc" id="anaCliente"><div class="h">Committente / immobile</div><div class="n">n.d.</div><div class="m"></div></div>
+  </div>
+  <div class="ana-actions">
+    <a href="locali-cantiere.html" target="_blank">⚙ Modifica in Locali-Cantiere</a>
+    <button type="button" class="mx-reload" id="btnReloadAna">↻ Ricarica anagrafica</button>
+  </div>
+
+  <section class="hero">
+    <h2>LIM Sedlbauer, <em>Punto di Rugiada, Diagramma Psicrometrico</em></h2>
+    <p>Modulo unificato, Sezione <strong>A</strong> rischio muffa (Sedlbauer 2001 &middot; VTT Hukka-Viitanen 1999) &middot; Sezione <strong>B</strong> Punto di Rugiada (Magnus-Tetens UNI EN ISO 13788:2013 App. E) &middot; Sezione <strong>M</strong> Diagramma Psicrometrico (ASHRAE Handbook of Fundamentals 2025). Sposta i cursori per simulare condizioni T/UR; le 3 sezioni si aggiornano in tempo reale.</p>
+    <div style="margin-top:14px"><a href="assistente.html?skill=termoigrometria" target="_blank" rel="noopener" style="display:inline-block;background-image:linear-gradient(135deg,#18a4b0,#0e7c87 55%,#0a5b64);color:#fff;font-weight:800;font-size:13.5px;text-decoration:none;padding:11px 18px;border-radius:10px;box-shadow:0 3px 10px rgba(14,124,135,.34)">💬 Assistente condensa/muffa: T, UR, T superficie → verdetto</a></div>
+  </section>
+
+  <article class="card">
+    <h3><span class="num">1</span> Substrate Group (Sedlbauer 2001)</h3>
+    <div class="body">
+      <div class="subs">
+        <button class="sub-btn is-on" data-sub="0" type="button">
+          <span class="lab">Cat. I <small>Substrati biodegradabili</small></span>
+          <span class="desc">Legno, cartongesso, carta da parati, tessuti, isolanti in fibra naturale</span>
+        </button>
+        <button class="sub-btn" data-sub="1" type="button">
+          <span class="lab">Cat. II <small>Minerali porosi</small></span>
+          <span class="desc">Calcestruzzo, intonaco, laterizio, malta, isolanti minerali, pitture</span>
+        </button>
+        <button class="sub-btn" data-sub="2" type="button">
+          <span class="lab">Cat. III <small>Inerti (estensione)</small></span>
+          <span class="desc">Vetro, metallo, ceramica smaltata, plastica: superfici inerti, muffa solo su deposito/sporco</span>
+        </button>
+      </div>
+      <div class="formula" style="margin-top:10px">
+        <strong>LIM = isolinea inferiore</strong> di germinazione spore. Le soglie variano con T e categoria substrato (interpolazione lineare LIM_DATA sugli ancoraggi della dissertazione Sedlbauer 2001: punti nel testo pp. 84-86 e Fig. 34; sotto 10&deg;C il modulo tiene in via cautelativa il valore a 10&deg;C). Sedlbauer definisce i gruppi di substrato <b>0</b> (terreno di coltura, non rilevante in edilizia), <b>I</b> (biodegradabili) e <b>II</b> (minerali porosi), pi&ugrave; la classe K per la specie pi&ugrave; critica. <b>Cat. I e Cat. II del modulo coincidono con i gruppi I e II di Sedlbauer</b> (riscontro: LIM I = 80,3% e LIM II = 84,6% a 10&deg;C). La <b>Cat. III</b> (superfici inerti: vetro, metallo, ceramica smaltata) &egrave; un&apos;<b>estensione prudenziale del modulo, non una classe pubblicata da Sedlbauer</b>: su materiali inerti la muffa cresce solo su deposito/sporco.
+      </div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">2</span> Cursori ambientali</h3>
+    <div class="body">
+      <div class="sliders">
+        <div class="sl" data-id="T">
+          <div class="sl-lab"><b>Temperatura aria interna</b><small>sonda interna</small></div>
+          <input type="range" id="sT_r" min="0" max="50" step="0.5" value="20">
+          <div class="sl-num"><input type="number" id="sT_n" min="0" max="50" step="0.5" value="20.0"><span>&deg;C</span></div>
+        </div>
+        <div class="sl" data-id="UR">
+          <div class="sl-lab"><b>Umidit&agrave; relativa aria</b><small>datalogger 1-24 h</small></div>
+          <input type="range" id="sUR_r" min="5" max="100" step="1" value="65">
+          <div class="sl-num"><input type="number" id="sUR_n" min="5" max="100" step="1" value="65"><span>%</span></div>
+        </div>
+        <div class="sl" data-id="Ts">
+          <div class="sl-lab"><b>Temperatura superficie parete</b><small>termocamera / sonda a contatto</small></div>
+          <input type="range" id="sTs_r" min="-5" max="30" step="0.5" value="14">
+          <div class="sl-num"><input type="number" id="sTs_n" min="-5" max="30" step="0.5" value="14.0"><span>&deg;C</span></div>
+        </div>
+        <div class="sl" data-id="Te">
+          <div class="sl-lab"><b>Temperatura aria esterna</b><small>per f<sub>Rsi</sub> (UNI EN ISO 13788)</small></div>
+          <input type="range" id="sTe_r" min="-20" max="50" step="0.5" value="10">
+          <div class="sl-num"><input type="number" id="sTe_n" min="-20" max="50" step="0.5" value="10.0"><span>&deg;C</span></div>
+        </div>
+        <div class="sl" data-id="URe">
+          <div class="sl-lab"><b>UR esterna</b><small>condizioni meteo</small></div>
+          <input type="range" id="sURe_r" min="5" max="100" step="1" value="80">
+          <div class="sl-num"><input type="number" id="sURe_n" min="5" max="100" step="1" value="80"><span>%</span></div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">3</span> Indicatori psicrometrici (vista sintetica)</h3>
+    <div class="body">
+      <div class="kpis">
+        <div class="kpi" id="kTd"><span class="l">Punto di rugiada</span><span class="v">n.d.</span><span class="s">T<sub>d</sub> (Magnus-Tetens)</span></div>
+        <div class="kpi" id="kUrSup"><span class="l">UR superficie</span><span class="v">n.d.</span><span class="s">% su T parete</span></div>
+        <div class="kpi" id="kUrCrit"><span class="l">UR critica aria</span><span class="v">n.d.</span><span class="s">condensa a T parete</span></div>
+        <div class="kpi" id="kLimCrit"><span class="l">LIM critica</span><span class="v">n.d.</span><span class="s">Sedlbauer &middot; cat. attiva</span></div>
+        <div class="kpi" id="kMargine"><span class="l">Margine LIM</span><span class="v">n.d.</span><span class="s">LIM &minus; UR sup.</span></div>
+        <div class="kpi" id="kFrsi"><span class="l">Fattore f<sub>Rsi</sub></span><span class="v">n.d.</span><span class="s">soglia 0,72 IT</span></div>
+        <div class="kpi" id="kVPD"><span class="l">VPD</span><span class="v">n.d.</span><span class="s">Vapor Pressure Deficit</span></div>
+        <div class="kpi" id="kVTT"><span class="l">VTT t<sub>M=1</sub></span><span class="v">n.d.</span><span class="s">giorni a M=1 (Hukka-Viitanen)</span></div>
+      </div>
+      <div class="verdict" id="verdict">Sposta i cursori per simulare le condizioni.</div>
+      <div class="actions">
+        <button type="button" id="btnBio" class="cta" disabled>&#129441; Apri Biodeteriogeni</button>
+        <button type="button" id="btnCellai" title="Precarica T=20&deg;C UR=40%, esempio Cellai pag.13 (verifica peritale)">&#128208; Esempio Cellai</button>
+        <button type="button" id="btnReset">&#8634; Reset</button>
+      </div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">A</span> Sezione A, LIM Sedlbauer (Diagramma Isoplethe)</h3>
+    <div class="body">
+      <div class="banner blue" style="margin-bottom:14px;padding:14px 18px;background:linear-gradient(180deg,rgba(25,118,210,.08),#fff);border-left:4px solid #1976d2;border-radius:9px;font-size:13px;line-height:1.55;color:#2c1810">
+        <div style="font-weight:800;font-size:14px;color:#0d47a1;margin-bottom:8px">&#128218; Come leggere il diagramma LIM Sedlbauer</div>
+        <p style="margin:0 0 8px"><strong>LIM (Lowest Isopleth for Mould)</strong>, Sedlbauer 2001, Fraunhofer-IBP. Curva di UR critica MINIMA sotto cui le muffe non crescono, in funzione di temperatura e categoria del substrato. Riferimento normativo: UNI EN ISO 13788:2013 Annex E + WTA 6-3-05/D.</p>
+        <p style="margin:0 0 8px;padding:8px 12px;background:#fff5f3;border-left:3px solid #c0392b;border-radius:6px;color:#5d1a14;font-size:12px"><strong>&#9888; Importante per la relazione tecnica:</strong> la UNI EN ISO 13788:2013 &sect;5 prescrive che il rischio muffa va valutato su <strong>UR ≥ 80% per 5 giorni consecutivi</strong> (analisi mensile 12 mesi), NON sul singolo punto istantaneo. Questo modulo &egrave; uno <strong>screening preliminare</strong>: per la verifica formale eseguire anche il <a href="condensa-glaser.html" style="color:#5d1a14;font-weight:700">calcolo Glaser stratigrafia 12 mesi</a> (UNI EN ISO 13788:2013) o l'analisi dinamica igrotermica oraria (UNI EN 15026:2023).</p>
+        <p style="margin:0 0 8px"><strong>I 3 picchi mostrano:</strong></p>
+        <ul style="margin:0 0 8px 18px;padding:0;font-size:12.5px">
+          <li><b>UR ARIA</b> (verde a sinistra): UR % misurata nell'aria del locale (Step 1)</li>
+          <li><b>UR SUPERFICIE</b> (arancio al centro): UR % calcolata sulla parete fredda (pi&ugrave; alta dell'aria perch&eacute; T_parete &lt; T_aria)</li>
+          <li><b>UR CRITICA</b> (giallo a destra): soglia LIM Sedlbauer per il materiale + temperatura corrente</li>
+        </ul>
+        <p style="margin:0 0 8px"><strong>Le 4 linee di soglia</strong> (dal basso verso l'alto):</p>
+        <ul style="margin:0 0 8px 18px;padding:0;font-size:12.5px">
+          <li><b>LIM Cat. I, &asymp;76% a 20&deg;C</b> (substrato biodegradabile: legno, carta, tessuti): la soglia sale col freddo (80,3% a 10&deg;C)</li>
+          <li><b>LIM Cat. II, &asymp;80% a 20&deg;C</b> (minerali porosi: intonaco, laterizio, malta, calcestruzzo &middot; gruppo II di Sedlbauer; 84,6% a 10&deg;C)</li>
+          <li><b>LIM Cat. III, 91% a 20&deg;C</b> (estensione del modulo per superfici inerti pulite: vetro, metallo, ceramica smaltata &middot; non &egrave; una classe Sedlbauer)</li>
+          <li><b>100%, Saturazione</b>: condensa liquida (acqua sulla superficie)</li>
+        </ul>
+        <p style="margin:0;padding:8px 12px;background:#fff8e5;border-radius:6px;border-left:3px solid #d4a017;color:#5b4400"><strong>&#128221; In pratica:</strong> guarda dove si trova il picco <b>UR SUPERFICIE</b> rispetto alla linea della tua categoria materiale. Se il picco SUPERA la linea della Cat. del tuo substrato &#8594; <b>la muffa pu&ograve; crescere</b> in quel punto. Pi&ugrave; il picco supera la linea, maggiore &egrave; il rischio. Il margine si misura in <b>punti di UR%</b>.</p>
+      </div>
+      <div id="chartHost"></div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">B</span> Sezione B, Punto di Rugiada (Magnus-Tetens &middot; UNI EN ISO 13788:2013 App. E)</h3>
+    <div class="body">
+      <div class="kpis" style="margin-bottom:14px">
+        <div class="kpi" id="kBT"><span class="l">T aria</span><span class="v">n.d.</span><span class="s">interna</span></div>
+        <div class="kpi" id="kBTd"><span class="l">T<sub>d</sub> rugiada</span><span class="v">n.d.</span><span class="s">Magnus-Tetens</span></div>
+        <div class="kpi" id="kBTw"><span class="l">T parete</span><span class="v">n.d.</span><span class="s">termocamera / sonda</span></div>
+        <div class="kpi" id="kBMargin"><span class="l">Margine T<sub>w</sub> &minus; T<sub>d</sub></span><span class="v">n.d.</span><span class="s">soglia rischio</span></div>
+      </div>
+      <div id="dewHost"></div>
+      <div class="verdict" id="verdictB">Sposta i cursori per visualizzare il punto di rugiada.</div>
+      <div class="formula">
+        <strong>Punto di rugiada (Magnus-Tetens inverso):</strong>
+        &alpha; = ln(UR/100) + (17.269 &middot; T)/(237.3 + T) &nbsp;&rarr;&nbsp; T<sub>d</sub> = 237.3 &middot; &alpha; / (17.269 &minus; &alpha;) [&deg;C]<br>
+        <strong>Condizione di condensa superficiale:</strong> T<sub>parete</sub> &lt; T<sub>d</sub> &rArr; rischio formazione acqua liquida.<br>
+        <strong>Soglie operative</strong> (UNI EN ISO 13788:2013, prassi tecnica): margine &gt; 5&deg;C sicuro &middot; 3-5&deg;C margine ridotto &middot; 0-3&deg;C rischio condensa &middot; &le;0&deg;C condensa in atto.<br>
+        <strong>fRsi</strong> (UNI EN ISO 13788 &sect;5): fRsi = (T<sub>parete</sub> &minus; T<sub>est</sub>) / (T<sub>int</sub> &minus; T<sub>est</sub>) &nbsp; con soglia 0,72 (DM 26/06/2015 mod. DM 28/10/2025 per climi italiani).
+      </div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">M</span> Sezione M, Diagramma Psicrometrico (ASHRAE Handbook of Fundamentals 2025)</h3>
+    <div class="body">
+      <div class="kpis" style="margin-bottom:14px">
+        <div class="kpi" id="kMW"><span class="l">Umidit&agrave; specifica W</span><span class="v">n.d.</span><span class="s">g/kg aria secca</span></div>
+        <div class="kpi" id="kMH"><span class="l">Entalpia h</span><span class="v">n.d.</span><span class="s">kJ/kg<sub>as</sub></span></div>
+        <div class="kpi" id="kMTw"><span class="l">T bulbo umido</span><span class="v">n.d.</span><span class="s">Stull 2011</span></div>
+        <div class="kpi" id="kMV"><span class="l">Volume specifico</span><span class="v">n.d.</span><span class="s">m&sup3;/kg<sub>as</sub></span></div>
+      </div>
+      <div id="psychroHost"></div>
+      <div class="verdict" id="verdictM">Sposta i cursori per visualizzare il diagramma psicrometrico.</div>
+      <div class="formula">
+        <strong>Aria umida (ASHRAE Handbook of Fundamentals 2025, cap. 1):</strong><br>
+        Rapporto di mistura: W = 0,621945 &middot; p<sub>v</sub> / (P<sub>atm</sub> &minus; p<sub>v</sub>) &nbsp; [kg<sub>v</sub>/kg<sub>as</sub>]<br>
+        Entalpia: h = 1,006 &middot; T + W &middot; (2501 + 1,86 &middot; T) &nbsp; [kJ/kg<sub>as</sub>]
+        <span style="font-size:10.5px;color:#8b7355;font-style:italic">(rif. h=0 a T=0&deg;C, W=0, convenzione ASHRAE moderna; differisce di ~10 kJ/kg da Carrier classico, ma le <em>differenze</em> di h si conservano)</span><br>
+        Volume specifico: v = R<sub>da</sub>(T+273,15) &middot; (1 + 1,6078 &middot; W) / P<sub>atm</sub> &nbsp; [m&sup3;/kg<sub>as</sub>]<br>
+        T bulbo umido (Stull 2011 approssimazione): T<sub>w</sub> = T &middot; atan(0,151977 &middot; &radic;(UR+8,313659)) + atan(T+UR) &minus; atan(UR&minus;1,676331) + 0,00391838 &middot; UR<sup>1,5</sup> &middot; atan(0,023101 &middot; UR) &minus; 4,686035
+        <span style="font-size:10.5px;color:#8b7355;font-style:italic">(validit&agrave;: P=101,325 kPa, T &isin; [&minus;20,+50]&deg;C, UR &isin; [5,99]%, errore RMS 0,28&deg;C, max 1,65&deg;C, Stull 2011 Tab.1)</span><br>
+        <strong>Punto di lavoro</strong>: (T, W) sul diagramma. La <strong>traiettoria condensa</strong> in rosso mostra il raffreddamento isoenthalpico dell'aria al contatto con la parete fredda (1 &rarr; tr) e la successiva saturazione (tr &rarr; 2). P = 101,325 kPa.
+      </div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">T</span> Tracciabilit&agrave; tecnica (perito)</h3>
+    <div class="body">
+      <details>
+        <summary style="cursor:pointer;font-weight:700;color:var(--ink);padding:6px 0;font-family:Georgia,serif;font-style:italic">Espandi: formule, costanti, riferimenti normativi</summary>
+        <div style="margin-top:12px;font-size:13px;line-height:1.7;color:var(--ink-soft)">
+          <p><strong style="color:var(--ink)">Sezione A, Rischio crescita muffe (LIM)</strong><br>
+          Modello: Sedlbauer K. (2001) <em>Vorhersage von Schimmelpilzbildung auf und in Bauteilen</em>, Dissertation Universit&auml;t Stuttgart, Fraunhofer-Institut f&uuml;r Bauphysik (IBP). Punti LIM nel testo, cap. 3.3.1 pp. 84-86, e Fig. 34, sistema generalizzato di isopleti per la germinazione (Lowest Isopleth for Mould, LIM); sotto 10&deg;C il modulo mantiene in via cautelativa il valore a 10&deg;C.<br>
+          Estensione VTT (giorni a M=1): Hukka A. &amp; Viitanen H. (1999), <em>A mathematical model of mould growth on wooden material</em>, Wood Science and Technology 33: 475-485. La formula chiusa qui implementata &egrave; valida per condizioni T/UR costanti come indicatore di priorit&agrave; al sopralluogo (il modello completo &egrave; dinamico, eq. dM/dt).</p>
+          <p><strong style="color:var(--ink)">Sezione B, Punto di rugiada</strong><br>
+          Magnus-Tetens UNI EN ISO 13788:2013 (Appendice E, eq. E.1/E.2): p<sub>sat</sub>(T) = 610,5 &middot; exp(a&middot;T/(b+T)) con a=17,269 b=237,3 (acqua liquida) o a=21,875 b=265,5 (ghiaccio). T<sub>d</sub> = b&middot;&alpha;/(a&minus;&alpha;), &alpha; = ln(UR/100)+a&middot;T/(b+T).<br>
+          fRsi: UNI EN ISO 13788:2013 &sect;5. Soglia italiana 0,72: DM 26/06/2015 Allegato 1 &sect;2.3 modificato dal DM 28/10/2025 (GU 05/12/2025).</p>
+          <p><strong style="color:var(--ink)">Sezione M, Diagramma psicrometrico</strong><br>
+          ASHRAE Handbook of Fundamentals 2025, capitolo 1 &laquo;Psychrometrics&raquo;, equazioni di riferimento ricavate da Hyland-Wexler (1983). &epsilon; = 0,621945, M<sub>a</sub>/M<sub>w</sub> = 1,6078. P<sub>atm</sub> = 101,325 kPa. Bulbo umido: Stull R. (2011) <em>Wet-Bulb Temperature from Relative Humidity and Air Temperature</em>, J. Appl. Meteorol. Climatol. 50: 2267-2269 (approssimazione valida per P=101,325 kPa).<br>
+          Riferimento storico Mollier h-x (1923): R. Mollier, <em>Ein neues Diagramm f&uuml;r D&auml;mpfe</em>, ZVDI 67:869. In Italia e ambito ASHRAE si usa convenzionalmente la carta T-W; nel mondo DACH/NL/BE/FR/Scandinavia si preferisce Mollier h-x.</p>
+          <p><strong style="color:var(--ink)">VPD, Vapor Pressure Deficit</strong><br>
+          Campbell G.S. &amp; Norman J.M. (1998), <em>An Introduction to Environmental Biophysics</em>, 2&deg; ed., Springer.<br>
+          Soglie: VPD &lt; 0,4 kPa rischio biologico alto &middot; 0,4-0,8 moderato &middot; &ge; 0,8 basso.</p>
+          <p style="margin-bottom:0"><strong style="color:var(--ink)">Limiti del modulo</strong>: i calcoli sono validi in <em>regime stazionario</em>. Per regime transitorio (effetti di accumulo igroscopico, cicli giornalieri) il riferimento &egrave; UNI EN 15026:2023 con simulazione dinamica. I risultati di questo modulo costituiscono <em>indicatore istantaneo di priorit&agrave; di rischio</em>, non sostituiscono la verifica progettuale UNI EN ISO 13788:2013 (verifica mensile su 12 mesi) e la simulazione termoigrometrica dinamica per applicazioni peritali.</p>
+        </div>
+      </details>
+    </div>
+  </article>
+
+  <footer class="ft">
+    <strong>Mixando &middot; Termoigrometria v3.2.7</strong> &middot; Algoritmi verificati con triplo riscontro &middot; cuore A+B+M unificato<br>
+    UNI EN ISO 13788:2013 App. E (a=17.269 b=237.3 acqua; a=21.875 b=265.5 ghiaccio; e<sub>0</sub>=610.5 Pa) &middot; UNI EN ISO 6946:2018 (+ EC 1:2023, NA:2025) &middot; Sedlbauer 2001 (Fraunhofer IBP, Cat. I/II/III) &middot; Hukka &amp; Viitanen 1999, Wood Sci. Technol. 33:475-485 &middot; ASHRAE Handbook of Fundamentals 2025 Ch.1 (&epsilon;=0,621945) &middot; Stull 2011 J. Appl. Meteorol. Climatol. 50:2267-2269 (Tw) &middot; Campbell-Norman 1998 (VPD) &middot; DM 26/06/2015 mod. DM 28/10/2025 (GU 05/12/2025, fRsi&ge;0,72)
+  </footer>
+</main>
+
+
+<!-- MX TOOLBAR LIBRARY -->
+<script>
+/* =====================================================================
+ * MX Toolbar, Libreria condivisa Mixando v3
+ * Pulsanti standard + modal anteprima + Word/.doc + PDF (print) + report aggregato
+ * MX-BUILD: 2026-05-24-toolbar-v1.1 sempre visibile + needs-result
+ * ===================================================================== */
+(function(){
+'use strict';
+/* Mini-logo perito da mx2::perito.logoData */
+(function(){
+  
+/* === MIXANDO v3 · Risanamento Termigro: dataset embedded === */
+const SOL_TERMIGRO = [{nome:"VMC con recuperatore di calore",categoria:"Ventilazione meccanica",invasivita:"media",tempistica:"5-15 giorni",norma:"UNI EN 16798-1:2019",normeSec:["UNI EN ISO 7730:2026 (comfort)", "UNI EN 13141 serie (componenti VMC)", "UNI 10339:1995 (ritirata 2024, rif. UNI EN 16798-1:2019)"],sintesi:"Installazione di unit\u00e0 VMC centralizzata o decentralizzata con scambiatore aria-aria (rendimento \u03b7\u226575%). Garantisce ricambio aria minimo 0,5 vol/h (UNI EN 16798-1 cat.II) con recupero del 70-90% dell'energia termica. Riduce l'umidit\u00e0 interna e mantiene cat.II UNI 16798-1 (CO\u2082<950 ppm).",limit:"Manutenzione filtri F7/F9 annuale obbligatoria. Possibili rumorosit\u00e0 >35 dB(A) se mal dimensionata."},{nome:"Deumidificazione attiva localizzata",categoria:"Controllo UR",invasivita:"bassa",tempistica:"1 giorno installazione",norma:"UNI EN 60335-2-40:2022",normeSec:["UNI EN 16798-1:2019"],sintesi:"Installazione di deumidificatori a condensazione (a compressore) o a desiccante (rotori entalpici) per mantenere UR<60% in locali critici. Capacit\u00e0 tipica 10-30 L/giorno per residenze, 50-200 L/giorno per archivi/musei.",limit:"Consumi energetici 250-600 W. Le unit\u00e0 a condensazione non lavorano sotto 15\u00b0C. Soluzione palliativa se non si rimuove la fonte."},{nome:"Schermature solari estive + controllo apporti termici",categoria:"Mitigazione stress termico estivo",invasivita:"media",tempistica:"5-30 giorni",norma:"UNI EN 14501:2025",normeSec:["UNI EN ISO 52016-1:2018 (calcolo energetico)", "D.M. 26/06/2015"],sintesi:"Installazione di schermature solari mobili esterne (frangisole, tende a rullo, persiane orientabili) con fattore solare g<0,35 (calcolo UNI EN ISO 52022-3; soglia DM 26/06/2015) per ridurre gli apporti termici estivi. Combinata con ventilazione notturna (free-cooling).",limit:"Schermature esterne richiedono compatibilit\u00e0 estetica + autorizzazione comunale per facciate vincolate."}];
+const DPI_TERMIGRO = [{"item": "DPI standard cantiere", "norma": "D.Lgs 81/2008 art.74-78", "note": "Casco, scarpe S3, guanti generici secondo contesto"}, {"item": "Mascherina FFP1", "norma": "UNI EN 149:2001+A1:2009", "note": "Solo se ambiente con polveri di lavorazione"}];
+const STRUMENTI_TERMIGRO = [{"nome": "Datalogger T/UR psicrometrici", "norma": "UNI EN ISO 7726:2026", "uso": "Monitoraggio T, UR, calcolo punto di rugiada via Magnus-Tetens"}, {"nome": "Anemometro hot-wire", "norma": "UNI EN ISO 7726:2026", "uso": "Velocit\\u00e0 aria, draft rating UNI EN ISO 7730:2026"}, {"nome": "Sensore CO2 NDIR", "norma": "ASTM D6245-18", "uso": "Proxy ventilazione - cat. UNI EN 16798-1:2019"}];
+
+function _renderRisanamentoTermigro(){
+  let html = '';
+  html += '<section data-pat="termigro" data-sec="risanamento" style="margin-top:14px;padding:16px 18px;background:linear-gradient(180deg,#eef9f1,#fff);border:1px solid #bce5c8;border-left:5px solid #2e7d52;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#1b5532;font-family:Georgia,serif;font-size:16px">\ud83d\udee0 Risanamento consigliato</h4>';
+  html += '<p style="margin:0 0 10px;font-size:12px;color:#1b5532;font-style:italic">Tecniche normate applicabili. Verificare prerequisiti caso per caso.</p>';
+  html += '<div style="display:grid;gap:8px">';
+  SOL_TERMIGRO.forEach(s=>{
+    html += '<div style="background:#fff;border:1px solid #d8e8db;border-left:4px solid #d4a017;border-radius:10px;padding:11px 13px">'
+      + '<div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
+        + '<span style="font-size:9.5px;font-weight:800;letter-spacing:.14em;padding:3px 9px;border-radius:11px;background:linear-gradient(135deg,#f5d164,#d4a017);color:#3a2c00">\u2b50 APPLICABILE</span>'
+        + '<strong style="flex:1;min-width:200px;font-family:Georgia,serif;font-size:14px;color:#2c1810">'+s.nome+'</strong>'
+        + '<span style="font-size:10.5px;color:#fff;background:#475569;padding:2px 8px;border-radius:9px;font-family:JetBrains Mono,monospace">'+s.tempistica+'</span>'
+      + '</div>'
+      + '<div style="font-size:12.5px;color:#5d4a30;line-height:1.5;margin-bottom:5px">'+s.sintesi+'</div>'
+      + '<div style="font-family:JetBrains Mono,monospace;font-size:11px;color:#1b5532;background:#eef9f1;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:5px"><b>Norma cardine:</b> '+s.norma+'</div>'
+      + (s.normeSec.length?'<div style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#666;margin-bottom:5px"><b>Secondarie:</b> '+s.normeSec.join(' \u00b7 ')+'</div>':'')
+      + '<div style="font-size:11.5px;color:#7f1d1d;background:#fff5f3;padding:5px 9px;border-radius:6px;border-left:3px solid #c0392b"><b>\u26a0 Limitazioni:</b> '+s.limit+'</div>'
+    + '</div>';
+  });
+  html += '</div></section>';
+  html += '<section data-pat="termigro" data-sec="dpi" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#fff5f3,#fff);border:1px solid #fdd;border-left:5px solid #c0392b;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#7f1d1d;font-family:Georgia,serif;font-size:15px">\ud83e\udd7a DPI (D.Lgs 81/2008)</h4><div style="display:grid;gap:6px">';
+  DPI_TERMIGRO.forEach(p=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #fdd;border-left:3px solid #c0392b;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+p.item+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#c0392b;background:#fff5f3;padding:2px 7px;border-radius:9px;margin-left:6px">'+p.norma+'</span><div style="font-size:11px;color:#5d1a14;margin-top:3px">'+p.note+'</div></div>';
+  });
+  html += '</div></section>';
+  html += '<section data-pat="termigro" data-sec="strumenti" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#e3f3f5,#fff);border:1px solid #b3dde2;border-left:5px solid #0e7c87;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#075863;font-family:Georgia,serif;font-size:15px">\ud83d\udd2c Strumenti per verifica</h4><div style="display:grid;gap:6px">';
+  STRUMENTI_TERMIGRO.forEach(s=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #b3dde2;border-left:3px solid #0e7c87;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+s.nome+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#075863;background:#e3f3f5;padding:2px 7px;border-radius:9px;margin-left:6px">'+s.norma+'</span><div style="font-size:11px;color:#0f3a3f;margin-top:3px">'+s.uso+'</div></div>';
+  });
+  html += '</div></section>';
+  return html;
+}
+
+function loadLg(){
+    try{
+      var p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");
+      var img=document.getElementById("mxLogoPerito");
+      var bar=document.querySelector(".mx-bar");
+      if(img && p && p.logoData){ img.src=p.logoData; img.style.display="block"; if(bar)bar.classList.add("has-logo"); }
+      else { if(img)img.style.display="none"; if(bar)bar.classList.remove("has-logo"); }
+    }catch(e){}
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",loadLg);
+  else loadLg();
+})();
+
+
+window.MX = window.MX || {};
+
+/* =====================================================================
+ * STORAGE HELPERS
+ * ===================================================================== */
+function loadJSON(key, def){
+  try{ var s = JSON.parse(localStorage.getItem(key)); return (s != null) ? s : def; }
+  catch(_){ return def; }
+}
+function saveJSON(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); return true; }catch(_){ return false; }
+}
+
+MX.getPerito = MX.getPerito || function(){ return loadJSON('mx2::perito', {}); };
+MX.getImmobile = MX.getImmobile || function(){ return loadJSON('mx2::locali-v1', {ana:{}, locali:[]}); };
+
+/* =====================================================================
+ * UTILITY
+ * ===================================================================== */
+function esc(s){
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  });
+}
+function fmtDate(d){
+  if (!d) return '';
+  if (typeof d === 'string' && d.length === 10) {
+    var p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0];
+  }
+  var dt = new Date(d);
+  return dt.getDate().toString().padStart(2,'0')+'/'+(dt.getMonth()+1).toString().padStart(2,'0')+'/'+dt.getFullYear();
+}
+function fmtNow(){
+  var d = new Date();
+  return d.getDate().toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getFullYear()+' '+
+         d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+}
+function toast(msg, ms){
+  var t = document.querySelector('.mx-toast');
+  if (!t){
+    t = document.createElement('div');
+    t.className = 'mx-toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tmr);
+  t._tmr = setTimeout(function(){ t.classList.remove('show'); }, ms||2400);
+}
+
+/* =====================================================================
+ * MODULE CONFIG (set via initToolbar)
+ * ===================================================================== */
+var CFG = null;
+
+/* =====================================================================
+ * INTESTAZIONE DOCUMENTO (header standard Word/PDF/Report)
+ * ===================================================================== */
+function buildDocHead(meta){
+  var perito = MX.getPerito() || {};
+  var imm = MX.getImmobile() || {ana:{}};
+  var ana = imm.ana || {};
+  var logoHtml = perito.logoData
+    ? '<div class="logo"><img src="'+esc(perito.logoData)+'" alt="Logo"></div>'
+    : '';
+  return ''+
+    '<div class="mx-doc-head">'+
+      logoHtml+
+      '<div class="doc-meta">'+
+        (perito.nome ? '<div class="perito-name">'+esc(perito.titolo||'')+' '+esc(perito.nome)+'</div>' : '<div class="perito-name" style="color:#a83232">⚠ Anagrafica perito non compilata</div>')+
+        (perito.studio ? '<div>'+esc(perito.studio)+'</div>' : '')+
+        (perito.albo ? '<div>'+esc(perito.albo)+(perito.numAlbo?' n. '+esc(perito.numAlbo):'')+'</div>' : '')+
+        (perito.piva ? '<div>P.IVA/C.F.: '+esc(perito.piva)+'</div>' : '')+
+        ((perito.tel||perito.email) ? '<div>'+(perito.tel?'Tel.: '+esc(perito.tel):'')+(perito.tel&&perito.email?' · ':'')+(perito.email?esc(perito.email):'')+'</div>' : '')+
+      '</div>'+
+      '<div class="doc-meta" style="text-align:right">'+
+        '<strong>Relazione tecnica</strong>'+
+        '<div style="font-size:12px;font-style:italic;color:#2c5d7c">'+esc(CFG.moduleName)+'</div>'+
+        '<div style="margin-top:6px">Emissione: '+fmtNow()+'</div>'+
+        (ana.DataSopr ? '<div>Sopralluogo: '+fmtDate(ana.DataSopr)+'</div>' : '')+
+        (ana.Incarico ? '<div>Incarico: '+esc(ana.Incarico)+'</div>' : '')+
+      '</div>'+
+    '</div>'+
+    '<h1>'+esc(meta.titolo || CFG.moduleName)+'</h1>'+
+    (ana.Nome || ana.Indirizzo ? ''+
+      '<table style="margin-top:0">'+
+        '<tr><th style="width:30%">Committente</th><td>'+esc(ana.Nome||'n.d.')+(ana.CF?' · C.F./P.IVA: '+esc(ana.CF):'')+'</td></tr>'+
+        '<tr><th>Immobile</th><td>'+esc(ana.Indirizzo||'n.d.')+(ana.Catasto?' · '+esc(ana.Catasto):'')+(ana.Anno?' · costruzione '+esc(ana.Anno):'')+'</td></tr>'+
+        (ana.Oggetto ? '<tr><th>Oggetto</th><td>'+esc(ana.Oggetto)+'</td></tr>' : '')+
+        (meta.note ? '<tr><th>Note del perito</th><td>'+esc(meta.note).replace(/\n/g,'<br>')+'</td></tr>' : '')+
+      '</table>' : (meta.note ? '<div class="mx-doc-note">'+esc(meta.note).replace(/\n/g,'<br>')+'</div>' : ''));
+}
+
+function buildDocFooter(){
+  return '<div class="mx-doc-footer">Relazione generata da <strong>Mixando v3</strong> · '+fmtNow()+' · '+esc(CFG.moduleName)+'<br>Algoritmi conformi alle normative vigenti citate nelle sezioni di tracciabilità tecnica.</div>';
+}
+
+/* =====================================================================
+ * BUILD PREVIEW DOCUMENT (riusabile per Word/PDF/Report)
+ * ===================================================================== */
+function buildFullDoc(selections, note){
+  var meta = { titolo: CFG.moduleName, note: note };
+  var html = '<div class="mx-doc">';
+  html += buildDocHead(meta);
+  if (typeof CFG.getDocSections === 'function'){
+    html += CFG.getDocSections(selections || {});
+  } else {
+    html += '<p><em>Il modulo non ha ancora definito il contenuto del report.</em></p>';
+  }
+  html += buildDocFooter();
+  html += '</div>';
+  return html;
+}
+
+/* =====================================================================
+ * MODAL ANTEPRIMA
+ * ===================================================================== */
+var $modal = null;
+function ensureModal(){
+  if ($modal) return $modal;
+  var m = document.createElement('div');
+  m.className = 'mx-modal';
+  m.innerHTML = ''+
+    '<div class="mx-modal-frame">'+
+      '<div class="mx-modal-head">'+
+        '<h2 id="mx-modal-title">Anteprima documento</h2>'+
+        '<button type="button" class="x" data-act="close" aria-label="Chiudi">&times;</button>'+
+      '</div>'+
+      '<div class="mx-modal-body">'+
+        '<aside class="mx-modal-side">'+
+          '<div class="mx-info" id="mx-perito-info">…</div>'+
+          '<button type="button" class="mx-link" data-act="open-anagrafica">&#9881; Modifica anagrafica perito/cliente</button>'+
+          '<button type="button" class="mx-link" data-act="refresh-anagrafica" style="margin-left:6px">&#8635; Ricarica</button>'+
+          '<h3>Note del perito (libere)</h3>'+
+          '<div class="mx-fld"><textarea id="mx-note" placeholder="Eventuali osservazioni, condizioni del sopralluogo, segnalazioni al committente..."></textarea></div>'+
+          '<h3>Sezioni incluse</h3>'+
+          '<div class="mx-sections" id="mx-sections"></div>'+
+          '<div style="margin-top:14px"><button type="button" class="mx-link" data-act="refresh-preview">&#8635; Aggiorna anteprima</button></div>'+
+        '</aside>'+
+        '<section class="mx-modal-preview">'+
+          '<div class="mx-modal-paper mx-print" id="mx-preview"></div>'+
+        '</section>'+
+      '</div>'+
+      '<div class="mx-modal-foot">'+
+        '<div class="left">'+
+          '<button type="button" class="mx-tb-btn tb-word" data-act="export-word"><span class="ico">&#128221;</span><span class="label">Salva Word</span></button>'+
+          '<button type="button" class="mx-tb-btn tb-pdf" data-act="export-pdf"><span class="ico">&#128196;</span><span class="label">Stampa / PDF</span></button>'+
+          '<button type="button" class="mx-tb-btn tb-report" data-act="export-report"><span class="ico">&#128230;</span><span class="label">Aggiungi al report</span></button>'+
+          '<button type="button" class="mx-tb-btn tb-save" data-act="export-json" title="Scarica un file .json con dati input+output (backup tecnico)"><span class="ico">&#128190;</span><span class="label">JSON</span></button>'+
+        '</div>'+
+        '<div class="right">'+
+          '<button type="button" class="mx-tb-btn tb-reset" data-act="close"><span class="ico">&#10005;</span><span class="label">Chiudi</span></button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(m);
+  $modal = m;
+  /* event delegation */
+  m.addEventListener('click', function(ev){
+    var el = ev.target.closest('[data-act]');
+    if (!el) return;
+    var act = el.dataset.act;
+    if (act === 'close') closeModal();
+    else if (act === 'refresh-anagrafica' || act === 'refresh-preview') refreshPreview();
+    else if (act === 'open-anagrafica') window.open('locali-cantiere.html', '_blank');
+    else if (act === 'export-word') doExportWord();
+    else if (act === 'export-pdf') doExportPDF();
+    else if (act === 'export-report') doAddToReport();
+    else if (act === 'export-json') doExportJSON();
+  });
+  return m;
+}
+function openModal(){
+  ensureModal();
+  /* render perito info */
+  var p = MX.getPerito() || {};
+  var imm = MX.getImmobile() || {ana:{}};
+  var ana = imm.ana || {};
+  var pInfo = document.getElementById('mx-perito-info');
+  var ok = !!(p.nome && p.studio);
+  pInfo.className = ok ? 'mx-info' : 'mx-warn';
+  pInfo.innerHTML = ok
+    ? '<b>'+esc(p.titolo||'')+' '+esc(p.nome)+'</b><br>'+esc(p.studio||'')+(ana.Nome?'<br><b>Committente:</b> '+esc(ana.Nome):'')+(ana.Indirizzo?'<br><b>Immobile:</b> '+esc(ana.Indirizzo):'')
+    : '<b>Anagrafica incompleta.</b> I dati del perito e del committente non sono compilati. Clicca <em>Modifica anagrafica</em> per integrare.';
+  /* sections checkboxes */
+  var def = CFG.defaultSections || {};
+  var sec = document.getElementById('mx-sections');
+  sec.innerHTML = '';
+  Object.keys(def).forEach(function(k){
+    var lab = document.createElement('label');
+    lab.innerHTML = '<input type="checkbox" data-k="'+esc(k)+'"' + (def[k].on ? ' checked' : '') + '> '+esc(def[k].label);
+    sec.appendChild(lab);
+  });
+  sec.querySelectorAll('input').forEach(function(inp){
+    inp.addEventListener('change', refreshPreview);
+  });
+  document.getElementById('mx-note').value = '';
+  refreshPreview();
+  $modal.classList.add('is-open');
+}
+function closeModal(){ if ($modal) $modal.classList.remove('is-open'); }
+function readSelections(){
+  var out = {};
+  document.querySelectorAll('#mx-sections input').forEach(function(inp){
+    out[inp.dataset.k] = inp.checked;
+  });
+  return out;
+}
+function refreshPreview(){
+  var sel = readSelections();
+  var note = document.getElementById('mx-note').value;
+  document.getElementById('mx-preview').innerHTML = buildFullDoc(sel, note);
+}
+
+/* =====================================================================
+ * EXPORT, WORD (.doc HTML con MIME application/msword)
+ * ===================================================================== */
+/* 19/11/2026: Word non disegna i grafici SVG (ne stampa le scritte alla rinfusa). Prima di scaricare il documento
+   ogni disegno diventa un'immagine; le curve animate vanno al loro stato finale; i tasti dell'interfaccia si tolgono. */
+function _mxSvgInImmagini(html, fatto){
+  var host = document.createElement('div'); host.innerHTML = html;
+  [].slice.call(host.querySelectorAll('button')).forEach(function(b){ if (b.parentNode) b.parentNode.removeChild(b); });
+  var svgs = [].slice.call(host.querySelectorAll('svg'));
+  var restano = svgs.length;
+  if (!restano){ fatto(host.innerHTML); return; }
+  var chiudi = function(){ if (--restano === 0) fatto(host.innerHTML); };
+  svgs.forEach(function(svg){
+    try {
+      var vb = (svg.getAttribute('viewBox') || '').split(/[ ,]+/).map(Number);
+      var w = parseFloat(svg.getAttribute('width')) || vb[2] || 800;
+      var h = parseFloat(svg.getAttribute('height')) || vb[3] || 400;
+      [].slice.call(svg.querySelectorAll('animate,set,animateTransform,animateMotion')).forEach(function(a){
+        try { var an = a.getAttribute('attributeName'), to = a.getAttribute('to'); if (an && to != null && a.parentNode && !/transform|motion/i.test(a.tagName)) a.parentNode.setAttribute(an, to); } catch(e){}
+        if (a.parentNode) a.parentNode.removeChild(a);
+      });
+      svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      svg.setAttribute('width', w); svg.setAttribute('height', h);
+      var xml = new XMLSerializer().serializeToString(svg);
+      var img = new Image();
+      img.onload = function(){
+        try {
+          var sc = Math.min(2, 1800 / w); if (w < 64) sc = 4;
+          var c = document.createElement('canvas'); c.width = Math.round(w * sc); c.height = Math.round(h * sc);
+          var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+          var out = document.createElement('img'); out.src = c.toDataURL('image/png');
+          var lw = (w < 64) ? 14 : Math.min(600, w); out.setAttribute('width', Math.round(lw)); out.setAttribute('height', Math.round(h * lw / w));
+          svg.parentNode.replaceChild(out, svg);
+        } catch(e){}
+        chiudi();
+      };
+      img.onerror = chiudi;
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+    } catch(e){ chiudi(); }
+  });
+}
+function doExportWord(){
+  var sel = readSelections();
+  var note = document.getElementById('mx-note').value;
+  _mxSvgInImmagini(buildFullDoc(sel, note), function(bodyHtml){   /* 19/11/2026: grafici come immagini */
+  /* Stili minimi inline per il file .doc */
+  var docHtml =
+    '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'+
+    '<head><meta charset="utf-8"><title>'+esc(CFG.moduleName)+'</title>'+
+    '<style>'+
+      'body{font-family:Georgia,serif;color:#2c1810;font-size:12pt;line-height:1.5}'+
+      'h1{font-size:18pt;color:#2c1810;font-style:italic;border-bottom:2px solid #2c1810;padding-bottom:6pt}'+
+      'h2{font-size:14pt;color:#2c5d7c;border-bottom:1px solid #d8d3c4;padding-bottom:3pt;margin-top:18pt}'+
+      'h3{font-size:12pt;color:#2c1810;margin-top:12pt}'+
+      'table{border-collapse:collapse;width:100%;margin:6pt 0;font-size:10pt}'+
+      'th,td{border:1px solid #999;padding:4pt 6pt;text-align:left;vertical-align:top}'+
+      'th{background:#f0eada;font-weight:700}'+
+      '.mx-doc-head{display:table;width:100%;margin-bottom:12pt;border-bottom:2pt solid #2c1810;padding-bottom:8pt}'+
+      '.mx-doc-head>div{display:table-cell;vertical-align:top}'+
+      '.mx-doc-head .perito-name{font-size:13pt;font-weight:700;color:#2c1810}'+
+      '.mx-doc-footer{margin-top:18pt;padding-top:8pt;border-top:1pt solid #999;font-size:9pt;color:#8b7355;text-align:center}'+
+      '.ver-ok{background:#f0f8f3;border-left:3pt solid #1f7a4d;padding:6pt 10pt;margin:6pt 0}'+
+      '.ver-warn{background:#fdf6ec;border-left:3pt solid #b07820;padding:6pt 10pt;margin:6pt 0}'+
+      '.ver-err{background:#fbf0f0;border-left:3pt solid #a83232;padding:6pt 10pt;margin:6pt 0}'+
+      '.ver-crit{background:#f5e6f9;border-left:3pt solid #7b1fa2;padding:6pt 10pt;margin:6pt 0}'+
+      '.mx-doc-note{background:#fffbef;border:1px solid #f0e0c4;padding:6pt 10pt;margin:6pt 0;font-style:italic;font-size:10.5pt}'+
+    '</style></head>'+
+    '<body>'+ bodyHtml +'</body></html>';
+  var blob = new Blob(['﻿', docHtml], { type:'application/msword;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var imm = MX.getImmobile() || {ana:{}};
+  var slug = (imm.ana && imm.ana.Nome ? imm.ana.Nome.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : 'analisi');
+  var a = document.createElement('a');
+  a.href = url; a.download = CFG.moduleId+'-'+slug+'-'+(new Date().toISOString().slice(0,10))+'.doc';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 300);
+  toast('File Word generato, apri con Word');
+  });
+}
+
+/* =====================================================================
+ * EXPORT, PDF (window.print)
+ * ===================================================================== */
+function doExportPDF(){
+  /* la classe .mx-print del paper limita la stampa a quel blocco via @media print */
+  window.print();
+}
+
+/* =====================================================================
+ * AGGIUNGI AL REPORT (snapshot in mx2::reports)
+ * ===================================================================== */
+function doAddToReport(){
+  var sel = readSelections();
+  var note = document.getElementById('mx-note').value;
+  var snap = {
+    schemaVersion: 1,
+    moduleId: CFG.moduleId,
+    moduleName: CFG.moduleName,
+    timestamp: new Date().toISOString(),
+    input: (typeof CFG.getInput === 'function') ? CFG.getInput() : null,
+    output: (typeof CFG.getOutput === 'function') ? CFG.getOutput() : null,
+    svg: (typeof CFG.getSvgHTML === 'function') ? CFG.getSvgHTML() : null,
+    note: note,
+    sections: sel,
+    docHtml: buildFullDoc(sel, note)
+  };
+  var reports = loadJSON('mx2::reports', []);
+  reports.push(snap);
+  saveJSON('mx2::reports', reports);
+  toast('Analisi aggiunta al Report (' + reports.length + ' totali)');
+  closeModal();
+}
+
+/* =====================================================================
+ * EXPORT, JSON (backup tecnico file scaricato)
+ * ===================================================================== */
+function doExportJSON(){
+  var sel = readSelections();
+  var note = document.getElementById('mx-note').value;
+  var snap = {
+    schemaVersion: 1,
+    moduleId: CFG.moduleId,
+    moduleName: CFG.moduleName,
+    exportedAt: new Date().toISOString(),
+    perito: MX.getPerito ? MX.getPerito() : null,
+    immobile: MX.getImmobile ? MX.getImmobile() : null,
+    input: (typeof CFG.getInput === 'function') ? CFG.getInput() : null,
+    output: (typeof CFG.getOutput === 'function') ? CFG.getOutput() : null,
+    svg: (typeof CFG.getSvgHTML === 'function') ? CFG.getSvgHTML() : null,
+    note: note,
+    sections: sel
+  };
+  var blob = new Blob([JSON.stringify(snap, null, 2)], {type:'application/json;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var imm = MX.getImmobile ? MX.getImmobile() : {ana:{}};
+  var slug = (imm && imm.ana && imm.ana.Nome) ? imm.ana.Nome.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : 'analisi';
+  var a = document.createElement('a');
+  a.href = url; a.download = CFG.moduleId+'-'+slug+'-'+(new Date().toISOString().slice(0,10))+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 300);
+  toast('File JSON scaricato (backup tecnico)');
+}
+
+/* =====================================================================
+ * DIALOG SALVA (mini), chiede nome e note
+ * ===================================================================== */
+var $dlg = null;
+function ensureDialog(){
+  if ($dlg) return $dlg;
+  $dlg = document.createElement('div');
+  $dlg.className = 'mx-dialog';
+  $dlg.innerHTML = '<div class="mx-dialog-card" id="mx-dlg-card"></div>';
+  document.body.appendChild($dlg);
+  return $dlg;
+}
+function openSaveDialog(){
+  ensureDialog();
+  var imm = MX.getImmobile() || {ana:{}};
+  var defName = (imm.ana && imm.ana.Nome ? imm.ana.Nome+' - ' : '') + fmtNow();
+  var card = document.getElementById('mx-dlg-card');
+  card.innerHTML = ''+
+    '<h3>&#128190; Salva analisi</h3>'+
+    '<p>Dai un nome al salvataggio. Potrai ricaricarlo o confrontarlo con uno futuro (es. al ritorno sul cantiere).</p>'+
+    '<div class="mx-fld"><label>Nome</label><input type="text" id="mx-dlg-name" value="'+esc(defName)+'"></div>'+
+    '<div class="mx-fld"><label>Note (opzionali)</label><textarea id="mx-dlg-note"></textarea></div>'+
+    '<div class="mx-dialog-foot">'+
+      '<button type="button" data-act="dlg-cancel">Annulla</button>'+
+      '<button type="button" class="primary" data-act="dlg-save">&#128190; Salva</button>'+
+    '</div>';
+  $dlg.classList.add('is-open');
+  card.querySelector('[data-act="dlg-cancel"]').addEventListener('click', function(){ $dlg.classList.remove('is-open'); });
+  card.querySelector('[data-act="dlg-save"]').addEventListener('click', function(){
+    var nm = document.getElementById('mx-dlg-name').value.trim();
+    if (!nm){ alert('Inserisci un nome.'); return; }
+    var nt = document.getElementById('mx-dlg-note').value.trim();
+    var saves = loadJSON('mx2::'+CFG.moduleId+'-saves', []);
+    saves.push({
+      schemaVersion: 1,
+      nome: nm,
+      note: nt,
+      timestamp: new Date().toISOString(),
+      input: (typeof CFG.getInput === 'function') ? CFG.getInput() : null,
+      output: (typeof CFG.getOutput === 'function') ? CFG.getOutput() : null,
+      svg: (typeof CFG.getSvgHTML === 'function') ? CFG.getSvgHTML() : null
+    });
+    saveJSON('mx2::'+CFG.moduleId+'-saves', saves);
+    $dlg.classList.remove('is-open');
+    toast('Analisi salvata ('+saves.length+' totali per questo modulo)');
+  });
+}
+
+/* =====================================================================
+ * DIALOG CARICA, lista dei salvataggi
+ * ===================================================================== */
+function openLoadDialog(){
+  ensureDialog();
+  var saves = loadJSON('mx2::'+CFG.moduleId+'-saves', []);
+  var card = document.getElementById('mx-dlg-card');
+  if (saves.length === 0){
+    card.innerHTML = '<h3>&#128194; Carica analisi</h3><p>Non ci sono analisi salvate per questo modulo. Calcola, poi clicca <em>Salva analisi</em> per crearne una.</p><div class="mx-dialog-foot"><button type="button" class="primary" data-act="dlg-cancel">OK</button></div>';
+  } else {
+    var rows = saves.map(function(s, i){
+      return '<div class="mx-save-row">'+
+        '<div class="info"><div class="nm">'+esc(s.nome)+'</div><div class="meta">'+fmtDate(s.timestamp)+' '+(new Date(s.timestamp).toTimeString().slice(0,5))+(s.note?' &middot; '+esc(s.note):'')+'</div></div>'+
+        '<button type="button" class="load" data-i="'+i+'" data-act="load">Carica</button>'+
+        '<button type="button" class="del" data-i="'+i+'" data-act="del">&times;</button>'+
+      '</div>';
+    }).join('');
+    card.innerHTML = '<h3>&#128194; Carica analisi salvata</h3><p>Scegli un\'analisi salvata in precedenza. Verr&agrave; ricaricata sostituendo i dati attuali.</p>'+
+      '<div class="mx-saves-list">'+rows+'</div>'+
+      '<div class="mx-dialog-foot"><button type="button" data-act="dlg-cancel">Chiudi</button></div>';
+  }
+  $dlg.classList.add('is-open');
+  card.querySelectorAll('[data-act="dlg-cancel"]').forEach(function(b){ b.addEventListener('click', function(){ $dlg.classList.remove('is-open'); }); });
+  card.querySelectorAll('[data-act="load"]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var i = parseInt(b.dataset.i, 10);
+      var saves2 = loadJSON('mx2::'+CFG.moduleId+'-saves', []);
+      var s = saves2[i];
+      if (!s) return;
+      if (typeof CFG.applyData === 'function'){
+        CFG.applyData(s.input);
+        $dlg.classList.remove('is-open');
+        toast('Analisi caricata: '+s.nome);
+      } else {
+        alert('Il modulo non supporta il caricamento di dati salvati.');
+      }
+    });
+  });
+  card.querySelectorAll('[data-act="del"]').forEach(function(b){
+    b.addEventListener('click', function(){
+      if (!confirm('Eliminare questo salvataggio?')) return;
+      var i = parseInt(b.dataset.i, 10);
+      var saves2 = loadJSON('mx2::'+CFG.moduleId+'-saves', []);
+      saves2.splice(i, 1);
+      saveJSON('mx2::'+CFG.moduleId+'-saves', saves2);
+      openLoadDialog();
+    });
+  });
+}
+
+/* =====================================================================
+ * DIALOG CONFRONTA, side-by-side con una salvata
+ * ===================================================================== */
+function openCompareDialog(){
+  ensureDialog();
+  var saves = loadJSON('mx2::'+CFG.moduleId+'-saves', []);
+  var card = document.getElementById('mx-dlg-card');
+  if (saves.length === 0){
+    card.innerHTML = '<h3>&#9974; Confronta</h3><p>Non ci sono analisi salvate da confrontare. Salva prima un\'analisi (caso d\'uso tipico: ritorno sul cantiere dopo settimane/mesi e confronto T0 vs T1).</p><div class="mx-dialog-foot"><button type="button" class="primary" data-act="dlg-cancel">OK</button></div>';
+    $dlg.classList.add('is-open');
+    card.querySelector('[data-act="dlg-cancel"]').addEventListener('click', function(){ $dlg.classList.remove('is-open'); });
+    return;
+  }
+  var rows = saves.map(function(s, i){
+    return '<div class="mx-save-row">'+
+      '<div class="info"><div class="nm">'+esc(s.nome)+'</div><div class="meta">'+fmtDate(s.timestamp)+' '+(new Date(s.timestamp).toTimeString().slice(0,5))+'</div></div>'+
+      '<button type="button" class="cmp" data-i="'+i+'" data-act="cmp">Confronta</button>'+
+    '</div>';
+  }).join('');
+  card.innerHTML = '<h3>&#9974; Confronta con analisi precedente</h3><p>Scegli l\'analisi salvata da confrontare con quella corrente.</p>'+
+    '<div class="mx-saves-list">'+rows+'</div>'+
+    '<div class="mx-dialog-foot"><button type="button" data-act="dlg-cancel">Annulla</button></div>';
+  $dlg.classList.add('is-open');
+  card.querySelectorAll('[data-act="dlg-cancel"]').forEach(function(b){ b.addEventListener('click', function(){ $dlg.classList.remove('is-open'); }); });
+  card.querySelectorAll('[data-act="cmp"]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var i = parseInt(b.dataset.i, 10);
+      var s = saves[i];
+      if (!s) return;
+      showCompareView(s);
+      $dlg.classList.remove('is-open');
+    });
+  });
+}
+
+function showCompareView(savedSnap){
+  /* costruisco una vista a 2 colonne: T0 (snapshot) vs T1 (corrente) */
+  var curOut = (typeof CFG.getOutput === 'function') ? CFG.getOutput() : null;
+  var t0_out = savedSnap.output || {};
+  var t1_out = curOut || {};
+  var keysT0 = Object.keys(t0_out).filter(function(k){ return typeof t0_out[k] !== 'object' || t0_out[k] === null; });
+  var keysT1 = Object.keys(t1_out).filter(function(k){ return typeof t1_out[k] !== 'object' || t1_out[k] === null; });
+  var allKeys = Array.from(new Set(keysT0.concat(keysT1)));
+  /* 19/11/2026: nomi leggibili e numeri arrotondati (prima uscivano i nomi interni, es. «Rtot_m2KW», e quindici decimali) */
+  var _CMP_NOMI = {
+    Rtot_m2KW:'Resistenza termica totale Rtot (m²K/W)', U_Wm2K:'Trasmittanza U (W/m²K)', Sd_m:'Sd totale (m)', fRsi:'Fattore di temperatura fRsi',
+    fRsi_OK:'fRsi rispetta il riferimento 0,72', Tsi_design_C:'T superficiale interna di progetto (°C)', URsi_perc:'UR alla superficie interna (%)',
+    Td_int_C:'Punto di rugiada interno (°C)', hasCondensation:'Condensa interstiziale', condensationPoints:'Interfacce con condensa (n.)',
+    Td_C:'Punto di rugiada Td (°C)', UR_surf_perc:'UR alla superficie (%)', UR_crit_perc:'UR critica (%)', LIM_crit_perc:'LIM critica (%)',
+    VPD_kPa:'VPD (kPa)', VTT_M1_days:'VTT, giorni a M=1', W_gkg:'Umidità specifica W (g/kg)', h_kJkg:'Entalpia h (kJ/kg)',
+    Tw_C:'Temperatura di bulbo umido Tw (°C)', v_m3kg:'Volume specifico v (m³/kg)',
+    media_Bq_m3:'Media annua (Bq/m³)', semestre1:'Semestre 1', semestre2:'Semestre 2', regione:'Regione', comune:'Comune', piano:'Piano'
+  };
+  function _cmpNome(k){ return _CMP_NOMI[k] || String(k).replace(/_/g,' '); }
+  function _cmpVal(v){ if(v==null||v==='') return 'n.d.'; if(v===true) return 'sì'; if(v===false) return 'no'; if(typeof v==='number') return isFinite(v) ? String(+v.toFixed(3)) : 'n.d.'; return String(v); }
+  var rows = allKeys.map(function(k){
+    var v0 = t0_out[k]; var v1 = t1_out[k];
+    var diff = '';
+    if (typeof v0 === 'number' && typeof v1 === 'number'){
+      var d = v1 - v0;
+      diff = (d>=0?'+':'')+d.toFixed(3);
+    } else if (v0 === v1){
+      diff = 'invariato';
+    } else {
+      diff = 'modificato';
+    }
+    return '<tr><td><b>'+esc(_cmpNome(k))+'</b></td><td>'+esc(_cmpVal(v0))+'</td><td>'+esc(_cmpVal(v1))+'</td><td>'+esc(diff)+'</td></tr>';
+  }).join('');
+  ensureModal();
+  var sel = {};
+  if (CFG.defaultSections) Object.keys(CFG.defaultSections).forEach(function(k){ sel[k] = CFG.defaultSections[k].on; });
+  var doc = '<div class="mx-doc">'+
+    buildDocHead({ titolo: 'Confronto: '+esc(savedSnap.nome)+' vs analisi attuale', note:'' })+
+    '<h2>Confronto T0 vs T1</h2>'+
+    '<p><strong>T0 (salvata):</strong> '+esc(savedSnap.nome)+' &middot; '+fmtDate(savedSnap.timestamp)+'<br>'+
+    '<strong>T1 (corrente):</strong> '+fmtNow()+'</p>'+
+    '<table>'+
+      '<thead><tr><th>Grandezza</th><th>T0 (precedente)</th><th>T1 (attuale)</th><th>Differenza</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody>'+
+    '</table>'+
+    '<div class="mx-doc-note">Il confronto evidenzia le variazioni tra il sopralluogo precedente e quello attuale. Utile per documentare evoluzioni nel tempo (efficacia di interventi, peggioramenti, monitoraggi temporali).</div>'+
+    buildDocFooter()+
+    '</div>';
+  document.getElementById('mx-preview').innerHTML = doc;
+  document.getElementById('mx-modal-title').textContent = 'Confronto T0 vs T1';
+  /* nascondo sezioni-side perché in confronto non hanno senso */
+  document.getElementById('mx-sections').innerHTML = '<div style="font-size:12px;color:#8b7355;font-style:italic">Modalità Confronto: le sezioni opzionali sono disabilitate.</div>';
+  document.getElementById('mx-note').value = 'Confronto con: '+savedSnap.nome;
+  $modal.classList.add('is-open');
+}
+
+/* =====================================================================
+ * RESET, chiede conferma e chiama callback del modulo
+ * ===================================================================== */
+function doReset(){
+  if (typeof CFG.onReset === 'function'){
+    CFG.onReset();
+  }
+}
+
+/* =====================================================================
+ * BUILD TOOLBAR DOM
+ * ===================================================================== */
+function buildToolbar(){
+  if (document.querySelector('.mx-toolbar')) return;
+  var bar = document.createElement('div');
+  bar.className = 'mx-toolbar';
+  bar.classList.add('needs-result');
+  bar.id = 'mxToolbar';
+  bar.innerHTML = ''+
+    '<h3 class="mx-toolbar-head">'+
+      '<span class="ico-wrap">&#128190;</span>'+
+      '<span class="title">Salvataggio &amp; esportazione<small>Salva l\'analisi, ricarica un\'analisi precedente o esporta in Word/PDF per la relazione tecnica</small></span>'+
+    '</h3>'+
+    '<div class="mx-toolbar-body">'+
+      '<div class="mx-toolbar-hint">&#9432; Esegui il calcolo per attivare i pulsanti di salvataggio ed esportazione</div>'+
+      '<div class="mx-toolbar-inner">'+
+        '<button type="button" class="mx-tb-btn tb-save"    data-act="save"    data-needs="result"><span class="ico">&#128190;</span><span class="label">Salva</span></button>'+
+        '<button type="button" class="mx-tb-btn tb-load"    data-act="load"><span class="ico">&#128194;</span><span class="label">Carica</span></button>'+
+        '<button type="button" class="mx-tb-btn tb-compare" data-act="compare" data-needs="result"><span class="ico">&#9974;</span><span class="label">Confronta</span></button>'+
+        '<button type="button" class="mx-tb-btn tb-word"    data-act="word"    data-needs="result"><span class="ico">&#128221;</span><span class="label">Word</span></button>'+
+        '<button type="button" class="mx-tb-btn tb-pdf"     data-act="pdf"     data-needs="result"><span class="ico">&#128196;</span><span class="label">PDF</span></button>'+
+        '<button type="button" class="mx-tb-btn tb-report"  data-act="report"  data-needs="result"><span class="ico">&#128230;</span><span class="label">Al report</span></button>'+
+        '<button type="button" class="mx-tb-btn tb-reset"   data-act="reset"><span class="ico">&#8634;</span><span class="label">Reset</span></button>'+
+      '</div>'+
+    '</div>';
+  // Inserisco la toolbar dentro <main> (o body fallback) e NON setto mx-has-toolbar (non serve più padding-bottom)
+  var container = document.querySelector('main') || document.querySelector('.wrap') || document.body;
+  container.appendChild(bar);
+  bar.addEventListener('click', function(ev){
+    var el = ev.target.closest('[data-act]');
+    if (!el) return;
+    var act = el.dataset.act;
+    /* Per esporre Word/PDF/Report apre il modal anteprima */
+    /* Blocca azioni che richiedono lastResult quando non c'è */
+    var needs = el.dataset.needs;
+    if (needs === 'result' && bar.classList.contains('needs-result')){
+      toast('Esegui prima il calcolo per usare questa funzione');
+      return;
+    }
+    if (act === 'word' || act === 'pdf' || act === 'report'){
+      openModal();
+    } else if (act === 'save'){
+      openSaveDialog();
+    } else if (act === 'load'){
+      openLoadDialog();
+    } else if (act === 'compare'){
+      openCompareDialog();
+    } else if (act === 'reset'){
+      if (confirm('Sicuro di voler azzerare l\'analisi corrente?')) doReset();
+    }
+  });
+}
+
+/* =====================================================================
+ * API PUBBLICA: initToolbar(config) + setActive(bool)
+ * ===================================================================== */
+/* 19/11/2026: porta d'ingresso per «Apri snapshot»: rimette nel modulo i dati d'ingresso di un file esportato,
+   per la stessa strada del tasto «Carica». Risponde 'ok', 'altro' (file di un altro modulo) oppure 'no'. */
+MX.applyData = function(input, moduleId){
+  if (!CFG || typeof CFG.applyData !== 'function') return 'no';
+  if (moduleId && CFG.moduleId && String(moduleId) !== String(CFG.moduleId)) return 'altro';
+  CFG.applyData(input);
+  return 'ok';
+};
+MX.initToolbar = function(config){
+  CFG = Object.assign({
+    moduleId: 'modulo',
+    moduleName: 'Modulo',
+    moduleColor: '#2c5d7c',
+    defaultSections: {},
+    getInput: function(){ return null; },
+    getOutput: function(){ return null; },
+    getSvgHTML: function(){ return null; },
+    getDocSections: function(){ return ''; },
+    applyData: function(){},
+    onReset: function(){}
+  }, config || {});
+  buildToolbar();
+};
+
+MX.toolbarActive = function(active){
+  var bar = document.querySelector('.mx-toolbar');
+  if (!bar) return;
+  if (active){
+    bar.classList.add('is-active');
+    bar.classList.remove('needs-result');
+  } else {
+    bar.classList.remove('is-active');
+    bar.classList.add('needs-result');
+  }
+};
+
+/* Esporto helper toast */
+MX.toast = toast;
+})();
+
+</script>
+<!-- END MX TOOLBAR LIBRARY -->
+
+<script>
+(function(){
+  'use strict';
+
+  /* COSTANTI FISICHE */
+  var MAGNUS     = { a: 17.269, b: 237.3 };
+  var MAGNUS_ICE = { a: 21.875, b: 265.5 };
+  var E0         = 610.5;
+  var PATM       = 101325;
+  var EPSILON    = 0.621945;
+  var FRSI_MIN_IT = 0.72;
+
+  /* LIM_DATA Sedlbauer 2001 (dissertazione Fraunhofer IBP), germinazione.
+     LIM Bau I: punti nel testo cap. 3.3.1 p. 84 (12°C/79%, 25°C/75%, 30°C/76%)
+     + lettura calibrata della Fig. 34 (10°C/80,3%, 20°C/75,9%, tolleranza ~1 pp).
+     LIM Bau II: punto nel testo p. 86 (30°C/79%) + Fig. 34 (10°C/84,6%, 20°C/80,2%);
+     a 12 e 25°C interpolazione lineare fra gli ancoraggi 10/20/30.
+     Sotto 10°C nessun valore tabulato: si TIENE il valore a 10°C (scelta
+     cautelativa dichiarata: la curva vera sale, qui resta piatta).
+     Cat III = estensione prudenziale del modulo, non pubblicata da Sedlbauer. */
+  var LIM_DATA = {
+    temps:  [10,    12,    20,    25,    30],
+    catI:   [80.3,  79,    75.9,  75,    76],
+    catII:  [84.6,  83.7,  80.2,  79.6,  79],
+    catIII: [94,    92.4,  91,    91,    93]
+  };
+  /* VTT_C rimosso: i valori 0,14/0,33/0,8 non sono i coefficienti W/SQ canonici di Hukka-Viitanen.
+     La forma chiusa usa il substrato ligneo sensibile di riferimento (vedi vttDays). */
+  var STORAGE_KEY = 'mx2::termoigrometria-v3';
+
+  /* FORMULE */
+  function pSat(T){
+    if (T >= 0) return E0 * Math.exp((MAGNUS.a    *T) / (MAGNUS.b    + T));
+    return            E0 * Math.exp((MAGNUS_ICE.a*T) / (MAGNUS_ICE.b+ T));
+  }
+  function dewPoint(T, UR){
+    if (T == null || UR == null || UR <= 0) return null;
+    var rh = Math.max(0.001, Math.min(100, UR)) / 100;
+    var alpha = Math.log(rh) + (MAGNUS.a * T) / (MAGNUS.b + T);
+    return (MAGNUS.b * alpha) / (MAGNUS.a - alpha);
+  }
+  function rhAtSurface(Tair, URair, Tsurf){
+    if (Tair == null || URair == null || Tsurf == null) return null;
+    var pAir = pSat(Tair) * (URair/100);
+    var pS = pSat(Tsurf);
+    return Math.min(100, (pAir/pS) * 100);
+  }
+  function rhCritico(Tair, Tsurf){
+    if (Tair == null || Tsurf == null) return null;
+    return Math.min(100, Math.max(0, (pSat(Tsurf)/pSat(Tair)) * 100));
+  }
+  function limCritical(T, catIdx){
+    var arr;
+    if (catIdx === 0) arr = LIM_DATA.catI;
+    else if (catIdx === 1) arr = LIM_DATA.catII;
+    else arr = LIM_DATA.catIII;
+    var temps = LIM_DATA.temps;
+    if (T <= temps[0]) return arr[0];
+    if (T >= temps[temps.length-1]) return arr[arr.length-1];
+    for (var i=1; i<temps.length; i++){
+      if (T <= temps[i]){
+        var t0 = temps[i-1], t1 = temps[i];
+        var v0 = arr[i-1],  v1 = arr[i];
+        return v0 + (T - t0)/(t1 - t0) * (v1 - v0);
+      }
+    }
+    return arr[arr.length-1];
+  }
+  function frsiCalc(Tair, Tsurf, Text){
+    if (Tair == null || Tsurf == null || Text == null) return null;
+    var den = Tair - Text;
+    if (Math.abs(den) < 0.01) return null;
+    return (Tsurf - Text) / den;
+  }
+  function vpd(Tair, URair){
+    if (Tair == null || URair == null) return null;
+    var pS = pSat(Tair);
+    var pV = (URair/100) * pS;
+    return (pS - pV) / 1000;
+  }
+  function vttDays(T, UR, catIdx){
+    if (T == null || UR == null || UR <= 0 || T <= 0) return null;
+    // Hukka & Viitanen (1999), forma chiusa del tempo a Mould Index M=1 (settimane) per
+    // substrato ligneo sensibile di RIFERIMENTO (pino, superficie segata: W=0, SQ=0), T/UR costanti:
+    //   ln t = -0.68·ln T - 13.9·ln(UR) + 66.02     [T in °C, UR in PERCENTO]
+    // (La categoria di sensibilità I/II/III governa la soglia di condensazione ISO 13788, non questo indicatore.)
+    var tWeeks = Math.exp(-0.68 * Math.log(T) - 13.9 * Math.log(UR) + 66.02);
+    return Math.max(1, Math.round(tWeeks * 7));
+  }
+  /* PSICROMETRIA ASHRAE 2025 cap.1 */
+  function humRatio(T, UR){
+    if (T == null || UR == null || UR <= 0) return null;
+    var pv = (UR/100) * pSat(T);
+    if (pv >= PATM) return null;
+    return EPSILON * pv / (PATM - pv);
+  }
+  function Wgkg(T, UR){
+    var x = humRatio(T, UR);
+    return (x == null) ? null : x * 1000;
+  }
+  function enthalpy(T, UR){
+    var x = humRatio(T, UR);
+    if (x == null || T == null) return null;
+    return 1.006 * T + x * (2501 + 1.86 * T);
+  }
+  function specVol(T, UR){
+    var x = humRatio(T, UR);
+    if (x == null || T == null) return null;
+    return (287.042 * (T + 273.15) / PATM) * (1 + 1.6078 * x);
+  }
+  function wetBulb(T, UR){
+    if (T == null || UR == null) return null;
+    var rh = Math.max(0.001, Math.min(100, UR));
+    return T * Math.atan(0.151977 * Math.sqrt(rh + 8.313659))
+      + Math.atan(T + rh) - Math.atan(rh - 1.676331)
+      + 0.00391838 * Math.pow(rh, 1.5) * Math.atan(0.023101 * rh)
+      - 4.686035;
+  }
+
+  /* STATE */
+  function num(v){ var n = parseFloat(v); return isNaN(n) ? null : n; }
+  function fmt(n, dec){ return (n == null || isNaN(n)) ? 'n.d.' : Number(n).toFixed(dec||1); }
+  function loadState(){
+    try{ var s = JSON.parse(localStorage.getItem(STORAGE_KEY)); return s || {}; }
+    catch(_){ return {}; }
+  }
+  function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(_){} }
+  var defaults = { T:20, UR:65, Ts:14, Te:10, URe:80, cat:0 };
+  var state = Object.assign({}, defaults, loadState());
+
+  /* SLIDER BINDINGS */
+  function bindSlider(key, rId, nId, color){
+    var r = document.getElementById(rId);
+  try{ window._mxAggancia_getDati = function(){ return state; }; }catch(_){}
+    var n = document.getElementById(nId);
+    function syncTrack(){
+      var min = parseFloat(r.min), max = parseFloat(r.max), v = parseFloat(r.value);
+      var pct = ((v - min) / (max - min)) * 100;
+      r.style.setProperty('--val', pct.toFixed(2)+'%');
+      r.style.setProperty('--thumb', color);
+      var _sl = r.closest ? r.closest('.sl') : r.parentElement;
+      if (_sl) _sl.style.setProperty('--thumb', color);
+    }
+    function fromSlider(){
+      var v = parseFloat(r.value);
+      n.value = (r.step.indexOf('.')>=0 || r.step === '0.5') ? v.toFixed(1) : v;
+      state[key] = v; saveState(); syncTrack(); refresh();
+    }
+    function fromNum(){
+      var v = parseFloat(n.value);
+      if (isNaN(v)) return;
+      v = Math.max(parseFloat(r.min), Math.min(parseFloat(r.max), v));
+      r.value = v;
+      state[key] = v; saveState(); syncTrack(); refresh();
+    }
+    if (state[key] != null){ r.value = state[key]; n.value = state[key]; }
+    r.addEventListener('input', fromSlider);
+    n.addEventListener('input', fromNum);
+    syncTrack();
+  }
+  bindSlider('T',   'sT_r',   'sT_n',   '#c0392b');
+  bindSlider('UR',  'sUR_r',  'sUR_n',  '#1f7a4d');
+  bindSlider('Ts',  'sTs_r',  'sTs_n',  '#6a3d8c');
+  bindSlider('Te',  'sTe_r',  'sTe_n',  '#1f4e55');
+  bindSlider('URe', 'sURe_r', 'sURe_n', '#5b86c9');
+
+  /* SUBSTRATE GROUP */
+  var subBtns = document.querySelectorAll('.sub-btn');
+  function setSubstrate(idx){
+    state.cat = idx; saveState();
+    subBtns.forEach(function(b,i){ b.classList.toggle('is-on', i === idx); });
+    refresh();
+  }
+  subBtns.forEach(function(b,i){
+    b.addEventListener('click', function(){ setSubstrate(i); });
+  });
+  setSubstrate(state.cat || 0);
+
+  function setKpi(id, value, suffix, cls){
+    var el = document.getElementById(id);
+    el.classList.remove('is-ok','is-warn','is-err');
+    if (cls) el.classList.add('is-'+cls);
+    el.querySelector('.v').textContent = (value == null) ? 'n.d.' : value;
+    if (suffix !== undefined) el.querySelector('.s').textContent = suffix;
+  }
+
+  function refresh(){
+    var T   = state.T,  UR  = state.UR, Ts  = state.Ts, Te  = state.Te, URe = state.URe;
+    var cat = state.cat || 0;
+    var Td     = dewPoint(T, UR);
+    var URsurf = rhAtSurface(T, UR, Ts);
+    var URcrit = rhCritico(T, Ts);
+    /* LIM Sedlbauer valutato alla TEMPERATURA SUPERFICIALE (la muffa germina sulla superficie:
+       T superficie + UR superficie, cfr. Sedlbauer 2001). Fallback a T aria se la parete non è nota. */
+    var Tsurf  = (Ts != null) ? Ts : T;
+    var lim    = limCritical(Tsurf, cat);
+    var margine = (lim != null && URsurf != null) ? (lim - URsurf) : null;
+    var fRsi   = frsiCalc(T, Ts, Te);
+    var vp     = vpd(T, UR);
+    var vtt    = vttDays(Tsurf, URsurf || UR, cat);
+
+    /* KPI Sezione 3 sintetica */
+    setKpi('kTd',      fmt(Td,1)+' °C',     'da T='+fmt(T,1)+'°C UR='+fmt(UR,0)+'%', null);
+    var clsSurf = 'ok';
+    if (URsurf != null){
+      if (URsurf >= 100)       clsSurf = 'err';
+      else if (URsurf >= lim)  clsSurf = 'err';
+      else if (URsurf >= lim-5) clsSurf = 'warn';
+      else if (URsurf >= 60)   clsSurf = 'warn';
+      else                      clsSurf = 'ok';
+    }
+    setKpi('kUrSup',   fmt(URsurf,1)+' %',  'a T parete '+fmt(Ts,1)+'°C', clsSurf);
+    setKpi('kUrCrit',  fmt(URcrit,1)+' %',  '↗ oltre = condensa', null);
+    setKpi('kLimCrit', fmt(lim,1)+' %',     'Cat. '+(['I','II','III'][cat])+' @ '+fmt(Tsurf,1)+'°C sup.', null);
+    var clsMar = (margine == null) ? null : (margine < 0 ? 'err' : margine < 5 ? 'warn' : 'ok');
+    setKpi('kMargine', (margine != null ? (margine>=0?'+':'')+fmt(margine,1)+' p' : 'n.d.'),
+                       (margine == null) ? 'LIM - UR sup.' : (margine >= 0 ? 'sotto LIM' : 'OLTRE LIM'),
+                       clsMar);
+    var clsFr = (fRsi == null) ? null : (fRsi >= FRSI_MIN_IT ? 'ok' : 'err');
+    setKpi('kFrsi',    fmt(fRsi,3),         (fRsi == null) ? 'soglia 0,72 IT' : (fRsi >= FRSI_MIN_IT ? 'conforme ≥ 0,72' : 'non conforme < 0,72'),
+                       clsFr);
+    var clsVp = null;
+    if (vp != null){
+      if (vp < 0.4) clsVp = 'err';
+      else if (vp < 0.8) clsVp = 'warn';
+      else clsVp = 'ok';
+    }
+    setKpi('kVPD',     fmt(vp,2)+' kPa',    (vp==null?'kPa':vp<0.4?'aria quasi satura':vp<0.8?'moderato':'basso rischio biologico'), clsVp);
+    var clsVtt = null;
+    if (vtt != null){
+      if (vtt < 14) clsVtt = 'err';
+      else if (vtt < 56) clsVtt = 'warn';
+      else clsVtt = 'ok';
+    }
+    setKpi('kVTT',     (vtt == null ? 'n.d.' : vtt + ' gg'), (vtt == null ? 'giorni' : vtt < 14 ? '< 2 sett.' : vtt < 56 ? '< 8 sett.' : '> 8 sett.'), clsVtt);
+
+    /* VERDETTO Sezione 3 (LIM 5 livelli) */
+    var v = document.getElementById('verdict');
+    v.classList.remove('is-ok','is-warn','is-err','is-crit');
+    var rhRef = URsurf != null ? URsurf : UR;
+    if (Ts != null && Td != null && Ts < Td){
+      v.classList.add('is-crit');
+      v.innerHTML = '<h4>CONDENSA IN ATTO, superficie sotto punto di rugiada</h4>'
+        + '<strong>T parete '+fmt(Ts,1)+'°C &lt; T<sub>d</sub> '+fmt(Td,1)+'°C.</strong> Si forma acqua liquida sulla superficie. Causa frequente: ponte termico, isolamento insufficiente, scarsa ventilazione invernale.';
+    } else if (URsurf != null && URsurf >= 100){
+      v.classList.add('is-crit');
+      v.innerHTML = '<h4>SATURAZIONE 100%, condensa imminente</h4>UR superficie pari a 100%: equilibrio col vapore d\'aria. Microcondensa intermittente probabile.';
+    } else if (rhRef >= lim){
+      v.classList.add('is-err');
+      var sopra = (rhRef - lim).toFixed(1);
+      v.innerHTML = '<h4>RISCHIO ALTO, soglia LIM superata</h4>'
+        + 'UR superficie ('+fmt(URsurf,1)+'%) <strong>SUPERA la soglia LIM Sedlbauer '+fmt(lim,1)+'%</strong> per il substrato Cat. '+(['I','II','III'][cat])+' a '+fmt(Tsurf,1)+'°C di superficie. Soglia superata di '+sopra+' punti.'
+        + (vtt != null ? '<br><em>Tempo stimato a M=1 (Hukka-Viitanen): <strong>'+vtt+' giorni</strong>.</em>' : '');
+    } else if (rhRef >= lim - 5){
+      v.classList.add('is-warn');
+      var marg = (lim - rhRef).toFixed(1);
+      v.innerHTML = '<h4>RISCHIO MODERATO, margine residuo sottile</h4>'
+        + 'UR superficie ('+fmt(URsurf,1)+'%) si avvicina alla soglia LIM critica ('+fmt(lim,1)+'%). Margine residuo: <strong>soli '+marg+' punti</strong>.';
+    } else if (rhRef >= 60){
+      v.classList.add('is-ok');
+      var m = (lim - rhRef).toFixed(1);
+      v.innerHTML = '<h4>RISCHIO BASSO, sotto soglia LIM con margine</h4>'
+        + 'UR superficie ('+fmt(URsurf,1)+'%) è '+m+' punti sotto la soglia LIM critica ('+fmt(lim,1)+'%). Margine di sicurezza sufficiente.';
+    } else {
+      v.classList.add('is-ok');
+      v.innerHTML = '<h4>NESSUN RISCHIO, UR &lt; 60%</h4>'
+        + 'L\'umidità relativa di riferimento ('+fmt(rhRef,1)+'%) è inferiore al 60%: nessun rischio di crescita fungina su qualsiasi substrato (Sedlbauer 2001).';
+    }
+
+    /* Bottone Biodeteriogeni */
+    var bio = document.getElementById('btnBio');
+    var attivo = (fRsi != null && fRsi < FRSI_MIN_IT) || (URsurf != null && URsurf >= lim);
+    bio.disabled = !attivo;
+    bio.style.opacity = attivo ? 1 : 0.45;
+    bio.style.cursor = attivo ? 'pointer' : 'not-allowed';
+
+    /* Render 3 grafici */
+    renderChart({T:T,UR:UR,Ts:Ts,Td:Td,URsurf:URsurf,URcrit:URcrit,lim:lim,cat:cat,fRsi:fRsi,vp:vp,vtt:vtt});
+
+    /* SEZIONE B */
+    var marginTs = (Ts != null && Td != null) ? (Ts - Td) : null;
+    setKpi('kBT',      fmt(T,1)+' °C',  'aria interna', null);
+    setKpi('kBTd',     fmt(Td,1)+' °C', 'Magnus-Tetens', null);
+    var clsBTw = null;
+    if (Ts != null && Td != null){
+      if (Ts < Td)              clsBTw = 'err';
+      else if (Ts < Td + 3)     clsBTw = 'warn';
+      else                       clsBTw = 'ok';
+    }
+    setKpi('kBTw',     fmt(Ts,1)+' °C', 'sonda parete', clsBTw);
+    var clsBM = null;
+    if (marginTs != null){
+      if (marginTs <= 0)      clsBM = 'err';
+      else if (marginTs <= 3) clsBM = 'warn';
+      else                     clsBM = 'ok';
+    }
+    setKpi('kBMargin', (marginTs != null ? (marginTs>=0?'+':'')+fmt(marginTs,1)+' °C' : 'n.d.'),
+                       (marginTs == null ? 'soglia' : marginTs<=0 ? 'condensa attiva' : marginTs<=3 ? 'rischio' : marginTs<=5 ? 'attenzione' : 'sicuro'),
+                       clsBM);
+    var vB = document.getElementById('verdictB');
+    vB.classList.remove('is-ok','is-warn','is-err','is-crit');
+    var rhWall = URsurf;
+    if (Ts == null || Td == null){
+      vB.innerHTML = 'Inserire T parete e UR per il calcolo.';
+    } else if (Ts < Td){
+      vB.classList.add('is-crit');
+      vB.innerHTML = '<h4>CONDENSA IN ATTO, superficie sotto punto di rugiada</h4>'
+        + 'T parete '+fmt(Ts,1)+'°C &lt; T<sub>d</sub> '+fmt(Td,1)+'°C. <strong>Si forma acqua liquida</strong> sulla superficie. Crescita di muffa quasi certa se le condizioni persistono.'
+        + (rhWall != null ? ' UR alla superficie &asymp; '+fmt(rhWall,0)+'%.' : '');
+    } else if (marginTs <= 3){
+      vB.classList.add('is-warn');
+      vB.innerHTML = '<h4>RISCHIO CONDENSA, margine soli '+fmt(marginTs,1)+'°C</h4>'
+        + 'La parete a '+fmt(Ts,1)+'°C è molto vicina al punto di rugiada '+fmt(Td,1)+'°C.'
+        + (rhWall != null ? ' UR superficie &asymp; '+fmt(rhWall,0)+'%' + (rhWall >= 80 ? ' (sufficiente per crescita muffa, Sedlbauer 2001).' : '.') : '');
+    } else if (marginTs <= 5){
+      vB.classList.add('is-ok');
+      vB.innerHTML = '<h4>MARGINE RIDOTTO, condensa non in atto</h4>'
+        + 'Parete a '+fmt(Ts,1)+'°C, '+fmt(marginTs,1)+'°C sopra il punto di rugiada '+fmt(Td,1)+'°C. La condensa non è in atto ma potrebbe verificarsi in condizioni di picco.';
+    } else {
+      vB.classList.add('is-ok');
+      vB.innerHTML = '<h4>NESSUN RISCHIO CONDENSA, margine +'+fmt(marginTs,1)+'°C</h4>'
+        + 'T parete '+fmt(Ts,1)+'°C ben sopra punto di rugiada '+fmt(Td,1)+'°C.';
+    }
+    renderDewChart({T:T, Td:Td, Ts:Ts, margin:marginTs, URsurf:URsurf});
+
+    /* SEZIONE M */
+    var W   = Wgkg(T, UR);
+    var Hh  = enthalpy(T, UR);
+    var Tw  = wetBulb(T, UR);
+    var Vv  = specVol(T, UR);
+    var Wsat_wall = (Ts != null) ? Wgkg(Ts, 100) : null;
+    var condensedW = (W != null && Wsat_wall != null && W > Wsat_wall) ? (W - Wsat_wall) : 0;
+    setKpi('kMW',  fmt(W,2)+' g/kg',     'umidità specifica', null);
+    setKpi('kMH',  fmt(Hh,1)+' kJ/kg',    'entalpia',               null);
+    setKpi('kMTw', fmt(Tw,1)+' °C',  'bulbo umido (Stull)',    null);
+    setKpi('kMV',  fmt(Vv,3)+' m³/kg', 'volume specifico',     null);
+    var vM = document.getElementById('verdictM');
+    vM.classList.remove('is-ok','is-warn','is-err','is-crit');
+    if (Ts == null || Td == null){
+      vM.innerHTML = 'Inserire T parete per la verifica condensa.';
+    } else if (Ts < Td){
+      vM.classList.add('is-crit');
+      vM.innerHTML = '<h4>🔴 CONDENSA IN ATTO sulla parete</h4>'
+        + 'Acqua condensata stimata: <strong>'+fmt(condensedW,2)+' g/kg<sub>as</sub></strong> (W aria '+fmt(W,2)+' &minus; W<sub>sat</sub> parete '+fmt(Wsat_wall,2)+'). UR superficie 100%. La traiettoria 1→tr→2 sul diagramma mostra il raffreddamento isoenthalpico fino alla curva di saturazione.';
+    } else if (Ts < Td + 3){
+      vM.classList.add('is-warn');
+      vM.innerHTML = '<h4>⚠ Margine ridotto, rischio condensa</h4>'
+        + 'La parete a '+fmt(Ts,1)+'°C è soli '+fmt(Ts-Td,1)+'°C sopra il punto di rugiada. UR superficie &asymp; '+fmt(URsurf,0)+'%.'
+        + ((URsurf != null && URsurf >= 80) ? ' Crescita di muffa probabile (Sedlbauer 2001).' : ' Monitorare le condizioni notturne.');
+    } else {
+      vM.classList.add('is-ok');
+      vM.innerHTML = '<h4>✓ Nessun rischio condensa sulla parete</h4>'
+        + 'Parete a '+fmt(Ts,1)+'°C, '+fmt(Ts-Td,1)+'°C sopra il punto di rugiada. UR superficie &asymp; '+fmt(URsurf,0)+'%.';
+    }
+    renderPsychroChart({T:T, UR:UR, Ts:Ts, Td:Td, W:W, Wsat_wall:Wsat_wall, Tw:Tw, vv:Vv, hh:Hh});
+    if (window.MX && window.MX.toolbarActive) window.MX.toolbarActive(true);
+  }
+
+  /* ============= SEZIONE A, LIM neon chart ============= */
+
+/* === Mixando theme toggle (Termoigrometria), palette neon/classic === */
+var _termoLastChart = null, _termoLastDew = null, _termoLastPsychro = null;
+function _termoReadTheme(){ try{ return localStorage.getItem('mx2::chartTheme') || 'classic'; }catch(_){ return 'classic'; } }
+function _termoRedrawAll(){
+  try{ if (_termoLastChart && typeof renderChart === 'function') renderChart(_termoLastChart); }catch(e){}
+  try{ if (_termoLastDew && typeof renderDewChart === 'function') renderDewChart(_termoLastDew); }catch(e){}
+  try{ if (_termoLastPsychro && typeof renderPsychroChart === 'function') renderPsychroChart(_termoLastPsychro); }catch(e){}
+}
+// Espongo su window per onclick inline (le funzioni stanno in IIFE)
+if (typeof window !== 'undefined'){ window._termoRedrawAll = _termoRedrawAll; window._termoReadTheme = _termoReadTheme; }
+
+  function renderChart(d){
+    _termoLastChart = d;
+    var host = document.getElementById('chartHost');
+    if (d.URsurf == null && d.UR == null){
+      host.innerHTML = '<p style="margin:0;color:var(--ink-mute);font-style:italic;text-align:center;padding:30px 0">Sposta i cursori per visualizzare la vista diagnostica.</p>';
+      return;
+    }
+    var C_GRN='#00E676', C_ORG='#FF9100', C_RED='#FF1744', C_FUC='#E040FB', C_YEL='#FFEA00';
+    var THEME = (function(){ try{ return localStorage.getItem('mx2::chartTheme') || 'classic'; }catch(_){ return 'classic'; } })();
+    var DARK = (THEME==='neon');
+    if(!DARK){ C_YEL='#c2920a'; }
+    var INK   = DARK ? '#e6f0f5' : '#33474f';
+    var MUT   = DARK ? '#7da9b8' : '#5d7682';
+    var GRIDC = DARK ? 'rgba(125,169,184,.16)' : 'rgba(70,100,118,.12)';
+    var AXISC = DARK ? '#2b5567' : '#b7c8d0';
+    var ZONEa = DARK ? 0.15 : 0.10;
+    var TH_n = { wrapBg:'linear-gradient(180deg,#04101a,#0a1f2e)', wrapBorder:'#1f4d5c', wrapShadow:'0 8px 30px rgba(0,0,0,.4),inset 0 0 80px rgba(0,229,255,.05)', titleColor:'#00E5FF', titleShadow:'0 0 12px rgba(0,229,255,.5)', titleRule:'linear-gradient(90deg,#00E5FF,transparent)', metaColor:'#7da9b8', btnBg:'rgba(0,229,255,.15)', btnBorder:'#00E5FF', btnText:'#00E5FF' };
+    var TH_c = { wrapBg:'#ffffff', wrapBorder:'#d0d0d0', wrapShadow:'0 2px 6px rgba(0,0,0,.08)', titleColor:'#2c5d7c', titleShadow:'none', titleRule:'linear-gradient(90deg,#2c5d7c,transparent)', metaColor:'#6b5c4c', btnBg:'#fbf8ef', btnBorder:'#2c5d7c', btnText:'#2c5d7c' };
+    var TH = DARK ? TH_n : TH_c;
+
+    var W=900, H=440, PADL=54, PADR=132, PADT=34, PADB=54;
+    var tMin=5, tMax=30, rMin=40, rMax=105;
+    function xT(T){ return PADL + (Math.max(tMin,Math.min(tMax,T))-tMin)/(tMax-tMin)*(W-PADL-PADR); }
+    function yR(r){ return PADT + (H-PADT-PADB) - (Math.max(rMin,Math.min(rMax,r))-rMin)/(rMax-rMin)*(H-PADT-PADB); }
+    var catCol=[C_YEL,C_ORG,C_RED], catNm=['I','II','III'];
+    var cat = d.cat||0;
+    var Tsurf = (d.Ts!=null)? d.Ts : d.T;
+    var limAct = limCritical(Tsurf, cat);
+    function valColor(v){ if(v==null)return C_GRN; if(v>=100)return C_FUC; if(v>=limAct)return C_RED; if(v>=limAct-5)return C_ORG; if(v>=60)return C_YEL; return C_GRN; }
+
+    var grid='';
+    for (var Tg=tMin; Tg<=tMax; Tg+=5){
+      var gx=xT(Tg);
+      grid += '<line x1="'+gx+'" y1="'+PADT+'" x2="'+gx+'" y2="'+(H-PADB)+'" stroke="'+GRIDC+'" stroke-width="1"/>'+
+              '<text x="'+gx+'" y="'+(H-PADB+17)+'" text-anchor="middle" fill="'+MUT+'" font-size="11" font-family="monospace">'+Tg+'°</text>';
+    }
+    for (var Rg=rMin; Rg<=100; Rg+=10){
+      var gy=yR(Rg);
+      grid += '<line x1="'+PADL+'" y1="'+gy+'" x2="'+(W-PADR)+'" y2="'+gy+'" stroke="'+GRIDC+'" stroke-width="1"/>'+
+              '<text x="'+(PADL-7)+'" y="'+(gy+3.5)+'" text-anchor="end" fill="'+MUT+'" font-size="10.5" font-family="monospace">'+Rg+'</text>';
+    }
+    var axes='<line x1="'+PADL+'" y1="'+PADT+'" x2="'+PADL+'" y2="'+(H-PADB)+'" stroke="'+AXISC+'" stroke-width="1.2"/>'+
+             '<line x1="'+PADL+'" y1="'+(H-PADB)+'" x2="'+(W-PADR)+'" y2="'+(H-PADB)+'" stroke="'+AXISC+'" stroke-width="1.2"/>';
+    var axLab='<text x="'+((PADL+(W-PADR))/2)+'" y="'+(H-6)+'" text-anchor="middle" fill="'+MUT+'" font-size="11" font-family="Georgia,serif" font-style="italic">Temperatura superficie θ (°C)</text>'+
+            '<text x="15" y="'+((PADT+(H-PADB))/2)+'" text-anchor="middle" fill="'+MUT+'" font-size="11" font-family="Georgia,serif" font-style="italic" transform="rotate(-90,15,'+((PADT+(H-PADB))/2)+')">UR superficie φ (%)</text>';
+
+    function limPath(c){ var p=''; for(var T=tMin;T<=tMax;T+=0.5){ p+=(p?' L ':'M ')+xT(T).toFixed(1)+' '+yR(limCritical(T,c)).toFixed(1); } return p; }
+    var zp=''; for(var Tz=tMin;Tz<=tMax;Tz+=0.5){ zp+=(zp?' L ':'M ')+xT(Tz).toFixed(1)+' '+yR(limCritical(Tz,cat)).toFixed(1); }
+    zp+=' L '+xT(tMax).toFixed(1)+' '+yR(rMax).toFixed(1)+' L '+xT(tMin).toFixed(1)+' '+yR(rMax).toFixed(1)+' Z';
+    var riskZone='<path d="'+zp+'" fill="'+C_RED+'" opacity="'+ZONEa+'"/>';
+    var floor60='<line x1="'+PADL+'" y1="'+yR(60)+'" x2="'+(W-PADR)+'" y2="'+yR(60)+'" stroke="'+C_GRN+'" stroke-width="1" stroke-dasharray="2 4" opacity="0.55"/>'+
+                '<text x="'+(PADL+5)+'" y="'+(yR(60)-4)+'" fill="'+C_GRN+'" font-size="9.5" font-family="monospace" opacity="0.85">60% · soglia minima muffa</text>';
+    var satLine='<line x1="'+PADL+'" y1="'+yR(100)+'" x2="'+(W-PADR)+'" y2="'+yR(100)+'" stroke="'+C_FUC+'" stroke-width="1.3" stroke-dasharray="2 3" opacity="0.7"/>'+
+                '<text x="'+(W-PADR-3)+'" y="'+(yR(100)-4)+'" text-anchor="end" fill="'+C_FUC+'" font-size="9.5" font-family="monospace" font-weight="700">100% · condensa</text>';
+
+    var curves='', curveLabs='';
+    [2,1,0].forEach(function(ci){
+      var active=(ci===cat), col=catCol[ci];
+      if(active){
+        curves+='<path d="'+limPath(ci)+'" fill="none" stroke="'+col+'" stroke-width="2.8" filter="url(#glow-peak)" stroke-dasharray="1400" stroke-dashoffset="1400"><animate attributeName="stroke-dashoffset" from="1400" to="0" dur="1.3s" begin="0.2s" fill="freeze" calcMode="spline" keySplines="0.25 0.1 0.25 1"/></path>';
+      } else {
+        curves+='<path d="'+limPath(ci)+'" fill="none" stroke="'+col+'" stroke-width="1.3" stroke-dasharray="7 5" opacity="0.5"/>';
+      }
+      var lv=limCritical(tMax,ci);
+      curveLabs+='<text x="'+(xT(tMax)+5)+'" y="'+(yR(lv)+3.5)+'" fill="'+col+'" font-size="10.5" font-family="monospace" font-weight="'+(active?'800':'600')+'" opacity="'+(active?1:0.65)+'">LIM '+catNm[ci]+(active?' ←':'')+'</text>';
+    });
+
+    var pts='';
+    if (d.URsurf!=null){
+      var sx=xT(Tsurf), sy=yR(d.URsurf), sc=valColor(d.URsurf);
+      pts+='<line x1="'+PADL+'" y1="'+sy+'" x2="'+sx+'" y2="'+sy+'" stroke="'+sc+'" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.5"/>'+
+           '<line x1="'+sx+'" y1="'+(H-PADB)+'" x2="'+sx+'" y2="'+sy+'" stroke="'+sc+'" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.5"/>';
+      pts+='<g opacity="0"><circle cx="'+sx+'" cy="'+sy+'" r="12" fill="'+sc+'" opacity="0.22" filter="url(#glow-dot)"/>'+
+        '<circle cx="'+sx+'" cy="'+sy+'" r="6.5" fill="'+sc+'" filter="url(#glow-soft)"/>'+
+        '<circle cx="'+sx+'" cy="'+sy+'" r="2.6" fill="#fff"/>'+
+        '<text x="'+sx+'" y="'+(sy-14)+'" text-anchor="middle" fill="'+sc+'" font-size="13" font-family="Georgia,serif" font-weight="700" filter="url(#glow-soft)">φsi '+fmt(d.URsurf,1)+'%</text>'+
+        '<text x="'+sx+'" y="'+(sy-29)+'" text-anchor="middle" fill="'+MUT+'" font-size="9.5" font-family="monospace" letter-spacing=".08em">SUPERFICIE '+fmt(Tsurf,1)+'°C</text>'+
+        '<animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="1.0s" fill="freeze"/></g>';
+    }
+    if (d.UR!=null && d.T!=null){
+      var ax=xT(d.T), ay=yR(d.UR); var ayLab=(ay>(H-PADB-24))?(ay-11):(ay+18);
+      pts+='<g opacity="0"><circle cx="'+ax+'" cy="'+ay+'" r="4.5" fill="none" stroke="'+INK+'" stroke-width="1.6"/>'+
+        '<circle cx="'+ax+'" cy="'+ay+'" r="1.6" fill="'+INK+'"/>'+
+        '<text x="'+ax+'" y="'+ayLab+'" text-anchor="middle" fill="'+MUT+'" font-size="10" font-family="monospace">aria '+fmt(d.T,0)+'°/'+fmt(d.UR,0)+'%</text>'+
+        '<animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="1.2s" fill="freeze"/></g>';
+    }
+
+    var verdBadge='';
+    if (d.URsurf!=null){
+      var bcol,btxt;
+      if (d.URsurf>=100){bcol=C_FUC;btxt='⛔ SATURAZIONE';}
+      else if (d.URsurf>=limAct){bcol=C_RED;btxt='⚠ OLTRE LIM';}
+      else if (d.URsurf>=limAct-5){bcol=C_ORG;btxt='⚡ PROSSIMO LIM';}
+      else if (d.URsurf>=60){bcol=C_YEL;btxt='⏱ MONITORARE';}
+      else {bcol=C_GRN;btxt='✓ CONFORME';}
+      verdBadge='<rect x="'+(W-PADR-150)+'" y="'+(PADT-9)+'" width="150" height="24" rx="12" fill="'+bcol+'" opacity="0"><animate attributeName="opacity" from="0" to="'+(DARK?0.32:0.16)+'" dur="0.5s" begin="1.5s" fill="freeze"/></rect>'+
+        '<text x="'+(W-PADR-75)+'" y="'+(PADT+7)+'" text-anchor="middle" fill="'+bcol+'" font-size="11.5" font-family="monospace" font-weight="800" letter-spacing=".06em" opacity="0">'+btxt+'<animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="1.6s" fill="freeze"/></text>';
+    }
+
+    var svg='<div style="margin-top:0;background:'+TH.wrapBg+';border-radius:14px;padding:14px 14px 12px;border:1px solid '+TH.wrapBorder+';box-shadow:'+TH.wrapShadow+'">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;padding:0 8px"><span style="font-family:Georgia,serif;font-size:14px;font-style:italic;color:'+TH.titleColor+';text-shadow:'+TH.titleShadow+'">Diagramma degli isopleti LIM, Sedlbauer</span><span style="flex:1;height:1px;background:'+TH.titleRule+';opacity:.5"></span><span style="font-family:monospace;font-size:10px;color:'+TH.metaColor+';letter-spacing:.12em;text-transform:uppercase">substrato Cat. '+catNm[cat]+'</span></div>'+
+      '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block">'+
+      '<defs>'+
+      '<filter id="glow-peak" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+      '<filter id="glow-soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+      '<filter id="glow-dot" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="5"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+      '</defs>'+
+      riskZone + grid + axes + floor60 + satLine + curves + curveLabs + pts + axLab + verdBadge +
+      '</svg>'+
+      '<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:13px;padding:0 8px;font-family:monospace;font-size:10px;color:'+TH.metaColor+'">'+
+        '<span style="color:'+C_RED+'">■ zona muffa possibile (sopra LIM)</span>'+
+        '<span>● punto superficie φsi</span>'+
+        '<span>◯ aria ambiente</span>'+
+        '<span style="color:'+C_FUC+'">- - 100% condensa</span>'+
+      '</div>'+
+      (function(){
+        var togIcon, togLabel;
+        if (THEME==='neon'){
+          togIcon = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;vertical-align:-3px;flex-shrink:0"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.4" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.6"/><line x1="2.4" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.6" y2="12"/><line x1="4.9" y1="4.9" x2="7" y2="7"/><line x1="17" y1="17" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="7" y2="17"/><line x1="17" y1="7" x2="19.1" y2="4.9"/></svg>';
+          togLabel = 'CHIARO';
+        } else {
+          togIcon = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;vertical-align:-3px;flex-shrink:0"><path d="M20.6 13.2A8.4 8.4 0 1 1 10.8 3.4a6.6 6.6 0 0 0 9.8 9.8z"/></svg>';
+          togLabel = 'SCURO';
+        }
+        return '<div style="margin-top:10px;padding:6px 10px 0;display:flex;justify-content:flex-end;align-items:center"><button type="button" class="mx-shimmer-pill" title="Cambia tema (vale per tutti i grafici)" onclick="(function(){var c=(localStorage.getItem(\'mx2::chartTheme\')||\'classic\');localStorage.setItem(\'mx2::chartTheme\',(c===\'neon\'?\'classic\':\'neon\'));window._termoRedrawAll&&window._termoRedrawAll();})()" style="appearance:none;border:1.5px solid '+TH.btnBorder+';background:'+TH.btnBg+';color:'+TH.btnText+';font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.16em;padding:9px 16px 9px 13px;border-radius:20px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;position:relative;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.10)">'+togIcon+'<span>'+togLabel+'</span></button></div>';
+      })()+
+      '</div>';
+    host.innerHTML = svg;
+  }
+  /* ============= SEZIONE B, Dew chart (barre + gauge) ============= */
+  function renderDewChart(d){
+    _termoLastDew = d;
+    var host = document.getElementById('dewHost');
+    if (d.T == null || d.Td == null || d.Ts == null){
+      host.innerHTML = '<p style="margin:0;color:var(--ink-mute);font-style:italic;text-align:center;padding:30px 0">Inserire T aria, UR e T parete.</p>';
+      return;
+    }
+    var C_GRN='#00E676', C_ORG='#FF9100', C_RED='#FF1744', C_FUC='#E040FB', C_BLU='#29B6F6', C_PUR='#B388FF';
+    var W=900, H=360, PADL=72, PADR=40, PADT=30, PADB=70;
+    var yMin=-10, yMax=35;
+    var THEME2=(function(){try{return localStorage.getItem('mx2::chartTheme')||'classic';}catch(_){return 'classic';}})();
+    var DARK=(THEME2==='neon');
+    var TXT=DARK?'#FFFFFF':'#33474f';
+    var MUT=DARK?'#7da9b8':'#5d7682';
+    var AXISC=DARK?'#1f4d5c':'#b7c8d0';
+    var NEEDLE=DARK?'#fff':'#33474f';
+    function yPos(v){ return PADT + (H-PADT-PADB) - ((v-yMin)/(yMax-yMin))*(H-PADT-PADB); }
+    function pX(f){ return PADL + (W-PADL-PADR)*f; }
+    function colMargin(m){
+      if (m == null) return C_GRN;
+      if (m <= 0) return C_FUC;
+      if (m <= 3) return C_RED;
+      if (m <= 5) return C_ORG;
+      return C_GRN;
+    }
+    var bars = [
+      {x:0.18, val:d.T,  col:C_ORG, lab:'T ARIA',     sub:fmt(d.T,1)+'°C'},
+      {x:0.34, val:d.Td, col:C_BLU, lab:'T RUGIADA',  sub:fmt(d.Td,1)+'°C'},
+      {x:0.50, val:d.Ts, col:C_PUR, lab:'T PARETE',   sub:fmt(d.Ts,1)+'°C'}
+    ];
+    var barsSVG = '';
+    var baseY = yPos(0);
+    bars.forEach(function(b, i){
+      var x = pX(b.x);
+      var y = yPos(b.val);
+      var bw = 60;
+      var rectY = Math.min(y, baseY);
+      var rectH = Math.abs(y - baseY);
+      barsSVG += '<g opacity="0">'+
+        '<rect x="'+(x-bw/2)+'" y="'+rectY+'" width="'+bw+'" height="'+rectH+'" fill="'+b.col+'" opacity="0.25" filter="url(#dG-soft)"/>'+
+        '<rect x="'+(x-bw/2)+'" y="'+rectY+'" width="'+bw+'" height="'+rectH+'" fill="none" stroke="'+b.col+'" stroke-width="2" filter="url(#dG-soft)"/>'+
+        '<circle cx="'+x+'" cy="'+y+'" r="6" fill="'+b.col+'"/>'+
+        '<circle cx="'+x+'" cy="'+y+'" r="3" fill="#fff"/>'+
+        '<text x="'+x+'" y="'+(y-14)+'" text-anchor="middle" fill="'+b.col+'" font-size="14" font-family="Georgia,serif" font-weight="700" filter="url(#dG-soft)">'+b.sub+'</text>'+
+        '<text x="'+x+'" y="'+(H-PADB+22)+'" text-anchor="middle" fill="'+TXT+'" font-size="11" font-family="monospace" letter-spacing=".10em" font-weight="700">'+b.lab+'</text>'+
+        '<animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="'+(0.2 + i*0.25)+'s" fill="freeze"/>'+
+        '</g>';
+    });
+    var lineSVG = '<line x1="'+PADL+'" y1="'+yPos(d.Td)+'" x2="'+(W-PADR)+'" y2="'+yPos(d.Td)+'" stroke="'+C_BLU+'" stroke-width="1.6" stroke-dasharray="8 5" opacity="0"><animate attributeName="opacity" from="0" to="0.85" dur="0.5s" begin="1.0s" fill="freeze"/></line>'+
+      '<text x="'+(W-PADR-10)+'" y="'+(yPos(d.Td)-6)+'" text-anchor="end" fill="'+C_BLU+'" font-size="11" font-family="monospace" font-weight="700" opacity="0"><animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="1.1s" fill="freeze"/>Td '+fmt(d.Td,1)+'°C</text>';
+    var gaugeCx = pX(0.78), gaugeCy = (H-PADB) - 20;
+    var R = 110;
+    function polar(a){ return [gaugeCx + R*Math.cos(Math.PI - a*Math.PI/10), gaugeCy - R*Math.sin(Math.PI - a*Math.PI/10)]; }
+    function angFromM(m){ return (Math.max(-10, Math.min(10, m)) + 10) / 2; }
+    function arc(a0, a1, col){
+      var p0 = polar(a0), p1 = polar(a1);
+      var large = (a1-a0) > 5 ? 1 : 0;
+      return '<path d="M '+p0[0].toFixed(1)+' '+p0[1].toFixed(1)+' A '+R+' '+R+' 0 '+large+' 1 '+p1[0].toFixed(1)+' '+p1[1].toFixed(1)+'" fill="none" stroke="'+col+'" stroke-width="14" stroke-linecap="butt" opacity="0.85" filter="url(#dG-soft)"/>';
+    }
+    var arcs = arc(angFromM(-10), angFromM(0), C_RED) + arc(angFromM(0), angFromM(3), C_ORG) + arc(angFromM(3), angFromM(10), C_GRN);
+    var ticks = '';
+    [-10,-5,0,3,5,10].forEach(function(t){
+      var ex = gaugeCx + (R+18)*Math.cos(Math.PI - angFromM(t)*Math.PI/10);
+      var ey = gaugeCy - (R+18)*Math.sin(Math.PI - angFromM(t)*Math.PI/10);
+      ticks += '<text x="'+ex.toFixed(1)+'" y="'+(ey+4).toFixed(1)+'" text-anchor="middle" fill="'+MUT+'" font-size="10" font-family="monospace">'+t+'</text>';
+    });
+    /* Lancetta: clamp visivo a fine corsa quando margine fuori range [-10, +10] */
+    /* Il valore numerico mostrato sopra rimane quello reale */
+    var mClamped;
+    var isOutOfRange = false;
+    if (d.margin == null){
+      mClamped = 0;
+    } else if (d.margin > 10){
+      mClamped = 10;  /* fine corsa destra (verde) */
+      isOutOfRange = true;
+    } else if (d.margin < -10){
+      mClamped = -10; /* fine corsa sinistra (rosso) */
+      isOutOfRange = true;
+    } else {
+      mClamped = d.margin;
+    }
+    var pNeedle = polar(angFromM(mClamped));
+    var needleCol = colMargin(d.margin);
+    var needle = '<g opacity="0">'+
+      '<line x1="'+gaugeCx+'" y1="'+gaugeCy+'" x2="'+pNeedle[0].toFixed(1)+'" y2="'+pNeedle[1].toFixed(1)+'" stroke="'+NEEDLE+'" stroke-width="3" stroke-linecap="round" filter="url(#dG-soft)"/>'+
+      '<circle cx="'+gaugeCx+'" cy="'+gaugeCy+'" r="9" fill="'+needleCol+'" stroke="#fff" stroke-width="2"/>'+
+      '<text x="'+gaugeCx+'" y="'+(gaugeCy-R-12)+'" text-anchor="middle" fill="'+needleCol+'" font-size="22" font-family="Georgia,serif" font-weight="700" filter="url(#dG-soft)">'+
+      ((d.margin != null) ? ((d.margin>=0?'+':'')+fmt(d.margin,1)+'°C') : 'n.d.')+'</text>'+
+      (isOutOfRange ? '<text x="'+gaugeCx+'" y="'+(gaugeCy-R+26)+'" text-anchor="middle" fill="#FFEA00" font-size="9.5" font-family="monospace" font-style="italic" opacity="0.85">fuori scala, lancetta a fine corsa</text>' : '')+
+      '<text x="'+gaugeCx+'" y="'+(gaugeCy-R+8)+'" text-anchor="middle" fill="'+MUT+'" font-size="10" font-family="monospace" letter-spacing=".15em">MARGINE T parete − Td</text>'+
+      '<animate attributeName="opacity" from="0" to="1" dur="0.7s" begin="1.4s" fill="freeze"/></g>';
+    var axisY = '';
+    for (var k=yMin; k<=yMax; k+=5){
+      var y_ = yPos(k);
+      axisY += '<text x="'+(PADL-8)+'" y="'+(y_+3)+'" text-anchor="end" fill="'+MUT+'" font-size="9.5" font-family="monospace" opacity="0.6">'+k+'°</text>'+
+        '<line x1="'+(PADL-3)+'" y1="'+y_+'" x2="'+PADL+'" y2="'+y_+'" stroke="'+MUT+'" stroke-width="0.5" opacity="0.4"/>';
+    }
+    var yAxis = '<line x1="'+PADL+'" y1="'+PADT+'" x2="'+PADL+'" y2="'+(H-PADB)+'" stroke="'+AXISC+'" stroke-width="1" opacity="0.5"/>';
+    var xAxis = '<line x1="'+PADL+'" y1="'+(H-PADB)+'" x2="'+(W-PADR)+'" y2="'+(H-PADB)+'" stroke="'+AXISC+'" stroke-width="1" opacity="0.5"/>';
+    // Theme palette (sole/luna toggle)
+    var THEME = (function(){ try{ return localStorage.getItem('mx2::chartTheme') || 'classic'; }catch(_){ return 'classic'; } })();
+    var TH_n = { wrapBg:'linear-gradient(180deg,#04101a,#0a1f2e)', wrapBorder:'#1f4d5c', wrapShadow:'0 8px 30px rgba(0,0,0,.4),inset 0 0 80px rgba(0,229,255,.05)', titleColor:'#00E5FF', titleShadow:'0 0 12px rgba(0,229,255,.5)', titleRule:'linear-gradient(90deg,#00E5FF,transparent)', metaColor:'#7da9b8', btnBg:'rgba(0,229,255,.15)', btnBorder:'#00E5FF', btnText:'#00E5FF' };
+    var TH_c = { wrapBg:'#ffffff', wrapBorder:'#d0d0d0', wrapShadow:'0 2px 6px rgba(0,0,0,.08)', titleColor:'#2c5d7c', titleShadow:'none', titleRule:'linear-gradient(90deg,#2c5d7c,transparent)', metaColor:'#6b5c4c', btnBg:'#fbf8ef', btnBorder:'#2c5d7c', btnText:'#2c5d7c' };
+    var TH = (THEME==='neon') ? TH_n : TH_c;
+    var svg = '<div style="margin-top:6px;background:'+TH.wrapBg+';border-radius:14px;padding:14px 14px 12px;border:1px solid '+TH.wrapBorder+';box-shadow:'+TH.wrapShadow+'">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;padding:0 8px"><span style="font-family:Georgia,serif;font-size:14px;font-style:italic;color:#29B6F6;text-shadow:0 0 12px rgba(41,182,246,.5)">Profilo termico, Punto di Rugiada</span><span style="flex:1;height:1px;background:linear-gradient(90deg,#29B6F6,transparent);opacity:.5"></span><span style="font-family:monospace;font-size:10px;color:#7da9b8;letter-spacing:.12em;text-transform:uppercase">Magnus-Tetens &middot; UNI EN ISO 13788</span></div>'+
+      '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block">'+
+      '<defs>'+
+      '<filter id="dG-soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+      '</defs>'+
+      yAxis + xAxis + axisY + lineSVG + barsSVG + arcs + ticks + needle +
+      '</svg></div>';
+    host.innerHTML = svg;
+  }
+
+  /* ============= SEZIONE M, Psychrometric chart ASHRAE ============= */
+  function renderPsychroChart(d){
+    _termoLastPsychro = d;
+    var host = document.getElementById('psychroHost');
+    if (d.T == null || d.UR == null){
+      host.innerHTML = '<p style="margin:0;color:var(--ink-mute);font-style:italic;text-align:center;padding:30px 0">Inserire T aria e UR.</p>';
+      return;
+    }
+    var W_=940, H=560, PADL=72, PADR=110, PADT=30, PADB=62;
+    var tMin=0, tMax=50, wMin=0, wMax=30;
+    var THEME2=(function(){try{return localStorage.getItem('mx2::chartTheme')||'classic';}catch(_){return 'classic';}})();
+    var DARK=(THEME2==='neon');
+    var TXT=DARK?'#FFFFFF':'#33474f';
+    var MUT=DARK?'#7da9b8':'#5d7682';
+    var AXISC=DARK?'#1f4d5c':'#b7c8d0';
+    var NEEDLE=DARK?'#fff':'#33474f';
+    function xT(T){ return PADL + (T-tMin)/(tMax-tMin) * (W_-PADL-PADR); }
+    function yW(w){ return PADT + (H-PADT-PADB) - (w-wMin)/(wMax-wMin) * (H-PADT-PADB); }
+    var urCurves = '';
+    var URS = [10,20,30,40,50,60,70,80,90];
+    URS.forEach(function(ur){
+      var pts = '';
+      for (var T=tMin; T<=tMax; T+=1){
+        var w = Wgkg(T, ur);
+        if (w == null || w > wMax) continue;
+        pts += (pts ? ' L ' : 'M ') + xT(T).toFixed(1) + ' ' + yW(w).toFixed(1);
+      }
+      urCurves += '<path d="'+pts+'" fill="none" stroke="#3b6b80" stroke-width="0.7" opacity="0.55"/>';
+      var wEnd = Wgkg(tMax, ur);
+      if (wEnd != null && wEnd <= wMax){
+        urCurves += '<text x="'+(xT(tMax)+4)+'" y="'+(yW(wEnd)+3)+'" fill="#5b9fb8" font-size="10" font-family="monospace" opacity="0.75">'+ur+'%</text>';
+      }
+    });
+    var satPts='';
+    for (var T2=tMin; T2<=tMax; T2+=0.5){
+      var w2 = Wgkg(T2, 100);
+      if (w2 == null) continue;
+      if (w2 > wMax) break;
+      satPts += (satPts ? ' L ' : 'M ') + xT(T2).toFixed(1) + ' ' + yW(w2).toFixed(1);
+    }
+    var Wsat_tip = Wgkg(tMax, 100);
+    var yTip = (Wsat_tip != null && Wsat_tip < wMax) ? yW(Wsat_tip) : yW(wMax);
+    var satCurve = '<path d="'+satPts+'" fill="none" stroke="#29B6F6" stroke-width="2.2" opacity="0.95" filter="url(#pG-soft)"/>'+
+      '<text x="'+(xT(tMax)+4)+'" y="'+(yTip+3)+'" fill="#29B6F6" font-size="11" font-family="monospace" font-weight="700">100%</text>';
+    var isoH = '';
+    for (var h=10; h<=120; h+=10){
+      var pts = '';
+      for (var Th=tMin; Th<=tMax; Th+=2){
+        var wh = (h - 1.006*Th) / (2501 + 1.86*Th) * 1000;
+        if (wh < wMin || wh > wMax) continue;
+        pts += (pts ? ' L ' : 'M ') + xT(Th).toFixed(1) + ' ' + yW(wh).toFixed(1);
+      }
+      if (pts) isoH += '<path d="'+pts+'" fill="none" stroke="#FF5252" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.4"/>';
+    }
+    for (var hl=20; hl<=120; hl+=10){
+      for (var Tt=tMin; Tt<=tMax; Tt+=0.5){
+        var wsat = Wgkg(Tt, 100);
+        var wh2 = (hl - 1.006*Tt) / (2501 + 1.86*Tt) * 1000;
+        if (wsat != null && Math.abs(wsat - wh2) < 0.3 && wsat <= wMax){
+          isoH += '<text x="'+(xT(Tt)-3)+'" y="'+(yW(wsat)-4)+'" text-anchor="end" fill="#FF5252" font-size="9" font-family="monospace" opacity="0.7">h='+hl+'</text>';
+          break;
+        }
+      }
+    }
+    var isoTw = '';
+    [5,10,15,20,25,30,35].forEach(function(twL){
+      var Wsat_tw = Wgkg(twL, 100);
+      if (Wsat_tw == null) return;
+      var hRef = 1.006*twL + (Wsat_tw/1000)*(2501+1.86*twL);
+      var pts = '';
+      for (var Tj=twL; Tj<=tMax; Tj+=1){
+        var w_tw = (hRef - 1.006*Tj) / (2501 + 1.86*Tj) * 1000;
+        if (w_tw < wMin || w_tw > wMax) continue;
+        pts += (pts ? ' L ' : 'M ') + xT(Tj).toFixed(1) + ' ' + yW(w_tw).toFixed(1);
+      }
+      if (pts) isoTw += '<path d="'+pts+'" fill="none" stroke="#00E676" stroke-width="0.6" stroke-dasharray="2 4" opacity="0.45"/>';
+      isoTw += '<text x="'+(xT(twL)+3)+'" y="'+(yW(Wsat_tw)-4)+'" fill="#00E676" font-size="9" font-family="monospace" opacity="0.7">Tw '+twL+'°</text>';
+    });
+    var gridX = '';
+    for (var Tg=tMin; Tg<=tMax; Tg+=5){
+      var x = xT(Tg);
+      gridX += '<line x1="'+x+'" y1="'+PADT+'" x2="'+x+'" y2="'+(H-PADB)+'" stroke="'+AXISC+'" stroke-width="0.4" opacity="0.25"/>'+
+        '<text x="'+x+'" y="'+(H-PADB+16)+'" text-anchor="middle" fill="'+MUT+'" font-size="10" font-family="monospace">'+Tg+'°</text>';
+    }
+    var gridY = '';
+    for (var Wg=wMin; Wg<=wMax; Wg+=5){
+      var y = yW(Wg);
+      gridY += '<line x1="'+PADL+'" y1="'+y+'" x2="'+(W_-PADR)+'" y2="'+y+'" stroke="'+AXISC+'" stroke-width="0.4" opacity="0.25"/>'+
+        '<text x="'+(W_-PADR+6)+'" y="'+(y+3)+'" fill="'+MUT+'" font-size="10" font-family="monospace">'+Wg+'</text>';
+    }
+    var xAxisLab = '<text x="'+((PADL+(W_-PADR))/2)+'" y="'+(H-12)+'" text-anchor="middle" fill="'+MUT+'" font-size="11" font-family="Georgia,serif" font-style="italic">Temperatura bulbo secco T (°C)</text>';
+    var yAxisLab = '<text x="'+(W_-PADR+30)+'" y="'+((PADT+H-PADB)/2)+'" text-anchor="middle" fill="'+MUT+'" font-size="11" font-family="Georgia,serif" font-style="italic" transform="rotate(90,'+(W_-PADR+30)+','+((PADT+H-PADB)/2)+')">Umidità specifica W (g/kg aria secca)</text>';
+    var workPoint = '';
+    var xWP = xT(d.T), yWP = yW(Math.min(d.W, wMax));
+    if (d.W != null && d.W <= wMax){
+      workPoint = '<g opacity="0">'+
+        '<line x1="'+PADL+'" y1="'+yWP+'" x2="'+xWP+'" y2="'+yWP+'" stroke="#FFEA00" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.55"/>'+
+        '<line x1="'+xWP+'" y1="'+(H-PADB)+'" x2="'+xWP+'" y2="'+yWP+'" stroke="#FFEA00" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.55"/>'+
+        '<circle cx="'+xWP+'" cy="'+yWP+'" r="9" fill="#FFEA00" opacity="0.3" filter="url(#pG-dot)"/>'+
+        '<circle cx="'+xWP+'" cy="'+yWP+'" r="6" fill="#FFEA00" filter="url(#pG-soft)"/>'+
+        '<circle cx="'+xWP+'" cy="'+yWP+'" r="2.5" fill="#0a1f2e"/>'+
+        '<text x="'+(xWP+10)+'" y="'+(yWP-10)+'" fill="'+(DARK?'#FFEA00':'#b8860b')+'" font-size="13" font-family="Georgia,serif" font-weight="700" filter="url(#pG-soft)">1 ('+fmt(d.T,1)+'°C, '+fmt(d.UR,0)+'%)</text>'+
+        '<text x="'+(xWP+10)+'" y="'+(yWP+6)+'" fill="'+(DARK?'#FFEA00':'#b8860b')+'" font-size="11" font-family="monospace">W='+fmt(d.W,2)+' g/kg</text>'+
+        '<animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="1.0s" fill="freeze"/></g>';
+    }
+    var condPath = '';
+    if (d.Ts != null && d.Td != null && d.W != null && d.Wsat_wall != null){
+      var xTr = xT(d.Td), yTr = yW(Math.min(d.W, wMax));
+      var x2_ = xT(d.Ts), y2_ = yW(Math.min(d.Wsat_wall, wMax));
+      var critical = (d.Ts < d.Td);
+      var colP = critical ? '#FF1744' : '#FF9100';
+      condPath = '<g opacity="0">'+
+        '<line x1="'+xWP+'" y1="'+yWP+'" x2="'+xTr+'" y2="'+yTr+'" stroke="'+colP+'" stroke-width="2.2" stroke-dasharray="6 3" filter="url(#pG-soft)"/>'+
+        '<line x1="'+xTr+'" y1="'+yTr+'" x2="'+x2_+'" y2="'+y2_+'" stroke="'+colP+'" stroke-width="2.2" filter="url(#pG-soft)"/>'+
+        '<circle cx="'+xTr+'" cy="'+yTr+'" r="5" fill="'+colP+'" filter="url(#pG-dot)"/>'+
+        '<circle cx="'+xTr+'" cy="'+yTr+'" r="2" fill="#0a1f2e"/>'+
+        '<text x="'+(xTr-6)+'" y="'+(yTr-10)+'" text-anchor="end" fill="'+colP+'" font-size="11" font-family="monospace" font-weight="700" filter="url(#pG-soft)">tr (Td='+fmt(d.Td,1)+'°)</text>'+
+        '<circle cx="'+x2_+'" cy="'+y2_+'" r="6" fill="'+colP+'" filter="url(#pG-dot)"/>'+
+        '<circle cx="'+x2_+'" cy="'+y2_+'" r="3" fill="#fff"/>'+
+        '<text x="'+(x2_-8)+'" y="'+(y2_+18)+'" text-anchor="end" fill="'+colP+'" font-size="12" font-family="Georgia,serif" font-weight="700" filter="url(#pG-soft)">2 ('+fmt(d.Ts,1)+'°C sat)</text>'+
+        '<animate attributeName="opacity" from="0" to="1" dur="0.7s" begin="1.6s" fill="freeze"/></g>';
+    }
+    /* === BOX 'Aria ambiente' top-left con tbs/tsat/X/UR/v/h === */
+    var infoBox = '';
+    var bw = 215, bh = (d.Ts != null && d.Wsat_wall != null && d.W != null && d.Ts < d.Td) ? 156 : 138;
+    /* Posizionamento DINAMICO opposto al punto di lavoro (per non ostruire le tratteggiate orizzontali) */
+    /* Se punto a DESTRA della metà → box a SINISTRA; se a sinistra → box a destra */
+    var xMidChart = PADL + (W_-PADL-PADR)/2;
+    var bx, by = PADT + 12;
+    if (xT(d.T) > xMidChart){
+      bx = PADL + 18;                      /* punto destra → box sinistra (come vecchio screenshot) */
+    } else {
+      bx = (W_-PADR) - bw - 20;            /* punto sinistra → box destra (come luigiserio.com) */
+    }
+    infoBox = '<g opacity="0">'+
+      '<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" rx="6" fill="rgba(4,16,26,0.88)" stroke="#FFEA00" stroke-width="1.2"/>'+
+      '<text x="'+(bx+10)+'" y="'+(by+18)+'" fill="#FFEA00" font-size="12" font-family="Georgia,serif" font-weight="700">1 Aria ambiente</text>'+
+      '<text x="'+(bx+10)+'" y="'+(by+38)+'" fill="#e0e8ef" font-size="11" font-family="monospace">tbs  = '+fmt(d.T,1)+' &#176;C</text>'+
+      '<text x="'+(bx+10)+'" y="'+(by+54)+'" fill="#e0e8ef" font-size="11" font-family="monospace">tsat = '+fmt(d.Td,1)+' &#176;C</text>'+
+      '<text x="'+(bx+10)+'" y="'+(by+70)+'" fill="#e0e8ef" font-size="11" font-family="monospace">X    = '+fmt(d.W,2)+' g/kg</text>'+
+      '<text x="'+(bx+10)+'" y="'+(by+86)+'" fill="#e0e8ef" font-size="11" font-family="monospace">UR   = '+fmt(d.UR,0)+' %</text>'+
+      '<text x="'+(bx+10)+'" y="'+(by+102)+'" fill="#e0e8ef" font-size="11" font-family="monospace">v    = '+fmt(d.vv,3)+' m&#179;/kg</text>'+
+      '<text x="'+(bx+10)+'" y="'+(by+118)+'" fill="#e0e8ef" font-size="11" font-family="monospace">h    = '+fmt(d.hh,2)+' kJ/kg</text>';
+    if (d.Ts != null && d.Wsat_wall != null && d.W != null && d.Ts < d.Td){
+      var dX_val = (d.W - d.Wsat_wall);
+      infoBox += '<text x="'+(bx+10)+'" y="'+(by+140)+'" fill="#FF1744" font-size="11" font-family="monospace" font-weight="700">2 Parete '+fmt(d.Ts,1)+'&#176;C, &#916;X='+fmt(dX_val,1)+' g/kg</text>';
+    }
+    infoBox += '<animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="0.5s" fill="freeze"/></g>';
+
+    /* === Etichetta &Delta;X sulla traiettoria condensa (a met&agrave; del segmento 1&rarr;tr) === */
+    var deltaLabel = '';
+    if (d.Ts != null && d.Td != null && d.W != null && d.Wsat_wall != null && d.Ts < d.Td){
+      var dX_v = (d.W - d.Wsat_wall);
+      var xMid = (xT(d.T) + xT(d.Td))/2;
+      var yMid = yW(Math.min(d.W, wMax));
+      deltaLabel = '<g opacity="0">'+
+        '<rect x="'+(xMid-46)+'" y="'+(yMid-26)+'" width="92" height="18" rx="3" fill="rgba(4,16,26,0.85)" stroke="#FF1744" stroke-width="0.8"/>'+
+        '<text x="'+xMid+'" y="'+(yMid-13)+'" text-anchor="middle" fill="#FF1744" font-size="11" font-family="monospace" font-weight="700">&#916;X = '+fmt(dX_v,1)+' g/kg</text>'+
+        '<animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="1.9s" fill="freeze"/></g>';
+    }
+
+    /* === Linee tratteggiate orizzontali (punto 1, punto 2) verso destra + freccia 'vapore condensato' === */
+    var condensateScale = '';
+    if (d.Ts != null && d.W != null && d.Wsat_wall != null && d.Ts < d.Td){
+      var xScale = (W_-PADR) + 35;       /* posizione asta verticale */
+      var yTop   = yW(Math.min(d.W, wMax));
+      var yBot   = yW(Math.min(d.Wsat_wall, wMax));
+      var x1pt   = xT(d.T);              /* x punto 1 (T_aria) */
+      var x2pt   = xT(d.Ts);             /* x punto 2 (T_parete) */
+      var dX_s   = (d.W - d.Wsat_wall);
+      condensateScale = '<g opacity="0">'+
+        /* Linea tratteggiata orizzontale dal punto 1 (W_aria) -> destra fino alla scala */
+        '<line x1="'+x1pt+'" y1="'+yTop+'" x2="'+xScale+'" y2="'+yTop+'" stroke="#FF1744" stroke-width="1.1" stroke-dasharray="4 3" opacity="0.85"/>'+
+        /* Linea tratteggiata orizzontale dal punto 2 (W_sat parete) -> destra fino alla scala */
+        '<line x1="'+x2pt+'" y1="'+yBot+'" x2="'+xScale+'" y2="'+yBot+'" stroke="#FF1744" stroke-width="1.1" stroke-dasharray="4 3" opacity="0.85"/>'+
+        /* asta verticale (segmento &Delta;X) */
+        '<line x1="'+xScale+'" y1="'+yTop+'" x2="'+xScale+'" y2="'+yBot+'" stroke="#FF1744" stroke-width="1.8"/>'+
+        /* tacche orizzontali ai 2 estremi sull\'asta */
+        '<line x1="'+(xScale-6)+'" y1="'+yTop+'" x2="'+(xScale+6)+'" y2="'+yTop+'" stroke="#FF1744" stroke-width="1.4"/>'+
+        '<line x1="'+(xScale-6)+'" y1="'+yBot+'" x2="'+(xScale+6)+'" y2="'+yBot+'" stroke="#FF1744" stroke-width="1.4"/>'+
+        /* freccia in alto (sopra il tick alto) */
+        '<polygon points="'+xScale+','+(yTop-2)+' '+(xScale-4)+','+(yTop+6)+' '+(xScale+4)+','+(yTop+6)+'" fill="#FF1744"/>'+
+        /* freccia in basso */
+        '<polygon points="'+xScale+','+(yBot+2)+' '+(xScale-4)+','+(yBot-6)+' '+(xScale+4)+','+(yBot-6)+'" fill="#FF1744"/>'+
+        /* etichette numeriche W ai 2 estremi */
+        '<text x="'+(xScale+10)+'" y="'+(yTop+3)+'" fill="#FF1744" font-size="10" font-family="monospace" font-weight="700">'+fmt(d.W,1)+' g/kg</text>'+
+        '<text x="'+(xScale+10)+'" y="'+(yBot+3)+'" fill="#FF1744" font-size="10" font-family="monospace" font-weight="700">'+fmt(d.Wsat_wall,1)+' g/kg</text>'+
+        /* label rotated &laquo;vapore condensato &Delta;X&raquo; */
+        '<text x="'+(xScale+50)+'" y="'+((yTop+yBot)/2)+'" fill="#FF1744" font-size="11" font-family="monospace" font-weight="700" text-anchor="middle" transform="rotate(90,'+(xScale+50)+','+((yTop+yBot)/2)+')">vapore cond. &#916;X = '+fmt(dX_s,1)+' g/kg</text>'+
+        '<animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="2.1s" fill="freeze"/></g>';
+    }
+
+    // Theme palette (sole/luna toggle)
+    var THEME = (function(){ try{ return localStorage.getItem('mx2::chartTheme') || 'classic'; }catch(_){ return 'classic'; } })();
+    var TH_n = { wrapBg:'linear-gradient(180deg,#04101a,#0a1f2e)', wrapBorder:'#1f4d5c', wrapShadow:'0 8px 30px rgba(0,0,0,.4),inset 0 0 80px rgba(0,229,255,.05)', titleColor:'#00E5FF', titleShadow:'0 0 12px rgba(0,229,255,.5)', titleRule:'linear-gradient(90deg,#00E5FF,transparent)', metaColor:'#7da9b8', btnBg:'rgba(0,229,255,.15)', btnBorder:'#00E5FF', btnText:'#00E5FF' };
+    var TH_c = { wrapBg:'#ffffff', wrapBorder:'#d0d0d0', wrapShadow:'0 2px 6px rgba(0,0,0,.08)', titleColor:'#2c5d7c', titleShadow:'none', titleRule:'linear-gradient(90deg,#2c5d7c,transparent)', metaColor:'#6b5c4c', btnBg:'#fbf8ef', btnBorder:'#2c5d7c', btnText:'#2c5d7c' };
+    var TH = (THEME==='neon') ? TH_n : TH_c;
+    var svg = '<div style="margin-top:6px;background:'+TH.wrapBg+';border-radius:14px;padding:14px 14px 12px;border:1px solid '+TH.wrapBorder+';box-shadow:'+TH.wrapShadow+'">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;padding:0 8px"><span style="font-family:Georgia,serif;font-size:14px;font-style:italic;color:#FFEA00;text-shadow:0 0 12px rgba(255,234,0,.5)">Diagramma Psicrometrico</span><span style="flex:1;height:1px;background:linear-gradient(90deg,#FFEA00,transparent);opacity:.5"></span><span style="font-family:monospace;font-size:10px;color:#7da9b8;letter-spacing:.12em;text-transform:uppercase">ASHRAE 2025 &middot; P=101,325 kPa</span></div>'+
+      '<svg viewBox="0 0 '+W_+' '+H+'" style="width:100%;height:auto;display:block">'+
+      '<defs>'+
+      '<filter id="pG-soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+      '<filter id="pG-dot"  x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4"/><feMerge><feMergeNode/><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+      '</defs>'+
+      gridX + gridY + isoH + isoTw + urCurves + satCurve + xAxisLab + yAxisLab + workPoint + condPath + deltaLabel + condensateScale + infoBox +
+      '</svg>'+
+      '<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:14px;padding:0 8px;font-family:monospace;font-size:10.5px;color:'+MUT+'">'+
+        '<span><span style="display:inline-block;width:14px;height:2px;background:#29B6F6;vertical-align:middle"></span> UR 100% saturazione</span>'+
+        '<span><span style="display:inline-block;width:14px;height:1px;background:#3b6b80;vertical-align:middle"></span> UR 10-90%</span>'+
+        '<span style="color:#FF5252">- - - iso-entalpia h (kJ/kg)</span>'+
+        '<span style="color:#00E676">- - - iso-T bulbo umido</span>'+
+        '<span style="color:#FFEA00">● punto di lavoro · tr · parete</span>'+
+      '</div></div>';
+    host.innerHTML = svg;
+  }
+
+  /* RESET + EXPORT */
+  document.getElementById('btnReset').addEventListener('click', function(){
+    if (!confirm('Azzerare tutti i valori e tornare ai default?')) return;
+    state = Object.assign({}, defaults);
+    saveState();
+    var pairs = [['T','sT_r','sT_n'],['UR','sUR_r','sUR_n'],['Ts','sTs_r','sTs_n'],['Te','sTe_r','sTe_n'],['URe','sURe_r','sURe_n']];
+    pairs.forEach(function(p){
+      var r=document.getElementById(p[1]), n=document.getElementById(p[2]);
+      r.value = state[p[0]];
+      n.value = state[p[0]];
+      r.dispatchEvent(new Event('input'));
+    });
+    setSubstrate(0);
+  });
+
+  document.getElementById('btnCellai').addEventListener('click', function(){
+    /* Esempio Cellai pag.13: T=20°C UR=40% → J=34.72 kJ/kg (manuale) vs mio modulo 34.84 kJ/kg (Δ 0.3%) */
+    state.T = 20; state.UR = 40; state.Ts = 14; state.Te = 10; state.URe = 80;
+    saveState();
+    [['T','sT_r','sT_n'],['UR','sUR_r','sUR_n'],['Ts','sTs_r','sTs_n'],['Te','sTe_r','sTe_n'],['URe','sURe_r','sURe_n']].forEach(function(p){
+      var r=document.getElementById(p[1]), n=document.getElementById(p[2]);
+      r.value = state[p[0]]; n.value = state[p[0]];
+      r.dispatchEvent(new Event('input'));
+    });
+  });
+
+  document.getElementById('btnBio').addEventListener('click', function(){
+    if (this.disabled) return;
+    var q = '?T='+encodeURIComponent(state.T)+'&UR='+encodeURIComponent(state.UR)+'&Ts='+encodeURIComponent(state.Ts);
+    window.location.href = 'biodeteriogeni.html' + q;
+  });
+
+  var _btnExp=document.getElementById('btnExport'); if(_btnExp) _btnExp.addEventListener('click', function(){
+    var T = state.T, UR = state.UR, Ts = state.Ts, Te = state.Te;
+    var snap = {
+      module:'termoigrometria', version:'v3.1',
+      label:'Termoigrometria, LIM Sedlbauer · Magnus-Tetens · ASHRAE Psicrometrico',
+      exportedAt: new Date().toISOString(),
+      substrateCategory: ['I','II','III'][state.cat||0],
+      input: { T_aria_C:T, UR_aria_perc:UR, T_superficie_C:Ts, T_esterna_C:Te, UR_esterna_perc:state.URe },
+      output: {
+        dewPoint_C:           dewPoint(T,UR),
+        UR_superficie_perc:   rhAtSurface(T,UR,Ts),
+        UR_critica_aria_perc: rhCritico(T,Ts),
+        LIM_critica_perc:     limCritical((Ts!=null)?Ts:T, state.cat||0),
+        margine_LIM_pp:       limCritical((Ts!=null)?Ts:T, state.cat||0) - rhAtSurface(T,UR,Ts),
+        fRsi:                 frsiCalc(T,Ts,Te),
+        VPD_kPa:              vpd(T,UR),
+        VTT_M1_giorni:        vttDays((Ts!=null)?Ts:T, rhAtSurface(T,UR,Ts) || UR, state.cat||0),
+        W_gkg:                Wgkg(T,UR),
+        entalpia_kJkg:        enthalpy(T,UR),
+        Tw_bulbo_umido_C:     wetBulb(T,UR),
+        volume_specifico_m3kg: specVol(T,UR)
+      },
+      costanti: {
+        MAGNUS:'a=17.269 b=237.3 (UNI EN ISO 13788:2013 App. E acqua liquida)',
+        MAGNUS_ICE:'a=21.875 b=265.5 (ghiaccio)',
+        E0_Pa: 610.5, fRsi_min_IT: FRSI_MIN_IT, ASHRAE_epsilon: EPSILON, PATM_Pa: PATM
+      },
+      norme: [
+        'UNI EN ISO 13788:2013 - Prestazione igrotermica componenti edilizia',
+        'UNI EN ISO 6946:2018 (+ EC 1:2023, NA:2025) - Resistenze termiche e trasmittanze',
+        'Sedlbauer 2001 - Vorhersage von Schimmelpilzbildung (Fraunhofer IBP)',
+        'Hukka & Viitanen 1999 - Wood Sci. Technol. 33:475-485 (VTT Mould Index)',
+        'ASHRAE Handbook of Fundamentals 2025, Ch.1 Psychrometrics',
+        'Stull 2011 - J. Appl. Meteorol. Climatol. 50:2267-2269 (Tw approx)',
+        'Campbell-Norman 1998 - Vapor Pressure Deficit',
+        'DM 26/06/2015 (mod. DM 28/10/2025, GU 05/12/2025) - Requisiti minimi fRsi 0,72'
+      ]
+    };
+    var blob = new Blob([JSON.stringify(snap, null, 2)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'termoigrometria-v3-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 300);
+  });
+
+  refresh();
+
+
+/* ============== MX TOOLBAR INTEGRATION ============== */
+try {
+  window._termoBuildDoc = function(sel){ return buildDocSectionsForTermo(sel); };
+  window._termoApplySnap = function(inp){ return applyTermoSnapshot(inp); };
+} catch(_e){}
+
+function buildDocSectionsForTermo(sel){
+  /* Stato attuale del calcolo */
+  var T = state.T, UR = state.UR, Ts = state.Ts, Te = state.Te, URe = state.URe;
+  var cat = state.cat || 0;
+  var Td_v = dewPoint(T, UR);
+  var URsurf = rhAtSurface(T, UR, Ts);
+  var URcrit = rhCritico(T, Ts);
+  var lim = limCritical((Ts != null) ? Ts : T, cat);   /* 19/11/2026: alla temperatura di superficie, come a schermo (prima: aria) */
+  var margine = (lim != null && URsurf != null) ? (lim - URsurf) : null;
+  var fRsi = frsiCalc(T, Ts, Te);
+  var vp = vpd(T, UR);
+  var vtt = vttDays((Ts != null) ? Ts : T, URsurf || UR, cat);
+  var Psat_T = pSat(T), Psat_Ts = pSat(Ts), Psat_Te = pSat(Te);
+  var Pv_int = (UR/100)*Psat_T;
+  var Pv_est = (URe/100)*Psat_Te;
+  var W = Wgkg(T, UR);
+  var Hh = enthalpy(T, UR);
+  var Tw = wetBulb(T, UR);
+  var Vv = specVol(T, UR);
+
+  var html = '';
+
+  /* === SEZIONE 1: Condizioni ambientali === */
+  if (sel.condAmbientali !== false){
+    html += '<h2>1. Condizioni ambientali (sopralluogo)</h2>';
+    html += '<table>'+
+      '<tr><th>Parametro</th><th>Valore</th><th>Calcolo / Note</th></tr>'+
+      '<tr><td>T aria interna (T<sub>int</sub>)</td><td>'+fmt(T,1)+' &deg;C</td><td>misurata in ambiente</td></tr>'+
+      '<tr><td>UR aria interna (&phi;<sub>int</sub>)</td><td>'+fmt(UR,0)+' %</td><td>misurata in ambiente</td></tr>'+
+      '<tr><td>P<sub>sat</sub>(T<sub>int</sub>)</td><td>'+fmt(Psat_T,0)+' Pa</td><td>Magnus-Tetens UNI 13788 App.E</td></tr>'+
+      '<tr><td>P<sub>v,int</sub> = &phi;<sub>int</sub>&middot;P<sub>sat</sub>(T<sub>int</sub>)</td><td><b>'+fmt(Pv_int,1)+' Pa</b></td><td>= '+fmt(UR/100,2)+' &times; '+fmt(Psat_T,0)+'</td></tr>'+
+      '<tr><td>T superficie parete (T<sub>si</sub>)</td><td>'+fmt(Ts,1)+' &deg;C</td><td>termocamera / sonda contatto</td></tr>'+
+      '<tr><td>T aria esterna (T<sub>est</sub>)</td><td>'+fmt(Te,1)+' &deg;C</td><td>condizioni meteo / UNI 10349-1:2016</td></tr>'+
+      '<tr><td>UR aria esterna (&phi;<sub>est</sub>)</td><td>'+fmt(URe,0)+' %</td><td>condizioni meteo / UNI 10349-1:2016</td></tr>'+
+      '<tr><td>Substrate Group attivo</td><td>Cat. '+(['I','II','III'][cat])+'</td><td>Sedlbauer 2001 gruppi I/II (Cat. III = estensione modulo, superfici inerti)</td></tr>'+
+      '</table>';
+  }
+
+  /* === SEZIONE 2: Sezione A LIM (rischio muffa Sedlbauer) === */
+  if (sel.sezioneA !== false){
+    html += '<h2>2. Sezione A, Rischio crescita muffe (LIM Sedlbauer 2001)</h2>';
+    html += '<table>'+
+      '<tr><th>Grandezza</th><th>Valore</th><th>Note</th></tr>'+
+      '<tr><td>UR sulla superficie (parete)</td><td>'+fmt(URsurf,1)+' %</td><td>P<sub>v,int</sub> / P<sub>sat</sub>(T<sub>si</sub>) &middot; 100</td></tr>'+
+      '<tr><td>UR critica (oltre = condensa)</td><td>'+fmt(URcrit,1)+' %</td><td>P<sub>sat</sub>(T<sub>si</sub>) / P<sub>sat</sub>(T<sub>int</sub>) &middot; 100</td></tr>'+
+      '<tr><td>LIM critica (Sedlbauer)</td><td><b>'+fmt(lim,1)+' %</b></td><td>Cat. '+(['I','II','III'][cat])+' @ T<sub>sup</sub>='+fmt((Ts != null) ? Ts : T,1)+'&deg;C (Sedlbauer 2001 pp. 84-86 + Fig. 34)</td></tr>'+
+      '<tr><td>Margine LIM &minus; UR<sub>sup</sub></td><td><b>'+((margine!=null)?((margine>=0?"+":"")+fmt(margine,1)+" pp"):"n.d.")+'</b></td><td>se negativo = oltre soglia</td></tr>'+
+      '<tr><td>VTT t<sub>M=1</sub> (Hukka-Viitanen)</td><td>'+((vtt!=null)?vtt+' giorni':'n.d.')+'</td><td>tempo a Mould Index M=1 (closed-form)</td></tr>'+
+      '</table>';
+    /* Grafico LIM */
+    if (sel.graficoA !== false){
+      var hA = document.getElementById('chartHost');
+      if (hA && hA.innerHTML && hA.innerHTML.indexOf('<svg') >= 0){
+        html += '<div style="text-align:center;margin:10px 0;padding:8px;border:1px solid #d8d3c4;border-radius:8px">' + hA.innerHTML + '</div>';
+        html += '<p style="font-size:11px;color:#6b5c4c;font-style:italic;text-align:center">Diagramma LIM Sedlbauer, UR aria, UR superficie, UR critica con soglie 100% / LIM Cat I/II/III a T corrente.</p>';
+      }
+    }
+  }
+
+  /* === SEZIONE 3: Sezione B Punto di Rugiada === */
+  if (sel.sezioneB !== false){
+    html += '<h2>3. Sezione B, Punto di rugiada (Magnus-Tetens, UNI 13788 App. E)</h2>';
+    var marginTs = (Ts != null && Td_v != null) ? (Ts - Td_v) : null;
+    html += '<table>'+
+      '<tr><th>Grandezza</th><th>Valore</th><th>Calcolo</th></tr>'+
+      '<tr><td>T aria interna</td><td>'+fmt(T,1)+' &deg;C</td><td>n.d.</td></tr>'+
+      '<tr><td>T<sub>d</sub> punto di rugiada</td><td><b>'+fmt(Td_v,1)+' &deg;C</b></td><td>Magnus inverso: &alpha;=ln(UR/100)+a&middot;T/(b+T); T<sub>d</sub>=b&middot;&alpha;/(a&minus;&alpha;)</td></tr>'+
+      '<tr><td>T superficie parete</td><td>'+fmt(Ts,1)+' &deg;C</td><td>n.d.</td></tr>'+
+      '<tr><td>Margine T<sub>si</sub> &minus; T<sub>d</sub></td><td><b>'+((marginTs!=null)?((marginTs>=0?"+":"")+fmt(marginTs,1)+" &deg;C"):"n.d.")+'</b></td><td>se &le; 0 condensa superficiale attiva</td></tr>'+
+      '<tr><td>fattore f<sub>Rsi</sub></td><td>'+fmt(fRsi,3)+'</td><td>(T<sub>si</sub>&minus;T<sub>est</sub>)/(T<sub>int</sub>&minus;T<sub>est</sub>) UNI 13788 &sect;5</td></tr>'+
+      '</table>';
+    if (sel.graficoB !== false){
+      var hB = document.getElementById('hostB');
+      if (hB && hB.innerHTML && hB.innerHTML.indexOf('<svg') >= 0){
+        html += '<div style="text-align:center;margin:10px 0;padding:8px;border:1px solid #d8d3c4;border-radius:8px">' + hB.innerHTML + '</div>';
+      }
+    }
+  }
+
+  /* === SEZIONE 4: Sezione M Psicrometrico === */
+  if (sel.sezioneM !== false){
+    html += '<h2>4. Sezione M, Diagramma psicrometrico (ASHRAE Handbook 2025)</h2>';
+    html += '<table>'+
+      '<tr><th>Grandezza</th><th>Valore</th><th>Calcolo</th></tr>'+
+      '<tr><td>Umidit&agrave; specifica W</td><td><b>'+fmt(W,2)+' g/kg<sub>as</sub></b></td><td>W = 0,621945&middot;p<sub>v</sub>/(P<sub>atm</sub>&minus;p<sub>v</sub>)&middot;1000</td></tr>'+
+      '<tr><td>Entalpia h</td><td><b>'+fmt(Hh,1)+' kJ/kg<sub>as</sub></b></td><td>h = 1,006&middot;T + W&middot;(2501+1,86&middot;T)</td></tr>'+
+      '<tr><td>T bulbo umido T<sub>w</sub></td><td>'+fmt(Tw,1)+' &deg;C</td><td>approx Stull 2011</td></tr>'+
+      '<tr><td>Volume specifico v</td><td>'+fmt(Vv,3)+' m&sup3;/kg<sub>as</sub></td><td>v = R<sub>da</sub>&middot;(T+273,15)&middot;(1+1,6078&middot;W)/P<sub>atm</sub></td></tr>'+
+      '<tr><td>VPD (vapor pressure deficit)</td><td>'+fmt(vp,3)+' kPa</td><td>(P<sub>sat</sub>&minus;p<sub>v</sub>)/1000 (Campbell-Norman 1998)</td></tr>'+
+      '</table>';
+    if (sel.graficoM !== false){
+      var hM = document.getElementById('hostM');
+      if (hM && hM.innerHTML && hM.innerHTML.indexOf('<svg') >= 0){
+        html += '<div style="text-align:center;margin:10px 0;padding:8px;border:1px solid #d8d3c4;border-radius:8px">' + hM.innerHTML + '</div>';
+        html += '<p style="font-size:11px;color:#6b5c4c;font-style:italic;text-align:center">Diagramma psicrometrico ASHRAE Handbook 2025 cap.1 (P=101,325 kPa) &middot; punto di lavoro e traiettoria condensa.</p>';
+      }
+    }
+  }
+
+  /* === SEZIONE 5: Verdetto === */
+  if (sel.verdetto !== false){
+    html += '<h2>5. Verdetto sintetico</h2>';
+    var rhRef = URsurf != null ? URsurf : UR;
+    if (Ts != null && Td_v != null && Ts < Td_v){
+      html += '<div class="ver-crit"><strong>CONDENSA IN ATTO sulla parete.</strong> T<sub>si</sub>='+fmt(Ts,1)+'&deg;C &lt; T<sub>d</sub>='+fmt(Td_v,1)+'&deg;C. Si forma acqua liquida sulla superficie.</div>';
+    } else if (URsurf != null && URsurf >= 100){
+      html += '<div class="ver-crit"><strong>SATURAZIONE 100%</strong> sulla superficie, condensa imminente.</div>';
+    } else if (rhRef >= lim){
+      html += '<div class="ver-err"><strong>RISCHIO ALTO, soglia LIM superata.</strong> UR<sub>sup</sub>='+fmt(URsurf,1)+'% &gt; LIM '+fmt(lim,1)+'% (Cat. '+(['I','II','III'][cat])+'). Crescita muffa probabile. VTT t<sub>M=1</sub> = '+(vtt?vtt+' giorni':'n.d.')+'.</div>';
+    } else if (rhRef >= lim - 5){
+      html += '<div class="ver-warn"><strong>RISCHIO MODERATO</strong>, UR<sub>sup</sub> a '+fmt(lim-rhRef,1)+' pp sotto LIM. Margine sottile.</div>';
+    } else if (rhRef >= 60){
+      html += '<div class="ver-ok"><strong>RISCHIO BASSO</strong>, UR<sub>sup</sub> '+fmt(lim-rhRef,1)+' pp sotto LIM. Margine adeguato.</div>';
+    } else {
+      html += '<div class="ver-ok"><strong>NESSUN RISCHIO</strong>, UR<sub>sup</sub> &lt; 60% (Sedlbauer 2001).</div>';
+    }
+    if (fRsi != null){
+      if (fRsi >= 0.72){
+        html += '<div class="ver-ok"><strong>f<sub>Rsi</sub> = '+fmt(fRsi,3)+' &ge; 0,72</strong>, conforme al riferimento operativo DM 26/06/2015 per clima IT tipico.</div>';
+      } else {
+        html += '<div class="ver-err"><strong>f<sub>Rsi</sub> = '+fmt(fRsi,3)+' &lt; 0,72</strong>, non conforme. Probabile rischio condensa superficiale.</div>';
+      }
+    }
+  }
+
+  /* === SEZIONE 6: Tracciabilita tecnica === */
+  if (sel.tracciabilita !== false){
+    html += '<h2>6. Tracciabilit&agrave; tecnica</h2>';
+    html += '<h3>6.1 Metodo</h3>';
+    html += '<p>Analisi termoigrometrica integrata: rischio muffa (Sedlbauer LIM 2001), punto di rugiada (Magnus-Tetens UNI EN ISO 13788:2013 App. E), diagramma psicrometrico (ASHRAE Handbook of Fundamentals 2025 cap. 1).</p>';
+    html += '<h3>6.2 Costanti fisiche</h3>';
+    html += '<table>'+
+      '<tr><td>e<sub>0</sub> = 610,5 Pa, a/b acqua = 17,269/237,3, ghiaccio = 21,875/265,5</td><td>UNI 13788 App.E</td></tr>'+
+      '<tr><td>&epsilon; = 0,621945 (M<sub>w</sub>/M<sub>a</sub>)</td><td>ASHRAE Handbook 2025 cap.1</td></tr>'+
+      '<tr><td>P<sub>atm</sub> = 101.325 Pa</td><td>standard atmosfera</td></tr>'+
+      '<tr><td>R<sub>si,fRsi</sub> = 0,25 m&sup2;K/W</td><td>UNI 13788 &sect;5.1</td></tr>'+
+      '<tr><td>LIM pp. 84-86 + Fig. 34 (germinazione)</td><td>Sedlbauer 2001 (Fraunhofer IBP)</td></tr>'+
+      '<tr><td>VTT t<sub>M=1</sub> closed-form: ln t = &minus;0,68&middot;ln T &minus; 13,9&middot;ln(UR%) + 66,02 (substrato ligneo sensibile di rif.)</td><td>Hukka-Viitanen 1999 Wood Sci. Tech. 33:475-485</td></tr>'+
+      '<tr><td>T<sub>w</sub> approx Stull 2011</td><td>J. Appl. Meteorol. Climatol. 50:2267-2269</td></tr>'+
+      '</table>';
+    html += '<h3>6.3 Riferimento normativo italiano</h3>';
+    html += '<p>DM 26/06/2015 (modifica DM 28/10/2025 GU 05/12/2025 in vigore dal 03/06/2026) per soglia f<sub>Rsi</sub>. Valore 0,72 = riferimento operativo per clima IT tipico; nella relazione tecnica f<sub>Rsi,min</sub> va calcolato caso per caso secondo UNI 13788 &sect;5.</p>';
+    html += '<h3>6.4 Limiti del metodo</h3>';
+    html += '<p>Calcolo stazionario. Per accumulo igroscopico o cicli transitori &rarr; UNI EN 15026:2023 con simulazione numerica.</p>';
+  }
+  return html;
+}
+
+function applyTermoSnapshot(input){
+  if (!input) return;
+  if (input.T_aria_C != null) state.T = parseFloat(input.T_aria_C);
+  if (input.UR_aria_perc != null) state.UR = parseFloat(input.UR_aria_perc);
+  if (input.T_superficie_C != null) state.Ts = parseFloat(input.T_superficie_C);
+  if (input.T_esterna_C != null) state.Te = parseFloat(input.T_esterna_C);
+  if (input.UR_esterna_perc != null) state.URe = parseFloat(input.UR_esterna_perc);
+  if (input.substrateCategory){
+    var cm = {'I':0,'II':1,'III':2};
+    if (cm[input.substrateCategory] != null) state.cat = cm[input.substrateCategory];
+  }
+  saveState();
+  /* sincronizza UI slider */
+  ['T','UR','Ts','Te','URe'].forEach(function(k){
+    var pairs = {T:['sT_r','sT_n'],UR:['sUR_r','sUR_n'],Ts:['sTs_r','sTs_n'],Te:['sTe_r','sTe_n'],URe:['sURe_r','sURe_n']};
+    var r=document.getElementById(pairs[k][0]), n=document.getElementById(pairs[k][1]);
+    if (r && n){
+      r.value = state[k]; n.value = state[k];
+      r.dispatchEvent(new Event('input'));
+    }
+  });
+  if (input.substrateCategory) setSubstrate(state.cat);
+  refresh();
+}
+
+function onResetTermo(){
+  state = Object.assign({}, defaults);
+  saveState();
+  var pairs = [['T','sT_r','sT_n'],['UR','sUR_r','sUR_n'],['Ts','sTs_r','sTs_n'],['Te','sTe_r','sTe_n'],['URe','sURe_r','sURe_n']];
+  pairs.forEach(function(p){
+    var r=document.getElementById(p[1]), n=document.getElementById(p[2]);
+    r.value = state[p[0]]; n.value = state[p[0]];
+    r.dispatchEvent(new Event('input'));
+  });
+  setSubstrate(0);
+  if (window.MX && MX.toolbarActive) MX.toolbarActive(false);
+}
+
+if (window.MX && MX.initToolbar){
+  try {
+    MX.initToolbar({
+      moduleId: 'termo',
+      moduleName: 'Termoigrometria, LIM + Punto Rugiada + Psicrometrico',
+      moduleColor: '#c0392b',
+      defaultSections: {
+        condAmbientali: { label: 'Condizioni ambientali (sopralluogo)', on: true },
+        sezioneA:       { label: 'Sezione A, LIM Sedlbauer (rischio muffa)', on: true },
+        graficoA:       { label: 'Grafico A, LIM neon', on: true },
+        sezioneB:       { label: 'Sezione B, Punto di rugiada', on: true },
+        graficoB:       { label: 'Grafico B, barre + gauge', on: true },
+        sezioneM:       { label: 'Sezione M, Diagramma psicrometrico', on: true },
+        graficoM:       { label: 'Grafico M, carta ASHRAE', on: true },
+        verdetto:       { label: 'Verdetto sintetico', on: true },
+        tracciabilita:  { label: 'Tracciabilità tecnica (norme)', on: true }
+      },
+      getInput: function(){
+        return { T_aria_C: state.T, UR_aria_perc: state.UR, T_superficie_C: state.Ts, T_esterna_C: state.Te, UR_esterna_perc: state.URe, substrateCategory: ['I','II','III'][state.cat||0] };
+      },
+      getOutput: function(){
+        var T=state.T,UR=state.UR,Ts=state.Ts,Te=state.Te,cat=state.cat||0;
+        return {
+          Td_C: dewPoint(T,UR),
+          UR_surf_perc: rhAtSurface(T,UR,Ts),
+          UR_crit_perc: rhCritico(T,Ts),
+          LIM_crit_perc: limCritical((Ts!=null)?Ts:T,cat),
+          fRsi: frsiCalc(T,Ts,Te),
+          VPD_kPa: vpd(T,UR),
+          VTT_M1_days: vttDays((Ts!=null)?Ts:T, rhAtSurface(T,UR,Ts) || UR, cat),
+          W_gkg: Wgkg(T,UR),
+          h_kJkg: enthalpy(T,UR),
+          Tw_C: wetBulb(T,UR),
+          v_m3kg: specVol(T,UR)
+        };
+      },
+      getSvgHTML: function(){
+        var h = document.getElementById('chartHost');
+        return h ? h.innerHTML : null;
+      },
+      getDocSections: buildDocSectionsForTermo,
+      applyData: applyTermoSnapshot,
+      onReset: onResetTermo
+    });
+  } catch(e){ console.error('[Termo] initToolbar:', e); }
+}
+
+})();
+</script>
+
+<!-- FALLBACK TOOLBAR INIT (post IIFE) -->
+<script>
+(function(){
+  function tryInit(){
+    if (document.querySelector('.mx-toolbar')) return;
+    if (!window.MX || !MX.initToolbar) return;
+    try{
+      MX.initToolbar({
+        moduleId: 'termo',
+        moduleName: 'Termoigrometria',
+        defaultSections: {
+          condAmbientali: { label: 'Condizioni ambientali', on: true },
+          sezioneA:       { label: 'Sezione A, LIM Sedlbauer', on: true },
+          graficoA:       { label: 'Grafico A, LIM', on: true },
+          sezioneB:       { label: 'Sezione B, Punto rugiada', on: true },
+          graficoB:       { label: 'Grafico B, gauge', on: true },
+          sezioneM:       { label: 'Sezione M, Psicrometrico ASHRAE', on: true },
+          graficoM:       { label: 'Grafico M, carta', on: true },
+          verdetto:       { label: 'Verdetto', on: true },
+          tracciabilita:  { label: 'Tracciabilità tecnica', on: true }
+        },
+        getDocSections: function(sel){
+          if (window._termoBuildDoc){ try { return window._termoBuildDoc(sel); } catch(e){ console.error(e); } }
+          return '<p><em>Calcola prima per generare il documento.</em></p>';
+        },
+        applyData: function(input){
+          if (window._termoApplySnap){ try { window._termoApplySnap(input); return; } catch(e){ console.error(e); } }
+        },
+        getSvgHTML: function(){ var h=document.getElementById('chartHost'); return h?h.innerHTML:null; },
+        onReset: function(){ location.reload(); }
+      });
+    } catch(e){ console.error('[Termo fallback]', e); }
+  }
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', tryInit);
+  else setTimeout(tryInit, 80);
+})();
+</script>
+
+<!-- MX-BUILD: 2026-08-09-termoigrometria-v3.2.7 LIM_DATA ricalibrata su fonte primaria Sedlbauer 2001 pp. 84-86 + Fig. 34 (piatta sotto 10 C, cautelativa); prima: sliders SHIMMER+PULSE + JSON nel modal (uniformità toolbar) toolbar standard + modal anteprima + box dinamico + nota convenzione h + Stull disclaimer + esempio Cellai + iso-h passo 10 -->
+<script>
+/* === MX SNAPSHOT IMPORTER (auto-install, Mixando v3) ===
+ * Aggiunge bottone "Apri snapshot" accanto al "JSON" della toolbar.
+ * Importa .json esportato dallo stesso modulo, ricarica la pagina.
+ * Riconosce pattern lite (STATE.cur/finished/data → *-draft) e
+ * pattern rich (state diretto → *-vN). NON modifica codice esistente.
+ * ====================================================== */
+(function(){
+  'use strict';
+  if (window.__mxSnapImportInstalled) return;
+  window.__mxSnapImportInstalled = true;
+  function findHostBtn(){
+    return document.querySelector('button[data-act="export-json"]')
+        || document.getElementById('btnJSON')
+        || document.getElementById('btnExportJSON')
+        || document.querySelector('.mx-tb-btn.tb-save');
+  }
+  function makeBtn(){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mx-tb-btn tb-load';
+    b.id = 'btnOpenSnap';
+    b.title = 'Apri uno snapshot .json esportato in precedenza da questo modulo (sostituirà i dati correnti).';
+    b.innerHTML = '<span class="ico">\u{1F4C2}</span><span class="label">Apri snapshot</span>';
+    return b;
+  }
+  function detectModuleKeys(){
+    /* 19/11/2026: solo le chiavi di QUESTO modulo, cioè quelle che il modulo nomina nel suo codice.
+       Prima prendeva le chiavi di tutti i moduli e lo snapshot finiva nella bozza del primo trovato
+       (un file dei Sali, aperto dal modulo Sali, sovrascriveva la bozza della Risalita). */
+    var src = '';
+    try { [].forEach.call(document.scripts, function(s){ if (!s.src) src += s.textContent; }); } catch(_){}
+    var condivise = {'mx2::perito':1,'mx2::periti-v2':1,'mx2::locali-v1':1,'mx2::reports':1,'mx2::indagini':1,'mx2::strumentazione':1,'mx2::chartTheme':1,'mx2::showPhysicalScale':1,'mx2::report-meta':1,'mx2::last-backup':1};
+    var mie = {}, re = /mx2::[A-Za-z0-9_-]+/g, m;
+    while ((m = re.exec(src))) { if (!condivise[m[0]]) mie[m[0]] = 1; }
+    return Object.keys(mie);
+  }
+  /* 20/11/2026: nomi con cui un file dichiara di venire da questo modulo (in «moduleId», in «module» o nella
+     sigla di «schemaVersion», per esempio 'sali-v3.1'). Servono a non aprire qui il file di un altro modulo. */
+  var _MX_MIEI = ['termo', 'termoigrometria'];
+  function _mxFileDiAltroModulo(obj){
+    if (!obj || typeof obj !== 'object') return '';
+    if (typeof obj._format === 'string' && obj._format.indexOf('mixando-backup') === 0) return 'Questo file è un backup generale di Mixando: si ripristina dalla pagina «Backup tecnico», non da qui.';
+    var d = obj.moduleId || obj.module || (typeof obj.schemaVersion === 'string' ? obj.schemaVersion : '');
+    if (typeof d !== 'string' || !d) return '';   /* il file non dice da dove viene: lo giudicano i controlli più sotto */
+    var n = d.toLowerCase().replace(/-v[\d.]+$/, '').replace(/_/g, '-');
+    if (_MX_MIEI.indexOf(n) >= 0) return '';
+    return 'Questo file viene da un altro modulo (' + (obj.moduleName || d) + ').';
+  }
+  function pickTargetKey(keys, payload){
+    var draftKeys = keys.filter(function(k){ return /-draft$/.test(k); });
+    var liteHint = payload && (payload.currentStep !== undefined || payload.data !== undefined);
+    if (liteHint && draftKeys.length){ return { key: draftKeys[0], kind: 'lite' }; }
+    var primaryKeys = keys.filter(function(k){ return !/-(saves|draft|prefs)$/.test(k); });
+    if (primaryKeys.length === 1) return { key: primaryKeys[0], kind: 'rich' };
+    if (primaryKeys.length > 1){
+      var sortable = primaryKeys.map(function(k){ try { return [k, (localStorage.getItem(k)||'').length]; } catch(_){ return [k, 0]; } });
+      sortable.sort(function(a,b){ return b[1] - a[1]; });
+      return { key: sortable[0][0], kind: 'rich' };
+    }
+    if (draftKeys.length) return { key: draftKeys[0], kind: 'lite' };
+    return null;
+  }
+  function openImportDialog(){
+    var f = document.createElement('input');
+    f.type = 'file'; f.accept = 'application/json';
+    f.style.display = 'none';
+    f.addEventListener('change', function(e){
+      var file = e.target.files && e.target.files[0]; if (!file) return;
+      var rd = new FileReader();
+      rd.onload = function(ev){
+        try {
+          var obj = JSON.parse(ev.target.result);
+          /* 20/11/2026: il tasto riapre solo i file di QUESTO modulo. Prima accettava, dopo una conferma, anche il file
+             di un altro modulo o il backup generale, e il lavoro del modulo aperto andava perso (provato: file dei Sali
+             nel Radon, file del Radon e della Risalita nei Sali). */
+          var _altro = _mxFileDiAltroModulo(obj);
+          if (_altro){ alert(_altro + '\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          /* 19/11/2026: file esportato da un modulo con la barra nuova (Glaser, Termoigrometria, Radon). Porta i dati
+             d'ingresso in «input», in una forma diversa da quella tenuta in memoria: scriverlo in memoria azzerava
+             il modulo. Qui si usa la stessa strada del tasto «Carica». */
+          if (obj && obj.input && window.MX && typeof window.MX.applyData === 'function'){
+            if (!confirm('Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.moduleName || obj.moduleId || '?') + '\n\nI dati correnti del modulo verranno SOSTITUITI.')) return;
+            var _esito = window.MX.applyData(obj.input, obj.moduleId);
+            if (_esito === 'ok') alert('Snapshot importato.');
+            else if (_esito === 'altro') alert('Questo file viene da un altro modulo (' + (obj.moduleName || obj.moduleId) + '): non importato.');
+            else alert('Il modulo non sa ricaricare questo file.');
+            return;
+          }
+          /* 20/11/2026: nei moduli con la barra nuova il solo file che si sa riaprire è quello con la voce «input».
+             Un file diverso, scritto in memoria così com'era, azzerava il modulo. */
+          if (window.MX && typeof window.MX.applyData === 'function'){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var keys = detectModuleKeys();
+          if (!keys.length){
+            alert('Nessuna chiave di lavoro trovata per questo modulo nello storage corrente.\nSuggerimento: apri il modulo, fai almeno un\'interazione, poi riprova.');
+            return;
+          }
+          var target = pickTargetKey(keys, obj);
+          if (!target){ alert('Non sono riuscito a individuare la chiave di salvataggio. Snapshot non importato.'); return; }
+          /* 20/11/2026: un file senza i dati dei passi svuotava la bozza */
+          if (target.kind === 'lite' && !(obj && (obj.data || obj.state))){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var msg = 'Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.module || obj.schemaVersion || '?') + '\n• Destinazione: ' + target.key + ' (' + target.kind + ')\n\nI dati correnti del modulo verranno SOSTITUITI.\nConsiglio: prima fai "JSON" per backup di sicurezza.\n\nProcedere?';
+          if (!confirm(msg)) return;
+          var toWrite;
+          if (target.kind === 'lite'){
+            toWrite = { ts: Date.now(), state: { cur: (obj.currentStep !== undefined ? obj.currentStep : 0), finished: !!obj.finished, data: (obj.data || obj.state || {}) } };
+          } else {
+            toWrite = obj.state || obj;
+          }
+          try { localStorage.setItem(target.key, JSON.stringify(toWrite)); }
+          catch (err) { alert('Errore scrittura storage: ' + (err.message || err)); return; }
+          alert('Snapshot importato in "' + target.key + '". Pagina in ricaricamento…');
+          location.reload();
+        } catch (err) { alert('Errore lettura JSON: ' + err.message); }
+      };
+      rd.readAsText(file);
+    });
+    document.body.appendChild(f); f.click(); setTimeout(function(){ try{ document.body.removeChild(f); }catch(_){} }, 1500);
+  }
+  function install(){
+    if (document.getElementById('btnOpenSnap')) return;
+    if (!detectModuleKeys().length) return;   /* 19/11/2026: il modulo non tiene dati in memoria, il tasto non potrebbe funzionare */
+    var host = findHostBtn();
+    if (!host || !host.parentNode){ return setTimeout(install, 250); }
+    var btn = makeBtn();
+    host.parentNode.insertBefore(btn, host.nextSibling);
+    btn.addEventListener('click', openImportDialog);
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(install, 150); });
+  } else {
+    setTimeout(install, 150);
+  }
+})();
+</script>
+<script>
+/* === MX ANASTRIP RESTORE (auto-install, Mixando v3) ===
+ * Popola i box anaPerito/anaCliente leggendo mx2::perito (o mx2::periti-v2 attivo) + mx2::locali-v1.
+ * Si auto-disattiva se esiste già una funzione renderAna definita prima.
+ * Aggancia btnReloadAna se presente.
+ * ====================================================== */
+(function(){
+  'use strict';
+  if (window.__mxAnaStripPopulated) return;
+  if (typeof window.renderAna === 'function') { try { window.renderAna(); } catch(_){} return; }
+  function _loadPerito(){
+    try { var v2 = JSON.parse(localStorage.getItem('mx2::periti-v2')); if(v2 && Array.isArray(v2.list) && v2.list.length){ return v2.list.find(function(p){return p.id===v2.activeId;}) || v2.list[0]; } } catch(_){}
+    try { var p = JSON.parse(localStorage.getItem('mx2::perito')); if(p) return p; } catch(_){}
+    return {};
+  }
+  function _loadLocali(){ try { return JSON.parse(localStorage.getItem('mx2::locali-v1') || '{}'); } catch(_){ return {}; } }
+  function _populate(){
+    var pe = document.getElementById('anaPerito');
+    var ce = document.getElementById('anaCliente');
+    if(!pe && !ce) return false;
+    var p = _loadPerito() || {};
+    var l = _loadLocali();
+    var ana = (l && l.ana) ? l.ana : {};
+    if(pe){
+      var pn = (p.tipo_soggetto === 'PG') ? (p.ragione_sociale || p.nome || 'n.d.') : (p.nome || 'n.d.');
+      var psub = [];
+      if(p.titolo) psub.push(p.titolo);
+      if(p.albo) psub.push(p.albo + (p.numAlbo ? ' n. ' + p.numAlbo : ''));
+      if(p.studio) psub.push(p.studio);
+      else { if(p.tel || p.cellulare) psub.push(p.tel || p.cellulare); if(p.email) psub.push(p.email); }
+      var pnEl = pe.querySelector('.n'); var pmEl = pe.querySelector('.m');
+      if(pnEl) pnEl.textContent = pn;
+      if(pmEl) pmEl.textContent = psub.join(' · ');
+    }
+    if(ce){
+      var cn = (ana.TipoSoggetto === 'PG') ? (ana.RagSoc || ana.Nome || 'n.d.') : (ana.Nome || 'n.d.');
+      var csub = [];
+      if(ana.Indirizzo) csub.push(ana.Indirizzo);
+      if(ana.Comune) csub.push(ana.Comune);
+      if(ana.Regione) csub.push(ana.Regione);
+      if(ana.DataSopr) csub.push('sopralluogo ' + ana.DataSopr);
+      var cnEl = ce.querySelector('.n'); var cmEl = ce.querySelector('.m');
+      if(cnEl) cnEl.textContent = cn;
+      if(cmEl) cmEl.textContent = csub.join(' · ');
+    }
+    return true;
+  }
+  function install(){
+    if(!_populate()) return setTimeout(install, 200);
+    window.__mxAnaStripPopulated = true;
+    var btn = document.getElementById('btnReloadAna');
+    if(btn && !btn.__mxBound){ btn.__mxBound = true; btn.addEventListener('click', function(){ _populate(); }); }
+    window.addEventListener('focus', _populate);
+    window.addEventListener('storage', function(e){ if(e.key && (e.key === 'mx2::perito' || e.key === 'mx2::periti-v2' || e.key === 'mx2::locali-v1')) _populate(); });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(install, 100); });
+  else setTimeout(install, 100);
+})();
+
+/* === Integrazione mappa-indagini (aggancio bidirezionale), universal === */
+function _mxIndaginiList(){ try{ var raw=localStorage.getItem('mx2::indagini'); if(!raw) return []; var a=JSON.parse(raw); return Array.isArray(a)?a:[]; } catch(e){ return []; } }
+function _mxIndaginiSaveAll(list){ try{ localStorage.setItem('mx2::indagini', JSON.stringify(list||[])); return true; } catch(e){ return false; } }
+function _mxIndaginiNewId(){ return 'ind_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
+
+// Mapping generico universale: estrae campi standard se presenti, salva tutto in schedaCompleta
+function _mxBuildDatiUniversal(state){
+  state = state || {};
+  var out = { schedaCompleta: JSON.parse(JSON.stringify(state)) };
+  ['tInt','urInt','tSup','tempC','urPerc','co2_ppm','pm25','pm10','tvoc','hcho','co','no2',
+   'co2','tempC2','tempInt','T_int','T_ext','UR_int','UR_ext','Ta','UR'].forEach(function(k){
+    if(state[k] != null) out[k] = state[k];
+  });
+  if(state.note) out.note = state.note;
+  if(state.noteFinali) out.note = state.noteFinali;
+  return out;
+}
+
+/* 20/11/2026: le domande si fanno in una finestra dentro la pagina (window.mxChiedi, nel file condiviso
+   _shared/mx-switcher.js) e non più nelle finestrelle del browser. Se quel file non fosse stato caricato si torna
+   alle finestrelle di prima. _mxChiedi risponde con una promessa; _mxTesto chiede un solo testo. */
+function _mxChiedi(titolo, cfg){
+  if(window.mxChiedi) return window.mxChiedi(titolo, cfg);
+  cfg = cfg || {};
+  if(cfg.scelte){
+    var buone = cfg.scelte.filter(function(s){ return !s[2]; });
+    var r = prompt(titolo + '\n\n' + buone.map(function(s, i){ return (i+1) + '. ' + s[1]; }).join('\n') + '\n\nScrivi il numero:', '1');
+    var k = parseInt(r, 10) - 1;
+    return Promise.resolve(buone[k] ? buone[k][0] : null);
+  }
+  var out = [], campi = cfg.campi || [];
+  for(var i = 0; i < campi.length; i++){
+    var v = prompt(titolo + (campi[i][0] ? ('\n' + campi[i][0]) : ''), campi[i][1] == null ? '' : campi[i][1]);
+    if(v === null) return Promise.resolve(null);
+    out.push(v);
+  }
+  return Promise.resolve(out);
+}
+function _mxTesto(titolo, pre){ return _mxChiedi(titolo, {campi:[['', pre]]}).then(function(r){ return r ? r[0] : null; }); }
+async function _mxAggancialMappa(){
+  var cat = 'termoigrometria';
+  var moduloFile = 'termoigrometria.html';
+  var fileLabel = 'Termoigrometria';
+
+  // Ottiene lo stato della scheda: usa hook se la scheda lo ha popolato, altrimenti fallback "vuoto"
+  var stateData = (typeof window._mxAggancia_getDati === 'function') ? window._mxAggancia_getDati() : null;
+  if(!stateData){
+    // Fallback: tenta lettura da localStorage standard
+    try{
+      var keys = Object.keys(localStorage).filter(function(k){ return k.startsWith('mx2::') && (k.indexOf('-draft')>=0 || k.indexOf('-state')>=0); });
+      if(keys.length){
+        var raw = localStorage.getItem(keys[0]);
+        if(raw){ var parsed = JSON.parse(raw); stateData = (parsed.state && parsed.state.data) ? parsed.state.data : parsed; }
+      }
+    }catch(e){}
+    if(!stateData) stateData = {};
+  }
+
+  var dati = _mxBuildDatiUniversal(stateData);
+
+  var lista = _mxIndaginiList();
+  var stessoCat = lista.filter(function(r){ return r.categoria === cat; });
+
+  /* 20/11/2026: scelta dentro la pagina (prima si scriveva 1, 2 o 3 in una finestrella del browser) */
+  var mode = await _mxChiedi('Aggancia la scheda '+fileLabel.toUpperCase()+' alla Mappa Indagini', {scelte:[['1','Nuovo punto sulla mappa'],['2','Aggiorna un punto esistente ('+(stessoCat.length?(stessoCat.length+' disponibili'):'nessuno disponibile')+')', !stessoCat.length]]});
+  if(!mode) return;
+
+  if(mode === '1'){
+    var _nn = await _mxChiedi('Nuovo punto sulla mappa', {campi:[['Nome del punto', fileLabel+' '+new Date().toLocaleDateString('it-IT')],['Stanza (facoltativa)','']], conferma:'Crea il punto'});
+    if(!_nn || !String(_nn[0]).trim()) return;
+    var nome = String(_nn[0]).trim(), stanza = String(_nn[1]||'').trim();
+    var rec = {
+      id: _mxIndaginiNewId(),
+      schemaVer: 1, categoria: cat, piano: 0, x: 0.5, y: 0.5,
+      stanza: stanza || '', nome: nome,
+      posizione: 'Da posizionare sulla mappa (apri Mappa Indagini e trascina il pin)',
+      dataCreazione: new Date().toISOString(), dataModifica: new Date().toISOString(),
+      dati: dati, note: 'Rilievo creato da scheda '+moduloFile,
+      foto: [], termogrammi: [],
+      linkScheda: moduloFile+':'+Date.now(), layerId: ''
+    };
+    lista.push(rec);
+    _mxIndaginiSaveAll(lista);
+    var msgOK = '✓ Punto "'+nome+'" creato sulla mappa indagini';
+    if(typeof showToast === 'function') showToast(msgOK,'ok');
+    else if(typeof toast === 'function') toast(msgOK);
+    else alert(msgOK);
+    setTimeout(function(){
+      if(confirm('Punto "'+nome+'" creato sulla Mappa Indagini.\nVuoi aprire ora la Mappa per posizionarlo?')){
+        window.location.href = 'mappa-indagini.html';
+      }
+    }, 500);
+  } else if(mode === '2'){
+    if(!stessoCat.length){ alert('Nessun punto di categoria '+fileLabel+' esistente sulla mappa.'); return; }
+    var ch = await _mxChiedi('Quale punto vuoi aggiornare?', {scelte: stessoCat.map(function(r, i){ return [String(i+1), r.nome+' ('+(r.stanza||'senza stanza')+')']; })});
+    if(!ch) return;
+    var idx = parseInt(ch)-1;
+    if(isNaN(idx) || idx<0 || idx>=stessoCat.length){ alert('Selezione non valida'); return; }
+    var target = stessoCat[idx];
+    target.dati = dati;
+    target.dataModifica = new Date().toISOString();
+    target.linkScheda = moduloFile+':'+Date.now();
+    target.note = (target.note || '') + (target.note ? ' · ':'') + 'Aggiornato da '+moduloFile+' il '+new Date().toLocaleDateString('it-IT');
+    for(var i=0;i<lista.length;i++){ if(lista[i].id === target.id){ lista[i] = target; break; } }
+    _mxIndaginiSaveAll(lista);
+    var msgUp = '✓ Punto "'+target.nome+'" aggiornato';
+    if(typeof showToast === 'function') showToast(msgUp,'ok');
+    else if(typeof toast === 'function') toast(msgUp);
+    else alert(msgUp);
+  }
+}
+
+// Aggiunge automaticamente il pulsante "Aggancia alla mappa" alla toolbar (per schede dinamiche con pulsanti generati a runtime)
+function _mxInjectButton(){
+  var existing = document.getElementById('btnAggancia');
+  if(existing) return;
+  // Trova qualsiasi pulsante "tb-reset" come riferimento
+  var resetBtn = document.querySelector('.mx-tb-btn.tb-reset');
+  if(!resetBtn) return;
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'mx-tb-btn';
+  btn.id = 'btnAggancia';
+  btn.style.cssText = 'background-image:linear-gradient(135deg,#26a69a,#00897b 45%,#004d40);box-shadow:0 3px 10px rgba(0,137,123,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)';
+  btn.innerHTML = '<span class="ico">\ud83d\udccd</span><span class="label">Aggancia alla mappa</span>';
+  btn.onclick = _mxAggancialMappa;
+  resetBtn.parentNode.insertBefore(btn, resetBtn);
+}
+
+// Init: prova subito + MutationObserver per ricomparse della toolbar
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', function(){ _mxInjectButton(); });
+} else {
+  setTimeout(_mxInjectButton, 100);
+}
+// Observer per pulsanti rigenerati dinamicamente
+try{
+  var _mxObs = new MutationObserver(function(){
+    if(!document.getElementById('btnAggancia')) _mxInjectButton();
+  });
+  setTimeout(function(){ _mxObs.observe(document.body, {childList:true, subtree:true}); }, 300);
+}catch(e){}
+
+</script>
+<script src="_shared/mx-biblio.js" data-mod="termoigrometria" defer></script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

@@ -1,0 +1,1539 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Storia">
+<title>Mixando Lab · Storia della diagnostica del costruito</title>
+<style>
+:root{
+  --mx-accent:#34699e; --mx-accent-strong:#1e3f63; --mx-accent-soft:rgba(52,105,158,.12);
+  --bg:#f5f1e8; --paper:#fff; --ink:#1c2530; --ink-soft:#4a5663; --ink-mute:#7c8896;
+  --line:#e2ddcf; --r:14px;
+  --ff-serif:Georgia,"Cambria","Times New Roman",serif;
+  --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:0}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 22px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:720px;color:var(--ink-soft);font-size:14px}
+.timeline{position:relative;padding-left:30px;margin-top:18px}
+.timeline::before{content:"";position:absolute;left:8px;top:8px;bottom:8px;width:2px;background:var(--mx-accent-soft);border-radius:1px}
+.era{font-family:var(--ff-serif);font-style:italic;font-weight:700;color:var(--mx-accent-strong);font-size:13px;letter-spacing:.04em;text-transform:uppercase;margin:20px 0 8px;position:relative}
+.era:first-child{margin-top:0}
+.event{position:relative;padding:14px 16px;background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:0 1px 2px rgba(20,20,40,.04);margin-bottom:14px}
+.event::before{content:"";position:absolute;left:-26px;top:18px;width:14px;height:14px;border-radius:50%;background:var(--mx-accent);border:3px solid var(--bg);box-shadow:0 0 0 2px var(--mx-accent-soft)}
+.event .yr{display:inline-block;font-family:var(--ff-serif);font-size:18px;font-weight:700;color:var(--mx-accent);font-style:italic}
+.event .au{font-size:11.5px;color:var(--ink-mute);margin-left:8px;font-weight:600}
+.event h4{margin:6px 0 6px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700}
+.event p{margin:0 0 4px;font-size:13.5px;color:var(--ink-soft);line-height:1.6}
+.event .nb{font-size:12px;color:#7a5a1f;background:#fff8e5;border-left:3px solid #d4a017;border-radius:6px;padding:5px 9px;margin:6px 0 0;line-height:1.5}
+.event .src{font-size:11px;color:var(--ink-mute);font-style:italic;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+.mx-bar{position:relative;height:56px;display:flex;align-items:center;gap:14px;padding:0 20px;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%);box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04);border-bottom:3px solid var(--mx-accent)}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+.mx-bar .em{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong) 100%);color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12);text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;flex-shrink:0;position:relative}
+.mx-bar .meta{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--mx-accent-strong);display:inline-flex;align-items:center;gap:6px;line-height:1.2}
+.mx-bar .tag::before,.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif;font-weight:700;font-style:italic;font-size:16px;color:#15202b;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:7px 14px;border:1.5px solid var(--mx-accent);border-radius:9px;background:rgba(255,255,255,.65);transition:all .2s}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));color:#fff;transform:translateY(-1px)}
+.linkbox{background:linear-gradient(180deg,rgba(52,105,158,.10),#fff);border:1px solid rgba(52,105,158,.30);border-left:4px solid var(--mx-accent);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:var(--ink);line-height:1.55}
+.linkbox a{color:var(--mx-accent-strong);font-weight:800;text-decoration:none}
+@media (max-width:600px){.mx-bar{height:50px;padding:0 14px;gap:10px}.mx-bar .em{width:32px;height:32px;font-size:17px}.mx-bar .ti{font-size:13.5px}.mx-logo-center{height:26px;max-width:90px}}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+
+<style>/* === Modulo Storia: schede per tema === */
+.hero{padding:12px 6px 4px}
+.intro-note{max-width:760px;margin:10px auto 0;font-size:12.5px;color:#5b4400;background:linear-gradient(180deg,#fff8e5,#fffaf0);border:1px solid #efd989;border-left:4px solid var(--gold);border-radius:10px;padding:9px 13px;line-height:1.5}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px auto 4px;max-width:1010px}
+.tab{appearance:none;border:1.5px solid var(--line);background:var(--paper);color:var(--ink-soft);font:inherit;font-size:12.5px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:transform .15s,box-shadow .2s,background .2s,color .2s,border-color .2s}
+.tab .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.tab:hover{border-color:var(--mx-accent);color:var(--mx-accent-strong);transform:translateY(-1px)}
+.tab.active{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));color:#fff;border-color:var(--mx-accent-strong);box-shadow:0 3px 10px rgba(30,63,99,.30)}
+.tab.active .dot{background:#fff}
+.tab.todo{opacity:.6;border-style:dashed}
+.tab.todo .dot{background:var(--ink-mute)}
+.panel{display:none}
+.panel.show{display:block;animation:stFade .35s ease}
+@keyframes stFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.panel.show{animation:none}}
+.panel-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:6px 0 4px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.panel-head h2{margin:0;font-family:var(--ff-serif);font-size:22px;color:var(--mx-accent-strong);font-weight:700}
+.panel-head .cnt{font-size:12px;color:var(--ink-mute);font-weight:600}
+.ph{background:linear-gradient(180deg,#fff8e5,#fffaf0);border:1px solid #efd989;border-left:5px solid var(--gold);border-radius:12px;padding:22px 24px;color:#5b4400;line-height:1.6}
+.ph h3{margin:0 0 8px;font-family:var(--ff-serif);font-size:18px;color:#5b4400}
+.ph .src{font-size:11.5px;color:#7a5a1f;margin-top:8px;font-style:italic}
+</style>
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab">
+  <div class="meta"><span class="tag">Sapere</span><h1 class="ti">Storia della diagnostica</h1></div>
+  <a class="back" href="suite.html">&larr; Suite</a>
+</header>
+
+<main>
+  <section class="hero">
+    <h2>Storia della <em>diagnostica del costruito</em></h2>
+    <p>Le tappe della scienza che sta dietro a ogni patologia edilizia: come ci siamo arrivati, dalle prime intuizioni alle norme di oggi.</p>
+    <div class="intro-note"><strong>Stato:</strong> tutti gli 11 temi completi e verificati, con fonti citate. Le poche tappe minori a data o attribuzione incerta sono marcate "da confermare" (nota gialla): niente invenzioni, controllo consultabile.</div>
+  </section>
+
+  <nav class="tabs">
+    <button type="button" class="tab active" data-topic="acustica"><span class="dot"></span>Acustica</button>
+    <button type="button" class="tab" data-topic="termografia"><span class="dot"></span>Termografia</button>
+    <button type="button" class="tab" data-topic="sali"><span class="dot"></span>Sali</button>
+    <button type="button" class="tab" data-topic="risalita"><span class="dot"></span>Risalita</button>
+    <button type="button" class="tab" data-topic="condensa"><span class="dot"></span>Condensa / Glaser</button>
+    <button type="button" class="tab" data-topic="muffe"><span class="dot"></span>Muffe / Biodeteriogeni</button>
+    <button type="button" class="tab" data-topic="infiltrazioni"><span class="dot"></span>Infiltrazioni</button>
+    <button type="button" class="tab" data-topic="radon"><span class="dot"></span>Radon</button>
+    <button type="button" class="tab" data-topic="iaq"><span class="dot"></span>IAQ, aria indoor</button>
+    <button type="button" class="tab" data-topic="vespai"><span class="dot"></span>Vespai</button>
+    <button type="button" class="tab" data-topic="microclima"><span class="dot"></span>Microclima BC</button>
+    <button type="button" class="tab" data-topic="cantieri"><span class="dot"></span>Cantieri</button>
+  </nav>
+
+  <section class="panel show" data-topic="acustica"><div class="panel-head"><h2>Acustica in edilizia</h2><span class="cnt">40 tappe verificate</span></div>
+<div class="timeline">
+
+    <div class="era">Antichita e Medioevo: numeri, suono e teatri</div>
+
+    <article class="event">
+      <span class="yr">VI sec. a.C.</span><span class="au">Pitagora di Samo e la tradizione pitagorica</span>
+      <h4>Il monocordo e i rapporti armonici</h4>
+      <p>Alla scuola pitagorica si deve la scoperta che gli intervalli musicali consonanti corrispondono a rapporti numerici semplici tra lunghezze di corda (ottava 2:1, quinta 3:2, quarta 4:3). E la prima volta che un fenomeno percettivo viene ricondotto a leggi matematiche, radice dell'acustica come scienza.</p>
+      <p class="nb"><strong>Nota:</strong> l'aneddoto della fucina e l'invenzione del monocordo attribuiti personalmente a Pitagora sono di carattere leggendario; i rapporti armonici sono invece di solida matrice pitagorica.</p>
+      <div class="src">Tradizione pitagorica (Nicomaco, Boezio); voce "Acoustics", Encyclopaedia Britannica</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">IV-III sec. a.C.</span><span class="au">Aristotele (e, in parte, gli Stoici)</span>
+      <h4>Il suono come movimento dell'aria</h4>
+      <p>Nel De Anima (II.8, 420b) Aristotele afferma che il suono e un "certo movimento dell'aria", prodotto dall'urto di un corpo contro un altro attraverso un mezzo. E un'intuizione filosofica, non sperimentale, della propagazione del suono come perturbazione del mezzo, poi raffinata nella teoria ondulatoria del Seicento.</p>
+      <div class="src">Aristotele, De Anima II.8 (420b); Stanford Encyclopedia of Philosophy, voce "Sounds"</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">27-23 a.C. circa</span><span class="au">Marco Vitruvio Pollione, architetto romano</span>
+      <h4>L'acustica dei teatri e i vasi risonatori (echea)</h4>
+      <p>Nel De Architectura (Libro V) Vitruvio descrive la progettazione acustica dei teatri e l'uso di vasi di bronzo (echea) accordati, collocati tra le gradinate per rinforzare la voce degli attori. E la prima trattazione sistematica di acustica architettonica giunta dall'antichita.</p>
+      <p class="nb"><strong>Nota:</strong> gli echea non hanno riscontro archeologico nei teatri romani (vasi simili sono stati trovati in chiese medievali) e la loro reale efficacia e dibattuta tra gli studiosi.</p>
+      <div class="src">Vitruvio, De Architectura, Libro V, capp. 3-5</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">~500 d.C.</span><span class="au">Anicio Manlio Severino Boezio, filosofo (c. 477-524)</span>
+      <h4>De institutione musica: il ponte verso il Medioevo</h4>
+      <p>Il trattato di Boezio raccoglie i fondamenti della teoria musicale di matrice pitagorica e fu il principale veicolo di trasmissione della teoria classica del suono al Medioevo e al Rinascimento latino. Vi compare la celebre tripartizione musica mundana, humana, instrumentalis.</p>
+      <div class="src">Boezio, De institutione musica (inizio VI sec.); Cambridge History of Western Music Theory, cap. 5</div>
+    </article>
+
+    <div class="era">Rivoluzione scientifica: nasce la fisica del suono</div>
+
+    <article class="event">
+      <span class="yr">~1589</span><span class="au">Vincenzo Galilei, liutista e teorico (padre di Galileo)</span>
+      <h4>La tensione non segue i numeri interi pitagorici</h4>
+      <p>Con pesi appesi alle corde, Vincenzo Galilei mostro sperimentalmente che per ottenere un intervallo la tensione non segue i rapporti interi di lunghezza, ma il loro quadrato: per l'ottava la tensione va quadruplicata (4:1), per la quinta i pesi stanno come 9:4. L'altezza varia dunque con la radice quadrata della tensione, forse la prima descrizione matematica non lineare di un fenomeno naturale.</p>
+      <div class="src">V. Galilei, "Discorso intorno alle opere di Gioseffo Zarlino" (Firenze, 1589)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1636</span><span class="au">Marin Mersenne, matematico e teorico francese</span>
+      <h4>Le leggi delle corde vibranti</h4>
+      <p>Nell'Harmonie universelle Mersenne enuncia le leggi che legano la frequenza di una corda alla sua lunghezza, tensione e massa per unita di lunghezza, e fornisce la prima misura della frequenza di un suono udibile. E considerato il padre dell'acustica sperimentale.</p>
+      <div class="src">M. Mersenne, Harmonie universelle (Parigi, 1636)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1638</span><span class="au">Galileo Galilei, fisico e astronomo</span>
+      <h4>Frequenza di vibrazione e altezza del suono</h4>
+      <p>Nei Discorsi e dimostrazioni matematiche intorno a due nuove scienze Galileo collega l'altezza del suono alla frequenza delle vibrazioni e studia la risonanza e le consonanze in termini di rapporti di frequenza, ponendo le basi fisiche della percezione tonale.</p>
+      <div class="src">G. Galilei, Discorsi e dimostrazioni matematiche... (Leida, 1638), Prima Giornata</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1687</span><span class="au">Isaac Newton</span>
+      <h4>Primo calcolo teorico della velocita del suono</h4>
+      <p>Nei Principia (Libro II) Newton tratta il suono come perturbazione elastica del mezzo e ne ricava per la prima volta la velocita per via teorica, ottenendo circa 298 m/s: un valore inferiore di circa il 15% a quello reale, per aver assunto un processo isotermo.</p>
+      <div class="src">I. Newton, Philosophiae Naturalis Principia Mathematica (1687), Libro II, Sez. VIII</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1700-1701</span><span class="au">Joseph Sauveur, matematico francese</span>
+      <h4>Nasce la parola "acoustique"</h4>
+      <p>Sauveur propone il termine "acoustique" per designare la scienza del suono e ne studia i battimenti, gli armonici e i nodi delle corde vibranti, fondando l'acustica come disciplina autonoma. A lui si deve anche l'idea dell'unita poi chiamata "savart".</p>
+      <div class="src">J. Sauveur, Memorie dell'Academie royale des sciences (1700-1701)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1747-1755</span><span class="au">d'Alembert, Euler, Daniel Bernoulli</span>
+      <h4>L'equazione delle onde della corda vibrante</h4>
+      <p>d'Alembert formula (1747) l'equazione delle onde monodimensionale con soluzione f(x+t)+f(x-t); Euler ne sviluppa la soluzione secondo le condizioni iniziali; Daniel Bernoulli propone la soluzione come somma infinita di modi sinusoidali. Ne nasce la celebre "controversia della corda vibrante", risolta solo nell'Ottocento.</p>
+      <div class="src">d'Alembert (1747); Euler (1748-49); D. Bernoulli (c. 1753); American Journal of Physics 55, 33 (1987)</div>
+    </article>
+
+    <div class="era">Ottocento: onde, fisiologia e misura</div>
+
+    <article class="event">
+      <span class="yr">1787</span><span class="au">Ernst Florens Friedrich Chladni, fisico tedesco</span>
+      <h4>Le figure di Chladni e l'acustica sperimentale</h4>
+      <p>Cospargendo di sabbia una lastra metallica e facendola vibrare con un archetto, Chladni rende visibili i modi di vibrazione (le "figure di Chladni") e misura sistematicamente le frequenze. Tradizionalmente indicato come padre dell'acustica moderna, ne fonda il metodo sperimentale.</p>
+      <div class="src">E. F. F. Chladni, "Entdeckungen uber die Theorie des Klanges" (1787)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1793-1794</span><span class="au">Lazzaro Spallanzani, naturalista italiano</span>
+      <h4>I pipistrelli e l'intuizione dell'ecolocalizzazione</h4>
+      <p>Con i suoi esperimenti Spallanzani dimostra che i pipistrelli si orientano al buio anche se accecati, ma non se resi sordi: la prima intuizione documentata dell'orientamento basato sul suono, radice lontana dell'ecolocalizzazione e dell'acustica a ultrasuoni.</p>
+      <div class="src">L. Spallanzani, lettere ed esperimenti sui pipistrelli (1793-1794)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1816</span><span class="au">Pierre-Simon Laplace</span>
+      <h4>La correzione adiabatica della velocita del suono</h4>
+      <p>Laplace riconosce che la propagazione del suono nell'aria e un processo adiabatico, non isotermo come aveva assunto Newton: compressioni e rarefazioni sono troppo rapide per uno scambio di calore. Introduce il fattore gamma (rapporto dei calori specifici), dando v = radice di (gamma P / rho), in accordo con l'esperimento. E l'equazione di Newton-Laplace.</p>
+      <div class="src">P.-S. Laplace (1816, poi nella Mecanique celeste); B. S. Finn, "Laplace and the Speed of Sound" (1964)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1822</span><span class="au">Jean-Baptiste Joseph Fourier</span>
+      <h4>L'analisi armonica</h4>
+      <p>Nella Theorie analytique de la chaleur Fourier dimostra che una funzione periodica puo essere scomposta in somma di sinusoidi. Lo strumento matematico diventera il fondamento dell'analisi dei suoni in componenti spettrali, alla base di ogni analizzatore in frequenza.</p>
+      <p class="nb"><strong>Nota:</strong> l'opera del 1822 riguarda la propagazione del calore; l'applicazione sistematica dell'analisi di Fourier al suono e successiva.</p>
+      <div class="src">J. Fourier, Theorie analytique de la chaleur (1822)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">~1830</span><span class="au">Felix Savart, fisico francese</span>
+      <h4>La ruota di Savart e la misura della frequenza</h4>
+      <p>Con la ruota dentata che porta il suo nome, Savart misura direttamente la frequenza dei suoni e ne studia i limiti di udibilita, contributo chiave alla strumentazione acustica dell'Ottocento.</p>
+      <div class="src">F. Savart, Annales de chimie et de physique (anni 1820-1830)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1842</span><span class="au">Christian Doppler, fisico austriaco</span>
+      <h4>L'effetto Doppler</h4>
+      <p>Doppler enuncia che la frequenza percepita di un'onda cambia se sorgente e osservatore sono in moto relativo. L'effetto, dapprima riferito alla luce delle stelle, e oggi quotidiano in acustica (sirene in movimento) e alla base dell'eco-Doppler.</p>
+      <div class="src">C. Doppler, "Uber das farbige Licht der Doppelsterne" (1842)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1843</span><span class="au">Georg Simon Ohm, fisico tedesco</span>
+      <h4>La legge acustica di Ohm</h4>
+      <p>Ohm formula che l'orecchio analizza un suono complesso scomponendolo nelle sue componenti sinusoidali (parziali), percepite separatamente. E il fondamento dell'acustica fisiologica e la premessa diretta del lavoro di Helmholtz.</p>
+      <div class="src">G. S. Ohm, Annalen der Physik (1843)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1863</span><span class="au">Hermann von Helmholtz, fisico e fisiologo tedesco</span>
+      <h4>I risuonatori e la teoria delle sensazioni sonore</h4>
+      <p>In "Die Lehre von den Tonempfindungen" Helmholtz spiega il timbro come combinazione di armonici, introduce i risuonatori che portano il suo nome per isolare le componenti di un suono e fonda l'acustica fisiologica e musicale moderna.</p>
+      <div class="src">H. von Helmholtz, Die Lehre von den Tonempfindungen (1863; trad. ingl. Ellis 1875)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1877-1878</span><span class="au">John William Strutt, Lord Rayleigh, fisico inglese</span>
+      <h4>"The Theory of Sound": l'acustica diventa matematica</h4>
+      <p>I due volumi di Rayleigh sistematizzano matematicamente la propagazione, la riflessione e la risonanza delle onde sonore: e il trattato fondante dell'acustica moderna, ancora oggi di riferimento.</p>
+      <p class="nb"><strong>Nota:</strong> il premio Nobel per la fisica conferito a Rayleigh nel 1904 fu per la scoperta dell'argon, non per The Theory of Sound.</p>
+      <div class="src">Lord Rayleigh, The Theory of Sound, vol. I (1877) e vol. II (1878)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1880</span><span class="au">Jacques e Pierre Curie</span>
+      <h4>La piezoelettricita</h4>
+      <p>I fratelli Curie scoprono che alcuni cristalli, come il quarzo, generano una carica elettrica se sottoposti a pressione (effetto piezoelettrico diretto). E la base fisica dei trasduttori per ultrasuoni, sonar ed ecografia.</p>
+      <div class="src">J. e P. Curie, Bulletin de la Societe mineralogique de France (1880)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1898-1900</span><span class="au">Wallace Clement Sabine, fisico statunitense (Harvard)</span>
+      <h4>Il tempo di riverbero e la nascita dell'acustica architettonica</h4>
+      <p>Studiando l'eccesso di riverbero di un'aula, Sabine ricava la prima relazione quantitativa tra tempo di riverbero, volume dell'ambiente e assorbimento (T = 0,161 V / A). E la nascita dell'acustica architettonica scientifica e il primo strumento di progetto acustico delle sale.</p>
+      <div class="src">W. C. Sabine, "Reverberation" (1900); formula del 29 ottobre 1898</div>
+    </article>
+
+    <div class="era">Novecento: elettroacustica, sale e ultrasuoni</div>
+
+    <article class="event">
+      <span class="yr">1911</span><span class="au">attribuzione tradizionale (J. J. Berger)</span>
+      <h4>La legge di massa per l'isolamento dei divisori</h4>
+      <p>Si afferma per via empirica la "legge di massa": il potere fonoisolante di una parete singola cresce con la massa per unita di superficie e con la frequenza (circa 6 dB per ogni raddoppio). E ancora oggi il punto di partenza della stima previsionale dell'isolamento aereo.</p>
+      <p class="nb"><strong>Nota:</strong> l'attribuzione e la datazione precisa della prima formulazione empirica sono incerte in letteratura (spesso citato Berger, ~1911); da confermare sulla fonte primaria.</p>
+      <div class="src">Letteratura tecnica di acustica edilizia; cfr. UNI EN ISO 12354-1</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1915-1918</span><span class="au">Paul Langevin, fisico francese</span>
+      <h4>Il primo sonar a ultrasuoni</h4>
+      <p>Durante la Prima guerra mondiale Langevin realizza il primo sonar attivo, usando trasduttori piezoelettrici al quarzo per generare e ricevere ultrasuoni e rilevare i sommergibili. Nasce l'acustica subacquea applicata.</p>
+      <div class="src">P. Langevin, brevetti e lavori sul rilevamento ultrasonoro (1915-1918)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1925</span><span class="au">Heinrich Barkhausen, ingegnere tedesco</span>
+      <h4>Il phon e la misura della rumorosita</h4>
+      <p>Barkhausen introduce il "phon" come unita del livello di sensazione sonora, primo tentativo di misurare quantitativamente la rumorosita percepita: premessa pratica della strumentazione fonometrica e dei limiti normativi successivi.</p>
+      <p class="nb"><strong>Nota:</strong> la datazione e talvolta riportata come 1926; da confermare sulla fonte primaria.</p>
+      <div class="src">H. Barkhausen, lavori sulla misura della rumorosita (anni 1920)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1930</span><span class="au">Carl F. Eyring, Bell Telephone Laboratories</span>
+      <h4>Il riverbero negli ambienti molto assorbenti</h4>
+      <p>Eyring corregge la formula di Sabine per gli ambienti molto assorbenti ("dead rooms"), dove l'assorbimento e elevato: la formula di Eyring affianca quella di Sabine nel calcolo del tempo di riverbero.</p>
+      <div class="src">C. F. Eyring, Journal of the Acoustical Society of America (1930)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1933</span><span class="au">Harvey Fletcher e Wilden A. Munson, Bell Labs</span>
+      <h4>Le curve isofoniche di uguale sonorita</h4>
+      <p>Le curve di Fletcher-Munson descrivono come la sensibilita dell'orecchio dipenda dalla frequenza a parita di sonorita percepita. Sono la base concettuale delle ponderazioni in frequenza (la curva A, da cui il dB(A)) usate in tutti i limiti acustici, compreso il DPCM 5/12/1997.</p>
+      <div class="src">H. Fletcher, W. A. Munson, "Loudness, its definition, measurement and calculation", JASA (1933)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1942</span><span class="au">Lothar Cremer, fisico tedesco</span>
+      <h4>L'effetto di coincidenza e la frequenza critica</h4>
+      <p>Cremer spiega il calo di isolamento delle pareti alla "frequenza critica", quando la lunghezza d'onda del suono in aria coincide con quella delle onde flessionali nella parete (effetto di coincidenza). E il fondamento fisico, accanto alla legge di massa, delle formule di potere fonoisolante usate nella progettazione acustica edilizia.</p>
+      <div class="src">L. Cremer, Akustische Zeitschrift (1942); cfr. Cremer-Heckl, "Structure-Borne Sound"</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1948-1954</span><span class="au">Leo L. Beranek, MIT e Bolt Beranek and Newman</span>
+      <h4>L'acustica moderna e il controllo del rumore</h4>
+      <p>Beranek cofonda lo studio BBN e pubblica nel 1954 il testo "Acoustics", riferimento per generazioni di acustici. Sviluppa l'acustica delle sale e il controllo del rumore, ponti tra la fisica e la pratica progettuale.</p>
+      <div class="src">L. L. Beranek, "Acoustics" (McGraw-Hill, 1954); "Music, Acoustics, and Architecture" (1962)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1961</span><span class="au">Georg von Bekesy, biofisico ungherese-statunitense</span>
+      <h4>La meccanica della coclea (premio Nobel)</h4>
+      <p>von Bekesy riceve il Nobel per la medicina per aver spiegato come la membrana basilare della coclea analizzi le frequenze tramite un'onda viaggiante. E il vertice dell'acustica fisiologica, che spiega come percepiamo l'altezza dei suoni.</p>
+      <div class="src">G. von Bekesy, premio Nobel per la medicina o la fisiologia (1961)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1965</span><span class="au">Manfred R. Schroeder, Bell Telephone Laboratories</span>
+      <h4>La misura moderna del tempo di riverbero</h4>
+      <p>Schroeder introduce il metodo dell'integrazione inversa della risposta all'impulso, che permette di misurare il tempo di riverbero (T20, T30) con una sola acquisizione e grande precisione. E ancora il metodo usato dagli analizzatori moderni e dalla UNI EN ISO 3382.</p>
+      <div class="src">M. R. Schroeder, "New Method of Measuring Reverberation Time", JASA (1965)</div>
+    </article>
+
+    <div class="era">Normazione e calcolo: l'acustica in edilizia</div>
+
+    <article class="event">
+      <span class="yr">1978</span><span class="au">ISO, Comitato tecnico TC 43 Acoustics</span>
+      <h4>La serie ISO 140: misura dell'isolamento acustico</h4>
+      <p>La serie ISO 140 codifica a livello internazionale i metodi di misura, in laboratorio e in opera, dell'isolamento acustico per via aerea e del rumore di calpestio. E l'ossatura da cui derivano le attuali UNI EN ISO 16283 (misura in opera) e 10140 (laboratorio).</p>
+      <div class="src">ISO 140 (serie, dal 1978); oggi sostituita da ISO 16283 e ISO 10140</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1993</span><span class="au">M. Kleiner, B.-I. Dalenback, P. Svensson (Chalmers)</span>
+      <h4>L'auralizzazione</h4>
+      <p>Viene definita l'auralizzazione: rendere udibile, tramite modelli numerici, il campo sonoro di un ambiente prima ancora che sia costruito. Unisce simulazione acustica e ascolto, strumento chiave della progettazione delle sale.</p>
+      <div class="src">Kleiner, Dalenback, Svensson, "Auralization, an overview", JAES (1993)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1995</span><span class="au">Repubblica Italiana, Parlamento</span>
+      <h4>Legge 447/1995, legge quadro sull'inquinamento acustico</h4>
+      <p>La Legge 26 ottobre 1995 n. 447 fissa il quadro nazionale per la tutela dall'inquinamento acustico, istituisce la figura del Tecnico Competente in Acustica e rinvia a decreti attuativi, tra cui quello sui requisiti acustici passivi degli edifici.</p>
+      <div class="src">Legge 26 ottobre 1995, n. 447 (G.U. n. 254 del 30/10/1995)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1996</span><span class="au">ISO, TC 43</span>
+      <h4>La serie ISO 717: gli indici a numero unico</h4>
+      <p>La serie ISO 717 definisce gli indici di valutazione a numero unico (R'w, D2m,nT,w, L'n,w) e i termini di adattamento spettrale C e Ctr, che traducono gli spettri di misura in un singolo valore confrontabile con i limiti di legge.</p>
+      <div class="src">ISO 717-1 e 717-2 (ed. 1996; oggi UNI EN ISO 717-1/-2:2020)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1997</span><span class="au">Presidenza del Consiglio dei Ministri (Italia)</span>
+      <h4>DPCM 5/12/1997: i requisiti acustici passivi degli edifici</h4>
+      <p>Il DPCM 5 dicembre 1997 fissa, per categoria di edificio (Tab. A e B), i valori limite cogenti di isolamento di facciata, isolamento tra ambienti, rumore di calpestio e rumore degli impianti. In vigore dal 20/2/1998, e la base legale diretta della verifica acustica in edilizia.</p>
+      <div class="src">DPCM 5 dicembre 1997 (G.U. n. 297 del 22/12/1997)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">2002</span><span class="au">CEN, recepimento italiano UNI</span>
+      <h4>UNI EN 12354: i modelli previsionali</h4>
+      <p>La serie EN 12354 fornisce i modelli di calcolo per stimare in fase di progetto l'isolamento aereo, di facciata e il rumore di calpestio a partire dalle prestazioni dei singoli elementi e dalla trasmissione laterale (flanking). Integrata in Italia dalla UNI/TR 11175.</p>
+      <div class="src">UNI EN 12354 (recepimento dal 2002; oggi UNI EN ISO 12354-1/-2/-3/-4:2017)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">2010</span><span class="au">UNI, Ente Italiano di Normazione</span>
+      <h4>UNI 11367: la classificazione acustica delle unita immobiliari</h4>
+      <p>La UNI 11367 introduce la classificazione acustica dell'unita immobiliare in quattro classi (I, ottima, IV, modesta), a partire dai descrittori misurati. E lo strumento che traduce le prestazioni acustiche in una "etichetta" di qualita comprensibile.</p>
+      <div class="src">UNI 11367:2010 (prima edizione)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">2022</span><span class="au">Ministero della Transizione Ecologica (Italia)</span>
+      <h4>CAM Edilizia: l'acustica diventa requisito ambientale</h4>
+      <p>I Criteri Ambientali Minimi per l'edilizia (D.M. 23 giugno 2022, in vigore dal 4/12/2022) richiedono per gli edifici pubblici il raggiungimento di almeno la Classe II della UNI 11367, portando le prestazioni acustiche tra i requisiti cogenti degli appalti.</p>
+      <div class="src">D.M. 23 giugno 2022 (CAM Edilizia)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">2023</span><span class="au">UNI, Ente Italiano di Normazione</span>
+      <h4>UNI 11367:2023: la revisione della classificazione</h4>
+      <p>La revisione 2023 aggiorna la classificazione acustica delle unita immobiliari (in vigore dal 26/1/2023), recependo l'esperienza applicativa e l'allineamento con i metodi di misura e valutazione vigenti (ISO 16283, 717).</p>
+      <div class="src">UNI 11367:2023</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">oggi</span><span class="au">Acustica computazionale</span>
+      <h4>Metodi numerici e simulazione</h4>
+      <p>I metodi numerici (elementi finiti FEM, elementi al contorno BEM) e l'acustica geometrica permettono di simulare il campo sonoro e l'isolamento prima della costruzione, integrandosi con i modelli previsionali normativi e con l'auralizzazione.</p>
+      <div class="src">Letteratura di acustica computazionale (FEM/BEM, ray tracing); cfr. UNI EN ISO 12354</div>
+    </article>
+
+  </div></section>
+
+  <section class="panel" data-topic="termografia"><div class="panel-head"><h2>Termografia</h2><span class="cnt">18 tappe verificate</span></div>
+<div class="timeline">
+    <article class="event">
+      <span class="yr">1800</span><span class="au">William Herschel, astronomo</span>
+      <h4>Scoperta dell'infrarosso</h4>
+      <p>Studiando lo spettro solare con un prisma, Herschel misurò la temperatura oltre il rosso visibile e trovò un riscaldamento maggiore: l'esistenza di una radiazione invisibile, in seguito chiamata <em>infrarosso</em>.</p>
+      <div class="src">Royal Society Philosophical Transactions, vol. 90, 1800</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1840</span><span class="au">John Herschel, figlio</span>
+      <h4>Primo "termogramma" su carta sensibile</h4>
+      <p>Realizza il primo "evaporogramma" facendo evaporare alcol da una superficie nera in modo differenziale in base all'intensità della radiazione IR ricevuta.</p>
+      <div class="src">"On the Chemical Action of the Rays of the Solar Spectrum"</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1864</span><span class="au">Macedonio Melloni, fisico italiano (Parma)</span>
+      <h4>Termomoltiplicatore, padre della termografia italiana</h4>
+      <p>Perfeziona il termomoltiplicatore, primo strumento veramente sensibile alla radiazione termica. Studia il "calorico raggiante" e dimostra che l'infrarosso ha proprietà ottiche (riflessione, rifrazione, polarizzazione) analoghe alla luce visibile. Considerato il padre della spettrometria IR.</p>
+      <div class="src">Melloni M. "La thermochrose" (1850); Ann. Chim. Phys. (1864); Accademia delle Scienze di Napoli</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1879-1884</span><span class="au">Joseph Stefan + Ludwig Boltzmann</span>
+      <h4>Legge di Stefan-Boltzmann, fondamento della radiometria</h4>
+      <p>Stefan (1879) deriva empiricamente che la potenza radiante è proporzionale a T⁴; Boltzmann (1884) la dimostra termodinamicamente. M = ε·σ·T⁴ con σ = 5,67×10⁻⁸ W/m²·K⁴. Fondamento di TUTTE le misure radiometriche termografiche moderne.</p>
+      <div class="src">Stefan J. "Über die Beziehung zwischen der Wärmestrahlung..." (1879); Boltzmann L. Annalen der Physik (1884)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1880</span><span class="au">Samuel Pierpont Langley</span>
+      <h4>Invenzione del bolometro</h4>
+      <p>Strumento che sfrutta la variazione di resistenza elettrica al variare di temperatura: precursore di tutti i sensori IR moderni. Sensibilità migliaia di volte superiore ai termometri precedenti.</p>
+      <div class="src">American Journal of Science, vol. 21, 1881</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1900</span><span class="au">Max Planck</span>
+      <h4>Legge della radiazione del corpo nero</h4>
+      <p>Formulazione della legge di Planck, base fisica della termografia: la radiazione emessa da un corpo dipende dalla sua temperatura assoluta secondo una funzione che porta il suo nome.</p>
+      <div class="src">Verhandlungen der Deutschen Physikalischen Gesellschaft, 1900</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1929</span><span class="au">Tihanyi Kálmán</span>
+      <h4>Prima telecamera elettronica IR</h4>
+      <p>Brevettata in Inghilterra dal fisico ungherese, è la prima telecamera elettronica sensibile all'infrarosso, originariamente per uso militare (anti-aereo).</p>
+      <div class="src">British Patent No. 313456, 1929, UNESCO Memory of the World</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1939-1945</span><span class="au">Sviluppi militari WWII, USA, UK, Germania</span>
+      <h4>Sniperscope, telecamere IR antisottomarino, missili a guida termica</h4>
+      <p>La Seconda Guerra Mondiale accelera drasticamente la ricerca IR: i tedeschi sviluppano il convertitore d'immagine IR Vidicon (visione notturna soldati); USA producono "Sniperscope" M1/M2 (PbS detector); UK sviluppa rilevatori IR per Coastal Command; Germania brevetta i primi missili a guida termica (Enzian). Tecnologia declassificata negli anni '50 apre uso civile.</p>
+      <div class="src">RCA Vidicon (1939); US Army Sniperscope M1 (1943); Hudson R.D. "Infrared System Engineering" Wiley (1969)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1960</span><span class="au">Industria elettronica e fotografica</span>
+      <h4>Primi sensori MWIR commerciali</h4>
+      <p>Arriva il primo sensore InSb (Indio-Antimoniuro) per fascia MWIR 3-5 µm con raffreddamento criogenico. Si sviluppano pellicole IR sensibili fino a 1,3 µm (NIR). Apertura del mercato civile-industriale (controllo qualità manifattura, ricerca medica).</p>
+      <div class="src">Hudson R.D. (1969); Holst G.C. "Common Sense Approach to Thermal Imaging" SPIE (2000)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1965</span><span class="au">AGA</span>
+      <h4>Prima termocamera commerciale</h4>
+      <p>Lo scanner a infrarossi di AGA è il primo strumento IR portatile per applicazioni civili (industria e medicina). Pesava ~30 kg e richiedeva raffreddamento ad azoto liquido.</p>
+      <div class="src">Science Museum Group, Londra (scheda dell'oggetto: «first introduced 1965 (first commercial IR scanner)»); FLIR Systems corporate history</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1990</span><span class="au">Honeywell / DARPA</span>
+      <h4>Microbolometro non raffreddato</h4>
+      <p>Tecnologia che permette termocamere portatili senza raffreddamento criogenico, riducendo costi e dimensioni. Apre il mercato civile di massa.</p>
+      <div class="src">DARPA program 1980s, declassificazione 1992; Laser Focus World (1997; Hanson 2011)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">1995</span><span class="au">Industria dei sensori</span>
+      <h4>Microbolometri commerciali di massa</h4>
+      <p>Arrivano sul mercato i primi microbolometri all'ossido di vanadio (VOx) 320×240 px a temperatura ambiente e la tecnologia alternativa BST (Barium Strontium Titanate). NETD scende a 50 mK, prezzo crolla. Nascita del mercato termografia industriale di massa.</p>
+      <div class="src">Wood R.A. SPIE Proc. (1993); Kruse P.W. "Uncooled Thermal Imaging Arrays" SPIE (2001)</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">2000</span><span class="au">UNI / CEN</span>
+      <h4>Norma UNI EN 13187:2000</h4>
+      <p>"Prestazione termica degli edifici, Rilevamento qualitativo delle irregolarità termiche negli involucri edilizi, Metodo all'infrarosso". Primo standard europeo che codifica la termografia in edilizia.</p>
+      <div class="src">UNI EN 13187:2000, ratifica italiana della EN ISO 6781</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">2010</span><span class="au">Industria smartphone</span>
+      <h4>Termocamere per telefono</h4>
+      <p>Termocamere ad accessorio smartphone abbattono il prezzo. Diffusione tra tecnici, periti, ispettori. Risoluzione tipica 80×60 ÷ 320×240.</p>
+      <div class="src">Presentazione della prima generazione, 2014</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">2015</span><span class="au">ISO TC 163</span>
+      <h4>UNI EN ISO 6781-3:2015</h4>
+      <p>Aggiornamento: "Prestazione termica degli edifici, Rilevamento qualitativo delle irregolarità termiche negli involucri edilizi, Parte 3: Qualifiche degli operatori, attrezzature e relazioni". Riferimento attuale per le relazioni tecniche.</p>
+      <div class="src">UNI EN ISO 6781-3:2015</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">2020</span><span class="au">Risoluzioni alte + droni</span>
+      <h4>Termocamere ad alta risoluzione e UAV</h4>
+      <p>Sensori 640×512 px con NETD &lt; 30 mK accessibili a privati e professionisti. Diffusione di droni con payload IR per ispezione coperture, impianti fotovoltaici, infrastrutture.</p>
+      <div class="src">Schede tecniche dei produttori di termocamere per droni</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">2022</span><span class="au">UNI 11867:2022</span>
+      <h4>Norma italiana professionisti PND termografia</h4>
+      <p>UNI 11867:2022 "Prove non distruttive: termografia per professionisti, Qualifiche operatori e linee guida". Standard italiano specifico per qualifica termografi in edilizia. Integra UNI EN ISO 9712:2022 (livelli 1/2/3) con riferimenti specifici al settore costruzioni.</p>
+      <div class="src">UNI Ente Italiano di Normazione · CICPND/RINA certificazione</div>
+    </article>
+
+    <article class="event">
+      <span class="yr">2024</span><span class="au">AI Thermal Imaging</span>
+      <h4>Classificazione automatica difetti con deep learning</h4>
+      <p>Modelli CNN (Convolutional Neural Networks) addestrati su database termogrammi etichettati classificano automaticamente: ponti termici · infiltrazioni d'acqua · zone con umidità · disconnessioni isolante · difetti fotovoltaici · perdite termiche. Recall &gt;90% su difetti edilizia comune. Non sostituiscono il giudizio del perito ma riducono i tempi di analisi del 60-70%.</p>
+      <div class="src">Vollmer M. &amp; Möllmann K.P. "Infrared Thermal Imaging" Wiley (3rd ed. 2024); FLIR AI white paper 2024; Akhloufi M.A. et al. "Thermal imaging in defect detection" Remote Sensing (2023)</div>
+    </article>
+  </div></section>
+
+  <section class="panel" data-topic="sali"><div class="panel-head"><h2>Sali</h2><span class="cnt">21 tappe verificate</span></div>
+    <div class="timeline">
+      <article class="event">
+        <span class="yr">1805/1806</span><span class="au">Thomas Young (1805); Pierre-Simon Laplace (1806)</span>
+        <h4>Equazione di Young-Laplace, la pressione capillare</h4>
+        <p>Young e Laplace formalizzano la pressione esercitata da un menisco curvo in un capillare (Δp = 2σ·cosθ/r). È la base fisica per capire perche l'acqua, e con essa i sali disciolti, risale e si distribuisce nei pori fini dei materiali da costruzione. Il raggio del poro governa sia la risalita capillare sia, come si vedra molto dopo, la sovrasaturazione raggiungibile dalla soluzione salina.</p>
+        <div class="src">T. Young, Phil. Trans. R. Soc. (1805); P.S. Laplace, Mecanique Celeste, Suppl. al Libro X (1806)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1908</span><span class="au">Harold Hartley, B.M. Jones, G.A. Hutchinson</span>
+        <h4>La cristallizzazione spontanea delle soluzioni di solfato di sodio</h4>
+        <p>Hartley, Jones e Hutchinson studiano la cristallizzazione spontanea e metastabile delle soluzioni di solfato di sodio, mostrando quanto la sovrasaturazione e le forme idratate metastabili governino la separazione del sale. Resta un riferimento sul sale piu studiato nel degrado: il passaggio fra forma idrata (mirabilite) e anidra (thenardite), con la transizione classica intorno a 32,4 gradi C, e la chiave del suo potere distruttivo, tema poi completato dalla termodinamica moderna (Steiger 2008).</p>
+        <div class="src">H. Hartley, B.M. Jones, G.A. Hutchinson, 'The spontaneous crystallisation of sodium sulphate solutions', J. Chem. Soc. Trans. 93 (1908), 825-833</div>
+      </article>
+      <article class="event">
+        <span class="yr">1938</span><span class="au">Stephen Brunauer, Paul H. Emmett, Edward Teller</span>
+        <h4>Teoria BET dell'adsorbimento, la misura della superficie porosa</h4>
+        <p>Brunauer, Emmett e Teller estendono l'isoterma di adsorbimento al caso multistrato, fornendo il metodo standard per misurare superficie specifica e tessitura porosa dei materiali. Per il tema sali questo strumento e essenziale: la distribuzione dei pori controlla dove i cristalli nucleano e quanta pressione di cristallizzazione possono generare. La porosita fine, non quella grossolana, e quella pericolosa.</p>
+        <div class="src">Brunauer, Emmett, Teller, J. Am. Chem. Soc. 60 (1938), 309-319</div>
+      </article>
+      <article class="event">
+        <span class="yr">1949</span><span class="au">Carl W. Correns</span>
+        <h4>La pressione di cristallizzazione (legge di Correns)</h4>
+        <p>Correns formula la relazione che lega la pressione esercitata da un cristallo in crescita confinato al grado di sovrasaturazione della soluzione (la cosiddetta legge di Correns). È il fondamento meccanicistico di tutta la teoria del danno da sali: il cristallo non spinge per il suo volume, ma perche cresce contro la parete del poro alimentato da una soluzione sovrasatura, mantenendo un sottile film di liquido tra cristallo e parete.</p>
+        <div class="src">C.W. Correns, Discussions of the Faraday Society 5 (1949), 267-271</div>
+      </article>
+      <article class="event">
+        <span class="yr">1961</span><span class="au">Douglas H. Everett</span>
+        <h4>Termodinamica del danno da gelo nei solidi porosi</h4>
+        <p>Everett applica la termodinamica delle interfacce al danno da gelo, mostrando come la differenza di curvatura tra ghiaccio nei pori grandi e nei pori piccoli generi una pressione. Pur trattando il gelo, il suo modello e formalmente analogo a quello della cristallizzazione dei sali e viene poi esteso da Scherer e altri al danno salino. Stabilisce il principio che il danno nasce dal trasferimento di materia da pori piccoli a pori grandi.</p>
+        <div class="src">D.H. Everett, Transactions of the Faraday Society 57 (1961), 1541-1551</div>
+      </article>
+      <article class="event">
+        <span class="yr">1977</span><span class="au">Lewis Greenspan (National Bureau of Standards, USA)</span>
+        <h4>Umidita relativa di equilibrio delle soluzioni saline sature (deliquescenza)</h4>
+        <p>Greenspan compila e valuta criticamente i valori di umidita relativa in equilibrio con 28 soluzioni saline sature in funzione della temperatura. Per il degrado da sali questa tabella e il riferimento per la deliquescenza: ogni sale ha una UR critica sopra la quale assorbe acqua e si scioglie, sotto la quale cristallizza. I cicli attorno a questa soglia (igroscopicita) sono il motore del danno indipendente dalla fonte liquida.</p>
+        <div class="src">L. Greenspan, Journal of Research of the National Bureau of Standards A 81A (1977), 89-96</div>
+      </article>
+      <article class="event">
+        <span class="yr">1982</span><span class="au">Andreas Arnold</span>
+        <h4>Risalita capillare e minerali salini</h4>
+        <p>Arnold collega la risalita capillare alla distribuzione e cristallizzazione dei sali nelle murature, descrivendo la zonazione delle efflorescenze e subflorescenze in funzione della solubilita e dell'umidita. Introduce nel campo del restauro la lettura mineralogica del degrado salino e l'idea che i sali piu solubili migrino piu in alto. Lavoro fondativo per la diagnostica dei sali nelle murature umide.</p>
+        <div class="src">A. Arnold, in Proc. 4th Int. Congress on the Deterioration and Preservation of Stone Objects, Louisville (1982), 11-28</div>
+      </article>
+      <article class="event">
+        <span class="yr">1989 (atti 1990)</span><span class="au">Andreas Arnold, Konrad Zehnder</span>
+        <h4>Il degrado salino sui monumenti, la sintesi diagnostica</h4>
+        <p>Arnold e Zehnder offrono una rassegna sistematica delle forme di alterazione da sali sui monumenti, mettendo in relazione i minerali salini, la loro posizione (efflorescenze esterne o subflorescenze sotto la superficie) e i regimi di umidita. È diventato il quadro di riferimento per interpretare i sali in opera, distinguendo i danni estetici da quelli strutturali. Il modulo Mixando cita questa sintesi tra i suoi riferimenti.</p>
+        <div class="src">A. Arnold, K. Zehnder, in The Conservation of Monuments in the Mediterranean Basin (a cura di F. Zezza), Grafo, Brescia (1990), 31-58</div>
+      </article>
+      <article class="event">
+        <span class="yr">1999</span><span class="au">Carlos Rodriguez-Navarro, Eric Doehne</span>
+        <h4>Velocita di evaporazione, sovrasaturazione e pattern di cristallizzazione</h4>
+        <p>Con esperimenti micro e macroscopici, gli autori dimostrano che il danno dipende dal rapporto di sovrasaturazione e dal luogo in cui il sale cristallizza, non dal semplice volume del sale. Mostrano che una bassa UR accelera l'evaporazione, alza la sovrasaturazione e sposta la cristallizzazione sotto la superficie (subflorescenza dannosa), mentre un'evaporazione lenta produce efflorescenze innocue in superficie. Lavoro che ribalta interpretazioni precedenti.</p>
+        <div class="src">C. Rodriguez-Navarro, E. Doehne, Earth Surface Processes and Landforms 24 (1999), 191-209</div>
+      </article>
+      <article class="event">
+        <span class="yr">1999</span><span class="au">George W. Scherer</span>
+        <h4>Cristallizzazione nei pori, la teoria moderna della sovrasaturazione</h4>
+        <p>Scherer riformula in chiave termodinamica e cinetica la pressione di cristallizzazione nei pori, trattando risalita ed evaporazione, cicli di bagnatura-asciugatura e idratazione. Stabilisce che il danno richiede sovrasaturazione e che i cristalli nei pori piccoli, alimentati dai grandi, generano lo stress maggiore. Diventa la base della teoria oggi piu accettata del danno da sali, poi estesa da Flatt, Steiger e Coussy.</p>
+        <div class="src">G.W. Scherer, Cement and Concrete Research 29 (1999), 1347-1358</div>
+      </article>
+      <article class="event">
+        <span class="yr">2000</span><span class="au">Clifford A. Price (curatore), progetto EU ECOS</span>
+        <h4>Modello chimico ECOS/RUNSALT per prevenire il danno da sali</h4>
+        <p>Il rapporto finale del progetto europeo presenta ECOS, un modello termodinamico che predice quali fasi saline cristallizzano e a quali umidita relativa e temperatura, in miscele di sali reali. Tradotto poi nell'interfaccia RUNSALT, diventa lo strumento pratico per definire le condizioni climatiche di conservazione che evitano i cicli di dissoluzione-cristallizzazione. Sposta la diagnosi dal singolo sale alle miscele effettivamente presenti.</p>
+        <div class="src">C.A. Price (ed.), An Expert Chemical Model for Determining the Environmental Conditions Needed to Prevent Salt Damage in Porous Materials, Research Report 11, Archetype, London (2000)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2002</span><span class="au">Robert J. Flatt</span>
+        <h4>Come si generano le alte sovrasaturazioni</h4>
+        <p>Flatt sviluppa la teoria includendo la termodinamica delle soluzioni reali di Na2SO4 e NaCl, e quantifica gli sforzi. Mostra che la dissoluzione della thenardite anidra puo generare, rispetto al decaidrato mirabilite, sovrasaturazioni capaci di produrre sforzi di trazione dell'ordine di 10-20 MPa, ben oltre la resistenza di quasi tutte le pietre. Spiega su base fisica perche il solfato di sodio sia cosi distruttivo.</p>
+        <div class="src">R.J. Flatt, Journal of Crystal Growth 242 (2002), 435-454</div>
+      </article>
+      <article class="event">
+        <span class="yr">2005</span><span class="au">Michael Steiger</span>
+        <h4>Crescita dei cristalli nei pori, equazione della pressione di cristallizzazione</h4>
+        <p>In due lavori complementari Steiger deriva rigorosamente la pressione di cristallizzazione dai potenziali chimici delle facce caricate e scariche di un cristallo in crescita, mostrando l'influenza della dimensione del cristallo e quindi del raggio dei pori. Conferma che la cristallizzazione della mirabilite da soluzioni fortemente sovrasature e la causa principale del danno da solfato di sodio. Generalizza e mette su basi solide la legge di Correns.</p>
+        <div class="src">M. Steiger, Journal of Crystal Growth 282 (2005), Parte I 455-469 e Parte II 470-481</div>
+      </article>
+      <article class="event">
+        <span class="yr">2006</span><span class="au">Olivier Coussy</span>
+        <h4>Poromeccanica del danno da cristallizzazione in asciugatura</h4>
+        <p>Coussy inquadra la cristallizzazione dei sali indotta dall'asciugatura nella meccanica dei mezzi porosi, accoppiando deformazione, sforzo e chimica fisica del confinamento. Fornisce le equazioni costitutive che legano la pressione di cristallizzazione alla saturazione dei pori e alle proprieta del materiale. Completa il quadro teorico permettendo di calcolare deformazioni e tensioni effettive in un materiale reale soggetto a essiccamento.</p>
+        <div class="src">O. Coussy, Journal of the Mechanics and Physics of Solids 54 (2006), 1517-1547</div>
+      </article>
+      <article class="event">
+        <span class="yr">2006</span><span class="au">UNI (Ente Italiano di Normazione)</span>
+        <h4>UNI 11182:2006, lessico delle forme di alterazione lapidea</h4>
+        <p>La norma definisce e standardizza i termini per descrivere a occhio nudo le forme di alterazione e degrado dei materiali lapidei naturali e artificiali, incluse efflorescenze, subefflorescenze, croste e disgregazioni legate ai sali. Sostituisce la precedente NorMaL 1/88. È lo strumento per nominare in modo univoco, in perizia e in relazione di restauro, i fenomeni osservati, condizione preliminare a ogni diagnosi.</p>
+        <div class="src">UNI 11182:2006, Beni culturali, Materiali lapidei naturali ed artificiali, Descrizione della forma di alterazione, Termini e definizioni</div>
+      </article>
+      <article class="event">
+        <span class="yr">2008</span><span class="au">Michael Steiger, Sonke Asmussen</span>
+        <h4>Diagramma di fase Na2SO4-H2O aggiornato e generazione dello stress</h4>
+        <p>Steiger e Asmussen ricostruiscono il diagramma di fase del solfato di sodio rivedendo i dati termodinamici, includendo non solo le fasi stabili thenardite e mirabilite ma anche le metastabili Na2SO4(III) e l'eptaidrato Na2SO4·7H2O. Con esperimenti dilatometrici legano queste transizioni alla generazione di sforzo nei pori. È l'aggiornamento moderno del diagramma del 1908, indispensabile per interpretare i test di cristallizzazione.</p>
+        <div class="src">M. Steiger, S. Asmussen, Geochimica et Cosmochimica Acta 72 (2008), 4291-4306</div>
+      </article>
+      <article class="event">
+        <span class="yr">2010</span><span class="au">Leo Pel, Alison Sawdy, Victoria Voronina</span>
+        <h4>Principi fisici ed efficienza dell'estrazione dei sali con impacchi</h4>
+        <p>Gli autori analizzano con la risonanza magnetica il trasporto dell'acqua e dei sali durante la desalinizzazione a impacco (poultice), chiarendo quando il sale si concentra nell'impacco (estrazione efficace) e quando invece resta nel muro (avanzamento). Mostrano che il regime di asciugatura e il rapporto tra le proprieta capillari di muro e impacco determinano il successo. È la base fisica delle tecniche di desalinizzazione a impacchi.</p>
+        <div class="src">L. Pel, A. Sawdy, V. Voronina, Journal of Cultural Heritage 11 (2010), 59-67</div>
+      </article>
+      <article class="event">
+        <span class="yr">1999 (rev. 2020)</span><span class="au">CEN (Comitato Europeo di Normazione), recepita UNI</span>
+        <h4>EN 12370, prova di resistenza alla cristallizzazione dei sali</h4>
+        <p>La norma definisce il test accelerato per valutare la resistenza delle pietre con porosita aperta superiore al 5 per cento al danno da cristallizzazione: cicli di immersione in soluzione di solfato di sodio al 14 per cento, asciugatura in stufa e raffreddamento, ripetuti 15 volte, con misura della perdita di massa. È il riferimento normativo per qualificare un materiale, pur con i limiti noti dell'uso di una soluzione molto concentrata.</p>
+        <div class="src">EN 12370:1999, recepita come UNI EN 12370; edizione corrente BS/UNI EN 12370:2020</div>
+      </article>
+      <article class="event">
+        <span class="yr">2014</span><span class="au">Robert J. Flatt, Francesco Caruso, A. Maria Aguilar Sanchez, George W. Scherer</span>
+        <h4>Chemo-meccanica del danno da sali nella pietra, il criterio di rottura</h4>
+        <p>Gli autori conducono un esperimento in cui pressione di cristallizzazione e saturazione dei pori sono variate in modo controllato, e dimostrano che un criterio di rottura basato sull'energia di deformazione permette di prevedere quando il danno si verifica. Unisce in un quadro predittivo la termodinamica della cristallizzazione e la meccanica della frattura, chiudendo idealmente il percorso aperto da Correns. Risultato di riferimento per la previsione del danno.</p>
+        <div class="src">R.J. Flatt, F. Caruso, A.M. Aguilar Sanchez, G.W. Scherer, Nature Communications 5 (2014), 4823</div>
+      </article>
+      <article class="event">
+        <span class="yr">2018</span><span class="au">RILEM TC 271-ASC (B. Lubelli, R.P.J. van Hees et al.)</span>
+        <h4>Nuovo test accelerato di cristallizzazione RILEM</h4>
+        <p>Il comitato tecnico RILEM propone un protocollo di laboratorio piu realistico della EN 12370, articolato in una fase di accumulo dei sali per evaporazione e una fase di propagazione del danno con cicli di UR. L'obiettivo e riprodurre il meccanismo reale (subflorescenza vicino alla superficie) invece dell'immersione in soluzione concentrata. Validato con prove interlaboratorio (round robin), rappresenta lo stato dell'arte dei test sui sali.</p>
+        <p class="nb"><strong>Da confermare:</strong> Anno della raccomandazione consolidata indicato come 2018 nella letteratura del TC; la validazione round robin e successiva. Da confermare la data esatta di pubblicazione formale della raccomandazione.</p>
+        <div class="src">Recommendation of RILEM TC 271-ASC, Materials and Structures (validazione round robin pubblicata 2020-2023)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2021</span><span class="au">Salima Bouzid, Michael Steiger, Noushine Shahidzadeh et al.</span>
+        <h4>UR di deliquescenza nelle miscele di sali e fasi metastabili</h4>
+        <p>Con misure dirette di sorzione di vapore gli autori determinano l'umidita relativa di deliquescenza nelle miscele di sali, includendo il contributo delle fasi metastabili che i modelli di equilibrio trascurano. Mostrano che la cinetica, non solo la termodinamica di equilibrio, controlla le soglie di umidita a cui avvengono i cicli dannosi. Affina la previsione delle condizioni di conservazione rispetto al solo ECOS/RUNSALT.</p>
+        <div class="src">S. Bouzid, M. Steiger, N. Shahidzadeh et al., ACS Omega 6 (2021), Direct Measurements of the Deliquescence Relative Humidity in Salt Mixtures Including the Contribution from Metastable Phases</div>
+      </article>
+    </div></section>
+
+  <section class="panel" data-topic="risalita"><div class="panel-head"><h2>Risalita</h2><span class="cnt">17 tappe verificate</span></div>
+    <div class="timeline">
+      <article class="event">
+        <span class="yr">1718</span><span class="au">James Jurin</span>
+        <h4>Legge di Jurin: l'altezza di salita capillare e inversamente proporzionale al raggio del tubo</h4>
+        <p>Jurin pubblica sulle Philosophical Transactions of the Royal Society (vol. 30, pp. 739-747) gli esperimenti sull'ascesa e sospensione dell'acqua nei tubi capillari, stabilendo che l'altezza raggiunta dal liquido e inversamente proporzionale al diametro del tubo. E il fondamento fisico che spiega perche un muro a pori fini possa assorbire acqua in altezza per capillarita. La relazione era gia stata osservata sperimentalmente da Borelli nel 1670 e Hauksbee aveva descritto il fenomeno nel 1709-1712: l'attribuzione a Jurin riguarda la formulazione e conferma della legge, non la prima osservazione.</p>
+        <div class="src">Jurin J., An account of some experiments shown before the Royal Society; with an enquiry into the cause of the ascent and suspension of water in capillary tubes, Phil. Trans. R. Soc. Lond. 30 (1718), 739-747</div>
+      </article>
+      <article class="event">
+        <span class="yr">1805 / 1806</span><span class="au">Thomas Young (1805), Pierre-Simon Laplace (1806)</span>
+        <h4>Equazione di Young-Laplace: la pressione capillare in un menisco curvo</h4>
+        <p>Young pubblica nel 1805 An Essay on the Cohesion of Fluids (Phil. Trans. R. Soc. Lond. 95, 65-87), un trattamento qualitativo della tensione superficiale e dell'angolo di contatto. Laplace ne da nel 1806 la forma matematica nel supplemento al libro X della Mecanique Celeste. L'equazione Dp = 2s cos(theta)/r quantifica la pressione che spinge l'acqua nei pori sottili e governa l'altezza di equilibrio della risalita.</p>
+        <div class="src">Young T., An Essay on the Cohesion of Fluids, Phil. Trans. R. Soc. Lond. 95 (1805), 65-87; Laplace P.S., Supplement au livre X de la Mecanique Celeste (1806)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1839 / 1840</span><span class="au">Gotthilf H. L. Hagen (1839), Jean L. M. Poiseuille (1840-1846)</span>
+        <h4>Equazione di Hagen-Poiseuille: flusso laminare in tubo cilindrico</h4>
+        <p>Hagen (ingegnere idraulico, 1839) e Poiseuille (fisiologo, 1840-1846) ricavano indipendentemente la legge che lega la portata in un tubo cilindrico al raggio alla quarta potenza, al gradiente di pressione e alla viscosita. E il secondo pilastro fisico della risalita: descrive la velocita con cui l'acqua scorre nei pori-capillari del muro una volta innescata la capillarita. La forte dipendenza dal raggio spiega perche pori molto fini risalgono in alto ma molto lentamente.</p>
+        <div class="src">Hagen G. (1839); Poiseuille J.L.M., Recherches experimentales sur le mouvement des liquides dans les tubes de tres petits diametres (1840-1846)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1918</span><span class="au">Richard Lucas</span>
+        <h4>Legge del tempo dell'ascesa capillare: la penetrazione cresce con la radice del tempo</h4>
+        <p>Lucas pubblica Ueber das Zeitgesetz des kapillaren Aufstiegs von Fluessigkeiten (Kolloid-Zeitschrift 23, 15-22) ricavando per primo che la lunghezza di penetrazione l in un capillare cresce con la radice quadrata del tempo (l proporzionale a t^0,5), dall'equilibrio fra spinta capillare e attrito viscoso. E la base cinetica per capire la velocita di assorbimento dell'acqua nei materiali da costruzione.</p>
+        <div class="src">Lucas R., Ueber das Zeitgesetz des kapillaren Aufstiegs von Fluessigkeiten, Kolloid-Zeitschrift 23 (1918), 15-22</div>
+      </article>
+      <article class="event">
+        <span class="yr">1921</span><span class="au">Edward W. Washburn</span>
+        <h4>Equazione di Washburn: dinamica della penetrazione capillare in un poro</h4>
+        <p>Washburn pubblica The Dynamics of Capillary Flow (Physical Review 17(3), 273-283) formalizzando la cinetica della penetrazione di un liquido in un capillare e nei corpi porosi, ritrovando la dipendenza dalla radice del tempo (l proporzionale alla radice di (s r t cos(theta) / 2 eta)). E il riferimento canonico per il trasporto capillare nei mezzi porosi e per la porosimetria.</p>
+        <div class="src">Washburn E.W., The Dynamics of Capillary Flow, Phys. Rev. 17(3) (1921), 273-283, DOI 10.1103/PhysRev.17.273</div>
+      </article>
+      <article class="event">
+        <span class="yr">1975</span><span class="au">Ministero della Sanita (Italia)</span>
+        <h4>D.M. Sanita 5 luglio 1975: requisiti igienico-sanitari dei locali di abitazione</h4>
+        <p>Il decreto fissa altezza minima (2,70 m, ridotti a 2,40 m per servizi e disimpegni), superfici minime delle stanze, illuminazione e ventilazione naturale, definendo il quadro di salubrita di un'abitazione. E il riferimento regolatorio italiano rispetto al quale l'umidita di risalita diventa difetto rilevante, perche compromette i requisiti di salubrita e abitabilita dei locali.</p>
+        <div class="src">Decreto Ministeriale Sanita 5 luglio 1975, Modificazioni alle istruzioni ministeriali 20 giugno 1896 relativamente all'altezza minima ed ai requisiti igienico-sanitari principali dei locali d'abitazione</div>
+      </article>
+      <article class="event">
+        <span class="yr">1984</span><span class="au">Christopher Hall, William D. Hoff, Mia R. Nixon</span>
+        <h4>Movimento dell'acqua nei materiali porosi: evaporazione e asciugatura</h4>
+        <p>Sesto della serie sul movimento dell'acqua nei materiali da costruzione (Building and Environment 19, 13-20), il lavoro distingue sperimentalmente almeno due fasi di asciugatura nei laterizi e introduce il parametro di desorptivita, esaminando l'effetto di umidita, temperatura e velocita dell'aria. Spiega il versante evaporativo della risalita, che fissa l'altezza di equilibrio: il muro sale finche assorbimento ed evaporazione si bilanciano.</p>
+        <div class="src">Hall C., Hoff W.D., Nixon M.R., Water movement in porous building materials VI. Evaporation and drying in brick and block materials, Building and Environment 19 (1984), 13-20</div>
+      </article>
+      <article class="event">
+        <span class="yr">1996</span><span class="au">WTA (Wissenschaftlich-Technische Arbeitsgemeinschaft fuer Bauwerkserhaltung und Denkmalpflege)</span>
+        <h4>WTA 4-4-96/D: iniezione della muratura contro l'umidita capillare (barriera chimica)</h4>
+        <p>La scheda tecnica WTA codifica la barriera orizzontale chimica realizzata per iniezione, cioe l'inserimento a posteriori di una barriera contro la risalita mediante prodotti idrofobizzanti o otturanti i pori. Definisce principi di azione, condizioni di applicazione, criteri di prova e controllo di qualita. La prima edizione 1996 e stata sostituita dalla 4-4-04/D e, dal 2011, dalla WTA 4-10 sui prodotti certificati.</p>
+        <div class="src">WTA-Merkblatt 4-4-96/D, poi 4-4-04/D Mauerwerksinjektion gegen kapillare Feuchtigkeit</div>
+      </article>
+      <article class="event">
+        <span class="yr">1999</span><span class="au">WTA (Referat 4 Mauerwerk)</span>
+        <h4>WTA 4-5-99/D: valutazione della muratura, diagnostica murale</h4>
+        <p>La scheda definisce un approccio uniforme alla diagnostica della muratura: rilievo dello stato di fatto, mappatura dei danni, indagini su umidita e sali come preparazione alla pianificazione del risanamento. E uno dei riferimenti metodologici per impostare la diagnosi della risalita prima di scegliere l'intervento. Pubblicata nel settembre 1999, revisione editoriale 2015.</p>
+        <div class="src">WTA-Merkblatt 4-5-99/D, Beurteilung von Mauerwerk - Mauerwerksdiagnostik</div>
+      </article>
+      <article class="event">
+        <span class="yr">2002</span><span class="au">Christopher Hall, William D. Hoff</span>
+        <h4>Water Transport in Brick, Stone and Concrete (monografia di riferimento)</h4>
+        <p>Hall e Hoff raccolgono in un testo unico la descrizione del trasporto d'acqua, saturo e insaturo, nei materiali porosi inorganici e nelle strutture: fisica fondamentale, descrizione matematica e misura sperimentale del fenomeno (sorptivita, assorbimento capillare, asciugatura). E il manuale di riferimento internazionale per chi studia la risalita come problema di trasporto in mezzo poroso. Oggi alla terza edizione.</p>
+        <div class="src">Hall C., Hoff W.D., Water Transport in Brick, Stone and Concrete, Spon Press / Routledge (1a ed. 2002)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2003</span><span class="au">UNI (Ente Italiano di Normazione)</span>
+        <h4>UNI 11085:2003: contenuto di acqua con metodo ponderale</h4>
+        <p>La norma definisce il metodo gravimetrico (ponderale) per determinare il contenuto d'acqua in campioni di materiali lapidei naturali e artificiali (malte, intonaci) tra 2 e 50 g: pesatura del campione tal quale, essiccamento a 105 C fino a massa costante, calcolo della differenza. E il metodo di laboratorio di riferimento, il piu accurato, per quantificare l'umidita di un muro e validare la diagnosi di risalita.</p>
+        <div class="src">UNI 11085:2003, Beni culturali - Materiali lapidei naturali ed artificiali - Determinazione del contenuto d'acqua: metodo ponderale</div>
+      </article>
+      <article class="event">
+        <span class="yr">2004</span><span class="au">UNI (Ente Italiano di Normazione)</span>
+        <h4>UNI 11121:2004 (ritirata 2025): contenuto di acqua con metodo al carburo di calcio</h4>
+        <p>La norma codifica la misura rapida in cantiere del contenuto d'acqua: il campione sbriciolato e fatto reagire con carburo di calcio in un contenitore chiuso (CaC2 + 2H2O da C2H2 + Ca(OH)2); la pressione di acetilene sviluppata, letta su un manometro, e proporzionale all'acqua presente. E il metodo igrometrico al carburo, alternativa pratica al ponderale per la diagnosi in opera.</p>
+        <div class="src">UNI 11121:2004 (ritirata 2025), Beni culturali - Materiali lapidei naturali ed artificiali - Determinazione in opera del contenuto d'acqua: metodo al carburo di calcio</div>
+      </article>
+      <article class="event">
+        <span class="yr">2005</span><span class="au">BSI (British Standards Institution)</span>
+        <h4>BS 6576:2005: diagnosi della risalita e posa di barriere chimiche</h4>
+        <p>Codice di buona pratica britannico per la diagnosi della risalita nei muri degli edifici esistenti e l'installazione di barriere chimiche (chemical damp-proof course). Raccomanda procedure per distinguere la risalita dalle altre cause di umidita e indica precauzioni e modi di esecuzione del trattamento chimico per murature piene, a cassa vuota e a sacco. Aggiornato con l'emendamento A1 nel 2012.</p>
+        <div class="src">BS 6576:2005+A1:2012, Code of practice for diagnosis of rising damp in walls of buildings and installation of chemical damp-proof courses</div>
+      </article>
+      <article class="event">
+        <span class="yr">2007</span><span class="au">BRE - Peter Trotman (autore)</span>
+        <h4>BRE Digest 245 (revisione 2007): risalita nei muri, diagnosi e trattamento</h4>
+        <p>Il Digest del Building Research Establishment espone le cause dell'umidita nei muri e un metodo positivo per diagnosticare la risalita, attribuita alla capillarita che richiama umidita attraverso gli elementi porosi. L'Appendice A descrive il prelievo di campioni per carotaggio in serie verticale e l'interpretazione dei profili di umidita igroscopica e capillare. Indica i rimedi: barriera fisica o iniezione chimica e ripristino degli intonaci danneggiati.</p>
+        <div class="src">BRE Digest 245 (revised 2007), Rising damp in walls: diagnosis and treatment, autore Peter Trotman, Building Research Establishment</div>
+      </article>
+      <article class="event">
+        <span class="yr">2007</span><span class="au">M. I. M. Torres, Vasco Peixoto de Freitas</span>
+        <h4>Trattamento della risalita per ventilazione alla base del muro</h4>
+        <p>Pubblicato su Building and Environment, lo studio del laboratorio di fisica edile dell'Universita di Porto caratterizza la ventilazione alla base del muro come trattamento della risalita negli edifici storici, dove barriere e iniezioni risultano spesso inefficaci su murature spesse ed eterogenee. Un sistema (naturale o meccanico, igro-regolato) abbassa l'umidita aumentando l'evaporazione alla base, spostando verso il basso il fronte di umidita.</p>
+        <div class="src">Torres M.I.M., de Freitas V.P., Treatment of rising damp in historical buildings: wall base ventilation, Building and Environment 42 (2007), 424-435</div>
+      </article>
+      <article class="event">
+        <span class="yr">2017</span><span class="au">CEN / UNI (recepimento EN 16682)</span>
+        <h4>UNI EN 16682:2017: misura del contenuto di umidita nei materiali porosi inorganici</h4>
+        <p>Norma europea (TC 346, conservazione dei beni culturali) che guida nella scelta e nell'uso del metodo piu adatto per misurare l'umidita in murature e materiali porosi inorganici (laterizio, pietra, calcestruzzo, gesso, malte). Descrive quattro metodi assoluti (gravimetrico, Karl Fischer, distillazione azeotropica, carburo di calcio) e metodi relativi (resistenza, capacita, umidita relativa di equilibrio), con vantaggi, limiti e incertezze. E il quadro metodologico aggiornato per la diagnosi quantitativa della risalita.</p>
+        <div class="src">UNI EN 16682:2017, Conservazione dei beni culturali - Metodi di misurazione del contenuto di umidita, o del contenuto di acqua, nei materiali costituenti i beni culturali immobili</div>
+      </article>
+      <article class="event">
+        <span class="yr">2020</span><span class="au">WTA (Referat 2)</span>
+        <h4>WTA 2-9: sistemi di intonaco di risanamento (Sanierputz)</h4>
+        <p>La scheda definisce i requisiti dei sistemi di intonaco di risanamento, ampiamente porosi e idrofobizzati, che gestiscono umidita e sali sul muro umido: l'intonaco assorbe l'umidita e la restituisce come vapore, immagazzinando i sali cristallizzati nella propria massa con il fronte di evaporazione spostato all'interno, cosi da evitare efflorescenze e distacchi in superficie. E il metodo di accompagnamento standard dopo o in alternativa alle barriere, con durata stimata oltre 20 anni. Edizione 2020 (precedenti 2-2-91, 2-9-04).</p>
+        <div class="src">WTA-Merkblatt 2-9 (ed. 03.2020/D), Sanierputzsysteme / Renovation mortar systems; collegato a EN 998-1 (malte tipo R)</div>
+      </article>
+    </div></section>
+
+  <section class="panel" data-topic="condensa"><div class="panel-head"><h2>Condensa / Glaser</h2><span class="cnt">12 tappe (1 da confermare)</span></div>
+    <div class="timeline">
+      <article class="event">
+        <span class="yr">1855</span><span class="au">Adolf Eugen Fick</span>
+        <h4>Legge della diffusione (legge di Fick)</h4>
+        <p>Il medico e fisiologo tedesco Adolf Eugen Fick formula nel 1855 le leggi quantitative della diffusione, sulla scia degli esperimenti di Thomas Graham. La prima legge stabilisce che il flusso diffusivo e proporzionale al gradiente di concentrazione. Questa relazione, analoga alle leggi di Fourier (calore), Ohm (carica) e Darcy (flusso idraulico), diventera il fondamento fisico del trasporto del vapore acqueo attraverso i materiali da costruzione.</p>
+        <div class="src">Wikipedia, Fick's laws of diffusion / Adolf Eugen Fick (en.wikipedia.org)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1923</span><span class="au">Richard Mollier</span>
+        <h4>Diagramma h-x dell'aria umida (diagramma di Mollier)</h4>
+        <p>Il professore tedesco Richard Mollier, pioniere della termodinamica di acqua, vapore e aria umida, presenta nel 1923 il diagramma entalpia-umidita (h-x) per l'aria umida. Permette di rappresentare e calcolare riscaldamento, raffreddamento, umidificazione e deumidificazione, e fornisce lo strumento grafico di base per leggere temperatura di rugiada, umidita relativa e pressione di vapore. In ambito anglosassone l'equivalente e la carta psicrometrica.</p>
+        <div class="src">Wikipedia, Richard Mollier; Condair/Swegon technical guides</div>
+      </article>
+      <article class="event">
+        <span class="yr">1937-1939</span><span class="au">Frank B. Rowley (con L. V. Teesdale, T. S. Rogers, F. L. Browne)</span>
+        <h4>Analisi del punto di rugiada e nascita della barriera al vapore (USA)</h4>
+        <p>Tra la fine degli anni Venti e gli anni Trenta, Frank Rowley, professore di ingegneria meccanica all'Universita del Minnesota, studia la diffusione del vapore attraverso le pareti costruendo una casa in scala reale dentro una camera climatica refrigerata. La sua analisi del rischio di condensa (Condensation Risk Analysis, attorno al 1938) e la memoria A Theory Covering the Transfer of Vapor Through Materials (ASHVE Transactions 45:545, 1939) introducono il concetto di barriera al vapore. E il primo apparato sistematico di verifica della condensa interstiziale basato sul confronto fra temperatura e punto di rugiada negli strati.</p>
+        <p class="nb"><strong>Da confermare:</strong> La pubblicazione ASHVE 1939 e ben documentata; la data 1938 per la Condensation Risk Analysis e riportata da fonti secondarie autorevoli ma non da fonte primaria diretta. Le ricerche erano finanziate da produttori di isolanti...</p>
+        <div class="src">GreenBuildingAdvisor; buildingscience.com (J. Straube); Energy Vanguard</div>
+      </article>
+      <article class="event">
+        <span class="yr">1956</span><span class="au">Otto Krischer</span>
+        <h4>Fondamenti scientifici della tecnica di essiccazione (trasporto di umidita)</h4>
+        <p>Otto Krischer pubblica per Springer Die wissenschaftlichen Grundlagen der Trocknungstechnik (Fondamenti scientifici della tecnica di essiccazione), opera in piu volumi (1956-1959) che sistematizza il trasporto accoppiato di calore e umidita nei materiali porosi: moto capillare dell'acqua liquida, diffusione del vapore e conducibilita termica del materiale umido. Le sue ricerche, avviate gia negli anni Trenta (Z. VDI 1938), forniscono la base fisica del moto dell'umidita poi ripresa dalla fisica edilizia e dai modelli transitori.</p>
+        <div class="src">SpringerLink; Google Books; cataloghi Springer (ISBN 978-3-662-13236-4)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1958</span><span class="au">Helmuth Glaser</span>
+        <h4>Metodo grafico di Glaser per la condensa interstiziale</h4>
+        <p>Helmuth Glaser pubblica nella rivista Kaltetechnik (vol. 10, fasc. 11, pp. 358-364, parte 1; fasc. 12, pp. 386-390, parte 2) il lavoro Vereinfachte Berechnung der Dampfdiffusion durch geschichtete Wande bei Ausscheidung von Wasser und Eis (Calcolo semplificato della diffusione del vapore attraverso pareti stratificate con formazione di acqua e ghiaccio). Il metodo, sviluppato per le pareti delle celle frigorifere, assume regime stazionario e diffusione secondo Fick, e confronta graficamente la pressione parziale del vapore con la pressione di saturazione per individuare dove e quanta condensa si forma.</p>
+        <div class="src">Wikipedia tedesca, Glaser-Verfahren e Helmuth Glaser; archivio Kaltetechnik 1958 (vhkk.org)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1952</span><span class="au">DIN (Deutsches Institut fur Normung)</span>
+        <h4>DIN 4108, prima norma tedesca di protezione termica in edilizia</h4>
+        <p>La DIN 4108 Warmeschutz im Hochbau viene pubblicata per la prima volta nel 1952, fissando requisiti minimi di resistenza termica degli elementi costruttivi con finalita di salubrita (evitare le muffe) e protezione dell'edificio, piu che di risparmio energetico. Revisionata nel 1960 e nel 1969, e poi nelle parti successive, la sua parte 3 (DIN 4108-3) codifichera in seguito il metodo di Glaser come procedura normata di verifica della diffusione del vapore e della condensa.</p>
+        <div class="src">DIN Media (din.de); BauNetz Wissen; Wikipedia tedesca Glaser-Verfahren</div>
+      </article>
+      <article class="event">
+        <span class="yr">1994-1995</span><span class="au">Hartwig M. Kunzel (Fraunhofer-Institut fur Bauphysik, IBP)</span>
+        <h4>Simulazione igrotermica transitoria, modello WUFI</h4>
+        <p>Nella sua tesi di dottorato (1994, pubblicata da Fraunhofer IRB Verlag nel 1995, ISBN 3-8167-4103-7) Hartwig Kunzel sviluppa al Fraunhofer IBP il modello WUFI (Warme und Feuchte instationar, calore e umidita in regime non stazionario). Supera i limiti del metodo di Glaser calcolando il trasporto accoppiato e transitorio di calore e umidita (vapore piu acqua liquida capillare) nelle pareti multistrato esposte al clima reale, con materiali a proprieta variabili.</p>
+        <div class="src">WUFI.de (tesi Kunzel 1994/1995); Fraunhofer IBP; profili Kunzel (ResearchGate, prefabAUS)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2001</span><span class="au">ISO / CEN (recepimento UNI EN ISO 13788)</span>
+        <h4>UNI EN ISO 13788:2001, metodo di Glaser e fattore fRsi normati</h4>
+        <p>La prima edizione della ISO 13788 (2001-07, recepita come EN ISO 13788 e UNI EN ISO 13788) unifica a livello internazionale due verifiche: la temperatura superficiale interna minima per evitare umidita critica e muffa, espressa tramite il fattore di temperatura fRsi confrontato con un fRsi,min, e la verifica della condensa interstiziale per diffusione del vapore con il metodo di Glaser. Per la muffa il riferimento di soglia adottato e tipicamente l'80 percento di umidita relativa superficiale.</p>
+        <div class="src">ISO.org (ISO 13788:2001, Edition 1, 2001-07); iso-chemie; Physibel knowledge base</div>
+      </article>
+      <article class="event">
+        <span class="yr">2001</span><span class="au">Klaus Sedlbauer (Fraunhofer IBP, Universita di Stoccarda)</span>
+        <h4>Modello bioigrotermico e soglia muffa LIM (isopleti)</h4>
+        <p>Nella tesi di dottorato del 2001 all'Universita di Stoccarda (Fraunhofer IBP), Klaus Sedlbauer introduce il modello bioigrotermico per la previsione della crescita di muffa in regime transitorio. Definisce i sistemi di isopleti (curve a parita di germinazione o crescita in funzione di temperatura e umidita relativa) e la curva LIM (Lowest Isopleth for Mould), limite inferiore sotto il quale ogni attivita fungina cessa, distinta per germinazione delle spore e per crescita del micelio e dipendente dal substrato.</p>
+        <div class="src">Fraunhofer IBP (dissertazione Sedlbauer); Sedlbauer 2002 (Indoor and Built Environment, SAGE); WUFI.de</div>
+      </article>
+      <article class="event">
+        <span class="yr">2007</span><span class="au">CEN (EN 15026, recepita UNI EN 15026)</span>
+        <h4>EN 15026:2007, norma sulla simulazione numerica del trasporto di umidita</h4>
+        <p>La EN 15026:2007 Hygrothermal performance of building components and building elements, assessment of moisture transfer by numerical simulation fissa i criteri minimi per i software che calcolano il trasporto transitorio monodimensionale accoppiato di calore e umidita negli elementi multistrato. Definisce un esempio di riferimento (benchmark) per la validazione degli strumenti di calcolo, sancendo a livello normativo il passaggio dalla verifica stazionaria di Glaser alla simulazione igrotermica transitoria del tipo WUFI.</p>
+        <div class="src">WUFI.de (validation); BS EN 15026:2007; A. Proctor Group</div>
+      </article>
+      <article class="event">
+        <span class="yr">2012</span><span class="au">ISO / CEN (UNI EN ISO 13788, seconda edizione)</span>
+        <h4>UNI EN ISO 13788:2012, revisione della norma su condensa e muffa</h4>
+        <p>La seconda edizione della ISO 13788 (Edition 2, dicembre 2012, recepita come EN ISO 13788:2012) aggiorna i metodi di calcolo della temperatura superficiale interna per evitare umidita superficiale critica e muffa e della condensa interstiziale per diffusione del vapore. Resta una verifica semplificata in regime stazionario, complementare alle simulazioni transitorie della EN 15026. La norma e stata confermata in revisione nel 2023.</p>
+        <div class="src">ISO.org (ISO 13788:2012, Edition 2); evs.ee; NBS (BS EN ISO 13788:2012)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1958-oggi</span><span class="au">Helmuth Glaser e successori (DIN 4108-3, EN ISO 13788)</span>
+        <h4>Eredita del metodo di Glaser nelle norme attuali</h4>
+        <p>Il metodo grafico di Glaser, nato nel 1958 per le celle frigorifere, e tuttora il cuore della verifica stazionaria della condensa interstiziale codificata in DIN 4108-3 e in EN ISO 13788. Ne sono noti i limiti, regime stazionario, proprieta dei materiali costanti, sola diffusione del vapore senza moto capillare ne accumulo, motivo per cui le norme moderne lo affiancano alle simulazioni transitorie (EN 15026, modelli tipo WUFI) e ai modelli di muffa (fRsi, isopleti di Sedlbauer).</p>
+        <div class="src">Wikipedia tedesca Glaser-Verfahren; htflux.com; A. Proctor Group; ISO 13788</div>
+      </article>
+    </div></section>
+
+  <section class="panel" data-topic="muffe"><div class="panel-head"><h2>Muffe / Biodeteriogeni</h2><span class="cnt">13 tappe verificate</span></div>
+    <div class="timeline">
+      <article class="event">
+        <span class="yr">1953</span><span class="au">S. S. Block</span>
+        <h4>Requisiti di umidita per la crescita delle muffe sui materiali</h4>
+        <p>Block pubblica su Applied Microbiology uno dei primi studi sistematici che lega la crescita fungina sui materiali alla sola umidita relativa dell'aria, indipendentemente dal contenuto d'acqua del substrato. Individua soglie indicative di umidita relativa (intorno al 70-80 per cento) sotto cui la crescita non si avvia. E un riferimento fondativo per la fisica edile applicata alle muffe.</p>
+        <div class="src">Block S.S. (1953), Humidity Requirements for Mold Growth, Applied Microbiology, vol.1(6), pp.287-293 (journals.asm.org/doi/10.1128/am.1.6.287-293.1953)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1957</span><span class="au">W. J. Scott</span>
+        <h4>Il concetto di attivita dell'acqua (aw) per la crescita microbica</h4>
+        <p>Scott introduce in microbiologia degli alimenti l'attivita dell'acqua (aw) come parametro che governa la disponibilita d'acqua per i microrganismi, distinguendola dal semplice contenuto d'acqua. Dimostra che ogni microrganismo ha un valore minimo di aw sotto cui non cresce. Questo principio diventera la base fisica per descrivere la crescita delle muffe anche sui materiali edili.</p>
+        <div class="src">Scott W.J. (1957), Water relations of food spoilage microorganisms, Advances in Food Research; sintesi storica su Food Safety Magazine e AQUALAB (aqualab.com/learn/how-water-activity-controls-microbial-growth)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1969</span><span class="au">G. Ayerst</span>
+        <h4>Curve di crescita e germinazione in funzione di umidita e temperatura</h4>
+        <p>Ayerst misura per numerose specie di Aspergillus, Penicillium e Stachybotrys i tempi di germinazione e le velocita di crescita lungo tutto il campo di attivita dell'acqua e di temperatura che le permette. Mostra differenze marcate tra specie negli optimum e nei limiti, gettando le basi sperimentali degli isopleti di crescita (linee che uniscono le combinazioni aw-temperatura a pari risposta). I dati sono ancora citati nei modelli moderni.</p>
+        <div class="src">Ayerst G. (1969), The effects of moisture and temperature on growth and spore germination in some fungi, Journal of Stored Products Research, vol.5, pp.127-141 (sciencedirect.com/science/article/abs/pii/0022474X69900551)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1989</span><span class="au">C. Grant, C. A. Hunter, B. Flannigan, A. F. Bravery</span>
+        <h4>Le tre famiglie di muffe per esigenza d'acqua: xerofili, intermedi/mesofili, idrofili</h4>
+        <p>Il gruppo (Building Research Establishment e collaboratori) studia i requisiti di attivita dell'acqua di 19 specie di muffe isolate da abitazioni umide del Regno Unito. Suddivide i funghi in gruppi per esigenza idrica: idrofili con aw minima intorno a 0,90, mesofili/moderatamente xerofili intorno a 0,80-0,89, xerofili fino a 0,75-0,79 (e oltre). Questa classificazione e all'origine del concetto di colonizzatori primari, secondari e terziari del costruito.</p>
+        <div class="src">Grant C., Hunter C.A., Flannigan B., Bravery A.F. (1989), The moisture requirements of moulds isolated from domestic dwellings, International Biodeterioration, vol.25, pp.259-284 (sciencedirect.com/science/article/abs/pii/026530368990002X)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1994</span><span class="au">Olaf C. G. Adan</span>
+        <h4>Tesi sul deturpamento fungino delle finiture interne e il tempo di bagnatura (TOW)</h4>
+        <p>Nella tesi di dottorato all'Universita di Eindhoven, Adan modella la crescita vegetativa di Penicillium chrysogenum su cartongesso con curve sigmoidi e introduce il tempo di bagnatura (Time Of Wetness, TOW) come misura complessiva della disponibilita d'acqua in condizioni di umidita fluttuante. Il TOW e definito come rapporto tra periodo umido ciclico (UR maggiore o uguale a 80 per cento) e periodo secco. E un ponte tra dati di laboratorio e condizioni reali transitorie.</p>
+        <div class="src">Adan O.C.G. (1994), On the fungal defacement of interior finishes, PhD Thesis, Technische Universiteit Eindhoven, 224 pp. (research.tue.nl, doi 10.6100/IR427806)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1999</span><span class="au">Antti Hukka e Hannu Viitanen (VTT, Finlandia)</span>
+        <h4>Modello matematico VTT e Mould Index per il legno</h4>
+        <p>Hukka e Viitanen pubblicano su Wood Science and Technology un modello a equazioni differenziali che descrive la crescita delle muffe sul legno tramite un indice di muffa (Mould Index, scala 0-6) in funzione di tempo di esposizione, temperatura, umidita relativa e periodi secchi. Il modello prevede un valore massimo dell'indice dipendente dalle condizioni e definisce un'umidita relativa critica per l'avvio della crescita. E il capostipite della famiglia di modelli VTT.</p>
+        <div class="src">Hukka A., Viitanen H. (1999), A mathematical model of mould growth on wooden material, Wood Science and Technology, vol.33, pp.475-485 (link.springer.com/article/10.1007/s002260050131)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2001</span><span class="au">Klaus Sedlbauer (Fraunhofer IBP)</span>
+        <h4>Modello bioigrotermico e LIM (Lowest Isopleth for Mould)</h4>
+        <p>Nella tesi di dottorato Vorhersage von Schimmelpilzbildung auf und in Bauteilen (Fakulta della Universita di Stoccarda, svolta al Fraunhofer-Institut fuer Bauphysik IBP), Sedlbauer sviluppa il metodo bioigrotermico che segue il comportamento della spora sotto condizioni transitorie di temperatura e umidita superficiale. Introduce gli isopleti di crescita e la LIM, l'isopleta piu bassa per la muffa, cioe la curva di combinazioni aw-temperatura sotto cui non si ha crescita, differenziata per germinazione e per crescita del micelio, e classi di substrato.</p>
+        <div class="src">Sedlbauer K. (2001), Vorhersage von Schimmelpilzbildung auf und in Bauteilen, Dissertation, Universitaet Stuttgart / Fraunhofer IBP (ibp.fraunhofer.de, ks_dissertation; sintesi in Sedlbauer, Krus et al. 2003 su wufi.de)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2001</span><span class="au">ISO / CEN (recepita UNI EN ISO)</span>
+        <h4>EN ISO 13788, prima edizione: criterio dell'umidita superficiale critica per le muffe</h4>
+        <p>La prima edizione della norma (poi recepita in Italia come UNI EN ISO 13788) introduce un metodo semplificato per calcolare la temperatura superficiale interna sotto cui e probabile la crescita di muffa. Fissa il criterio dell'umidita relativa superficiale media mensile critica, da assumere pari a 0,8 (80 per cento) salvo dati piu specifici, come soglia di rischio muffa, oltre alla verifica della condensa interstiziale col metodo di Glaser.</p>
+        <div class="src">ISO 13788:2001, Hygrothermal performance of building components and building elements (iso.org/standard/22203.html); criterio φsi,cr=0,8 descritto in ISO 13788:2012 (iso.org/standard/51615.html)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2006</span><span class="au">UNI (ente italiano di normazione)</span>
+        <h4>UNI 11182: terminologia delle forme di alterazione, inclusa la colonizzazione biologica</h4>
+        <p>La norma italiana UNI 11182 (Beni culturali, materiali lapidei naturali ed artificiali, descrizione della forma di alterazione, termini e definizioni) uniforma il lessico per descrivere le alterazioni visibili dei materiali, compresa la colonizzazione biologica e il biodeterioramento da microrganismi (muffe, alghe, licheni). Sostituisce la raccomandazione NORMAL 1/88 e copre anche intonaci, malte e laterizi oltre a pietre e marmi.</p>
+        <div class="src">UNI 11182:2006, Beni culturali, Materiali lapidei naturali ed artificiali, Descrizione della forma di alterazione, Termini e definizioni (librinlinea.it; lessico su moodle2.units.it)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2009</span><span class="au">World Health Organization (WHO/OMS)</span>
+        <h4>Linee guida WHO per la qualita dell'aria interna: umidita e muffe</h4>
+        <p>L'OMS pubblica le WHO Guidelines for Indoor Air Quality: Dampness and Mould, frutto della revisione di un gruppo multidisciplinare di esperti. Concludono che l'umidita persistente e la conseguente crescita microbica indoor aumentano i sintomi respiratori, le allergie e l'asma e perturbano il sistema immunitario, e che gli occupanti vanno protetti riducendo umidita e muffa, indipendentemente dalla specie. Spostano l'attenzione dalla singola specie all'umidita come problema sanitario.</p>
+        <div class="src">WHO (2009), WHO guidelines for indoor air quality: dampness and mould, 228 pp. (who.int/publications/i/item/9789289041683; iris.who.int/handle/10665/164348)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2010</span><span class="au">Tuomo Ojanen, Hannu Viitanen e collaboratori (VTT)</span>
+        <h4>Modello VTT migliorato con classi di sensibilita dei materiali</h4>
+        <p>Ojanen, Viitanen e colleghi estendono il modello VTT oltre il legno, introducendo quattro classi di sensibilita dei materiali (e quattro classi di declino) ciascuna con i propri coefficienti per il calcolo dell'indice di muffa. Il modello tiene conto degli effetti dei periodi secchi o freddi prolungati che arrestano o fanno regredire la crescita, rendendolo applicabile a calcestruzzo, gesso, lane minerali, polistirene e altri materiali edili.</p>
+        <div class="src">Ojanen T., Viitanen H., Peuhkuri R., Lahdesmaki K., Vinha J., Salminen K. (2010), Mold growth modeling of building structures using sensitivity classes of materials, Thermal Performance of the Exterior Envelopes of Whole Buildings XI (web.ornl.gov/sci/buildings/conf-archive/2010 B11 papers/104_Ojanen.pdf)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2011</span><span class="au">Olaf C. G. Adan e Robert A. Samson (eds.)</span>
+        <h4>Fundamentals of Mold Growth in Indoor Environments: sintesi delle tre famiglie ecologiche</h4>
+        <p>Adan e Samson curano un volume di riferimento che consolida la micologia applicata al costruito: relazioni idriche dei funghi indoor, dinamica della crescita con umidita fluttuante e quadro delle famiglie ecologiche (xerofili/colonizzatori primari, intermedi/secondari, idrofili/terziari) in funzione dell'attivita dell'acqua. Raccoglie i contributi sperimentali e modellistici delle decadi precedenti in un trattato organico.</p>
+        <div class="src">Adan O.C.G., Samson R.A. (eds.) (2011), Fundamentals of mold growth in indoor environments and strategies for healthy living, Wageningen Academic Publishers (link.springer.com/book/10.3920/978-90-8686-722-6)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2012</span><span class="au">ISO / CEN (recepita UNI EN ISO)</span>
+        <h4>EN ISO 13788, edizione 2012: aggiornamento del metodo anti-muffa e anti-condensa</h4>
+        <p>La seconda edizione (recepita come UNI EN ISO 13788:2013) sostituisce quella del 2001 e mantiene i due metodi di calcolo: temperatura superficiale interna minima per evitare l'umidita superficiale critica e quindi la muffa (criterio 0,8 di UR superficiale) e verifica della condensa interstiziale per diffusione del vapore (Glaser mensile). E lo strumento normativo correntemente usato nella pratica peritale per la verifica del rischio muffa di involucri.</p>
+        <div class="src">ISO 13788:2012 (iso.org/standard/51615.html); EN ISO 13788:2012 approvata CEN il 28/12/2012 (standards.iteh.ai)</div>
+      </article>
+    </div></section>
+
+  <section class="panel" data-topic="infiltrazioni"><div class="panel-head"><h2>Infiltrazioni</h2><span class="cnt">17 tappe (1 da confermare)</span></div>
+    <div class="timeline">
+      <article class="event">
+        <span class="yr">1955</span><span class="au">Olaf Hoppestad (Norvegia)</span>
+        <h4>Relazione della pioggia battente e prima carta norvegese</h4>
+        <p>Hoppestad introduce la relazione della pioggia battente (driving rain relationship), legando l'intensita di pioggia battente sulla parete verticale alla velocita del vento e all'intensita di pioggia orizzontale tramite un coefficiente kappa. Costruisce per la Norvegia una carta basata su misure con pluviometro a quattro direzioni e dati meteo standard. E il punto di partenza scientifico della valutazione quantitativa dell'esposizione delle facciate alla pioggia.</p>
+        <div class="src">Blocken &amp; Carmeliet, A review of wind-driven rain research in building science, J. Wind Eng. Ind. Aerodyn. 2004 (urbanphysics.net/2004_JWEIA_WDRreview_preprint.pdf)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1962</span><span class="au">R. E. Lacy e H. C. Shellard (Building Research Station, UK)</span>
+        <h4>Carte della pioggia battente per le Isole Britanniche</h4>
+        <p>Lacy e Shellard pubblicano le prime carte di pioggia battente per le Isole Britanniche, fondate su un indice annuo di pioggia battente dato dal prodotto dei valori annui di velocita del vento e quantita di pioggia orizzontale. Si afferma cosi il concetto di driving rain index (DRI) come prodotto vento per pioggia. E la base del lavoro normativo britannico successivo.</p>
+        <p class="nb"><strong>Da confermare:</strong> Definizione del DRI come prodotto annuo vento per pioggia confermata da piu fonti; la data 1962 viene dalla rassegna Blocken &amp; Carmeliet Verifica: Titolo e anno (1965) confermati: e il paper presentato al Simposio RILEM/CIB...</p>
+        <div class="src">Blocken &amp; Carmeliet 2004 (urbanphysics.net); BRE bookshop, pubblicazioni Lacy (bregroup.com/store)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1965</span><span class="au">R. E. Lacy (Building Research Station, UK)</span>
+        <h4>Driving-rain maps and the onslaught of rain on buildings</h4>
+        <p>Lacy affina la relazione della pioggia battente introducendo relazioni empiriche che esprimono la dimensione mediana delle gocce in funzione di altre variabili, e pubblica carte di pioggia battente con applicazioni edilizie. Il lavoro consolida l'uso del driving rain index per stimare il carico di pioggia sulle facciate.</p>
+        <div class="src">Blocken &amp; Carmeliet 2004 (urbanphysics.net/2004_JWEIA_WDRreview_preprint.pdf)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1971</span><span class="au">R. E. Lacy (Building Research Station, poi BRE, UK)</span>
+        <h4>BRE Digest 127 (2a serie), An index of exposure to driving rain</h4>
+        <p>Il Building Research Station pubblica il Digest 127 (marzo 1971), che traduce in indice numerico i giudizi vaghi di esposizione (riparato, moderato, severo). Propone l'indice di pioggia battente con carte e regole per correggere il valore di carta in base a topografia e rugosita del terreno. E il primo strumento pratico e divulgato per classificare l'esposizione di un edificio.</p>
+        <div class="src">BRE bookshop, An index of exposure to driving rain - Withdrawn (bregroup.com/store/bookshop/an-index-of-exposure-to-driving-rain-withdrawn-)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1976</span><span class="au">R. E. Lacy (BRE, HMSO, UK)</span>
+        <h4>Driving-rain index: annual mean driving-rain index con regole rivedute</h4>
+        <p>Lacy pubblica per HMSO il rapporto sull'indice medio annuo di pioggia battente per la Gran Bretagna, presentato su 29 carte settoriali in scala 1:625000, con regole rivedute per adattare il valore di carta alla topografia locale e alla rugosita del terreno. E la versione piu rifinita dell'indice di Lacy prima del passaggio agli standard formali.</p>
+        <div class="src">BRE bookshop, Driving-rain index, annual mean driving-rain index in the United Kingdom with proposed revised rules (bregroup.com/store)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1980</span><span class="au">RILEM (TC, comitato tecnico internazionale)</span>
+        <h4>RILEM Test No. II.4 - Water Absorption Under Low Pressure (Pipe Method), il tubo di Karsten</h4>
+        <p>Un comitato tecnico RILEM formalizza la prova di assorbimento d'acqua a bassa pressione con tubo graduato applicato alla superficie, oggi nota come tubo RILEM o tubo di Karsten. La prova misura il calo del livello d'acqua nel tubo nel tempo, fornendo un dato non distruttivo di assorbimento della muratura. Diventa il riferimento per valutare in situ la tenuta all'acqua di intonaci, pietra e mattoni, con o senza trattamento idrorepellente.</p>
+        <div class="src">Construction Specifier, Testing the Test: Water absorption with RILEM tubes (constructionspecifier.com); Hendrickx, Using the Karsten tube..., Materials and Structures 2012 (link.springer.com/article/10.1617/s11527-012-9975-2)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1981</span><span class="au">Building Research Establishment (BRE, UK)</span>
+        <h4>BRE Digest 245, Rising damp in walls: diagnosis and treatment</h4>
+        <p>Il BRE pubblica il Digest 245 (gennaio 1981), che esamina le cause dell'umidita nei muri e propone un metodo positivo per la diagnosi della risalita capillare, distinguendola dalle altre forme. Suggerisce rimedi come barriera fisica al taglio o iniezione chimica e fornisce indicazioni sul ripristino degli intonaci. Diventa il riferimento britannico per la diagnosi della risalita e per la diagnosi differenziale dell'umidita.</p>
+        <div class="src">BRE bookshop, Rising damp in walls - diagnosis and treatment DG 245 (bregroup.com/store); NBS Publication Index</div>
+      </article>
+      <article class="event">
+        <span class="yr">1984</span><span class="au">BSI (British Standards Institution, UK)</span>
+        <h4>DD 93:1984, Methods for assessing exposure to wind-driven rain</h4>
+        <p>Il BSI pubblica il Draft for Development DD 93, che porta il lavoro di Lacy in forma metodologica con due metodi: l'indice locale di spell (periodo critico) e l'indice locale annuo, con carte di pioggia battente per tutto il Regno Unito. L'indice annuo serve a stimare il contenuto d'acqua medio della muratura, l'indice di spell a stimare il rischio di penetrazione attraverso muratura e giunti. E il ponte diretto verso la norma BS 8104.</p>
+        <div class="src">NBS Publication Index, DD 93:1984 (Withdrawn) (thenbs.com); BRE, Directional driving rain indices for the United Kingdom (background to DD93)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1986</span><span class="au">ASTM International (USA)</span>
+        <h4>ASTM E1105, prova in opera di tenuta all'acqua di serramenti e facciate continue</h4>
+        <p>L'ASTM approva (prima edizione 1986) il metodo E1105 per la determinazione in situ della penetrazione d'acqua attraverso finestre, lucernari, porte e facciate continue installate, applicando acqua spruzzata sulla faccia esterna con una differenza di pressione statica uniforme o ciclica. La prova sigilla una camera sul lato interno o esterno e osserva eventuali infiltrazioni. E lo strumento di campo per accertare se un serramento gia posato perde.</p>
+        <div class="src">Building America Solution Center, ASTM E1105 (basc.pnnl.gov); ASTM store (store.astm.org/standards/e1105); The ANSI Blog su ASTM E1105-15(2023)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1990</span><span class="au">BSI (British Standards Institution, UK)</span>
+        <h4>BS 8102:1990, protezione delle strutture contro l'acqua dal terreno</h4>
+        <p>Prima edizione della BS 8102 (1990), che sostituisce il CP 102:1973 e codifica la protezione delle strutture interrate dall'acqua del terreno. Suddivide le forme di struttura in tre tipi, introduce nuovi materiali e una sezione sull'ispezione e l'impermeabilizzazione dei seminterrati esistenti. E il riferimento per distinguere e trattare l'acqua di provenienza ipogea rispetto alla pioggia battente e alla risalita.</p>
+        <div class="src">NBS Publication Index, BS 8102:1990 (Withdrawn) (thenbs.com); IKO Technical Guidance BS 8102</div>
+      </article>
+      <article class="event">
+        <span class="yr">1992</span><span class="au">BSI (British Standards Institution, UK)</span>
+        <h4>BS 8104:1992, Code of practice for assessing exposure of walls to wind-driven rain</h4>
+        <p>La BS 8104 trasforma in codice di pratica il metodo del DD 93, con due procedimenti: il metodo dell'indice locale di spell e il metodo dell'indice locale annuo. Permette di stimare il peggior periodo di pioggia battente atteso in un dato triennio e quindi il rischio di penetrazione attraverso le pareti. Non e adatta a valutare la tenuta dei singoli componenti come i serramenti, ma il loro comportamento dipende dal progetto della parete circostante.</p>
+        <div class="src">BSI Knowledge / NBS, BS 8104:1992 (knowledge.bsigroup.com; thenbs.com); Orr et al., Characterisation of building exposure to wind-driven rain (ScienceDirect)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2000</span><span class="au">CEN (Comitato Europeo di Normazione)</span>
+        <h4>EN 1027:2000, tenuta all'acqua di finestre e porte, metodo di prova</h4>
+        <p>Prima edizione della EN 1027 (agosto 2000), che definisce il metodo convenzionale di laboratorio per determinare la tenuta all'acqua di finestre e porte completamente assemblate, di qualsiasi materiale, irrorando acqua sulla superficie sotto pressione positiva crescente. I risultati si classificano secondo la EN 12208 (nove classi, da 1A a 9A). E l'omologo europeo di laboratorio della prova in opera ASTM E1105.</p>
+        <div class="src">NBS Publication Index, BS EN 1027:2000 (Withdrawn) (thenbs.com); UNI store, UNI EN 1027:2016 (store.uni.com)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2009</span><span class="au">ISO (International Organization for Standardization)</span>
+        <h4>ISO 15927-3:2009, calcolo dell'indice di pioggia battente per superfici verticali</h4>
+        <p>La ISO 15927-3 (parte 3 della serie sulla prestazione igrotermica e i dati climatici) stabilisce procedure per stimare la quantita d'acqua che colpisce una parete di data orientazione, a partire da dati orari di vento e pioggia. Calcola un indice annuo medio e un indice di spell, totalizzati sull'anno e sul peggior periodo atteso in un triennio. Porta su base internazionale e oraria il metodo nato con Lacy e codificato dalla BS 8104.</p>
+        <div class="src">ISO, ISO 15927-3:2009 (iso.org/standard/44281.html); studi di equivalenza dei metodi ISO 15927-3 (ScienceDirect, S0360132320301359)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2009</span><span class="au">BSI (British Standards Institution, UK)</span>
+        <h4>BS 8102:2009, protezione delle strutture interrate contro l'acqua dal terreno</h4>
+        <p>Revisione della BS 8102 che sostituisce l'edizione 1990 e alza lo standard di progettazione dell'impermeabilizzazione delle strutture interrate, diventando un documento di riferimento adottato anche fuori dal Regno Unito. Articola i tipi di protezione (barriera, drenata, integrale alla struttura) e introduce maggiore attenzione al gradiente di rischio. E tappa della diagnosi differenziale per l'acqua ipogea.</p>
+        <div class="src">NBS Publication Index, BS 8102:2009 (Withdrawn) (thenbs.com)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2013</span><span class="au">CEN (Comitato Europeo di Normazione), TC 346 Conservazione dei beni culturali</span>
+        <h4>EN 16302:2013, misura dell'assorbimento d'acqua col metodo del tubo</h4>
+        <p>La EN 16302 (approvata da CEN il 28 dicembre 2012, edizione 2013) standardizza la misura dell'assorbimento d'acqua dei materiali inorganici porosi dei beni culturali col metodo del tubo, applicabile in laboratorio e in situ per la natura non distruttiva. Formalizza a livello europeo, per il patrimonio, il principio del tubo di Karsten gia codificato da RILEM II.4. E utile nella diagnosi della capacita di assorbimento e dell'efficacia di trattamenti su superfici storiche.</p>
+        <div class="src">EN-standard / SIS / DIN Media, EN 16302:2013 (en-standard.eu; sis.se; dinmedia.de)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2022</span><span class="au">BSI (British Standards Institution, UK)</span>
+        <h4>BS 8102:2022, protezione delle strutture interrate contro l'ingresso d'acqua</h4>
+        <p>Ultima edizione della BS 8102, in vigore dal 31 marzo 2022, che sostituisce la 2009 e mette al centro la valutazione del rischio: il progettista deve documentare una valutazione completa prima di scegliere il sistema di impermeabilizzazione. Cambia il titolo in protezione contro l'ingresso d'acqua, segnalando un approccio piu prestazionale e prudenziale. E lo stato dell'arte per la componente ipogea della diagnosi delle infiltrazioni.</p>
+        <div class="src">NBS Publication Index, BS 8102:2022 (thenbs.com); Newton Waterproofing, Technical Paper BS 8102:2022</div>
+      </article>
+      <article class="event">
+        <span class="yr">2007-2026</span><span class="au">BRE e prassi diagnostica internazionale</span>
+        <h4>Diagnosi differenziale dell'umidita: condensa, risalita, penetrazione, costruzione, perdite</h4>
+        <p>La prassi consolidata distingue le cause dell'umidita in categorie (condensa, risalita capillare, penetrazione e pioggia battente, umidita di costruzione, perdite impiantistiche) e raccomanda di non fermarsi all'osservazione ma di incrociare igrometro, prelievi con essiccazione o carburo e analisi dei sali, e soprattutto il monitoraggio termo-igrometrico nel tempo. Un principio chiave e il confronto del contenuto d'acqua in profondita rispetto alla superficie interna per separare condensa e risalita. La pioggia battente e una delle vie della penetrazione e va quantificata con gli indici di esposizione.</p>
+        <div class="src">BRE, Diagnosing the causes of dampness in buildings (bregroup.com/insights/diagnosing-the-causes-of-dampness-in-buildings); BRE Digest 245 (2007)</div>
+      </article>
+    </div></section>
+
+  <section class="panel" data-topic="radon"><div class="panel-head"><h2>Radon</h2><span class="cnt">14 tappe (2 da confermare)</span></div>
+    <div class="timeline">
+      <article class="event">
+        <span class="yr">1879</span><span class="au">Friedrich Hesse e Walther Härting (medici di Schneeberg)</span>
+        <h4>La Bergkrankheit dei minatori di Schneeberg riconosciuta come tumore polmonare</h4>
+        <p>Nel 1879 i due medici Härting e Hesse documentarono con riscontri autoptici che la mortale malattia dei minatori dei Monti Metalliferi sassoni (la Bergkrankheit, gia nota da secoli) era in larga parte un processo maligno del polmone, poi chiamato Schneeberger Lungenkrebs. Non identificarono la causa, ma stabilirono per la prima volta il nesso occupazionale tra il lavoro in miniera e il cancro polmonare. La causa radioattiva sarebbe stata ipotizzata solo decenni dopo.</p>
+        <p class="nb"><strong>Da confermare:</strong> Il cognome compare anche come Harting/Hartung in alcune fonti secondarie; la grafia corretta e Härting. La Bergkrankheit comprendeva anche silicosi e tubercolosi, non solo carcinoma. Verifica: Anno (1879), autori (Härting e...</p>
+        <div class="src">Schüttmann W., Schneeberg lung disease and uranium mining in the Saxon Ore Mountains (Erzgebirge), Am J Ind Med 1993 (PubMed 8427263); PMC8352703</div>
+      </article>
+      <article class="event">
+        <span class="yr">1899</span><span class="au">Ernest Rutherford e Robert B. Owens (McGill University, Montreal)</span>
+        <h4>Scoperta dell'emanazione del torio (radon-220)</h4>
+        <p>Studiando la radioattivita del torio, Rutherford e Owens osservarono che una parte della ionizzazione proveniva da un gas radioattivo a vita breve emesso dal torio, che chiamarono thorium emanation. Si trattava in realta di un isotopo del radon, il Rn-220 (toron), con emivita di circa 55 secondi. Questo lavoro fornì anche il primo indizio del concetto di costante di decadimento radioattivo.</p>
+        <div class="src">Wikipedia Radon e Radon-222; arXiv 1205.5841 Discovery of the astatine, radon, francium and radium isotopes; The Book of Science 1899-1910</div>
+      </article>
+      <article class="event">
+        <span class="yr">1900</span><span class="au">Friedrich Ernst Dorn (fisico tedesco, Halle)</span>
+        <h4>Scoperta del radon-222 (emanazione del radio)</h4>
+        <p>Dorn osservò che il radio emette un gas radioattivo, che chiamò emanazione del radio (radium emanation). Dimostrò che non era semplice radio vaporizzato ma una nuova sostanza radioattiva indipendente, misurandone le proprieta. E l'isotopo Rn-222, quello rilevante per l'esposizione in edilizia. Il nome radon fu adottato a livello internazionale solo nel 1923.</p>
+        <div class="src">Wikipedia Friedrich Ernst Dorn; Linda Hall Library Scientist of the Day; arXiv 1205.5841</div>
+      </article>
+      <article class="event">
+        <span class="yr">1924</span><span class="au">P. Ludewig e E. Lorenser</span>
+        <h4>Prima ipotesi del radon come causa del cancro dei minatori</h4>
+        <p>Ludewig e Lorenser misurarono concentrazioni elevate di radon nell'aria e nell'acqua delle miniere di Schneeberg e ipotizzarono che il gas radioattivo potesse contribuire allo sviluppo del cancro polmonare dei minatori. E la prima associazione esplicita tra radon ed eccesso di tumori polmonari, dopo che nel 1913 l'emanazione era stata genericamente sospettata.</p>
+        <div class="src">NCBI Bookshelf NBK218116 Epidemiological Studies of Persons Exposed to Radon Progeny; Jacobi W., The history of the radon problem in mines and homes (1993)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1932</span><span class="au">Anton Pirchan e Hubert Šikl</span>
+        <h4>Studio sui minatori di Jachymov: il radon causa del tumore polmonare</h4>
+        <p>Pirchan e Šikl pubblicarono sull'American Journal of Cancer i riscontri autoptici di nove minatori di Jachymov (Joachimsthal, Boemia) morti di cancro polmonare nel 1929-1930. Conclusero che l'emanazione del radio era la causa piu probabile dei tumori, dato il riscontro di radioattivita nelle miniere sia di Jachymov sia di Schneeberg e la lunga esposizione dei minatori. Oltre la meta dei decessi era per cancro polmonare, spesso prima dei 50 anni.</p>
+        <div class="src">Pirchan A., Šikl H., Cancer of the Lung in the Miners of Jachymov (Joachimstal), American Journal of Cancer 1932, 16(4):681-722 (AACR Journals); NCBI NBK218116</div>
+      </article>
+      <article class="event">
+        <span class="yr">1976-1986</span><span class="au">U.S. Environmental Protection Agency (EPA)</span>
+        <h4>Negli USA il radon indoor diventa problema di salute pubblica, action level 4 pCi/L</h4>
+        <p>Dopo il caso pioniere delle case di Grand Junction (Colorado) costruite su sterili di lavorazione dell'uranio (linea guida 1976) e il celebre caso Watras in Pennsylvania (1984), nel 1986 l'EPA con il DHHS pubblicò A Citizen's Guide to Radon, fissando un livello d'azione di 4 pCi/L (circa 150 Bq/m3) per le abitazioni esistenti. E il primo grande programma nazionale sul radon residenziale, con approccio non regolatorio basato su analisi costi-benefici.</p>
+        <div class="src">NCBI Bookshelf NBK230646 Indoor-Radon Guidelines and Recommendations; EPA, A Citizen's Guide to Radon; epa.gov action level radon</div>
+      </article>
+      <article class="event">
+        <span class="yr">1993</span><span class="au">ICRP - Commissione Internazionale per la Protezione Radiologica</span>
+        <h4>ICRP Publication 65: protezione dal radon-222 in casa e al lavoro</h4>
+        <p>L'ICRP pubblicò la Publication 65, Protection against Radon-222 at Home and at Work, che sintetizza le conoscenze sugli effetti sanitari del radon inalato e della sua progenie e formula raccomandazioni per il controllo dell'esposizione sia nelle abitazioni sia nei luoghi di lavoro. Le stime di rischio derivavano dalle coorti epidemiologiche di minatori. Introdusse l'approccio dose-conversione convenzionale poi rivisto nel 2017.</p>
+        <div class="src">ICRP, Publication 65, Annals of the ICRP 23(2), 1993 (icrp.org; PubMed 8179237)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1999</span><span class="au">U.S. National Research Council, Comitato BEIR VI</span>
+        <h4>Rapporto BEIR VI: il radon seconda causa di cancro polmonare</h4>
+        <p>Il National Research Council pubblicò Health Effects of Exposure to Radon: BEIR VI, la sintesi piu autorevole dei dati sull'esposizione al radon basata sulle coorti di minatori sotterranei. Confermò che il radon e la seconda causa di cancro polmonare negli Stati Uniti dopo il fumo, con una stima dell'ordine di 15.000-22.000 morti l'anno, sviluppando modelli matematici di proiezione del rischio. Il danno e dovuto alle particelle alfa della progenie del radon sulle cellule polmonari.</p>
+        <div class="src">National Research Council, Health Effects of Exposure to Radon: BEIR VI, National Academies Press, 1999 (NCBI NBK233255; PubMed 25121310)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2004-2005</span><span class="au">Sarah Darby et al. (Università di Oxford)</span>
+        <h4>Studio europeo pooled: rischio di cancro polmonare dal radon domestico</h4>
+        <p>L'analisi collaborativa dei dati individuali di 13 studi caso-controllo europei (7.148 casi di cancro polmonare e 14.208 controlli), guidata da Oxford, dimostrò che il radon residenziale aumenta il rischio di cancro polmonare in modo lineare senza soglia. L'incremento stimato e del 16% per ogni 100 Bq/m3, anche a concentrazioni basse e tipiche delle abitazioni. E la prova epidemiologica diretta del rischio del radon indoor sulla popolazione generale, non solo sui minatori.</p>
+        <div class="src">Darby S. et al., Radon in homes and risk of lung cancer: collaborative analysis of 13 European case-control studies, BMJ 2005;330:223 (PubMed 15613366; pubbl. online 21/12/2004)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2009</span><span class="au">Organizzazione Mondiale della Sanità (WHO/OMS)</span>
+        <h4>WHO Handbook on Indoor Radon: livello di riferimento 100 Bq/m3</h4>
+        <p>L'OMS pubblicò il WHO Handbook on Indoor Radon: A Public Health Perspective, definendo il radon una rilevante minaccia di salute pubblica nelle abitazioni e proponendo un livello di riferimento di 100 Bq/m3 per minimizzare il rischio. Dove tale valore non sia raggiungibile nelle condizioni nazionali, raccomanda di non superare comunque 300 Bq/m3. Stima che dal 3% al 14% dei tumori polmonari sia attribuibile al radon.</p>
+        <div class="src">WHO, Handbook on Indoor Radon: A Public Health Perspective, 2009 (who.int 9789241547673; NCBI NBK143216); comunicato WHO 21/09/2009</div>
+      </article>
+      <article class="event">
+        <span class="yr">2013</span><span class="au">Consiglio dell'Unione Europea (Euratom)</span>
+        <h4>Direttiva 2013/59/Euratom: norme fondamentali di sicurezza, radon incluso</h4>
+        <p>La direttiva 2013/59/Euratom stabilì le norme fondamentali di sicurezza per la protezione contro i pericoli da radiazioni ionizzanti, includendo per la prima volta in modo organico il radon indoor. All'articolo 7 e nell'allegato fissa per gli Stati membri un livello di riferimento per la concentrazione media annua di radon non superiore a 300 Bq/m3, sia per le abitazioni sia per i luoghi di lavoro, e richiede piani d'azione nazionali. E la base giuridica del recepimento italiano.</p>
+        <p class="nb"><strong>Da confermare:</strong> Termine di recepimento febbraio 2018; l'Italia ha recepito con ritardo nel 2020 (D.Lgs 101/2020). Verifica: L'anno (2013), il livello di riferimento (non oltre 300 Bq/m3 per abitazioni e luoghi di lavoro), i piani d'azione...</p>
+        <div class="src">Direttiva 2013/59/Euratom del Consiglio del 5/12/2013 (EUR-Lex); ARPA Lombardia; ambientesicurezzaweb.it</div>
+      </article>
+      <article class="event">
+        <span class="yr">2017</span><span class="au">ICRP - Commissione Internazionale per la Protezione Radiologica</span>
+        <h4>ICRP Publication 137: nuovi coefficienti di dose per il radon</h4>
+        <p>La Publication 137 (Occupational Intakes of Radionuclides: Part 3) introdusse coefficienti di dose per il radon basati su un approccio dosimetrico anziche epidemiologico, raddoppiando di fatto le stime di dose rispetto al passato. Raccomanda un valore di circa 3 mSv per mJ h m-3 (circa 10 mSv per WLM) per la maggior parte delle situazioni, con valori specifici: circa 12 mSv/WLM per le miniere, 20 mSv/WLM per i luoghi di lavoro al chiuso e 24 mSv/WLM (6,7 mSv per mJ h m-3) per il caso particolare delle grotte turistiche.</p>
+        <div class="src">ICRP, Publication 137, Annals of the ICRP 46(3/4), 2017 (icrp.org); ICRPaedia Calculating Radon Doses; PubMed 34278430</div>
+      </article>
+      <article class="event">
+        <span class="yr">2020</span><span class="au">Stato italiano (D.Lgs 31 luglio 2020, n. 101)</span>
+        <h4>D.Lgs 101/2020: recepimento Euratom, livelli 300 e 200 Bq/m3</h4>
+        <p>Il D.Lgs 101/2020, in vigore dal 27 agosto 2020, recepisce la direttiva 2013/59/Euratom e riorganizza la normativa italiana sulla radioprotezione. Fissa il livello di riferimento della concentrazione media annua di radon a 300 Bq/m3 per le abitazioni esistenti e i luoghi di lavoro, e a 200 Bq/m3 per le abitazioni e gli edifici costruiti dopo il 31 dicembre 2024. Introduce inoltre il Piano nazionale d'azione radon, superando la precedente disciplina che riguardava solo i luoghi di lavoro (livello 500 Bq/m3).</p>
+        <div class="src">D.Lgs 31/07/2020 n. 101 (Protezione Civile, dlgs-n101-del-31-luglio-2020); art. 12; ambientesicurezzaweb.it; ARPA Lombardia</div>
+      </article>
+      <article class="event">
+        <span class="yr">2020-2021</span><span class="au">ISO / UNI (normazione tecnica della misura)</span>
+        <h4>UNI ISO 11665 e i rivelatori a tracce CR-39 per la misura del radon</h4>
+        <p>La serie UNI ISO 11665 standardizza la misura della concentrazione di attivita del radon-222 in aria. La parte 4 (UNI ISO 11665-4:2021) definisce il metodo integrato passivo con analisi differita, comunemente realizzato con dosimetri a tracce nucleari in CR-39 (policarbonato PADC) in camera a diffusione. La media annua si ottiene tipicamente con due esposizioni semestrali consecutive, come richiesto dal D.Lgs 101/2020. Le particelle alfa lasciano tracce sul polimero, poi rivelate con attacco chimico e conteggio.</p>
+        <div class="src">UNI ISO 11665-4:2021 (catalogo UNI/ISO); ARPA FVG; AssoRadon Buone pratiche per i laboratori radon; radon.it</div>
+      </article>
+    </div></section>
+
+  <section class="panel" data-topic="iaq"><div class="panel-head"><h2>IAQ, aria indoor</h2><span class="cnt">14 tappe (1 da confermare)</span></div>
+    <div class="timeline">
+      <article class="event">
+        <span class="yr">1780-1790 ca.</span><span class="au">Antoine-Laurent de Lavoisier (con Armand Seguin e Marie-Anne Lavoisier)</span>
+        <h4>La respirazione come combustione lenta e l'aria viziata</h4>
+        <p>Negli anni 1780 Lavoisier dimostra con esperimenti quantitativi (cavia in campana, poi l'assistente Seguin con maschera) che la respirazione e una lenta combustione che consuma ossigeno e produce anidride carbonica e calore. Dopo uno spettacolo alle Tuileries osserva che nella parte alta della sala l'ossigeno cala e la CO2 aumenta, stimando l'esaurimento dell'aria in poche ore senza ricambio. È la radice scientifica del concetto di aria confinata viziata e della necessita di ventilazione.</p>
+        <div class="src">American Journal of Physiology - Lung Cellular and Molecular Physiology (Hallmarks in the study of respiratory physiology, Lavoisier 1743-1794); Encyclopaedia Britannica, biografia di Lavoisier</div>
+      </article>
+      <article class="event">
+        <span class="yr">1858</span><span class="au">Max von Pettenkofer (1818-1901)</span>
+        <h4>La CO2 come indicatore della qualita dell'aria indoor (Pettenkofer-Zahl, circa 1000 ppm)</h4>
+        <p>Il chimico e igienista tedesco Pettenkofer propone l'anidride carbonica come indicatore misurabile e oggettivo della qualita dell'aria negli ambienti chiusi. Indica circa 1000 ppm come valore guida di ventilazione adeguata (il cosiddetto numero di Pettenkofer) e un valore piu basso (intorno a 700 ppm) per le camere da letto. È la prima volta che la qualita dell'aria interna viene trattata come categoria oggettiva e quantificabile.</p>
+        <div class="src">ASHRAE Position Document on Indoor Carbon Dioxide; AIVC VIP 33 (CO2 as indicator for indoor air quality)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1936</span><span class="au">Constantin P. Yaglou (con C. Riley e D.I. Coggins)</span>
+        <h4>Tassi di ventilazione per il controllo degli odori corporei (ASHVE Transactions)</h4>
+        <p>Yaglou e colleghi conducono esperimenti in camera climatica facendo valutare a giudici, entrati da aria pulita, l'intensita degli odori (bioeffluenti) prodotti da occupanti seduti, in funzione del tasso di ventilazione e dello spazio per persona. Ne ricavano portate di aria esterna (circa 7,5-9 L/s a persona) necessarie a mantenere l'odore a un livello accettabile. Questi dati diventano una base storica per i requisiti di ventilazione, poi confluiti nello standard ASHRAE 62.</p>
+        <div class="src">Yaglou, Riley, Coggins, Ventilation requirements, ASHVE Transactions, v. 42, 1936; ASHRAE, The History of Ventilation and Temperature Control; PMC, The Story of ASHRAE Standard 62</div>
+      </article>
+      <article class="event">
+        <span class="yr">1976</span><span class="au">Centers for Disease Control (CDC), Philadelphia</span>
+        <h4>Malattia dei legionari e attenzione alle patologie correlate agli edifici</h4>
+        <p>Un focolaio di polmonite tra i partecipanti a un raduno della American Legion a Philadelphia porta alla scoperta del batterio Legionella, diffuso anche attraverso impianti di condizionamento e torri di raffreddamento. L'episodio accende l'attenzione pubblica e scientifica sulle building-related illnesses, cioe le malattie con causa specifica e accertata legata all'edificio e ai suoi impianti, distinte poi dalla sindrome dell'edificio malato.</p>
+        <p class="nb"><strong>Da confermare:</strong> Tappa di contesto rilevante per l'IAQ; la verifica web in questa sessione si e concentrata sulle altre tappe, quindi la marco prudenzialmente come da confermare sui dettagli. Verifica: L'EVENTO (focolaio di polmonite al raduno...</p>
+        <div class="src">CDC, storia della malattia dei legionari (Legionnaires' disease, Philadelphia 1976)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1980-1982</span><span class="au">U.S. Consumer Product Safety Commission e comunita scientifica</span>
+        <h4>Formaldeide indoor: schiume ureiche (UFFI) e case prefabbricate</h4>
+        <p>All'inizio degli anni 1980 emergono i reclami degli abitanti di case isolate con schiuma ureica-formaldeidica (UFFI) e di case mobili, con sintomi attribuiti alle emissioni di formaldeide. Nel 1982 la Consumer Product Safety Commission statunitense vieta l'UFFI per i rischi sanitari e l'uso quasi cessa dal 1983. La formaldeide diventa il primo inquinante indoor di massa al centro dell'attenzione pubblica e normativa.</p>
+        <div class="src">Vermont Department of Health e Illinois Department of Public Health (schede formaldeide e divieto UFFI 1982); ScienceDirect (studi salute occupanti case con UFFI)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1980-1990</span><span class="au">U.S. EPA, Lance A. Wallace e collaboratori</span>
+        <h4>Studio TEAM: l'esposizione indoor ai COV supera quella esterna</h4>
+        <p>Lo studio Total Exposure Assessment Methodology (TEAM) misura l'esposizione personale a 20-25 composti organici volatili in aria, acqua e respiro di centinaia di residenti in piu stati USA, con campionatori personali indossati durante la vita quotidiana. Risultato chiave: le esposizioni personali e indoor ai COV sono generalmente superiori alle concentrazioni esterne. Lo studio sposta il baricentro dell'attenzione sull'aria degli ambienti chiusi.</p>
+        <div class="src">L.A. Wallace, The Total Exposure Assessment Methodology (TEAM) Study, 1989; US EPA, TEAM Study summary and analysis Vol.1; ScienceDirect (TEAM, New Jersey)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1983</span><span class="au">Organizzazione Mondiale della Sanita (WHO)</span>
+        <h4>Nascita del termine Sick Building Syndrome</h4>
+        <p>L'OMS introduce e definisce il termine sindrome dell'edificio malato per descrivere l'aumento di sintomi aspecifici (irritazioni, cefalea, affaticamento) tra gli occupanti di determinati edifici, correlati al tempo trascorso all'interno ma senza una causa o una malattia specifica identificabile. Un rapporto piu ampio dell'OMS del 1984 stimera che fino al 30 per cento degli edifici nuovi o ristrutturati possa generare lamentele eccessive sulla qualita dell'aria interna.</p>
+        <div class="src">Encyclopaedia Britannica (sick building syndrome); US EPA, Indoor Air Facts No. 4 (Sick Building Syndrome); ScienceDirect (the sick building syndrome: a diagnostic dilemma)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1988</span><span class="au">P. Ole Fanger (1934-2006)</span>
+        <h4>Il comfort percepito: le unita olf e decipol</h4>
+        <p>Fanger introduce due nuove unita per quantificare l'inquinamento dell'aria cosi come e percepito dalle persone. L'olf misura l'emissione di bioeffluenti di una persona sedentaria standard; il decipol esprime la qualita dell'aria percepita prodotta da un olf ventilato con un dato flusso di aria pulita. Il metodo lega la percezione sensoriale (percentuale di insoddisfatti) alla ventilazione e alle sorgenti inquinanti, estendendo l'approccio anche a materiali e arredi, non solo alle persone.</p>
+        <div class="src">P.O. Fanger, Introduction of the olf and the decipol units to quantify air pollution perceived by humans indoors and outdoors, Energy and Buildings, vol. 12, 1988; Indoor and Built Environment (Olf and decipol, 1988)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2000</span><span class="au">Organizzazione Mondiale della Sanita, Ufficio Regionale per l'Europa</span>
+        <h4>WHO Air Quality Guidelines for Europe, seconda edizione</h4>
+        <p>L'OMS pubblica la seconda edizione delle linee guida europee sulla qualita dell'aria, aggiornando la prima del 1987. Il documento fissa valori guida basati sugli effetti sanitari per numerosi inquinanti atmosferici e include sostanze rilevanti anche per gli ambienti interni. Costituisce il riferimento internazionale prima del global update successivo.</p>
+        <div class="src">Wikipedia, Air quality guideline (storia delle WHO AQG: 1987, 1997, 2000, 2005/2006, 2021); WHO, Air quality guidelines - global update 2005</div>
+      </article>
+      <article class="event">
+        <span class="yr">2004 (serie in evoluzione)</span><span class="au">ISO, Comitato Tecnico ISO/TC 146/SC 6 Indoor air</span>
+        <h4>Serie UNI EN ISO 16000: campionamento e misura dell'aria interna</h4>
+        <p>Prende forma la serie internazionale ISO 16000 dedicata all'aria degli ambienti interni, con la Parte 1 sulla strategia generale di campionamento pubblicata nel 2004 e numerose parti su formaldeide, composti carbonilici e COV (per esempio campionamento attivo e diffusivo su tubi adsorbenti). La serie fornisce i metodi standardizzati di misura su cui poggia la verifica oggettiva della qualita dell'aria indoor, recepiti in Italia come UNI EN ISO 16000.</p>
+        <div class="src">ISO 16000-1:2004 (General aspects of sampling strategy); ISO 16000-3 e 16000-4 (determinazione formaldeide e composti carbonilici)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2001</span><span class="au">Stato italiano, Regioni e Province autonome (Commissione Indoor, ISS-ISPESL)</span>
+        <h4>Italia: Accordo Stato-Regioni del 27 settembre 2001 sugli ambienti confinati</h4>
+        <p>In assenza di una normativa italiana specifica sulla qualita dell'aria negli ambienti di vita chiusi, viene approvato l'Accordo del 27 settembre 2001 con le Linee guida per la tutela e la promozione della salute negli ambienti confinati. Il documento fornisce indicazioni per valutare e gestire i rischi sanitari legati all'IAQ e per attuare una strategia nazionale di prevenzione, basandosi sui lavori della Commissione Indoor istituita con DM 8 aprile 1998.</p>
+        <div class="src">Gazzetta Ufficiale n. 276 del 27/11/2001 (Accordo Stato-Regioni 27/09/2001); Ministero della Salute, sezione indoor</div>
+      </article>
+      <article class="event">
+        <span class="yr">2010</span><span class="au">Organizzazione Mondiale della Sanita, Ufficio Regionale per l'Europa</span>
+        <h4>WHO Guidelines for Indoor Air Quality: Selected Pollutants</h4>
+        <p>L'OMS pubblica linee guida dedicate specificamente all'aria interna, con valori guida per inquinanti che hanno sorgenti negli ambienti chiusi: benzene, monossido di carbonio, formaldeide, naftalene, biossido di azoto, idrocarburi policiclici aromatici (in particolare benzo[a]pirene), radon, tricloroetilene e tetracloroetilene. Per la formaldeide si stabilisce un valore guida di 0,1 mg/m3 (0,08 ppm) come media su 30 minuti, valido per esposizioni di breve e lungo termine.</p>
+        <div class="src">WHO Guidelines for Indoor Air Quality: Selected Pollutants, 2010 (WHO Regional Office for Europe; PAHO/WHO; NCBI Bookshelf)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2019</span><span class="au">CEN (Comitato Europeo di Normazione), recepita in Italia come UNI EN 16798-1</span>
+        <h4>UNI EN 16798-1: parametri ambientali interni per la prestazione energetica</h4>
+        <p>La norma europea EN 16798-1:2019 (recepita come UNI EN 16798-1) definisce i parametri di input dell'ambiente interno per la progettazione e la valutazione della prestazione energetica degli edifici, riguardo a qualita dell'aria, ambiente termico, illuminazione e acustica. Sostituisce la precedente EN 15251:2007, separa la parte normativa (Parte 1) da quella tecnica (Parte 2) e aggiorna le categorie di ambiente interno e i criteri di ventilazione. È il riferimento progettuale europeo attuale per l'IAQ negli edifici.</p>
+        <div class="src">EN 16798-1:2019 (Indoor environmental input parameters, Module M1-6); SimScale e BSI (rapporto con EN 15251:2007)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2021</span><span class="au">Organizzazione Mondiale della Sanita</span>
+        <h4>WHO Global Air Quality Guidelines 2021</h4>
+        <p>Il 22 settembre 2021 l'OMS pubblica le nuove linee guida globali sulla qualita dell'aria, primo grande aggiornamento dopo il global update 2005. I valori guida per i principali inquinanti vengono resi piu stringenti: per il PM2,5 la media annuale raccomandata scende da 10 a 5 microgrammi per metro cubo e per il PM10 da 20 a 15. Le linee guida coprono particolato, ozono, biossido di azoto, biossido di zolfo e monossido di carbonio, con riflessi diretti sull'esposizione complessiva, anche indoor.</p>
+        <div class="src">WHO global air quality guidelines 2021 (iris.who.int; NCBI Bookshelf, Executive summary); IQAir, New WHO air quality guidelines 2021</div>
+      </article>
+    </div></section>
+
+  <section class="panel" data-topic="vespai"><div class="panel-head"><h2>Vespai</h2><span class="cnt">13 tappe (10 da confermare)</span></div>
+    <div class="timeline">
+      <article class="event">
+        <span class="yr">I secolo a.C.</span><span class="au">Architettura romana (sistema attribuito ai Greci, perfezionato dai Romani); precedente in Campania/Campi Flegrei</span>
+        <h4>L'ipocausto romano, antenato dell'intercapedine ventilata</h4>
+        <p>L'ipocausto (dal greco, riscaldamento dal basso) creava sotto il pavimento dei locali una camera d'aria sostenuta da pilastrini di mattoni (pilae), su cui poggiava la soletta calpestabile detta suspensura. Nato per il riscaldamento di terme e ville, e non contro l'umidita, costituisce pero il piu antico precedente documentato di pavimento sollevato dal terreno con intercapedine d'aria, principio alla base del futuro vespaio aerato. Il sistema fu appreso dai Greci (primo esempio nelle terme di Olimpia) e diffuso dai Romani in tutto l'impero.</p>
+        <p class="nb"><strong>Da confermare:</strong> Il legame con l'anti-umidita e funzionale/analogico, non storico: l'ipocausto serviva a scaldare. Le datazioni d'origine (greca/campana) variano tra le fonti divulgative; la diffusione romana e ben attestata. Verifica: L'anno...</p>
+        <div class="src">romanoimpero.com (Il riscaldamento dei Romani); vanillamagazine.it; it.wikipedia.org/wiki/Vespaio</div>
+      </article>
+      <article class="event">
+        <span class="yr">Eta romana - Medioevo</span><span class="au">Maestranze e tradizione costruttiva (anonima)</span>
+        <h4>Anfore e cocci interrati sotto i pavimenti</h4>
+        <p>In eta romana e nei secoli successivi si usavano anfore intere o, piu plausibilmente, i loro cocci disposti sotto le strutture per creare vuoti e camere d'aria sotto il piano di calpestio. E una pratica empirica di alleggerimento e ventilazione del sottofondo che anticipa il vespaio, basata sull'esperienza dei costruttori piu che su una teoria scientifica.</p>
+        <p class="nb"><strong>Da confermare:</strong> Datazione ampia e attribuzione generica (tradizione costruttiva, non un autore o opera precisa). La voce Wikipedia stessa segnala il dubbio tra anfore intere e loro cocci.</p>
+        <div class="src">it.wikipedia.org/wiki/Vespaio</div>
+      </article>
+      <article class="event">
+        <span class="yr">XVIII - XIX secolo</span><span class="au">Tradizione costruttiva rurale e trattatistica edilizia (anonima)</span>
+        <h4>Il vespaio tradizionale in pietrame e ciottoli</h4>
+        <p>Si consolida il vespaio realizzato con acciottolato di ghiaia grossa o pietrame calcareo, posato in strati di pezzatura decrescente sopra il terreno per lasciare passare l'aria nei vuoti tra le pietre, e poi chiuso da malta di calce e da uno strato di calcestruzzo. La funzione e drenante e di distacco dall'umidita del suolo. Resta una soluzione di tradizione e regola dell'arte, senza una norma scritta dedicata.</p>
+        <p class="nb"><strong>Da confermare:</strong> La collocazione cronologica e indicativa: e una tecnica di lungo periodo della tradizione, non legata a una data o a un inventore. Spessori tipici citati 25-40 cm.</p>
+        <div class="src">it.wikipedia.org/wiki/Vespaio; ingenio-web.it (Vespaio aerato)</div>
+      </article>
+      <article class="event">
+        <span class="yr">Fine XIX - prima meta XX secolo</span><span class="au">Tradizione costruttiva (gattaiolato); diffusione dei tavelloni in laterizio</span>
+        <h4>Il vespaio a muretti e tavelloni (gattaiolato)</h4>
+        <p>Si afferma il vespaio aerato vero e proprio: muretti in mattoni a distanza regolare, con aperture dette gattaiole per la ventilazione (da cui il nome gattaiolato), su cui si posano tavelloni in laterizio e infine una soletta. L'aria circola nell'intercapedine grazie alle aperture, allontanando l'umidita di risalita dal suolo. E il modello che precede direttamente i casseri a perdere moderni.</p>
+        <p class="nb"><strong>Da confermare:</strong> La datazione e indicativa e legata alla diffusione del laterizio forato/tavellone; e tecnica di tradizione, non normata da un atto preciso.</p>
+        <div class="src">it.wikipedia.org/wiki/Vespaio; ediliziainrete.it (Vespai aerati)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1975</span><span class="au">Ministero della Sanita (Stato italiano)</span>
+        <h4>D.M. 5 luglio 1975, requisiti igienico-sanitari delle abitazioni</h4>
+        <p>Il decreto fissa i requisiti igienico-sanitari minimi dei locali di abitazione (altezze, superfici, aeroilluminazione, impianti) necessari per l'agibilita. E il riferimento storico nazionale per la salubrita degli alloggi, citato come cornice generale per la protezione dall'umidita dei locali a piano terra. Pubblicato in Gazzetta Ufficiale n. 190 del 18 luglio 1975.</p>
+        <div class="src">studiotecnicopagliai.it; certifico.com (testo D.M. 5/7/1975); stesia.it</div>
+      </article>
+      <article class="event">
+        <span class="yr">1985</span><span class="au">Regione Friuli-Venezia Giulia</span>
+        <h4>Legge regionale FVG n. 44 del 23 agosto 1985 (vespaio obbligatorio anti-radon)</h4>
+        <p>A seguito delle alte concentrazioni di gas radon riscontrate nel territorio regionale, il Friuli-Venezia Giulia rese obbligatorio il vespaio aerato negli edifici per impedire l'accumulo del gas nei locali abitati. La norma prescrive aperture poste a distanza di circa 2,5-3 metri, a quote differenziate sui lati caldo e freddo, per garantire ventilazione naturale per effetto camino. E indicata come la prima norma italiana a imporre il vespaio aerato in chiave anti-radon.</p>
+        <p class="nb"><strong>Da confermare:</strong> Discordanza tra fonti sulla data: Wikipedia indica L.R. n. 44 del 23/8/1985, mentre alcune fonti aziendali (Symbola/Daliform) parlano genericamente di una legge regionale FVG dei primi anni '90. Il numero e l'anno 1985 andrebbero...</p>
+        <div class="src">it.wikipedia.org/wiki/Vespaio; arpa.fvg.it (radon)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1990</span><span class="au">Comunita Europea (Euratom)</span>
+        <h4>Raccomandazione 90/143/Euratom sul radon negli edifici</h4>
+        <p>La raccomandazione europea introduce valori di riferimento per la concentrazione media annua di radon: azione consigliata sopra 400 Bq/m3 per le abitazioni esistenti e obiettivo di 200 Bq/m3 per i nuovi edifici. Pur non vincolante, e il primo quadro sovranazionale che orienta le scelte costruttive, tra cui le intercapedini ventilate alla base degli edifici.</p>
+        <p class="nb"><strong>Da confermare:</strong> Valori riportati da fonti tecniche secondarie; coerenti tra loro. La raccomandazione e atto di indirizzo, non obbligo. Verifica: La datazione 'Anni 1990' e DUBBIA e va corretta verso l'incertezza: una fonte (Edilio) indica...</p>
+        <div class="src">protezioneradon.it (normativa radon); cngegl.it (gas radon, testo integrale)</div>
+      </article>
+      <article class="event">
+        <span class="yr">1993</span><span class="au">Daliform Group (Pordenone)</span>
+        <h4>Nasce IGLU, il cassero a perdere modulare in plastica riciclata</h4>
+        <p>In risposta alla normativa regionale FVG sul radon, Daliform Group sviluppa IGLU, cassero a perdere modulare a volta a botte in plastica riciclata: accostando piu elementi si crea un piano autoportante su cui gettare il calcestruzzo, ottenendo un vespaio aerato continuo. E l'innovazione che industrializza il vespaio, sostituendo muretti e tavelloni del gattaiolato con elementi prefabbricati rapidi da posare.</p>
+        <p class="nb"><strong>Da confermare:</strong> L'anno 1993 e indicato da fonti aziendali/divulgative (Daliform, Symbola), non da fonte indipendente; le stesse fonti datano il contesto normativo FVG ai primi anni '90 (vedi discordanza con la L.R. 1985). Fonte di parte...</p>
+        <div class="src">symbola.net (Daliform Group); imbriaco.it; archiexpo.com</div>
+      </article>
+      <article class="event">
+        <span class="yr">Anni 1990</span><span class="au">Pontarolo Engineering (Pordenone)</span>
+        <h4>Cupolex, il cassero a cupola per vuoto sanitario</h4>
+        <p>Pontarolo Engineering brevetta Cupolex, cassero modulare in polipropilene rigenerato a forma di cupola convessa su quattro supporti, in pianta 56x56 o 71x71 cm. Gettato il calcestruzzo, lascia sotto un'intercapedine ad archi e pilastrini che smaltisce umidita e gas radon con ridotto consumo di calcestruzzo. E l'altro grande sistema italiano a cupola che, con IGLU, diffonde il vespaio aerato prefabbricato.</p>
+        <p class="nb"><strong>Da confermare:</strong> Le fonti confermano brevetto e geometria ma non l'anno esatto di lancio; la datazione anni '90 e plausibile per analogia con il contesto radon FVG ma non documentata con precisione. Azienda di Pordenone nata circa 60 anni fa.</p>
+        <div class="src">symbola.net (Pontarolo Engineering); pontarolo.com; shop.pontarolo.com</div>
+      </article>
+      <article class="event">
+        <span class="yr">Anni 1990-2000</span><span class="au">Regione Lombardia (Regolamento Locale di Igiene tipo)</span>
+        <h4>Lombardia, il rapporto di aerazione del vespaio (art. 3.2.6)</h4>
+        <p>Il Regolamento Locale di Igiene tipo della Regione Lombardia (art. 3.2.6), recepito dai Comuni, quantifica la ventilazione del vespaio: superficie delle aperture pari a 1/100 della superficie del vespaio per la ventilazione dal basso (griglie a pavimento), riducibile a 1/200 nel caso di ventilazione perimetrale tramite aperture nei muri di fondazione. E uno dei pochi parametri numerici espliciti per il dimensionamento del vespaio in Italia.</p>
+        <div class="src">lavoripubblici.it (vespaio aerato, normative); regione.lombardia.it (regolamento di igiene nel RET)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2016-2017</span><span class="au">Regione Siciliana</span>
+        <h4>Sicilia, vespaio aerato obbligatorio nel recupero dei piani terra/seminterrati</h4>
+        <p>La normativa regionale siciliana sul recupero dei locali a piano terra e seminterrati impone la presenza di idoneo vespaio aerato su tutta la superficie dei locali, o altra soluzione tecnica di pari efficacia, salvo deroga rilasciata dall'azienda sanitaria. Il vespaio diventa cosi requisito di salubrita per rendere abitabili locali a contatto con il terreno.</p>
+        <p class="nb"><strong>Da confermare:</strong> Le fonti citano l'obbligo nel recupero (riferito a L.R. sul recupero locali, indicata come art. 3 comma 3-ter L.R. 7/2017) e il Regolamento Edilizio Tipo regionale; numero e anno della legge andrebbero confermati su testo...</p>
+        <div class="src">dimmi.ordinearchitetti.mi.it; tizitumminaro.altervista.org (Regolamento Tipo Edilizio Unico Sicilia); regione.sicilia.it</div>
+      </article>
+      <article class="event">
+        <span class="yr">2020</span><span class="au">Stato italiano (recepimento Direttiva 2013/59/Euratom)</span>
+        <h4>D.Lgs. 101/2020, livelli di riferimento del radon</h4>
+        <p>Il decreto recepisce la Direttiva 2013/59/Euratom e fissa il livello di riferimento del radon a 300 Bq/m3 per abitazioni esistenti e luoghi di lavoro, e a 200 Bq/m3 per gli edifici costruiti dopo il 31 dicembre 2024. Prevede inoltre il Piano Nazionale d'Azione radon. E la cornice che oggi rende il vespaio aerato ventilato una delle soluzioni tecniche piu rilevanti per la mitigazione del gas dal suolo.</p>
+        <div class="src">frareg.com; spf-consulting.it; certifico.com (Piano Nazionale radon)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2022</span><span class="au">Ministero dell'Ambiente (CAM edilizia); ARPA regionali</span>
+        <h4>CAM 2022 e raccomandazioni ARPA: vespaio ventilato contro radon e umidita</h4>
+        <p>I Criteri Ambientali Minimi per l'edilizia (DM 23 giugno 2022) e le linee guida delle ARPA promuovono soluzioni di mitigazione del radon, tra cui intercapedini e vespai ventilati con evacuazione del gas all'esterno, eventualmente integrati da membrane e barriere anti-radon. Le ARPA documentano che un vespaio aerato ben ventilato puo ridurre la concentrazione di radon fino a circa il 90 per cento, ribadendo pero che da solo non basta e va integrato con sigillature e, nei casi critici, depressurizzazione.</p>
+        <p class="nb"><strong>Da confermare:</strong> L'abbattimento fino al 90 per cento e dato divulgativo/tecnico secondario, non un valore di norma: dipende fortemente da ventilazione, suolo e tenuta della soletta. Il numero del CAM (DM 23/6/2022) e citato da fonti secondarie;...</p>
+        <div class="src">ingenio-web.it (vespaio ventilato); edilportale.com (radon e umidita, fondazioni ventilate); arpa.fvg.it (protezione edifici dal radon)</div>
+      </article>
+    </div></section>
+
+  <section class="panel" data-topic="microclima"><div class="panel-head"><h2>Microclima BC</h2><span class="cnt">12 tappe (3 da confermare)</span></div>
+    <div class="timeline">
+      <article class="event">
+        <span class="yr">1934</span><span class="au">Harold Plenderleith / British Museum</span>
+        <h4>Prime preoccupazioni museali sul controllo del clima</h4>
+        <p>Tra gli anni Venti e Trenta i grandi musei iniziano a riconoscere il ruolo di umidita e temperatura nel degrado delle collezioni, con i primi laboratori scientifici e studi sulla conservazione preventiva. Il British Museum, con il suo Research Laboratory (attivo dal 1920) e figure come Harold Plenderleith, è tra i pionieri nell'affrontare il deterioramento legato all'ambiente. L'anno indicato è orientativo e segna una fase, non un evento puntuale.</p>
+        <p class="nb"><strong>Da confermare:</strong> Tappa di inquadramento, non un singolo evento datato. L'anno 1934 è indicativo della fase pre-bellica; verificare la data esatta se si vuole citare un episodio specifico. Verifica: L'anno 1934 NON corrisponde ad alcun evento...</p>
+        <div class="src">Letteratura storica sulla conservazione preventiva; profilo British Museum Research Laboratory</div>
+      </article>
+      <article class="event">
+        <span class="yr">1941</span><span class="au">National Gallery di Londra (Kenneth Clark, Ian Rawlins)</span>
+        <h4>L'esperienza della cava di Manod e la scoperta del clima stabile</h4>
+        <p>Durante la Seconda guerra mondiale l'intera collezione della National Gallery fu trasferita nella cava di Manod (Galles) dall'estate 1941 fino al 1945. Per contrastare l'aria umida fu allestito un rudimentale impianto: ventilatori facevano circolare l'aria su vassoi di gel di silice essiccato, poi rigenerato in forni domestici. L'osservazione di un'intera collezione in condizioni termoigrometriche stabili influenzò profondamente i criteri di conservazione del dopoguerra, spingendo verso l'adozione del condizionamento dell'aria.</p>
+        <div class="src">National Gallery, London (pagine storiche e mostra 'Manod: The Nation's Treasure Caves')</div>
+      </article>
+      <article class="event">
+        <span class="yr">1978</span><span class="au">Garry Thomson (National Gallery, London)</span>
+        <h4>'The Museum Environment': nasce il dogma 50-55% UR</h4>
+        <p>Garry Thomson pubblica 'The Museum Environment' (Butterworths, Londra, 1978), opera che diventa il riferimento mondiale per le condizioni ambientali nei musei. Il testo affronta i tre fattori di degrado (luce, umidita, inquinamento) e codifica condizioni ideali poi divenute consenso: circa 50 piu o meno 5% di umidita relativa e temperature dell'ordine di 19 gradi C in inverno e fino a 24 gradi C in estate. Da qui deriva il cosiddetto dogma del 50/55% UR seguito per decenni.</p>
+        <p class="nb"><strong>Da confermare:</strong> La 2a edizione è del 1986 (Routledge/Butterworth-Heinemann). I valori esatti vanno verificati sull'edizione: spesso citati come 50 o 55% UR a seconda della fonte. Verifica: Autore, titolo, editore (Butterworth, Londra) e anno...</p>
+        <div class="src">Garry Thomson, The Museum Environment, 1978 (1a ed.); voce Wikipedia 'Garry Thomson'; conserv.io environmental monitoring standards</div>
+      </article>
+      <article class="event">
+        <span class="yr">1985</span><span class="au">Image Permanence Institute (IPI), Rochester Institute of Technology</span>
+        <h4>Fondazione dell'IPI e l'ambiente per fotografia e pellicole</h4>
+        <p>L'Image Permanence Institute viene fondato nel 1985 dal Rochester Institute of Technology con la Society for Imaging Science and Technology, diventando il maggiore laboratorio indipendente sulla conservazione dei materiali fotografici e filmici. Le ricerche di James Reilly e collaboratori dimostrano il ruolo della conservazione a freddo (cold storage) e introducono strumenti come il Preservation Index per stimare la durata dei materiali in funzione di temperatura e umidita. Le indicazioni IPI ampliano il quadro oltre i dipinti, verso archivi e collezioni fotografiche.</p>
+        <div class="src">Image Permanence Institute (RIT), pagine istituzionali e pubblicazioni; voce Wikipedia 'Image Permanence Institute'</div>
+      </article>
+      <article class="event">
+        <span class="yr">1994</span><span class="au">Marion Mecklenburg, Charles Tumosa, David Erhardt (Smithsonian, CAL)</span>
+        <h4>La ricerca CAL sugli intervalli ammissibili di umidita</h4>
+        <p>Gli scienziati del Conservation Analytical Laboratory dello Smithsonian (Mecklenburg, Tumosa, Erhardt, McCormick-Goodhart) studiano le proprieta meccaniche dei materiali costitutivi di dipinti e legno, misurando curve sforzo-deformazione a diverse umidita. I risultati indicano margini di sicurezza molto piu ampi di quanto si credesse, con fluttuazioni di umidita relativa dell'ordine di piu o meno 15% tollerabili da molti materiali. Questa evidenza sperimentale mette in discussione la rigidita del dogma del 50% piu o meno 5%.</p>
+        <p class="nb"><strong>Da confermare:</strong> L'anno 1994 è indicativo dell'avvio/diffusione di questi studi; la pubblicazione di sintesi più nota è del 1998. Verificare le date dei singoli lavori per una citazione puntuale.</p>
+        <div class="src">Smithsonian CAL; Mecklenburg, Tumosa, Erhardt, 'Structural Response of Painted Wood Surfaces to Changes in Ambient Relative Humidity' (in Painted Wood, Getty, 1998); WAAC Newsletter; Smithsonian press</div>
+      </article>
+      <article class="event">
+        <span class="yr">1999</span><span class="au">UNI (Ente Italiano di Normazione)</span>
+        <h4>UNI 10829:1999, lo standard italiano per le condizioni di conservazione</h4>
+        <p>Entra in vigore (31 luglio 1999) la norma UNI 10829 'Beni di interesse storico e artistico. Condizioni ambientali di conservazione. Misurazione ed analisi'. La norma prescrive una metodologia per misurare le grandezze termoigrometriche e illuminotecniche e fornisce indicazioni per elaborare e sintetizzare i dati al fine di limitare i processi di degrado. È a lungo il riferimento tecnico italiano per il monitoraggio ambientale nei musei.</p>
+        <div class="src">UNI store (UNI 10829:1999); ISAC-CNR MUSA normativa; SCIRP reference</div>
+      </article>
+      <article class="event">
+        <span class="yr">1999</span><span class="au">Stefan Michalski / ASHRAE (Canadian Conservation Institute)</span>
+        <h4>Il capitolo ASHRAE 'Museums' e le classi di controllo AA-D</h4>
+        <p>Nel 1999 compare per la prima volta nell'ASHRAE Handbook (HVAC Applications) il capitolo dedicato a musei, gallerie, archivi e biblioteche, con la sezione su temperatura e umidita redatta da Stefan Michalski del Canadian Conservation Institute. Vengono introdotte le classi di controllo AA, A, B, C e D, dalla piu severa alla piu permissiva, ciascuna con il rischio stimato per le collezioni e con opzioni di adattamento stagionale. Questo approccio sposta il paradigma dal valore unico rigido alla gestione del rischio.</p>
+        <div class="src">S. Michalski, 'The Ideal Climate, Risk Management, the ASHRAE Chapter...' (Getty); ASHRAE Handbook; Canada.ca CCI 'ASHRAE types of control'</div>
+      </article>
+      <article class="event">
+        <span class="yr">2000</span><span class="au">Stefan Michalski (Canadian Conservation Institute)</span>
+        <h4>Linee guida CCI su umidita e temperatura</h4>
+        <p>Stefan Michalski pubblica per il Canadian Conservation Institute le 'Guidelines for Humidity and Temperature for Canadian Archives' (2000), spiegando come e perche le raccomandazioni siano cambiate verso intervalli piu flessibili. Il CCI sviluppa inoltre il quadro degli 'agents of deterioration', che inquadra umidita e temperatura scorrette tra i fattori di rischio gestibili. Il CCI diventa un riferimento internazionale insieme ad ASHRAE.</p>
+        <div class="src">CCI / Government of Canada Publications (NM95-55/23-2000E); Canada.ca CCI climate guidelines e 'agents of deterioration'</div>
+      </article>
+      <article class="event">
+        <span class="yr">2001</span><span class="au">Ministero per i Beni e le Attivita Culturali (Italia)</span>
+        <h4>Atto di indirizzo D.M. 10 maggio 2001 sugli standard museali</h4>
+        <p>Il D.M. 10 maggio 2001 'Atto di indirizzo sui criteri tecnico-scientifici e sugli standard di funzionamento e sviluppo dei musei' (pubblicato in G.U. n. 244 del 19 ottobre 2001, in attuazione dell'art. 150 del D.Lgs. 112/1998) fissa criteri anche per le condizioni ambientali di conservazione. Riconosce la difficolta di definire intervalli assoluti data la varieta dei beni e fornisce indicazioni sui parametri termoigrometrici e sulle fluttuazioni ammesse. È il riferimento amministrativo italiano per gli standard museali.</p>
+        <div class="src">Gazzetta Ufficiale n. 244 del 19/10/2001; testo D.M. 10/5/2001 (musei.beniculturali.it; Altalex)</div>
+      </article>
+      <article class="event">
+        <span class="yr">2010</span><span class="au">CEN / Dario Camuffo e il concetto di 'clima storico'</span>
+        <h4>UNI EN 15757:2010 e il principio del clima storico</h4>
+        <p>La norma europea EN 15757:2010 (recepita come UNI EN 15757) specifica i limiti di variabilita di temperatura e soprattutto umidita relativa per limitare il danno meccanico ai materiali organici igroscopici (legno, dipinti su tela, libri, tessuti, avorio, cuoio). Introduce in chiave normativa il concetto di 'clima storico': un oggetto rimasto a lungo in un ambiente si è adattato alle sue fluttuazioni abituali, che quindi non vanno alterate bruscamente. Il principio riflette anche gli studi microclimatici di Dario Camuffo (CNR Padova) sulle interazioni tra ambiente e beni culturali.</p>
+        <div class="src">EN/UNI EN 15757:2010 (BSI, DIN, intertek); D. Camuffo, 'Microclimate for Cultural Heritage' (Elsevier); MDPI Atmosphere 13(9):1344</div>
+      </article>
+      <article class="event">
+        <span class="yr">2014</span><span class="au">Bizot Group (International Group of Organizers of Large-Scale Exhibitions)</span>
+        <h4>Bizot Green Protocol: ampliamento del range climatico</h4>
+        <p>Nel novembre 2014 il Bizot Group concorda il Bizot Green Protocol, un insieme di principi guida che amplia gli intervalli climatici ammessi per ridurre i consumi energetici e l'impronta di carbonio dei musei. Le linee guida indicano valori dell'ordine di 16-25 gradi C e 40-60% di umidita relativa, con fluttuazioni contenute, sostenendo che condizioni piu ampie non compromettono la sicurezza della maggior parte delle collezioni. Il protocollo è adottato da diverse organizzazioni nazionali (NMDC nel Regno Unito, AAMD negli USA).</p>
+        <div class="src">Bizot Green Protocol (testo 2023 refresh, CIMAM/AAMD); NMDC; NEMO</div>
+      </article>
+      <article class="event">
+        <span class="yr">2014</span><span class="au">IIC e ICOM-CC</span>
+        <h4>Dichiarazione congiunta IIC / ICOM-CC sulle linee guida ambientali</h4>
+        <p>Ai congressi del 2014 (IIC a Hong Kong e ICOM-CC a Melbourne) i delegati concordano una Dichiarazione sulle linee guida ambientali che recepisce e affianca il Bizot Green Protocol. La dichiarazione invita i musei a ridurre l'impronta di carbonio e a non dare per scontato il ricorso al condizionamento (HVAC), allegando le linee guida provvisorie del Bizot Group, dell'AIC e dell'AICCM. Consolida a livello internazionale il passaggio dalla rigidita climatica alla sostenibilita.</p>
+        <div class="src">IIC e ICOM-CC, '2014 Declaration on Environmental Guidelines' (iiconservation.org); Studies in Conservation 61 (2016)</div>
+      </article>
+    </div></section>
+
+  <section class="panel" data-topic="cantieri"><div class="panel-head"><h2>Cantieri</h2><span class="cnt">27 tappe (norme 2025-2026 da confermare)</span></div>
+    <div class="timeline">
+      <article class="event"><span class="yr">1939</span><span class="au">Repubblica Italiana</span>
+        <h4>Legge 1089/1939: tutela delle cose d'interesse artistico o storico (Bottai)</h4>
+        <p>Prima legge organica italiana di tutela dei beni culturali. Stabilisce il sistema dei vincoli monumentali, il ruolo della Soprintendenza, il regime autorizzatorio. Abrogata e sostituita dal D.Lgs 42/2004, ma la sua impostazione perdura.</p>
+        <div class="src">GU 184/1939 (legge Bottai)</div></article>
+      <article class="event"><span class="yr">1942</span><span class="au">Repubblica Italiana</span>
+        <h4>Legge Urbanistica 1150/1942</h4>
+        <p>Prima legge urbanistica nazionale. Introduce il PRG (Piano Regolatore Generale), il regime autorizzatorio per costruzioni, le categorie di intervento. Base storica del successivo DPR 380/2001.</p>
+        <div class="src">GU 244/1942</div></article>
+      <article class="event"><span class="yr">1964</span><span class="au">ICOMOS</span>
+        <h4>Carta di Venezia ICOMOS: conservazione e restauro di monumenti e siti</h4>
+        <p>16 articoli + 7 titoli. Documento fondante del restauro moderno: rispetto del materiale originale, distinguibilità degli inserimenti, documentazione obbligatoria, restauro che si arresta dove inizia l'ipotesi. Adottata da ICOMOS nel 1965.</p>
+        <div class="src">ICOMOS, icomos.org/images/DOCUMENTS/Charters/venice_e.pdf</div></article>
+      <article class="event"><span class="yr">1971</span><span class="au">Repubblica Italiana</span>
+        <h4>L. 1086/1971: opere in cemento armato e a struttura metallica</h4>
+        <p>Introduce per la prima volta in Italia l'obbligo del collaudo statico per opere in c.a., c.a.p. e metallo. Direttore Lavori, calcoli statici, denuncia al Genio Civile. Disposizioni poi assorbite nel DPR 380/2001 (artt. 64-67) e nelle NTC 2018.</p>
+        <div class="src">GU 321/1971</div></article>
+      <article class="event"><span class="yr">1972</span><span class="au">Cesare Brandi e collaboratori</span>
+        <h4>Carta Italiana del Restauro 1972 (Brandi)</h4>
+        <p>Istruzioni per il restauro dei beni di interesse storico, artistico e archeologico. Completa la dottrina italiana del restauro critico-conservativo. Fondamento dell'approccio italiano al restauro.</p>
+        <div class="src">Ministero Pubblica Istruzione, Circolare 117/1972</div></article>
+      <article class="event"><span class="yr">1974</span><span class="au">Repubblica Italiana</span>
+        <h4>L. 64/1974: costruzioni nelle zone sismiche</h4>
+        <p>Disciplina cogente delle costruzioni in zona sismica. Obbligo di autorizzazione preventiva al Genio Civile. Disposizioni evolute fino alle NTC 2018 e all'OPCM 3274/2003 (classificazione sismica nazionale).</p>
+        <div class="src">GU 76/1974</div></article>
+      <article class="event"><span class="yr">1979</span><span class="au">Australia ICOMOS</span>
+        <h4>Carta di Burra (Australia ICOMOS)</h4>
+        <p>Carta multidimensionale per la gestione dei luoghi di significato culturale. Introduce il concetto di cultural significance e lo Statement of Significance. Revisionata 1981, 1988, 1999, 2013. Internazionalmente influente.</p>
+        <div class="src">Australia ICOMOS, australia.icomos.org</div></article>
+      <article class="event"><span class="yr">1985</span><span class="au">Repubblica Italiana</span>
+        <h4>Legge Galasso 431/1985: tutela paesaggistica</h4>
+        <p>Estende la tutela paesaggistica a fasce costiere, fluviali, lacuali, montagne sopra i 1600 m, ghiacciai, parchi, foreste, vulcani, zone umide e archeologiche. Disposizioni poi assorbite nel D.Lgs 42/2004 Parte III.</p>
+        <div class="src">GU 197/1985</div></article>
+      <article class="event"><span class="yr">1992</span><span class="au">Repubblica Italiana</span>
+        <h4>Legge 257/1992: cessazione dell'impiego dell'amianto</h4>
+        <p>Bandisce la produzione, importazione, commercializzazione e uso dell'amianto. Disciplina rimozione e bonifica. Albo Gestori Ambientali Categoria 10. Riferimento per ogni demolizione su edifici ante-1992.</p>
+        <div class="src">GU 87/1992</div></article>
+      <article class="event"><span class="yr">2001</span><span class="au">Repubblica Italiana</span>
+        <h4>DPR 380/2001: Testo Unico dell'edilizia</h4>
+        <p>Riordina e unifica la normativa edilizia. Definisce 6 categorie di intervento (art. 3) e i corrispondenti titoli abilitativi (CILA, SCIA, PdC). Riferimento cardine per ogni cantiere edilizio in Italia. Modificato piu volte (Salva Casa 2024).</p>
+        <div class="src">GU 245/2001, Bosetti &amp; Gatti</div></article>
+      <article class="event"><span class="yr">2004</span><span class="au">Repubblica Italiana</span>
+        <h4>D.Lgs 42/2004: Codice dei beni culturali e del paesaggio</h4>
+        <p>Riforma organica della tutela. Sostituisce L. 1089/1939 e L. 431/1985. Definisce vincoli (artt. 10-13), autorizzazione preventiva Soprintendenza (art. 21), conservazione (art. 29), sanzioni (artt. 160-169), paesaggio (Parte III).</p>
+        <div class="src">GU 45/2004, Bosetti &amp; Gatti</div></article>
+      <article class="event"><span class="yr">2005</span><span class="au">UNI</span>
+        <h4>UNI 11150-3:2005 e UNI 11150-4:2005</h4>
+        <p>Norme italiane sulla qualificazione degli interventi sui beni di interesse storico, architettonico e culturale. Parte 3: attivita analitiche/diagnostiche. Parte 4: sviluppo della progettazione di riqualificazione.</p>
+        <div class="src">UNI Store, InfoBuild</div></article>
+      <article class="event"><span class="yr">2008</span><span class="au">Repubblica Italiana</span>
+        <h4>D.Lgs 81/2008: Testo Unico salute e sicurezza nei luoghi di lavoro</h4>
+        <p>Riordina la sicurezza sul lavoro. Sostituisce il D.Lgs 626/1994. Titolo IV (artt. 88-160) e Allegato XV: cantieri temporanei o mobili, PSC, POS, CSP, CSE, notifica preliminare ASL. Revisionato continuamente.</p>
+        <div class="src">GU 101/2008, Olympus Uniurb</div></article>
+      <article class="event"><span class="yr">2009</span><span class="au">Repubblica Italiana</span>
+        <h4>DM 86/2009: profili professionali del Restauratore di Beni Culturali</h4>
+        <p>Definisce qualifica e formazione del Restauratore certificato. Solo i Restauratori iscritti all'Albo MiC possono firmare progetti di restauro su beni vincolati (D.Lgs 42/2004). Albo MiC, durata corso, esame di abilitazione.</p>
+        <div class="src">GU 162/2009</div></article>
+      <article class="event"><span class="yr">2015</span><span class="au">MiSE / MATTM</span>
+        <h4>DM 26/06/2015: requisiti minimi di prestazione energetica degli edifici</h4>
+        <p>Recepisce la Direttiva 2010/31/UE (EPBD). Regolamenta APE (Attestato Prestazione Energetica), classi energetiche A4-G, indici EP e verifiche fRsi per nuove costruzioni e ristrutturazioni rilevanti. Cogente per ogni cantiere edilizio.</p>
+        <p class="nb"><strong>Aggiornamento (verificato giu 2026):</strong> il DM 26/06/2015 e stato sostituito dal nuovo decreto requisiti minimi DM 28/10/2025 (GU n. 283 del 05/12/2025, in vigore 03/06/2026, periodo transitorio 180 giorni).</p>
+        <div class="src">GU Suppl. ord. 162/2015</div></article>
+      <article class="event"><span class="yr">2017</span><span class="au">UNI</span>
+        <h4>UNI 11337-1/-4/-5/-7:2017: BIM nazionale</h4>
+        <p>Norma BIM italiana. Modelli ed elaborati informativi (parte 1), Levels of Development LOD (parte 4), flussi informativi (parte 5), figure professionali BIM (parte 7). Aggiornata progressivamente fino al 2025.</p>
+        <div class="src">UNI Store</div></article>
+      <article class="event"><span class="yr">2017</span><span class="au">Repubblica Italiana</span>
+        <h4>DM 560/2017 (decreto Baratono): introduzione progressiva del BIM negli appalti pubblici</h4>
+        <p>Calendario dell'obbligo BIM nelle opere pubbliche, per soglie di importo decrescenti dal 2019 in poi. Soglie poi modificate dal D.Lgs 36/2023.</p>
+        <div class="src">GU 13/2018</div></article>
+      <article class="event"><span class="yr">2018</span><span class="au">Repubblica Italiana</span>
+        <h4>NTC 2018 (DM 17/01/2018) e Circolare 21/01/2019 n. 7</h4>
+        <p>Aggiorna le NTC 2008. Verifica sismica, costruzioni in zona sismica, costruzioni esistenti (par. 8: interventi locali, miglioramento, adeguamento). Recepisce gli Eurocodici. Cogente per ogni intervento strutturale.</p>
+        <div class="src">GU 42/2018</div></article>
+      <article class="event"><span class="yr">2018</span><span class="au">ISO</span>
+        <h4>ISO 19650-1:2018 e ISO 19650-2:2018: BIM internazionale</h4>
+        <p>Standard mondiale per la gestione delle informazioni nel BIM durante l'intero ciclo di vita degli asset. Concepts and principles (parte 1), Delivery phase (parte 2). Recepiti come UNI EN ISO 19650-1/-2:2019.</p>
+        <div class="src">ISO, iso.org</div></article>
+      <article class="event"><span class="yr">2020</span><span class="au">ISO</span>
+        <h4>ISO 21502:2020: guida al project management</h4>
+        <p>Linee guida pratiche di project management: governance, lifecycle, planning, risk, stakeholder, qualita. Sostituisce ISO 21500:2012 nelle parti operative. Allineata alla PMBOK Guide.</p>
+        <div class="src">ISO, iso.org/standard/74947.html</div></article>
+      <article class="event"><span class="yr">2022</span><span class="au">MASE</span>
+        <h4>DM 23/06/2022: CAM Edilizia 2022 (in vigore fino al 31/01/2026)</h4>
+        <p>Criteri Ambientali Minimi per l'affidamento di progettazione e lavori di interventi edilizi. Specifiche tecniche di sostenibilita, requisiti dei materiali, percentuali di contenuto riciclato. Cogente per gli appalti pubblici.</p>
+        <div class="src">GU Suppl. ord. 183/2022, MASE</div></article>
+      <article class="event"><span class="yr">2023</span><span class="au">Repubblica Italiana</span>
+        <h4>D.Lgs 36/2023: nuovo Codice dei Contratti Pubblici</h4>
+        <p>Sostituisce il D.Lgs 50/2016. Art. 57 c. 2: obbligatorieta dei CAM negli appalti pubblici. Recepisce le direttive 2014/24/UE e 2014/25/UE. Riforma le procedure di gara e introduce la digitalizzazione.</p>
+        <div class="src">GU Suppl. ord. 77/2023</div></article>
+      <article class="event"><span class="yr">2024</span><span class="au">Repubblica Italiana</span>
+        <h4>Decreto Salva Casa (DL 69/2024 conv. L. 105/2024): modifiche al DPR 380/2001</h4>
+        <p>Modifica gli artt. 6, 6-bis, 22, 36 del DPR 380. Amplia le opere in CILA, ammette regolarizzazioni di abusi minori, semplifica per dehors e tolleranze costruttive. Impatta sull'identificazione dei titoli abilitativi.</p>
+        <div class="src">GU 233/2024, Bosetti &amp; Gatti</div></article>
+      <article class="event"><span class="yr">2025</span><span class="au">MASE</span>
+        <h4>DM MASE 24/11/2025: CAM Edilizia 2026 (GU n. 281 del 03/12/2025)</h4>
+        <p>Sostituisce il DM 23/06/2022. In vigore dal 02/02/2026. Il criterio 2.3.13 dell'Allegato 1 prescrive, per il risanamento dell'umidita, una diagnosi tecnica obbligatoria basata su metodi normati (UNI 11085, BRE 245, BS 6576, WTA 4-5) prima dell'intervento.</p>
+        <p class="nb"><strong>Verificato (giu 2026):</strong> DM 24/11/2025, GU n. 281 del 03/12/2025, in vigore 02/02/2026 (fonte MASE).</p>
+        <div class="src">MASE, mase.gov.it/portale/cam-vigenti, ANIT</div></article>
+      <article class="event"><span class="yr">2025</span><span class="au">Repubblica Italiana</span>
+        <h4>01/01/2025: BIM obbligatorio per appalti pubblici oltre 2 M&euro;</h4>
+        <p>Termine fissato da D.Lgs 36/2023 e DM 560/2017 (modificato): BIM obbligatorio per le stazioni appaltanti pubbliche per opere di importo superiore a 2 milioni di euro. Spinta verso la digitalizzazione del settore costruzioni.</p>
+        <p class="nb"><strong>Da confermare:</strong> soglia e decorrenza da riverificare sul testo vigente del D.Lgs 36/2023.</p>
+        <div class="src">D.Lgs 36/2023, DM 560/2017</div></article>
+      <article class="event"><span class="yr">2025</span><span class="au">RICS</span>
+        <h4>31/01/2025: RICS Red Book Global Standards 2025</h4>
+        <p>Aggiornamento dello standard internazionale per la valutazione immobiliare. Allineato a IVS 2025, con focus su ESG, fattori climatici e sostenibilita. Riferimento mondiale per i surveyors.</p>
+        <p class="nb"><strong>Da confermare:</strong> data di pubblicazione e denominazione esatta da verificare su rics.org.</p>
+        <div class="src">RICS, rics.org</div></article>
+      <article class="event"><span class="yr">2026</span><span class="au">MASE</span>
+        <h4>02/02/2026: entrata in vigore del DM MASE 24/11/2025 (CAM Edilizia 2026)</h4>
+        <p>Data cardine: dal 02/02/2026 ogni nuova gara pubblica per progettazione o esecuzione di interventi edilizi deve applicare il nuovo CAM. Per il risanamento dell'umidita (criterio 2.3.13) la diagnosi normata diventa requisito.</p>
+        <p class="nb"><strong>Da confermare:</strong> decorrenza da riverificare alla fonte MASE.</p>
+        <div class="src">MASE, mase.gov.it</div></article>
+    </div></section>
+  <footer class="ft"><strong>Mixando Lab &middot; Storia della diagnostica del costruito</strong> &middot; Un modulo, una scheda per tema. Ogni tappa con fonte verificabile. Acustica: 40 tappe &middot; Termografia: 18 tappe &middot; altri temi in arrivo (verificati).</footer>
+</main>
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  var panels=[].slice.call(document.querySelectorAll('.panel'));
+  function show(key){
+    tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.topic===key); });
+    panels.forEach(function(p){ p.classList.toggle('show', p.dataset.topic===key); });
+    try{ history.replaceState(null,'','#'+key); }catch(e){}
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  tabs.forEach(function(t){ t.addEventListener('click', function(){ show(t.dataset.topic); }); });
+  var h=(location.hash||'').replace('#','');
+  if(h && document.querySelector('.panel[data-topic="'+h+'"]')) show(h);
+})();
+</script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

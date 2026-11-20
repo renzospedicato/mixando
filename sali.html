@@ -1,0 +1,1073 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mixando Lab · Diagnosi Sali nelle Murature v3.0</title>
+<style>
+:root{--mx-accent:#d4564e;--mx-accent-strong:#9c1f17;--mx-accent-soft:rgba(212,86,78,.12);
+--bg:#f5f1e8;--paper:#fff;--ink:#2c1810;--ink-soft:#6b5c4c;--ink-mute:#8b7355;
+--line:#e6e0d2;--ok:#1f7a4d;--warn:#b07820;--err:#a83232;--r:14px;
+--ff-serif:Georgia,"Cambria",serif;--ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+--ff-mono:ui-monospace,"SF Mono",Consolas,monospace;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:0px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--paper);border-bottom:3px solid var(--mx-accent);box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.mx-bar .em{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--mx-accent);color:#fff}
+.mx-bar .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mx-accent);line-height:1}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:14px;color:var(--ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:6px 12px;border:1px solid var(--mx-accent);border-radius:8px}
+.mx-bar a.back:hover{background:var(--mx-accent);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 22px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:720px;color:var(--ink-soft);font-size:14px}
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
+.ana-strip .pc{padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700;color:var(--ink)}
+.ana-strip .pc .m{font-size:11.5px;color:var(--ink-mute);margin-top:2px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card .body{padding:16px 18px}
+.stepper{display:flex;flex-wrap:wrap;gap:5px;padding:10px;background:#fafaf6;border:1px solid var(--line);border-radius:10px;margin-bottom:14px}
+.step-chip{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink-mute);padding:6px 11px;border-radius:14px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .15s}
+.step-chip.done{border-color:var(--ok);color:var(--ok);background:#e8f5e9}
+.step-chip.active{color:#fff;border-color:#0a5b64;background:linear-gradient(180deg,#18a4b0,#0e7c87 55%,#0a5b64);box-shadow:0 2px 7px rgba(14,124,135,.34),inset 0 1px 0 rgba(255,255,255,.34);text-shadow:0 1px 1px rgba(0,0,0,.22)}
+.step-chip:hover:not(.active){border-color:var(--mx-accent);color:var(--mx-accent-strong);background:var(--mx-accent-soft)}
+.banner{margin:8px 0 14px;padding:10px 14px;border-radius:9px;font-size:12.5px;line-height:1.55}
+.banner.blue{background:#e3f2fd;border-left:4px solid #1976d2;color:#0d47a1}
+.banner.yellow{background:#fff8e1;border-left:4px solid #f9a825;color:#7d5a1f}
+.banner.green{background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20}
+.banner.red{background:#ffebee;border-left:4px solid var(--err);color:#7f0000}
+.banner strong{font-weight:800}
+.step-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.step-head h4{margin:0;font-family:var(--ff-serif);font-size:18px;color:var(--ink);font-weight:700}
+.step-head .ref{font-size:11px;color:var(--ink-mute);font-style:italic;background:#faf8f3;padding:4px 10px;border-radius:7px;border:1px solid var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em}
+.fld label .opz{font-weight:400;color:var(--ink-mute);font-size:10.5px}
+.fld input,.fld select,.fld textarea{padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13.5px;background:#fff;outline:none;width:100%;color:var(--ink)}
+.fld input[type=number]{font-family:var(--ff-mono)}
+.fld textarea{min-height:60px;resize:vertical;font-family:inherit}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.fld .calc{background:#faf8f3 !important;font-family:var(--ff-mono);font-weight:700}
+.chkgrp{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.chkgrp label{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border:1px solid var(--line);border-radius:18px;font-size:12px;cursor:pointer;background:#fff;font-weight:600;color:var(--ink-soft);transition:all .15s}
+.chkgrp label:has(input:checked){border-color:var(--mx-accent);background:var(--mx-accent-soft);color:var(--mx-accent-strong)}
+.chkgrp input{margin:0}
+.radio-row{display:flex;flex-wrap:wrap;gap:6px}
+.radio-row label{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;cursor:pointer;background:#fff;font-weight:700;color:var(--ink-soft);transition:all .15s}
+.radio-row label:has(input:checked){border-color:var(--mx-accent);background:var(--mx-accent);color:#fff}
+.radio-row input{display:none}
+.step-nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+.mx-shiny{appearance:none;border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;letter-spacing:.04em;padding:11px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap}
+.mx-shiny::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-shiny:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-shiny:hover::before{transform:translateX(130%)}
+.mx-shiny:active{transform:translateY(0) scale(.98);transition-duration:.05s}
+.s-blue{background-image:linear-gradient(135deg,#42a5f5 0%,#1565c0 45%,#0d47a1 100%);box-shadow:0 3px 10px rgba(21,101,192,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.s-gray{background-image:linear-gradient(135deg,#bdbdbd 0%,#757575 45%,#424242 100%);box-shadow:0 3px 10px rgba(97,97,97,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.s-violet{background-image:linear-gradient(135deg,#ab47bc 0%,#6a1b9a 45%,#3e0a5b 100%);box-shadow:0 3px 10px rgba(106,27,154,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+/* Toolbar standard pattern Glaser */
+.mx-toolbar{background:#fff;border:1px solid #e6e0d2;border-radius:14px;box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin:18px 0 14px;overflow:hidden}
+.mx-toolbar-head{margin:0;padding:13px 18px;font-family:Georgia,serif;font-size:15px;color:#2c1810;font-weight:700;border-bottom:1px solid #e6e0d2;background:linear-gradient(180deg,rgba(212,86,78,.10),#fff);display:flex;align-items:center;gap:10px}
+.mx-toolbar-head .ico-wrap{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.mx-toolbar-head .title{flex:1}
+.mx-toolbar-head .title small{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-style:italic;font-size:11.5px;color:#8b7355;font-weight:500;letter-spacing:0;margin-top:2px}
+.mx-toolbar-body{padding:14px 18px 16px}
+.mx-toolbar-hint{text-align:center;font-size:12px;color:#8b7355;font-style:italic;margin-bottom:10px;padding:6px 10px;background:#fffbef;border-radius:7px;border:1px dashed #e0d7b8;display:none}
+.mx-toolbar-inner{max-width:1080px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.mx-tb-btn{appearance:none;border:0;color:#fff;font:inherit;font-size:13px;font-weight:700;letter-spacing:.02em;padding:12px 18px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);box-shadow:0 3px 8px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.12);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease,background-position .35s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap}
+.mx-tb-btn::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-tb-btn:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-tb-btn:hover::before{transform:translateX(130%)}
+.mx-tb-btn:active{transform:translateY(0) scale(.98);transition-duration:.05s}
+.mx-tb-btn .ico{font-size:16px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.mx-tb-btn.tb-save{background-image:linear-gradient(135deg,#64b5f6 0%,#1976d2 45%,#0d47a1 100%);box-shadow:0 3px 10px rgba(25,118,210,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-load{background-image:linear-gradient(135deg,#ffb74d 0%,#f57c00 45%,#bf360c 100%);box-shadow:0 3px 10px rgba(245,124,0,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-compare{background-image:linear-gradient(135deg,#ba68c8 0%,#7b1fa2 45%,#311b92 100%);box-shadow:0 3px 10px rgba(123,31,162,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-word{background-image:linear-gradient(135deg,#5a9bd8 0%,#2b579a 45%,#0c2e5e 100%);box-shadow:0 3px 10px rgba(43,87,154,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-pdf{background-image:linear-gradient(135deg,#ef5350 0%,#c62828 45%,#7f0000 100%);box-shadow:0 3px 10px rgba(198,40,40,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-report{background-image:linear-gradient(135deg,#ffd54f 0%,#f9a825 45%,#e65100 100%);color:#3e2e00;text-shadow:0 1px 0 rgba(255,255,255,.45);box-shadow:0 3px 10px rgba(249,168,37,.50),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -2px 4px rgba(0,0,0,.10)}
+.mx-tb-btn.tb-reset{background-image:linear-gradient(135deg,#9e9e9e 0%,#616161 45%,#212121 100%);box-shadow:0 3px 10px rgba(97,97,97,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.verdict{padding:18px;border-radius:12px;margin-top:14px;border:2px solid;text-align:center}
+.verdict.ok{background:#e8f5e9;border-color:var(--ok);color:#1b5e20}
+.verdict.warn{background:#fff8e1;border-color:#f9a825;color:#7d5a1f}
+.verdict.err{background:#ffebee;border-color:var(--err);color:#7f0000}
+.verdict .lbl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.verdict .v{font-family:var(--ff-serif);font-style:italic;font-size:22px;font-weight:700;margin-bottom:4px}
+.verdict .s{font-size:12.5px;line-height:1.55}
+.salt-card{background:#fff;border:2px solid var(--line);border-radius:10px;padding:14px 16px;margin:6px 0;cursor:pointer;transition:all .15s}
+.salt-card.active{border-color:var(--mx-accent);background:var(--mx-accent-soft)}
+.salt-card .nm{font-weight:800;font-size:15px;color:var(--ink);font-family:var(--ff-serif)}
+.salt-card .fm{font-family:var(--ff-mono);font-size:12px;color:var(--mx-accent-strong);margin-top:2px}
+.salt-card .info{font-size:11.5px;color:var(--ink-soft);margin-top:6px;line-height:1.5}
+.salt-card .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.salt-card .tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:#faf8f3;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase}
+.salt-card .tag.high{background:#ffebee;color:#c62828}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:28px 12px}
+.modal.show{display:flex}
+.modal-paper{background:#fff;max-width:840px;width:100%;border-radius:12px;box-shadow:0 18px 60px rgba(0,0,0,.4);overflow:hidden}
+.modal-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.modal-head h3{margin:0;font-family:var(--ff-serif);font-size:16px;color:var(--ink)}
+.modal-close{appearance:none;border:0;background:#f5f1e8;color:var(--ink);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:17px;font-weight:800}
+.modal-body{padding:24px 28px;font-family:Georgia,serif;color:var(--ink);font-size:13px;line-height:1.6}
+.modal-body h1{font-size:22px;margin:0 0 12px;font-weight:700;font-style:italic;color:var(--ink)}
+.modal-body h2{font-size:15px;margin:22px 0 8px;color:var(--mx-accent-strong);border-bottom:1px solid #d8d3c4;padding-bottom:4px}
+.modal-body table{width:100%;border-collapse:collapse;margin:10px 0;font-size:11.5px}
+.modal-body table th,.modal-body table td{padding:5px 7px;border-bottom:1px solid var(--line);text-align:left}
+.modal-body table th{background:#faf8f3;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
+.modal-actions{padding:12px 18px;border-top:1px solid var(--line);background:#faf8f3;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.dlg-list{max-height:50vh;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:#faf8f3}
+.dlg-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px}
+.dlg-empty{padding:30px;text-align:center;color:var(--ink-mute);font-style:italic;font-size:13px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:10px;font-size:13.5px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.32);z-index:300;opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);max-width:88vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:var(--ok)}.toast.err{background:var(--err)}.toast.warn{background:var(--warn)}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+@media (max-width:760px){.grid2,.grid3,.grid4,.ana-strip{grid-template-columns:1fr}}
+@media print{body * {visibility:hidden !important}.mx-print, .mx-print * {visibility:visible !important}.mx-print{position:absolute;left:0;top:0;width:100%;padding:24px}}
+.mx-logo-mini{height:32px;width:32px;border-radius:8px;background:#fff;padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.12);object-fit:contain;flex-shrink:0;display:none;border:1px solid var(--line,#e6e0d2)}
+.mx-bar.has-logo .em{display:none}
+
+.mx-bar{position:relative}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}}
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:0px !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:0px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab"><img id="mxLogoPerito" class="mx-logo-mini" alt="Logo perito">
+  <div class="meta"><span class="tag">Patologia · Sali</span><h1 class="ti">Diagnosi Sali nelle Murature · v3.0</h1></div>
+  <a class="back" href="suite.html">← Suite</a>
+</header>
+<main>
+  <section class="hero">
+    <h2>Diagnosi <em>Sali nelle Murature</em></h2>
+    <p>Wizard 7 step: caratterizzazione ambientale, rilievo visivo efflorescenze, test ionici (Cl⁻ / NO₃⁻ / SO₄²⁻ / pH), classificazione carico salino, identificazione sale prevalente, compatibilità intonaco, scelta del trattamento.</p>
+    <div style="margin-top:14px"><a href="assistente.html?skill=sali" target="_blank" rel="noopener" style="display:inline-block;background-image:linear-gradient(135deg,#c79a3a,#b8860b 55%,#7a5a07);color:#fff;font-weight:800;font-size:13.5px;text-decoration:none;padding:11px 18px;border-radius:10px;box-shadow:0 3px 10px rgba(184,134,11,.34)">💬 Assistente sali: dammi i test ionici, ti dico carico e deliquescenza</a></div>
+  </section>
+  <div class="ana-strip">
+    <div class="pc" id="anaPerito"><div class="h">Perito / tecnico</div><div class="n">n.d.</div><div class="m"></div></div>
+    <div class="pc" id="anaCliente"><div class="h">Committente / immobile</div><div class="n">n.d.</div><div class="m"></div></div>
+  </div>
+  <div style="text-align:center;margin-bottom:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+    <a href="locali-cantiere.html" target="_blank" style="font-size:12px;color:var(--mx-accent-strong);font-weight:700;text-decoration:none;border:1px solid var(--mx-accent);padding:6px 13px;border-radius:8px">⚙ Modifica in Locali-Cantiere</a>
+    <button type="button" class="mx-shiny" id="btnReloadAna" style="padding:6px 13px;font-size:11.5px;background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);box-shadow:0 3px 10px rgba(46,125,50,.42)">↻ Ricarica anagrafica</button>
+  </div>
+  <article class="card">
+    <div class="body">
+      <div class="stepper" id="stepper"></div>
+      <div id="difLive"></div>
+      <div id="stepPanel"></div>
+      <div class="step-nav">
+        <button type="button" class="mx-shiny s-gray" id="btnPrev">← Indietro</button>
+        <button type="button" class="mx-shiny" id="btnNext" style="background-image:linear-gradient(135deg,#e57373 0%,#c62828 45%,#7f0000 100%);box-shadow:0 3px 10px rgba(198,40,40,.42)">Avanti →</button>
+        <button type="button" class="mx-shiny s-violet" id="btnFinish" style="display:none">✓ Concludi diagnosi</button>
+      </div>
+    </div>
+  </article>
+  <div class="mx-toolbar" id="mxToolbar">
+    <h3 class="mx-toolbar-head">
+      <span class="ico-wrap">💾</span>
+      <span class="title">Salvataggio &amp; esportazione<small>Salva l'analisi, ricarica un'analisi precedente o esporta in Word/PDF per la relazione tecnica</small></span>
+    </h3>
+    <div class="mx-toolbar-body">
+      <div class="mx-toolbar-inner">
+        <button type="button" class="mx-tb-btn tb-save"    id="btnSave"><span class="ico">💾</span><span class="label">Salva</span></button>
+        <button type="button" class="mx-tb-btn tb-load"    id="btnLoad"><span class="ico">📁</span><span class="label">Carica</span></button>
+        <button type="button" class="mx-tb-btn tb-compare" id="btnCompare"><span class="ico">⚖</span><span class="label">Confronta</span></button>
+        <button type="button" class="mx-tb-btn tb-word"    id="btnWord"><span class="ico">📝</span><span class="label">Salva Word</span></button>
+        <button type="button" class="mx-tb-btn tb-pdf"     id="btnPDF"><span class="ico">📄</span><span class="label">Stampa / PDF</span></button>
+        <button type="button" class="mx-tb-btn tb-report"  id="btnReport"><span class="ico">📦</span><span class="label">Al report</span></button>
+        <button type="button" class="mx-tb-btn" id="btnAggancia" style="background-image:linear-gradient(135deg,#26a69a,#00897b 45%,#004d40);box-shadow:0 3px 10px rgba(0,137,123,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)" onclick="_mxAggancialMappa()"><span class="ico">&#128205;</span><span class="label">Aggancia alla mappa</span></button>
+        <button type="button" class="mx-tb-btn tb-reset"   id="btnReset"><span class="ico">✕</span><span class="label">Reset</span></button>
+      </div>
+    </div>
+  </div>
+  <footer class="ft">
+    Mixando v3 · <strong>Modulo Sali v3.1</strong> · UNI 11087:2003 (ritirata 2016, oggi EN 16455) · UNI EN 16455:2014 · UNI 11182:2006 · WTA 2-9-20/D (2020) · WTA 3-13-19/D · Doehne &amp; Price 2010 · Charola 2000 · Arnold &amp; Zehnder 1989.
+  </footer>
+</main>
+<div class="modal" id="dlgModal" role="dialog" aria-modal="true">
+  <div class="modal-paper" style="max-width:600px">
+    <div class="modal-head"><h3 id="dlgTitle">Dialog</h3><button class="modal-close" id="dlgCloseBtn">&times;</button></div>
+    <div class="modal-body" id="dlgBody" style="padding:18px 20px;font-family:var(--ff-sans)"></div>
+    <div class="modal-actions" id="dlgActions"></div>
+  </div>
+</div>
+<div class="modal" id="docModal" role="dialog" aria-modal="true">
+  <div class="modal-paper">
+    <div class="modal-head"><h3>📑 Anteprima documento</h3><button class="modal-close" id="modalCloseBtn">&times;</button></div>
+    <div class="modal-body mx-print" id="docBody"></div>
+    <div class="modal-actions">
+      <button type="button" class="mx-shiny" id="btnDoExportWord" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#5a9bd8,#2b579a 45%,#0c2e5e);box-shadow:0 3px 10px rgba(43,87,154,.42)">📑 Scarica .doc</button>
+      <button type="button" class="mx-shiny" id="btnDoExportPDF" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000);box-shadow:0 3px 10px rgba(198,40,40,.42)">📄 Stampa / PDF</button>
+      <button type="button" class="mx-shiny s-blue" id="btnDoExportJSON" style="padding:8px 14px;font-size:12px">💾 .json</button>
+      <button type="button" class="mx-shiny s-gray" id="btnCloseModal" style="padding:8px 14px;font-size:12px">Chiudi</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+/* Mini-logo perito da mx2::perito.logoData */
+(function(){
+  function loadLg(){
+    try{
+      var p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");
+      var img=document.getElementById("mxLogoPerito");
+      var bar=document.querySelector(".mx-bar");
+      if(img && p && p.logoData){ img.src=p.logoData; img.style.display="block"; if(bar)bar.classList.add("has-logo"); }
+      else { if(img)img.style.display="none"; if(bar)bar.classList.remove("has-logo"); }
+    }catch(e){}
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",loadLg);
+  else loadLg();
+})();
+
+const DRAFT_KEY="mx2::sali-draft", SAVES_KEY="mx2::sali-saves";
+const STEPS=[
+  {id:"amb",   label:"1. Ambiente",                   src:"clima locale + UR esterna"},
+  {id:"riv",   label:"2. Rilievo visivo",             src:"efflorescenze + posizione + pattern"},
+  {id:"ion",   label:"3. Test ionici",                src:"Cl⁻ NO₃⁻ SO₄²⁻ CO₃²⁻ + pH (UNI 11087 (ritirata 2016, oggi EN 16455))"},
+  {id:"carico",label:"4. Classificazione carico",     src:"WTA 4-5-99/D"},
+  {id:"sale",  label:"5. Sale prevalente",            src:"DB 19 sali Doehne-Price 2010"},
+  {id:"comp",  label:"6. Compatibilità intonaco",     src:"WTA 2-9 sanierputz + UNI EN 998-1"},
+  {id:"trat",  label:"7. Trattamento",                src:"WTA 2-9-20/D (intonaci di risanamento)"}
+];
+const OPERATOR_SALI_IDS = ['amb','riv','ion','sale','trat'];
+function getActiveSteps(){ return (STATE.mode==='operatore') ? STEPS.filter(s=>OPERATOR_SALI_IDS.indexOf(s.id)>=0) : STEPS; }
+/* Database sali principali (riferimento Doehne & Price 2010, Charola 2000, Arnold 1982) */
+const SALI_DB=[{id:"nacl",phMatch:["neutro"],effervescence:false,name:"Cloruro di sodio",formula:"NaCl",mineral:"Halite",category:"Cloruri",morphology:["croste_compatte","croste","granulare"],color:["bianco","trasparente","grigio"],hygroscopic:true,hygroscopicLevel:"alto",rhEq:75.3,solubility:"alta",solubilityG:359,damageType:"cristallizzazione ciclica",location:["bassa","media"],distribution:["fascia","diffusa"],environment:["marino","stradale","suolo"],materials:["tutti"],ionTest:{cloruri:true,sodio:true},phRange:"neutro",destructive:"medio-alto",crystalSystem:"Cubico",notes:"Forma croste granulari e granuli grossolani. Spesso associato ad ambienti marini o sali antigelo stradali. Altamente igroscopico: cicli dissoluzione/ricristallizzazione con variazioni di UR.",techNotes:"Equilibrio di fase a 75.3% UR (25°C). Pressione di cristallizzazione fino a 55 MPa. Trasporto ionico facilitato dalla sua alta solubilità. La deliquescenza causa zone permanentemente umide in ambienti costieri.",references:"Doehne & Price (2010); Charola (2000); BRE Digest 245",fieldTip:"Se l'efflorescenza scompare nelle giornate umide e ricompare in quelle secche, è molto probabilmente un sale igroscopico come NaCl."},{id:"na2so4",phMatch:["neutro","alcalino"],effervescence:false,name:"Solfato di sodio",formula:"Na₂SO₄ / Na₂SO₄·10H₂O",mineral:"Thenardite / Mirabilite",category:"Solfati",morphology:["whiskers","efflorescenza_polverosa","croste"],color:["bianco"],hygroscopic:true,hygroscopicLevel:"moderato",rhEq:87,solubility:"alta",solubilityG:195,damageType:"transizione thenardite↔mirabilite",location:["bassa","media"],distribution:["fascia","localizzata"],environment:["urbano","industriale","cemento"],materials:["laterizio","cemento","pietra_calcarea"],ionTest:{solfati:true,sodio:true},phRange:"neutro-alcalino",destructive:"molto alto",crystalSystem:"Ortorombico / Monoclino",notes:"Tra i sali più distruttivi per le murature. La transizione thenardite→mirabilite comporta un aumento di volume del 314% ed esercita pressioni di cristallizzazione devastanti.",techNotes:"Transizione di fase a circa 32.4°C. Mirabilite (10H₂O) stabile sotto 32.4°C. Volume molare mirabilite = 220 cm³ vs thenardite = 53 cm³. Pressione di cristallizzazione fino a 100 MPa. Test standard EN 12370 usa proprio Na₂SO₄.",references:"Doehne & Price (2010); Rodriguez-Navarro & Doehne (1999); Flatt (2002); Tsui et al. (2003)",fieldTip:"Efflorescenza bianca polverosa che causa visibile disgregazione del supporto (spalling, esfoliazione). Spesso legata all'uso di cemento in restauro."},{id:"caso4",phMatch:["neutro"],effervescence:false,name:"Solfato di calcio",formula:"CaSO₄·2H₂O",mineral:"Gesso",category:"Solfati",morphology:["croste_compatte","velo","croste"],color:["bianco","grigio","giallastro"],hygroscopic:false,hygroscopicLevel:"nullo",rhEq:null,solubility:"molto bassa",solubilityG:2.4,damageType:"crosta superficiale, black crust",location:["tutte"],distribution:["diffusa","localizzata"],environment:["urbano","industriale","inquinamento_SO2"],materials:["pietra_calcarea","marmo","laterizio","cemento"],ionTest:{solfati:true,calcio:true},phRange:"neutro",destructive:"basso-moderato",crystalSystem:"Monoclino",notes:"Forma croste dure e tenaci. In ambiente urbano inquinato si presenta come 'black crust' (crosta nera) per inclusione di particolato. Bassa solubilità lo rende poco mobile ma persistente.",techNotes:"Solubilità molto bassa (2.4 g/L a 20°C) limita il trasporto ma rende la rimozione difficile. Formazione da reazione SO₂/SO₃ atmosferico con CaCO₃ del substrato. Croste nere tipiche su superfici riparate dalla pioggia.",references:"Charola (2000); Sabbioni et al. (2001); Camuffo (1998)",fieldTip:"Crosta dura, non polverosa, che non si scioglie facilmente con acqua. Se grigio-nera in zona urbana, quasi certamente gesso + particolato."},{id:"kno3",phMatch:["neutro"],effervescence:false,name:"Nitrato di potassio",formula:"KNO₃",mineral:"Niter (Salnitro)",category:"Nitrati",morphology:["whiskers","efflorescenza_cotonosa"],color:["bianco"],hygroscopic:true,hygroscopicLevel:"moderato",rhEq:93,solubility:"alta",solubilityG:316,damageType:"cristallizzazione ciclica",location:["bassa"],distribution:["fascia"],environment:["biologico","agricolo","suolo"],materials:["laterizio","pietra","malta_calce"],ionTest:{nitrati:true,potassio:true},phRange:"neutro",destructive:"medio",crystalSystem:"Ortorombico",notes:"Il 'salnitro' classico delle murature umide. Origine biologica: decomposizione di materia organica nel terreno (letame, scarichi, cimiteri storici). Indicatore di contaminazione organica del suolo.",techNotes:"UR di equilibrio 93.2% a 25°C. Altamente solubile con forte dipendenza dalla temperatura (13 g/100mL a 0°C, 247 g/100mL a 100°C). Questa variazione causa cristallizzazione intensa con escursioni termiche.",references:"Arnold & Zehnder (1989); Charola (2000); BRE Digest 245",fieldTip:"Efflorescenze bianche 'a barba' nella parte bassa dei muri in edifici rurali, stalle, cantine storiche. Spesso associato a odore caratteristico."},{id:"caco3",phMatch:["alcalino"],effervescence:true,name:"Carbonato di calcio",formula:"CaCO₃",mineral:"Calcite",category:"Carbonati",morphology:["velo","stalattiti","croste_compatte"],color:["bianco","trasparente"],hygroscopic:false,hygroscopicLevel:"nullo",rhEq:null,solubility:"molto bassa",solubilityG:0.013,damageType:"estetico, ostruzione porosità",location:["tutte"],distribution:["colature","localizzata"],environment:["tutti"],materials:["malta_calce","cemento","calcestruzzo"],ionTest:{carbonati:true,calcio:true},phRange:"alcalino",destructive:"basso",crystalSystem:"Trigonale",notes:"Dilavamento della calce dai giunti di malta o dal calcestruzzo. Forma veli bianchi, colature, o stalattiti. Non igroscopico, danno prevalentemente estetico. Test: reagisce con HCl diluito (effervescenza CO₂).",techNotes:"Praticamente insolubile in acqua pura (0.013 g/L). Solubile in acque acide per formazione di Ca(HCO₃)₂. Il processo di carbonatazione (Ca(OH)₂ + CO₂ → CaCO₃ + H₂O) avviene per lisciviazione della portlandite.",references:"Charola (2000); Cultrone et al. (2005)",fieldTip:"Colature bianche dure sui muri in calcestruzzo o sotto i giunti di malta. Test rapido: una goccia di aceto produce bollicine = carbonato."},{id:"mgso4",phMatch:["neutro"],effervescence:false,name:"Solfato di magnesio",formula:"MgSO₄·7H₂O",mineral:"Epsomite",category:"Solfati",morphology:["whiskers","efflorescenza_cotonosa"],color:["bianco","trasparente"],hygroscopic:true,hygroscopicLevel:"moderato",rhEq:90,solubility:"alta",solubilityG:710,damageType:"transizioni di fase multiple",location:["bassa","media"],distribution:["fascia","diffusa"],environment:["suolo","dolomiti","cemento"],materials:["dolomia","laterizio","cemento"],ionTest:{solfati:true,magnesio:true},phRange:"neutro",destructive:"alto",crystalSystem:"Ortorombico",notes:"Presente dove si usano pietre dolomitiche o malte magnesiache. Multiple transizioni di fase (epsomite↔hexahydrite↔kieserite) lo rendono molto distruttivo.",techNotes:"Epsomite (7H₂O) → hexahydrite (6H₂O) → starkeyite (4H₂O) → kieserite (1H₂O). Ogni transizione genera stress. UR eq. epsomite ~90% a 25°C. Usato come test alternativo a Na₂SO₄ nella EN 12370.",references:"Doehne & Price (2010); Steiger & Asmussen (2008); Ruiz-Agudo et al. (2007)",fieldTip:"Simile al solfato di sodio ma su materiali dolomitici o magnesiaci. Efflorescenza fibrosa, aspetto 'cotonoso'."},{id:"nano3",phMatch:["neutro"],effervescence:false,name:"Nitrato di sodio",formula:"NaNO₃",mineral:"Nitratine",category:"Nitrati",morphology:["efflorescenza_polverosa","croste"],color:["bianco","giallastro"],hygroscopic:true,hygroscopicLevel:"alto",rhEq:74,solubility:"alta",solubilityG:912,damageType:"cristallizzazione ciclica, deliquescenza",location:["bassa"],distribution:["fascia","localizzata"],environment:["biologico","agricolo","suolo"],materials:["laterizio","pietra","malta_calce"],ionTest:{nitrati:true,sodio:true},phRange:"neutro",destructive:"medio-alto",crystalSystem:"Trigonale",notes:"Origine biologica come KNO₃. Altamente igroscopico (stessa UR del NaCl). Spesso presente in miscela con altri nitrati.",techNotes:"UR equilibrio 74.3% a 25°C (Greenspan 1977, NIST). Solubilità elevatissima (912 g/L a 25°C). La combinazione alta solubilità + bassa UR di equilibrio lo rende particolarmente aggressivo nei cicli di cristallizzazione.",references:"Arnold & Zehnder (1989); Charola (2000); Steiger (2005a)",fieldTip:"Come il salnitro (KNO₃) ma più igroscopico. Zone permanentemente umide in muri contaminati da scarichi o terreni agricoli."},{id:"na2co3",phMatch:["fortemente_alcalino","alcalino"],effervescence:true,name:"Carbonato di sodio",formula:"Na₂CO₃ / Na₂CO₃·10H₂O",mineral:"Natron / Trona",category:"Carbonati",morphology:["efflorescenza_polverosa","croste"],color:["bianco"],hygroscopic:true,hygroscopicLevel:"moderato",rhEq:87,solubility:"alta",solubilityG:217,damageType:"cristallizzazione, alcalinità",location:["bassa","media"],distribution:["diffusa"],environment:["cemento","urbano"],materials:["cemento","calcestruzzo"],ionTest:{carbonati:true,sodio:true},phRange:"fortemente alcalino",destructive:"medio",crystalSystem:"Monoclino",notes:"Tipico prodotto di lisciviazione del cemento. pH fortemente alcalino. Può causare reazione alcali-aggregati.",techNotes:"Transizione Na₂CO₃·10H₂O ↔ Na₂CO₃·7H₂O ↔ Na₂CO₃·H₂O con variazioni di volume significative. UR eq. natron ~87% a 25°C. Indicatore di eccesso di alcali nel cemento.",references:"Charola (2000); Taylor (1997); Biczók (1972)",fieldTip:"Efflorescenza bianca su calcestruzzo o malte cementizie giovani. pH molto alto (test con cartina: >10). Reagisce con HCl (effervescenza)."},{id:"cano3_2",phMatch:["neutro"],effervescence:false,name:"Nitrato di calcio",formula:"Ca(NO₃)₂·4H₂O",mineral:"Nitrocalcite",category:"Nitrati",morphology:["nessuna_visibile","zona_umida"],color:["nessuno"],hygroscopic:true,hygroscopicLevel:"molto_alto",rhEq:50,solubility:"alta",solubilityG:1290,damageType:"deliquescenza permanente, disgregazione",location:["bassa"],distribution:["localizzata","fascia"],environment:["biologico","suolo","cimiteri"],materials:["laterizio","pietra_calcarea","malta_calce"],ionTest:{nitrati:true,calcio:true},phRange:"neutro",destructive:"alto",crystalSystem:"Monoclino",notes:"Estremamente igroscopico: praticamente sempre in soluzione. Non forma efflorescenze visibili, ma causa zone permanentemente umide. Prodotto della reazione tra nitrati biologici e calcio del substrato.",techNotes:"UR di equilibrio 50.5% a 25°C: deliquescente in quasi tutte le condizioni abitative. Solubilità estrema (1290 g/L). Si forma per reazione: 2HNO₃ + CaCO₃ → Ca(NO₃)₂ + H₂O + CO₂. Spesso scambiato per 'umidità di risalita persistente'.",references:"Arnold & Zehnder (1989); Steiger (2005b); Sawdy & Heritage (2007)",fieldTip:"ATTENZIONE: nessuna efflorescenza visibile! Zona permanentemente bagnata che non risponde ai trattamenti. Sospettare se il muro resta umido anche dopo impermeabilizzazione."},{id:"k2so4",phMatch:["neutro"],effervescence:false,name:"Solfato di potassio",formula:"K₂SO₄",mineral:"Arcanite",category:"Solfati",morphology:["croste","efflorescenza_polverosa"],color:["bianco"],hygroscopic:false,hygroscopicLevel:"basso",rhEq:97,solubility:"moderata",solubilityG:111,damageType:"cristallizzazione moderata",location:["bassa","media"],distribution:["diffusa"],environment:["biologico","laterizio","cemento"],materials:["laterizio","cemento"],ionTest:{solfati:true,potassio:true},phRange:"neutro",destructive:"basso-moderato",crystalSystem:"Ortorombico",notes:"Meno distruttivo dei solfati di sodio e magnesio. Spesso presente in miscela. Può derivare da laterizi cotti a bassa temperatura.",techNotes:"UR equilibrio 97.3% a 25°C, quindi praticamente non igroscopico. Solubilità moderata (111 g/L a 20°C). Presente come prodotto secondario in laterizi contenenti K-feldspato.",references:"Charola (2000); Steiger (2005a)",fieldTip:"Efflorescenza bianca non igroscopica su laterizi. Meno aggressiva del solfato di sodio."},{id:"mgcl2",phMatch:["neutro"],effervescence:false,name:"Cloruro di magnesio",formula:"MgCl₂·6H₂O",mineral:"Bischofite",category:"Cloruri",morphology:["nessuna_visibile","zona_umida","croste"],color:["nessuno","bianco"],hygroscopic:true,hygroscopicLevel:"molto_alto",rhEq:33,solubility:"alta",solubilityG:543,damageType:"deliquescenza, corrosione",location:["bassa"],distribution:["fascia","localizzata"],environment:["marino","suolo"],materials:["dolomia","cemento","laterizio"],ionTest:{cloruri:true,magnesio:true},phRange:"neutro",destructive:"alto",crystalSystem:"Monoclino",notes:"Fortemente igroscopico, raramente visibile come efflorescenza. Presente in ambienti marini e in suoli ricchi di dolomite.",techNotes:"UR di equilibrio 33.1% a 25°C: permanentemente in soluzione in quasi tutti gli ambienti. Componente significativo dell'acqua marina (~3.7%). Attacco chimico al cemento (formazione di brucite).",references:"Doehne & Price (2010); Charola (2000); Neville (2011)",fieldTip:"Ambiente marino, zona permanentemente umida senza efflorescenze visibili. Test cloruri positivo + test magnesio positivo."},{id:"cacl2",phMatch:["neutro"],effervescence:false,name:"Cloruro di calcio",formula:"CaCl₂",mineral:"Antarctite",category:"Cloruri",morphology:["nessuna_visibile","zona_umida"],color:["nessuno"],hygroscopic:true,hygroscopicLevel:"estremo",rhEq:29,solubility:"alta",solubilityG:745,damageType:"deliquescenza permanente, corrosione armature",location:["bassa","media"],distribution:["localizzata","diffusa"],environment:["stradale","cemento","industriale"],materials:["calcestruzzo","cemento","laterizio"],ionTest:{cloruri:true,calcio:true},phRange:"neutro",destructive:"molto alto",crystalSystem:"Ortorombico",notes:"Il sale più igroscopico comune nelle murature. Utilizzato come antigelo stradale e accelerante del cemento. Mai visibile come efflorescenza.",techNotes:"UR di equilibrio 29.0% a 25°C: il più basso tra i sali comuni. Praticamente sempre in soluzione. Principale responsabile della corrosione delle armature (soglia 0.4% sul peso del cemento).",references:"BRE Digest 264; Neville (2011); EN 206; Tuutti (1982)",fieldTip:"Sospettare in calcestruzzi con armature corrose o in muri esposti a sali antigelo. Mai visibile, solo rilevabile con test ionici."},{id:"ettringite",phMatch:["alcalino","fortemente_alcalino"],effervescence:false,name:"Ettringite",formula:"3CaO·Al₂O₃·3CaSO₄·32H₂O",mineral:"Ettringite",category:"Solfati complessi",morphology:["espansione_interna","nessuna_visibile"],color:["bianco","giallastro"],hygroscopic:false,hygroscopicLevel:"nullo",rhEq:null,solubility:"molto bassa",solubilityG:0.01,damageType:"espansione interna (DEF/ESA)",location:["tutte"],distribution:["interna","diffusa"],environment:["cemento","industriale"],materials:["cemento","calcestruzzo"],ionTest:{solfati:true,alluminio:true,calcio:true},phRange:"alcalino",destructive:"molto alto",crystalSystem:"Esagonale",notes:"Si forma INTERNAMENTE alla matrice cementizia causando espansione e fessurazione (attacco solfatico esterno ESA o formazione ritardata DEF). Aghi microscopici visibili solo al SEM.",techNotes:"Volume molare ~715 cm³/mol. DEF in calcestruzzi maturati a T>70°C. ESA da solfati del terreno. Formazione: 3CaO·Al₂O₃ + 3CaSO₄ + 32H₂O → ettringite.",references:"Taylor (1997); Collepardi (2003); Neville (2011); EN 206",fieldTip:"Fessurazioni a mappa nel calcestruzzo, espansione dei getti, distacco copriferro. Non visibile a occhio nudo."},{id:"thaumasite",phMatch:["alcalino"],effervescence:false,name:"Thaumasite",formula:"CaSiO₃·CaCO₃·CaSO₄·15H₂O",mineral:"Thaumasite",category:"Solfati complessi",morphology:["massa_bianca"],color:["bianco"],hygroscopic:false,hygroscopicLevel:"nullo",rhEq:null,solubility:"molto bassa",solubilityG:0.01,damageType:"decomposizione C-S-H, perdita coesione",location:["bassa","interrata"],distribution:["localizzata"],environment:["suolo_solfatico","freddo_umido"],materials:["cemento","calcestruzzo"],ionTest:{solfati:true,calcio:true,silicati:true},phRange:"alcalino",destructive:"catastrofico",crystalSystem:"Esagonale",notes:"Distrugge il gel C-S-H del cemento, trasformandolo in una pasta bianca senza coesione. Richiede T<15°C, umidità costante e fonte di solfati e carbonati. Raro ma devastante.",techNotes:"Attacca direttamente i silicati di calcio idrati (C-S-H). Condizioni: T<15°C, sorgente SO₄²⁻, presenza CO₃²⁻, umidità continua. Thaumasite Expert Group (UK, 1999).",references:"Thaumasite Expert Group Report (DETR 1999); Collepardi (2003); BRE Special Digest 1",fieldTip:"Calcestruzzo interrato in suolo solfatico che diventa 'polpetta bianca'. Raro ma catastrofico. Controllare temperatura e pH del terreno."},{id:"nahco3",phMatch:["alcalino"],effervescence:true,name:"Bicarbonato di sodio",formula:"NaHCO₃",mineral:"Nahcolite",category:"Carbonati",morphology:["efflorescenza_polverosa","croste"],color:["bianco"],hygroscopic:false,hygroscopicLevel:"basso",rhEq:96,solubility:"moderata",solubilityG:96,damageType:"estetico",location:["media"],distribution:["diffusa"],environment:["cemento"],materials:["cemento","calcestruzzo"],ionTest:{carbonati:true,sodio:true},phRange:"alcalino",destructive:"basso",crystalSystem:"Monoclino",notes:"Prodotto intermedio della carbonatazione del cemento. Spesso transitorio.",techNotes:"Na₂CO₃ + CO₂ + H₂O → 2NaHCO₃. Fase intermedia nel processo di carbonatazione degli alcali. UR equilibrio 96.2%.",references:"Taylor (1997); Charola (2000)",fieldTip:"Efflorescenza transitoria su calcestruzzo giovane. Spesso scompare dopo le prime piogge."},{id:"syngenite",phMatch:["alcalino"],effervescence:false,name:"Syngenite",formula:"K₂Ca(SO₄)₂·H₂O",mineral:"Syngenite",category:"Solfati complessi",morphology:["espansione_interna","nessuna_visibile"],color:["bianco","trasparente"],hygroscopic:false,hygroscopicLevel:"nullo",rhEq:null,solubility:"bassa",solubilityG:2.5,damageType:"espansione in fase di presa",location:["tutte"],distribution:["interna"],environment:["cemento"],materials:["cemento"],ionTest:{solfati:true,potassio:true,calcio:true},phRange:"alcalino",destructive:"basso-moderato",crystalSystem:"Monoclino",notes:"Si forma durante l'idratazione del cemento ricco di K₂O. Può causare falsa presa.",techNotes:"K₂SO₄ + CaSO₄·2H₂O → K₂Ca(SO₄)₂·H₂O + H₂O. Formazione rapida nelle prime ore di idratazione del clinker ad alto K₂O (>0.8%).",references:"Taylor (1997); Collepardi (2003)",fieldTip:"Raramente rilevante in cantiere. Sospettare solo con cementi ad alto tenore di alcali."},{id:"darapskite",phMatch:["neutro","alcalino"],effervescence:false,name:"Darapskite",formula:"Na\u2083(NO\u2083)(SO\u2084)\u00b7H\u2082O",mineral:"Darapskite",category:"Solfati complessi",morphology:["efflorescenza_polverosa","croste"],color:["bianco","trasparente"],hygroscopic:true,hygroscopicLevel:"moderato",rhEq:73.9,solubility:"alta",solubilityG:null,damageType:"dissoluzione \u2192 mirabilite supersatura",location:["bassa","media"],distribution:["fascia","localizzata"],environment:["agricolo","urbano","cemento"],materials:["laterizio","arenaria","pietra"],ionTest:{solfati:true,nitrati:true,sodio:true},phRange:"neutro-alcalino",destructive:"alto",crystalSystem:"Monoclino",notes:"Doppio sale di Na, SO\u2084 e NO\u2083. Si forma in murature con apporto contemporaneo di nitrati (origine biologica/agricola) e solfati (cementi/atmosferici). Al contatto con acqua liquida o vapore, dissolve formando soluzione supersatura di mirabilite (Na\u2082SO\u2084\u00b710H\u2082O), trasferendo al substrato un potenziale di danno paragonabile al Na\u2082SO\u2084.",techNotes:"DRH 73,9% a 23,5\u00b0C come fase singola; in miscela ternaria NaCl-Na\u2082SO\u2084-NaNO\u2083 l\'eRH si abbassa a 66,3% per il darapskite. Cristallizza congruentemente solo in soluzioni con rapporto SO\u2084/NO\u2083 vicino a 1:1.",references:"Linnow K, Steiger M, Lemster C et al. (2014) Crystallization behavior of NaNO\u2083-Na\u2082SO\u2084 salt mixtures in sandstone, Environmental Earth Sciences; Linnow K et al. (2013) In situ Raman observation of the crystallization in NaNO\u2083-Na\u2082SO\u2084-H\u2082O solution droplets, Env. Earth Sci.",fieldTip:"Sospettare in murature con coesistenza solfati+nitrati (cantine di edifici agricoli, edifici urbani vicino a stalle storiche). Test ionici positivi contemporaneamente per NO\u2083\u207b e SO\u2084\u00b2\u207b + Na\u207a."},{id:"glauberite",phMatch:["neutro"],effervescence:false,name:"Glauberite",formula:"Na\u2082Ca(SO\u2084)\u2082",mineral:"Glauberite",category:"Solfati complessi",morphology:["espansione_interna","croste_compatte","granulare"],color:["bianco","trasparente","grigio"],hygroscopic:false,hygroscopicLevel:"basso",rhEq:null,solubility:"bassa",solubilityG:null,damageType:"cristallizzazione interna, fessurazione",location:["tutte"],distribution:["interna","localizzata"],environment:["cemento","industriale","laterizio"],materials:["laterizio","ceramica","cemento"],ionTest:{solfati:true,sodio:true,calcio:true},phRange:"neutro",destructive:"medio-alto",crystalSystem:"Monoclino",notes:"Doppio sale di Na e Ca. Si forma in materiali ceramici porosi e cementi quando coesistono Na\u2082SO\u2084 e CaSO\u2084 (gesso), oppure in miscele Na\u2082SO\u2084-MgSO\u2084 con ricambio cationico Mg/Ca. Cristallizza all\'interno della porosit\u00e0, causando fessurazioni e distacchi.",techNotes:"Sale incongruente, scarsamente solubile. Il Na\u2082SO\u2084 disciolto funge da substrato per la formazione del glauberite; il MgSO\u2084 disciolto partecipa come intermedio. Soluzioni 7,5% Na\u2082SO\u2084 + 7,5% MgSO\u2084 risultano le pi\u00f9 aggressive per i ceramici porosi (Materials 2025).",references:"Wieczorek-Ciurowa et al. (2025) Corrosion of Porous Building Ceramics Caused by Double Sulphate Salt, Materials 18(5):1041 (MDPI); Steiger M, Charola AE Phase changes of salts in porous materials.",fieldTip:"Fessurazioni interne in laterizi o cementi a contatto con miscele Na\u2082SO\u2084 + CaSO\u2084 o Na\u2082SO\u2084 + MgSO\u2084. Test ionici positivi per Na\u207a, Ca\u00b2\u207a e SO\u2084\u00b2\u207b senza effervescenza."},{id:"mascagnite",phMatch:["acido","neutro"],effervescence:false,name:"Solfato d\'ammonio",formula:"(NH\u2084)\u2082SO\u2084",mineral:"Mascagnite",category:"Solfati",morphology:["efflorescenza_polverosa","velo","croste"],color:["bianco","giallastro"],hygroscopic:true,hygroscopicLevel:"moderato",rhEq:80.0,solubility:"alta",solubilityG:744,damageType:"deliquescenza-cristallizzazione, attacco a calcari",location:["alta","tutte"],distribution:["diffusa"],environment:["urbano","industriale","agricolo"],materials:["pietra_calcarea","marmo","laterizio"],ionTest:{solfati:true},phRange:"acido",destructive:"medio",crystalSystem:"Ortorombico",notes:"Forma minerale del solfato d\'ammonio. Origine: deposizione atmosferica (reazione NH\u2083 + SO\u2082/SO\u2083 in atmosfera urbana o agricola), fertilizzanti azotati, fumarole vulcaniche, combustione carbone. Su pietre calcaree pu\u00f2 reagire formando gesso secondario.",techNotes:"DRH 80% a 25\u00b0C (Tang & Munkelwitz 1993). Solubilit\u00e0 744 g/L a 20\u00b0C. In soluzione il catione NH\u2084\u207a si idrolizza dando pH leggermente acido (~5-5,5). Distinguibile dagli altri solfati (Na\u2082SO\u2084, MgSO\u2084 neutri) per il pH acido dell\'estratto. Il test ionici standard rileva solo SO\u2084\u00b2\u207b: per identificazione di NH\u2084\u207a richiedere al laboratorio test specifici (Nessler, blu di indofenolo).",references:"Tang IN, Munkelwitz HR (1993) Composition and temperature dependence of the deliquescence properties of hygroscopic aerosols, Atmospheric Environment 27A:467-473; Sabbioni C et al. (1996) Deposition of anthropogenic compounds on monuments.",fieldTip:"Sospettare in zone urbane storicamente inquinate (NH\u2083 da scarichi + SO\u2082 da combustioni) o agricole (concimi azotati). pH dell\'estratto LEGGERMENTE ACIDO discrimina mascagnite dagli altri solfati. Per conferma chiedere al lab test specifico per NH\u2084\u207a."}];
+const STATE={cur:0,finished:false,mode:'tecnico',data:{
+  // 1 Ambiente
+  tInt:null,urInt:null,tExt:null,urExt:null,stagione:"",noteAmb:"",
+  // 2 Rilievo visivo
+  efflTipo:"",efflPosizione:"",efflEstensione:"",efflColore:"",effBubble:"",patologie:[],
+  // 3 Test ionici (mg/kg)
+  cl:null,no3:null,so4:null,co3:null,ph:null,
+  // 4 Classificazione carico
+  caricoClasse:"",caricoNote:"",
+  // 5 Sale prevalente
+  salePrevalente:"",saleNote:"",
+  // 6 Compatibilità intonaco
+  intonacoTipo:"",intonacoCondizione:"",compatibilita:"",
+  // 7 Trattamento
+  trattamentoScelto:"",trattamentoMot:""
+}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function showToast(m,k){const t=$("toast");t.textContent=m;t.className="toast show"+(k?" "+k:"");clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.className="toast",3200);}
+function persist(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify({ts:Date.now(),state:STATE}));}catch(e){}}
+function restore(){try{const r=localStorage.getItem(DRAFT_KEY);if(!r)return;const d=JSON.parse(r);if(d&&d.state){Object.assign(STATE.data,d.state.data||{});STATE.cur=d.state.cur||0;STATE.finished=!!d.state.finished;}}catch(e){}}
+function setField(k,v){STATE.data[k]=v;persist();if(window._difUpdate)_difUpdate();}
+function loadAna(){let p={},i={};try{p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");}catch(e){}try{const l=JSON.parse(localStorage.getItem("mx2::locali-v1")||"{}");i=l.ana||{};}catch(e){}return{perito:p,immobile:i};}
+function renderAna(){const a=loadAna(),p=a.perito,c=a.immobile;
+  const pe=$("anaPerito"),ce=$("anaCliente");
+  pe.querySelector(".n").textContent=p.nome||"n.d.";
+  pe.querySelector(".m").textContent=[p.titolo,p.albo&&(p.albo+(p.numAlbo?" n. "+p.numAlbo:"")),p.tel,p.email].filter(Boolean).join(" · ");
+  ce.querySelector(".n").textContent=c.Nome||"n.d.";
+  ce.querySelector(".m").textContent=[c.Indirizzo,c.Catasto,c.DataSopr&&("Sopralluogo "+c.DataSopr)].filter(Boolean).join(" · ");
+}
+function renderStepper(){
+  const ACT=getActiveSteps();
+  let h='<div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button type="button" id="saliModeTog" style="appearance:none;border:1px solid var(--mx-accent,#b8860b);background:#fff;color:var(--mx-accent,#b8860b);padding:4px 12px;border-radius:14px;font:inherit;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em">'+(STATE.mode==='operatore'?'🔬 Passa a Tecnico (7 step)':'⚡ Passa a Operatore (5 step)')+'</button></div><div style="display:flex;flex-wrap:wrap;gap:5px">';
+  ACT.forEach((st,i)=>{let c="step-chip";if(i===STATE.cur)c+=" active";else if(i<STATE.cur)c+=" done";h+='<button type="button" class="'+c+'" data-i="'+i+'">'+esc(st.label)+'</button>';});
+  h+='</div>';
+  $("stepper").innerHTML=h;
+  $("stepper").querySelectorAll(".step-chip").forEach(el=>el.addEventListener("click",function(){STATE.cur=+this.dataset.i;persist();render();}));
+  const tog=$("saliModeTog"); if(tog)tog.addEventListener("click",function(){STATE.mode=(STATE.mode==='operatore'?'tecnico':'operatore');if(STATE.cur>=getActiveSteps().length)STATE.cur=0;persist();render();});
+}
+/* 20/11/2026: limiti dei campi numerici. Prima il modulo prendeva per buono qualunque numero (indice VTT 10 su 6,
+   umidità 150 %, superfici negative). I limiti vengono da quello che il campo dichiara: la scala scritta nell'unità
+   («0-6»), le percentuali 0-100, le temperature da -60 a 100 °C, i decibel da -30 a 150, il pH 0-14, l'anno di
+   costruzione fino al 2100; tutte le altre grandezze non negative. Un valore fuori dai limiti non viene preso. */
+var _mxFuoriScala={};
+function _mxLimiti(f,l,u){
+  var s=String(u||""), lab=String(l||""), m=s.match(/^\s*(-?\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)\s*$/);
+  if(m) return [parseFloat(m[1].replace(",",".")), parseFloat(m[2].replace(",","."))];
+  if(/%/.test(s)) return [0,100];
+  if(/°C/.test(s)) return [-60,100];
+  if(/^dB/.test(s)) return [-30,150];
+  if(/\bpH\b/.test(lab)) return [0,14];
+  if(/^Anno /.test(lab)) return [0,2100];
+  return [0,null];
+}
+function _mxNumero(el){
+  var k=el.dataset.fld, box=el.parentNode?el.parentNode.querySelector(".mx-fuori"):null, msg="";
+  var v=(el.value==="")?null:parseFloat(el.value);
+  if(v!=null && isNaN(v)) v=null;
+  if(v!=null){
+    var lo=(el.dataset.min!==undefined&&el.dataset.min!=="")?parseFloat(el.dataset.min):null;
+    var hi=(el.dataset.max!==undefined&&el.dataset.max!=="")?parseFloat(el.dataset.max):null;
+    if((lo!=null&&v<lo)||(hi!=null&&v>hi)){
+      msg=(hi!=null)?("Fuori dai limiti: questo campo va da "+lo+" a "+hi+". Il valore non è stato preso."):("Questo campo non può essere minore di "+lo+". Il valore non è stato preso.");
+      _mxFuoriScala[k]={txt:el.value,msg:msg};
+      v=null;
+    }
+  }
+  if(!msg) delete _mxFuoriScala[k];
+  if(box){ box.textContent=msg; box.style.display=msg?"block":"none"; }
+  el.style.borderColor=msg?"#b3261e":""; el.style.background=msg?"#fdeceb":"";
+  return v;
+}
+/* la scritta resta mentre si scrive nello stesso passo; cambiando passo, azzerando o caricando si riparte puliti */
+function _mxPulisciFuori(){ var a=document.activeElement; if(!(a&&a.getAttribute&&a.getAttribute("data-fld"))) _mxFuoriScala={}; }
+function inpNum(f,l,u,h){const v=STATE.data[f];var L=_mxLimiti(f,l,u),fu=_mxFuoriScala[f];return '<div class="fld"><label>'+esc(l)+(u?' <span class="opz">('+esc(u)+')</span>':"")+'</label><input type="number" step="0.01" value="'+(fu?esc(fu.txt):(v==null?"":v))+'" placeholder="'+esc(h||"")+'" data-fld="'+f+'" data-kind="num"'+(L[0]!=null?' min="'+L[0]+'" data-min="'+L[0]+'"':'')+(L[1]!=null?' max="'+L[1]+'" data-max="'+L[1]+'"':'')+(fu?' style="border-color:#b3261e;background:#fdeceb"':'')+'><small class="mx-fuori" style="display:'+(fu?'block':'none')+';color:#b3261e;font-weight:700;font-size:11.5px;margin-top:3px">'+(fu?esc(fu.msg):'')+'</small></div>';}
+function inpTxt(f,l,h){const v=STATE.data[f]||"";return '<div class="fld"><label>'+esc(l)+'</label><input type="text" value="'+esc(v)+'" placeholder="'+esc(h||"")+'" data-fld="'+f+'" data-kind="txt"></div>';}
+function inpSel(f,l,opts){const v=STATE.data[f]||"";let h='<div class="fld"><label>'+esc(l)+'</label><select data-fld="'+f+'" data-kind="txt"><option value="">seleziona</option>';opts.forEach(o=>h+='<option value="'+esc(o[0])+'"'+(v===o[0]?" selected":"")+'>'+esc(o[1])+'</option>');return h+'</select></div>';}
+function inpRad(f,l,opts){const v=STATE.data[f]||"";let h='<div class="fld"><label>'+esc(l)+'</label><div class="radio-row">';opts.forEach(o=>h+='<label><input type="radio" name="r_'+f+'" value="'+esc(o[0])+'"'+(v===o[0]?" checked":"")+' data-fld="'+f+'" data-kind="txt">'+esc(o[1])+'</label>');return h+'</div></div>';}
+function inpChk(f,l,opts){const v=STATE.data[f]||[];let h='<div class="fld"><label>'+esc(l)+'</label><div class="chkgrp">';opts.forEach(o=>h+='<label><input type="checkbox" value="'+esc(o[0])+'"'+(v.includes(o[0])?" checked":"")+' data-fld="'+f+'" data-kind="chk">'+esc(o[1])+'</label>');return h+'</div></div>';}
+function inpTxA(f,l,h){const v=STATE.data[f]||"";return '<div class="fld"><label>'+esc(l)+'</label><textarea data-fld="'+f+'" data-kind="txt" placeholder="'+esc(h||"")+'">'+esc(v)+'</textarea></div>';}
+
+/* === PANELS === */
+function panelAmb(){return '<div class="step-head"><h4>Ambiente al rilievo</h4><span class="ref">UR ↔ cristallizzazione/deliquescenza</span></div>'+
+  '<div class="banner blue"><strong>Perché:</strong> UR e T determinano se il sale è in soluzione (deliquescente) o cristallizzato. Ogni sale ha la sua UR di equilibrio (es. NaCl 75%, CaCl₂ 29%, Na₂SO₄ 87%).</div>'+
+  '<div class="grid4">'+inpNum("tInt","T interna","°C")+inpNum("urInt","UR interna","%")+inpNum("tExt","T esterna","°C")+inpNum("urExt","UR esterna","%")+'</div>'+
+  '<div class="grid2" style="margin-top:10px">'+inpSel("stagione","Stagione",[["inverno","Inverno"],["primavera","Primavera"],["estate","Estate"],["autunno","Autunno"]])+inpTxt("noteAmb","Note ambiente","")+'</div>';}
+function panelRiv(){return '<div class="step-head"><h4>Rilievo visivo efflorescenze</h4><span class="ref">UNI 11182:2006</span></div>'+
+  '<div class="banner blue"><strong>Cosa osservare:</strong> morfologia (efflorescenza/crosta/subflorescenza/whisker), posizione (alta/media/bassa), estensione, colore. La morfologia è il primo discriminante del tipo di sale.</div>'+
+  '<div class="grid3">'+
+    inpSel("efflTipo","Morfologia",[["efflorescenza_polverosa","Efflorescenza polverosa"],["croste_compatte","Croste compatte"],["croste_dure","Croste dure (gesso)"],["whiskers","Aghi/whiskers (Na₂SO₄, MgSO₄)"],["velo","Velo trasparente"],["subflorescenza","Sub-florescenza interna"],["zona_umida","Zona umida senza efflorescenze (CaCl₂/MgCl₂)"]])+
+    inpSel("efflPosizione","Posizione sul muro",[["bassa","Bassa (0-50 cm)"],["media","Media (50-120 cm)"],["alta","Alta (>120 cm)"],["fascia","Fascia continua"],["diffusa","Diffusa tutta parete"]])+
+    inpSel("efflEstensione","Estensione",[["puntiforme","Puntiforme"],["localizzata","Localizzata"],["estesa","Estesa"],["abbondante","Abbondante / pluristrato"]])+
+  '</div>'+
+  '<div class="grid3" style="margin-top:10px">'+
+    inpSel("efflColore","Colore prevalente",[["bianco","Bianco"],["giallastro","Giallastro"],["grigio","Grigio (urbano)"],["scuro","Scuro / nero (black crust)"]])+
+    inpRad("effBubble","Effervescenza con HCl diluito",[["si","✓ Sì (carbonati)"],["no","✗ No"],["nt","Non testato"]])+
+    inpSel("intonacoTipo","Intonaco esistente",[["calce","Calce tradizionale"],["calce_cemento","Calce-cemento"],["cemento","Cemento puro"],["sanaerputz","Sanierputz"],["nessuno","Mancante"]])+
+  '</div>'+
+  '<div style="margin-top:10px">'+inpChk("patologie","Patologie associate (selezione multipla)",[["distacco","Distacco intonaco"],["sfarinamento","Sfarinamento malta"],["spalling","Spalling/esfoliazione"],["rigonfiamento","Rigonfiamenti"],["macchie","Macchie umido associate"],["caduta_intonaco","Caduta a placche"]])+'</div>';}
+function panelIon(){return '<div class="step-head"><h4>Test ionici quantitativi</h4><span class="ref">UNI EN 16455:2014</span></div>'+
+  '<div class="banner blue"><strong>Procedura:</strong> prelievo polvere muratura (10-20 g), estrazione acquosa, titolazione/cromatografia ionica. Classi di carico WTA 4-5-99/D per singolo anione, in percento sulla massa secca: cloruri 0,2 / 0,5 · nitrati 0,1 / 0,3 · solfati 0,5 / 1,5 (in mg/kg: 2000 / 5000 · 1000 / 3000 · 5000 / 15000). I carbonati non sono classificati dalla scheda.</div>'+
+  '<div class="grid4">'+
+    inpNum("cl","Cloruri Cl⁻","mg/kg")+
+    inpNum("no3","Nitrati NO₃⁻","mg/kg")+
+    inpNum("so4","Solfati SO₄²⁻","mg/kg")+
+    inpNum("co3","Carbonati CO₃²⁻","mg/kg")+
+  '</div>'+
+  '<div class="grid2" style="margin-top:10px">'+
+    inpNum("ph","pH dell\'estratto acquoso","","Neutro 7, acido <6, alcalino >8")+
+    '<div class="fld"><label>Somma degli anioni, informativa <span class="opz">(mg/kg)</span></label><input type="text" class="calc" readonly value="'+((STATE.data.cl||0)+(STATE.data.no3||0)+(STATE.data.so4||0)+(STATE.data.co3||0))+'"></div>'+
+  '</div>'+
+  '<div class="banner yellow" style="margin-top:10px"><strong>Identificazione cationi (NH₄⁺, Ca²⁺, Mg²⁺, Na⁺, K⁺):</strong> per la determinazione completa del sale, oltre agli anioni servono i cationi. Si richiede al laboratorio analisi ICP/AAS o test Nessler (NH₄⁺).</div>';}
+/* Classi di carico salino WTA 4-5-99/D, per singolo anione, in percento sulla massa secca
+   (cloruri 0,2 / 0,5 · nitrati 0,1 / 0,3 · solfati 0,5 / 1,5). Gli input sono in mg/kg: 1 % = 10000 mg/kg.
+   Classe complessiva = la peggiore fra gli anioni. I carbonati non sono classificati dalla scheda. */
+const WTA_SOGLIE={cl:[2000,5000],no3:[1000,3000],so4:[5000,15000]};
+const WTA_NOMI={cl:"cloruri",no3:"nitrati",so4:"solfati"};
+function classeAnioneWTA(k,v){if(v==null||isNaN(v)||v<=0)return null;const s=WTA_SOGLIE[k];return v<=s[0]?"basso":(v<=s[1]?"medio":"alto");}
+function classeWTA(d){const ord={basso:1,medio:2,alto:3};const per={};let max=null;["cl","no3","so4"].forEach(k=>{const c=classeAnioneWTA(k,d[k]);per[k]=c;if(c&&(!max||ord[c]>ord[max]))max=c;});return {classe:max,perAnione:per};}
+function panelCarico(){
+  const w=classeWTA(STATE.data);
+  const dett=["cl","no3","so4"].filter(k=>w.perAnione[k]).map(k=>WTA_NOMI[k]+" "+STATE.data[k]+" mg/kg → "+w.perAnione[k]).join(" · ");
+  return '<div class="step-head"><h4>Classificazione carico salino</h4><span class="ref">WTA 4-5-99/D (analisi UNI EN 16455:2014)</span></div>'+
+  '<div class="banner blue"><strong>Classe carico</strong> determina la scelta del trattamento. <strong>Calcolata automaticamente</strong> anione per anione dai test ionici (Step 3); classe complessiva = la peggiore: '+(w.classe?dett+" → <strong>"+w.classe+"</strong>":"compila prima i test ionici")+'.</div>'+
+  inpRad("caricoClasse","Conferma classe (puoi sovrascrivere)",[["basso","🟢 Basso (tutti gli anioni sotto la prima soglia WTA)"],["medio","🟡 Medio (almeno un anione fra le due soglie)"],["alto","🔴 Alto (almeno un anione oltre la seconda soglia)"]])+
+  '<div style="margin-top:10px">'+inpTxA("caricoNote","Note operative","Es. presenza simultanea di più sali, distribuzione disuniforme, ecc.")+'</div>';}
+function panelSale(){
+  const d=STATE.data;
+  /* Filtraggio automatico in base agli ioni rilevati (Step 3) */
+  const ionsPos=[];
+  if(d.cl>0)ionsPos.push("cloruri");
+  if(d.no3>0)ionsPos.push("nitrati");
+  if(d.so4>0)ionsPos.push("solfati");
+  if(d.co3>0)ionsPos.push("carbonati");
+  let suggested=[];
+  if(ionsPos.length){
+    suggested=SALI_DB.filter(s=>{
+      const it=s.ionTest||{};
+      return ionsPos.some(i=>it[i]===true);
+    });
+  }
+  const showList = suggested.length ? suggested : SALI_DB;
+  let h='<div class="step-head"><h4>Identificazione sale prevalente</h4><span class="ref">DB 19 sali · Doehne&amp;Price 2010</span></div>'+
+    '<div class="banner blue"><strong>Database completo</strong>: 19 sali principali delle murature con UR di equilibrio precisa, distruttività, references scientifiche, fieldTip da cantiere. Identifica il sale dominante in base ad anioni (Step 3), morfologia (Step 2), UR ambiente (Step 1), pH e origine.</div><div class="banner blue" style="background:#fef9e6;border-left:4px solid #b8860b"><strong>📦 Diagnosi differenziale:</strong> se sospetti che i sali siano <em>conseguenza</em> di umidità di risalita o infiltrazione, consulta anche: <a href=\'risalita.html\' target=\'_blank\' style=\'color:#b8860b;font-weight:800\'>→ Risalita Capillare</a> · <a href=\'umidita-hub.html\' target=\'_blank\' style=\'color:#b8860b;font-weight:800\'>→ Hub Umidità</a> · <a href=\'asciugatura.html\' target=\'_blank\' style=\'color:#b8860b;font-weight:800\'>→ Asciugatura</a></div>';
+  if(suggested.length)h+='<div class="banner green"><strong>🔎 Filtraggio automatico:</strong> '+suggested.length+' sali compatibili con i test ionici positivi inseriti ('+ionsPos.join("+")+').</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">';
+  showList.forEach(s=>{
+    const sel=STATE.data.salePrevalente===s.id;
+    const destrCls=(s.destructive||"").includes("alto")||(s.destructive||"").includes("catastrofico")?"high":"";
+    h+='<label class="salt-card '+(sel?"active":"")+'"><input type="radio" name="sale" value="'+esc(s.id)+'"'+(sel?" checked":"")+' data-fld="salePrevalente" data-kind="txt" style="display:none">'+
+      '<div class="nm">'+esc(s.name)+'</div>'+
+      '<div class="fm">'+esc(s.formula)+' · '+esc(s.mineral)+' · '+esc(s.category||"")+'</div>'+
+      '<div class="info">'+esc(s.notes||"")+'</div>'+
+      (s.techNotes?'<div style="font-size:10.5px;color:var(--ink-mute);margin-top:6px;padding:6px;background:#faf8f3;border-radius:5px"><strong>Tech:</strong> '+esc(s.techNotes)+'</div>':"")+
+      (s.fieldTip?'<div style="font-size:10.5px;color:var(--mx-accent-strong);margin-top:4px;font-style:italic">💡 '+esc(s.fieldTip)+'</div>':"")+
+      '<div class="tags">'+
+        '<span class="tag">UR eq: '+(s.rhEq==null?"n.d.":s.rhEq+"%")+'</span>'+
+        '<span class="tag '+destrCls+'">'+esc(s.destructive||"")+'</span>'+
+        '<span class="tag">'+esc((s.environment||[]).join(", "))+'</span>'+
+        (s.solubilityG?'<span class="tag">Sol: '+s.solubilityG+' g/L</span>':"")+
+      '</div>'+
+      (s.references?'<div style="font-size:9.5px;color:var(--ink-mute);margin-top:6px;border-top:1px dotted #e6e0d2;padding-top:4px">📚 '+esc(s.references)+'</div>':"")+
+      '</label>';
+  });
+  h+='</div>';
+  h+='<div style="margin-top:10px">'+inpTxA("saleNote","Note identificazione (miscele, sali secondari)","")+'</div>';
+  return h;
+}
+function panelComp(){return '<div class="step-head"><h4>Compatibilità intonaco</h4><span class="ref">UNI 11488:2021 · WTA 2-9-20/D</span></div>'+
+  '<div class="banner blue"><strong>Logica:</strong> cementi sono incompatibili con beni storici e con sali (favoriscono Na₂SO₄). Calce idraulica/aerea: preferita per murature storiche. Sanierputz (WTA): obbligatorio con sali medio-alti.</div>'+
+  '<div class="grid2">'+
+    inpSel("intonacoCondizione","Stato attuale intonaco",[["integro","Integro"],["macchie","Macchie umido"],["distacchi","Distacchi/bolle"],["sfarinamento","Sfarinamento"],["caduto","Caduto"]])+
+    inpSel("compatibilita","Compatibilità intonaco esistente con sali rilevati",[["compatibile","✓ Compatibile (mantenere)"],["da_integrare","◐ Da integrare con Sanierputz"],["incompatibile","✗ Incompatibile (rimuovere e rifare)"]])+
+  '</div>';}
+function panelTrat(){return '<div class="step-head"><h4>Trattamento proposto</h4><span class="ref">WTA 2-9-20/D · WTA 3-13-19/D · Doehne 2010</span></div>'+
+  '<div class="banner blue"><strong>Scelta del trattamento</strong> in base a: classe carico, sale prevalente, compatibilità intonaco, vincoli del bene tutelato.</div>'+
+  inpRad("trattamentoScelto","Metodo",[["sanaerputz","🧱 Sanierputz (WTA 2-9-20/D), intonaco macroporoso depositi interni sali"],["sacrificale","🧂 Intonaci sacrificali, calce idraulica + impacchi assorbenti"],["desalinizzazione","💧 Desalinizzazione attiva, impacchi cellulosa/polpa di carta"],["consolidamento","🔧 Consolidamento + protezione superficiale (silicato di etile)"],["sostituzione","🔄 Sostituzione muratura (casi estremi)"],["monitoraggio","⏸ Monitoraggio (carico basso, da rivalutare)"]])+
+  '<div style="margin-top:10px">'+inpTxA("trattamentoMot","Motivazione tecnica","Spiega scelta in base a contesto, vincoli, budget, compatibilità materiale.")+'</div>';}
+const panels={amb:panelAmb,riv:panelRiv,ion:panelIon,carico:panelCarico,sale:panelSale,comp:panelComp,trat:panelTrat};
+
+
+/* === MIXANDO v3 · Risanamento Sali: dataset embedded === */
+const SOL_SALI = [{id:"poultice_/_impacchi_adsorbenti",nome:"Poultice / impacchi adsorbenti per desalinizzazione",categoria:"Desalinizzazione passiva",invasivita:"bassa",tempistica:"3-21 giorni",norma:"WTA Merkblatt 3-13-20/D (desalinizzazione)",normeSec:["NORMAL 13/83 ICR", "UNI 11176:2025"],sintesi:"Applicazione di impacchi di materiali adsorbenti (argilla bentonitica, sepiolite, polpa di cellulosa) saturati con acqua deionizzata sulla superficie muraria. Per gradiente osmotico i sali migrano dalla muratura all'impacco, che viene poi rimosso e smaltito. Cicli ripetuti fino a riduzione conducibilit\u00e0 <500 \u00b5S/cm sull'estratto acquoso (NormaL 13/83 ICR).",limit:"Cicli lunghi (settimane) per concentrazioni elevate. Non rimuove la causa della contaminazione salina (umidit\u00e0 di risalita): da abbinare a barriera capillare."},{id:"rimozione_meccanica_intonaco_c",nome:"Rimozione meccanica intonaco contaminato + intonaco WTA macroporoso",categoria:"Sostituzione strato di sacrificio",invasivita:"media",tempistica:"10-25 giorni",norma:"WTA Merkblatt 2-9-20/D:2020-03",normeSec:["UNI EN 998-1:2016", "UNI 11176:2025"],sintesi:"Rimozione dell'intonaco contaminato fino a 80 cm sopra l'altezza max di sali visibili + spazzolatura/aspirazione del supporto. Applicazione di scratch coat + intonaco WTA macroporoso che intrappola i sali nella propria porosit\u00e0 senza danneggiare la finitura.",limit:"Non rimuove la causa: abbinare a intervento sulla risalita o infiltrazione. Va rinnovato a saturazione (15-25 anni)."},{id:"desalinizzazione_elettrocineti",nome:"Desalinizzazione elettrocinetica (metodo Mar\u00e9chal/Friese)",categoria:"Desalinizzazione attiva",invasivita:"media",tempistica:"2-6 settimane",norma:"WTA Merkblatt 3-13-20/D",normeSec:["UNI 11176:2025 (campionamento sali)"],sintesi:"Applicazione di un campo elettrico a corrente continua tra elettrodo positivo (nella muratura) ed elettrodo negativo (a contatto con acqua deionizzata in impacco esterno). Gli ioni Na\u207a, Cl\u207b, SO\u2084\u00b2\u207b migrano per elettro-migrazione verso gli elettrodi e vengono rimossi col bagno elettrolitico.",limit:"Elevati costi attrezzatura. Richiede tecnico specializzato. Monitoraggio gravimetrico/cromatografico (UNI EN 16455:2014) obbligatorio per validare efficacia."},{id:"biocida-inibitore_di_cristalli",nome:"Biocida-inibitore di cristallizzazione",categoria:"Inibizione chimica",invasivita:"bassa",tempistica:"1 giorno applicazione",norma:"WTA Merkblatt 3-13-20/D",normeSec:["ICOMOS-ISCS Glossary 2008"],sintesi:"Applicazione di inibitori di cristallizzazione (ferrocianuri, additivi anti-crystallization) che bloccano la crescita dei cristalli salini, limitando il danno meccanico da pressione di cristallizzazione (Doehne-Price 2010).",limit:"Non rimuove i sali: ne modifica solo la dinamica di cristallizzazione. Durata limitata (1-3 anni)."}];
+const DPI_SALI = [{"item": "Guanti chimici nitrile", "norma": "UNI EN ISO 374-1:2018 tipo B", "note": "Resistenza acidi diluiti (HCl per test cloruri)"}, {"item": "Occhiali a tenuta", "norma": "UNI EN 166:2004 (ritirata 2022, oggi UNI EN ISO 16321-1:2022) categoria 3", "note": "Schermatura gocce liquido (test colorimetrici AgNO3/HCl)"}, {"item": "Mascherina FFP2", "norma": "UNI EN 149:2001+A1:2009", "note": "Polveri saline da campionamento WTA 4-11/D"}, {"item": "Camice cotone monouso", "norma": "EN 13688:2013", "note": "Contenimento contaminazione abiti"}];
+const STRUMENTI_SALI = [{"nome": "Cromatografia ionica", "norma": "UNI EN 16455:2014 + NormaL 13/83 ICR", "uso": "Quantificazione cloruri/nitrati/solfati nei campioni"}, {"nome": "Test colorimetrici", "norma": "UNI 11176:2025", "uso": "Screening rapido in situ per ioni principali"}, {"nome": "Conducimetro estratto acquoso", "norma": "NormaL 13/83 ICR", "uso": "Stima carico salino totale (controllo desalinizzazione)"}, {"nome": "Diffrazione raggi X (XRD)", "norma": "UNI EN 16085:2012", "uso": "Identificazione cristallografica fasi saline"}];
+
+function _calcSaliScores(){
+  // Tutte primarie per default - moduli senza decision tree fine
+  const sc = {};
+  SOL_SALI.forEach(s=>{ sc[s.id] = {pri:true, why:'Applicabile al caso - verificare prerequisiti su norma cardine'}; });
+  return sc;
+}
+
+function _renderRisanamentoSali(){
+  const sc = _calcSaliScores();
+  let html = '';
+  html += '<section data-pat="sali" data-sec="risanamento" style="margin-top:14px;padding:16px 18px;background:linear-gradient(180deg,#eef9f1,#fff);border:1px solid #bce5c8;border-left:5px solid #2e7d52;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#1b5532;font-family:Georgia,serif;font-size:16px">\ud83d\udee0 Risanamento consigliato</h4>';
+  html += '<p style="margin:0 0 10px;font-size:12px;color:#1b5532;font-style:italic">Tecniche normate per la patologia. Verificare prerequisiti caso per caso.</p>';
+  html += '<div style="display:grid;gap:8px">';
+  SOL_SALI.forEach(s=>{
+    const x = sc[s.id];
+    html += '<div data-sol="'+s.id+'" style="background:#fff;border:1px solid #d8e8db;border-left:4px solid #d4a017;border-radius:10px;padding:11px 13px">'
+      + '<div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
+        + '<span style="font-size:9.5px;font-weight:800;letter-spacing:.14em;padding:3px 9px;border-radius:11px;background:linear-gradient(135deg,#f5d164,#d4a017);color:#3a2c00">\u2b50 APPLICABILE</span>'
+        + '<strong style="flex:1;min-width:200px;font-family:Georgia,serif;font-size:14px;color:#2c1810">'+s.nome+'</strong>'
+        + '<span style="font-size:10.5px;color:#fff;background:#475569;padding:2px 8px;border-radius:9px;font-family:JetBrains Mono,monospace">'+s.tempistica+'</span>'
+      + '</div>'
+      + '<div style="font-size:12.5px;color:#5d4a30;line-height:1.5;margin-bottom:5px">'+s.sintesi+'</div>'
+      + '<div style="font-family:JetBrains Mono,monospace;font-size:11px;color:#1b5532;background:#eef9f1;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:5px"><b>Norma cardine:</b> '+s.norma+'</div>'
+      + (s.normeSec.length?'<div style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#666;margin-bottom:5px"><b>Secondarie:</b> '+s.normeSec.join(' \u00b7 ')+'</div>':'')
+      + '<div style="font-size:11.5px;color:#7f1d1d;background:#fff5f3;padding:5px 9px;border-radius:6px;border-left:3px solid #c0392b"><b>\u26a0 Limitazioni:</b> '+s.limit+'</div>'
+    + '</div>';
+  });
+  html += '</div></section>';
+  html += '<section data-pat="sali" data-sec="dpi" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#fff5f3,#fff);border:1px solid #fdd;border-left:5px solid #c0392b;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#7f1d1d;font-family:Georgia,serif;font-size:15px">\ud83e\udd7a DPI obbligatori (D.Lgs 81/2008)</h4>';
+  html += '<div style="display:grid;gap:6px">';
+  DPI_SALI.forEach(p=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #fdd;border-left:3px solid #c0392b;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+p.item+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#c0392b;background:#fff5f3;padding:2px 7px;border-radius:9px;margin-left:6px">'+p.norma+'</span><div style="font-size:11px;color:#5d1a14;margin-top:3px">'+p.note+'</div></div>';
+  });
+  html += '</div></section>';
+  html += '<section data-pat="sali" data-sec="strumenti" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#e3f3f5,#fff);border:1px solid #b3dde2;border-left:5px solid #0e7c87;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#075863;font-family:Georgia,serif;font-size:15px">\ud83d\udd2c Strumenti per verifica</h4>';
+  html += '<div style="display:grid;gap:6px">';
+  STRUMENTI_SALI.forEach(s=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #b3dde2;border-left:3px solid #0e7c87;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+s.nome+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#075863;background:#e3f3f5;padding:2px 7px;border-radius:9px;margin-left:6px">'+s.norma+'</span><div style="font-size:11px;color:#0f3a3f;margin-top:3px">'+s.uso+'</div></div>';
+  });
+  html += '</div></section>';
+  return html;
+}
+
+function calcVerdict(){
+  const d=STATE.data;
+  const tot=(d.cl||0)+(d.no3||0)+(d.so4||0)+(d.co3||0);
+  const w=classeWTA(d);
+  let classe = d.caricoClasse==="molto_alto"?"alto":d.caricoClasse;
+  if(!classe) classe=w.classe;
+  const labels={basso:"Carico basso",medio:"Carico medio",alto:"Carico alto"};
+  const kinds={basso:"ok",medio:"warn",alto:"err"};
+  const summaries={
+    basso:"Carico salino basso secondo WTA 4-5-99/D: tutti gli anioni sotto la prima soglia. Monitoraggio o trattamento conservativo.",
+    medio:"Carico salino medio (WTA 4-5-99/D): almeno un anione fra le due soglie. Intonaco da risanamento Sanierputz (WTA 2-9-20/D) o intonaci sacrificali nella zona interessata.",
+    alto:"Carico salino alto (WTA 4-5-99/D): almeno un anione oltre la seconda soglia. Trattamento attivo: desalinizzazione e sistema Sanierputz; nei casi estremi sostituzione della muratura."
+  };
+  if(!classe)return{verdict:"Dati insufficienti",kind:"warn",summary:"Compila i test ionici (Step 3) e la classificazione (Step 4)."};
+  return{verdict:labels[classe],kind:kinds[classe],summary:summaries[classe],classe:classe,totale:tot,perAnione:w.perAnione,sale:d.salePrevalente};
+}
+/* === MIXANDO v3 · Ragionamento differenziale dal vivo, riusa calcVerdict (474) + filtro ionsPos (panelSale 372-381) + UR equilibrio del DB, niente soglie inventate === */
+function _difSali(){
+  var d=STATE.data, v=calcVerdict(), H=[];
+  function add(nome,stato,motivo,fonte,riga){ H.push({nome:nome,stato:stato,motivo:motivo,fonte:fonte,riga:riga}); }
+  function cands(anion){ return SALI_DB.filter(function(s){return (s.ionTest||{})[anion]===true;}).length; }
+  /* Anioni (Step 3): >0 rilevato · ===0 escluso (test negativo) · null non testato, stesso filtro reale di panelSale 372-381 */
+  var cats=[['cloruri','Cloruri','Cl⁻',d.cl,'372'],['solfati','Solfati','SO₄²⁻',d.so4,'374'],['nitrati','Nitrati','NO₃⁻',d.no3,'373'],['carbonati','Carbonati','CO₃²⁻',d.co3,'375']];
+  cats.forEach(function(c){
+    var n=cands(c[0]), val=c[3], st, msg;
+    if(val>0){ st='pres'; msg='anione rilevato ('+val+' mg/kg) → '+n+' sali compatibili nel DB'; }
+    else if(val===0){ st='escl'; msg='test negativo (0 mg/kg) → categoria esclusa'; }
+    else { st='na'; msg='anione non ancora testato (Step 3)'; }
+    add(c[1]+' ('+c[2]+')', st, msg, 'SALI_DB ionTest · Doehne&Price 2010', 'panelSale '+c[4]);
+  });
+  /* Sale prevalente selezionato (Step 4) + coerenza con gli anioni misurati */
+  var sp=d.salePrevalente?SALI_DB.filter(function(s){return s.id===d.salePrevalente;})[0]:null;
+  if(sp){
+    var it=sp.ionTest||{}, coerente=(d.cl>0&&it.cloruri)||(d.so4>0&&it.solfati)||(d.no3>0&&it.nitrati)||(d.co3>0&&it.carbonati);
+    var anyIon=(d.cl>0||d.so4>0||d.no3>0||d.co3>0);
+    if(anyIon && !coerente) add('Sale prevalente: '+sp.name,'warn','selezionato ma il suo anione non risulta tra i test positivi → verificare Step 3/4','SALI_DB · UNI 11087:2003 (ritirata 2016, oggi EN 16455)','panelSale 389');
+    else add('Sale prevalente: '+sp.name,'id',(sp.formula||'')+' · '+(sp.mineral||'')+' · distruttività '+(sp.destructive||'n.d.'),'SALI_DB · Doehne&Price 2010','panelSale 388-399');
+  } else add('Sale prevalente','na','non ancora selezionato (Step 4)','SALI_DB','panelSale 389');
+  /* Igroscopicità / deliquescenza del sale prevalente: rhEq (DB) vs UR interna misurata (Step 1) */
+  if(sp && sp.rhEq!=null){
+    if(d.urInt!=null){
+      if(d.urInt>=sp.rhEq) add('Igroscopicità (deliquescenza)','risk','UR interna '+d.urInt+'% ≥ UR equilibrio '+sp.rhEq+'% → sale in regime deliquescente alle condizioni rilevate: assorbe umidità ambientale e perpetua il degrado a prescindere dalla fonte liquida','UR eq. (SALI_DB) · UNI 11087:2003 (ritirata 2016, oggi EN 16455) · Doehne&Price 2010','Step1 332');
+      else add('Igroscopicità (deliquescenza)','escl','UR interna '+d.urInt+'% < UR equilibrio '+sp.rhEq+'% → sotto soglia: non deliquescente alle condizioni rilevate','UR eq. (SALI_DB)','Step1 332');
+    } else add('Igroscopicità (deliquescenza)','na','manca UR interna (Step 1) per il confronto con UR equilibrio '+sp.rhEq+'%','UR eq. (SALI_DB)','Step1 332');
+  } else add('Igroscopicità (deliquescenza)','na','seleziona il sale prevalente (Step 4) per valutare la deliquescenza','UR eq. (SALI_DB)','n.d.');
+  return {v:v, hyps:H};
+}
+function _difEnsureStyle(){
+  if(document.getElementById('difLiveCss')) return;
+  var s=document.createElement('style'); s.id='difLiveCss';
+  s.textContent='#difLive .dif-box{border:1px solid #d8cfba;border-radius:12px;background:linear-gradient(180deg,#fffdf8,#f6f0e4);box-shadow:0 2px 10px rgba(40,30,10,.06);padding:11px 14px;margin:0 0 14px;font-size:12.5px}'
+   +'#difLive .dif-head{font-weight:800;color:#0a5d66;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}'
+   +'#difLive .dif-sub{font-weight:600;font-size:10.5px;color:#8a7f6c}'
+   +'#difLive .dif-verdict{border-left:4px solid;padding:6px 10px;border-radius:6px;background:#fff;margin-bottom:9px}'
+   +'#difLive .dif-pct{font-weight:800;margin-left:6px}#difLive .dif-summary{font-size:11.5px;color:#5a4d3f;margin-top:2px}'
+   +'#difLive .dif-hyps{display:flex;flex-direction:column;gap:5px}#difLive .dif-h{border-radius:7px;padding:5px 9px}'
+   +'#difLive .dif-badge{display:inline-block;font-size:10px;font-weight:800;color:#fff;padding:1px 7px;border-radius:20px;margin-right:5px}'
+   +'#difLive .dif-mot{font-size:11px;color:#5a4d3f;margin-top:2px}#difLive .dif-fonte{color:#8a7f6c;font-style:italic}'
+   +'#difLive .dif-flags{margin-top:9px;font-size:11px;color:#7a5b2a}#difLive .dif-flag{display:inline-block;background:#fff5e6;border:1px solid #f0d9a8;border-radius:5px;padding:1px 6px;margin:2px 2px 0 0}'
+   +'#difLive .dif-foot{margin-top:9px;font-size:10px;color:#8a7f6c;border-top:1px solid #efe9dc;padding-top:6px}';
+  document.head.appendChild(s);
+}
+function _difHTML(R){
+  var v=R.v, kc={err:'#c0392b',warn:'#e67e22',ok:'#1b8a4b'}[v.kind]||'#6b5c4c';
+  var tot=(v.totale!=null?v.totale+' mg/kg':'n.d.');
+  var h='<div class="dif-box"><div class="dif-head">🔬 Ragionamento differenziale <span class="dif-sub">dal vivo · sintesi del motore del modulo (calcVerdict + filtro ionico)</span></div>';
+  h+='<div class="dif-verdict" style="border-color:'+kc+'"><div><b style="color:'+kc+'">'+esc(v.verdict)+'</b><span class="dif-pct">Σ ioni '+tot+'</span></div><div class="dif-summary">'+esc(v.summary)+'</div></div>';
+  h+='<div class="dif-sub" style="margin:0 0 6px">Speciazione (gli anioni testati escludono o confermano le categorie) e igroscopicità:</div>';
+  h+='<div class="dif-hyps">';
+  R.hyps.forEach(function(x){
+    var m={pres:['rilevato','#b8860b','#fef7e2'],escl:['escluso','#1b8a4b','#e9f7ee'],id:['identificato','#0e7c87','#e9f6f6'],risk:['⚠ deliquescente','#c0392b','#fdecea'],warn:['⚠ da verificare','#e67e22','#fdf1e3'],na:['da testare','#8a7f6c','#f2efe7']}[x.stato]||['n.d.','#888','#eee'];
+    h+='<div class="dif-h" style="background:'+m[2]+'"><span class="dif-badge" style="background:'+m[1]+'">'+m[0]+'</span><b>'+esc(x.nome)+'</b><div class="dif-mot">'+esc(x.motivo)+' <span class="dif-fonte">['+esc(x.fonte)+']</span></div></div>';
+  });
+  h+='</div>';
+  h+='<div class="dif-foot">I sali sono una <b>manifestazione</b>: la fonte d’acqua (risalita / infiltrazione / condensa) va diagnosticata nei moduli dedicati. Sintesi della logica del modulo (calcVerdict 474 + filtro ionsPos 372-381 + UR equilibrio del DB). Nessuna soglia inventata: ogni voce riporta norma e riga. La conclusione resta del tecnico.</div></div>';
+  return h;
+}
+function _immobileId(){ try{ var l=JSON.parse(localStorage.getItem('mx2::locali-v1')||'{}'); var a=(l&&l.ana)||{}; var raw=((a.Indirizzo||'')+(a.Catasto||'')+(a.Nome||'')).trim(); if(!raw) return ''; return ((a.Indirizzo||'')+'§'+(a.Catasto||'')+'§'+(a.Nome||'')).toLowerCase(); }catch(e){ return ''; } }
+function _evidenzeHTML(){
+  var R=[]; try{ R=JSON.parse(localStorage.getItem('mx2::reports')||'[]'); }catch(e){}
+  if(!Array.isArray(R)||!R.length) return '';
+  var cur=_immobileId();
+  var seen={}, items=[];
+  for(var i=R.length-1;i>=0;i--){ var r=R[i]; if(cur && r.immobile && r.immobile!==cur) continue; var k=r.module||r.moduleId||r.moduleName; if(!k||seen[k]) continue; seen[k]=1; items.push(r); }
+  if(!items.length) return '';
+  var h='<div class="dif-box" style="margin-top:10px"><div class="dif-head">📎 Evidenze da altri moduli <span class="dif-sub">stesso immobile · raccolte nel Report</span></div><div class="dif-hyps">';
+  items.forEach(function(r){ h+='<div class="dif-h" style="background:#eef3f7"><b>'+esc(r.moduleName||r.module||'modulo')+'</b><div class="dif-mot">'+esc(r.summary||r.verdict||'n.d.')+'</div></div>'; });
+  h+='</div><div class="dif-foot">Evidenze raccolte per questo immobile (modulo Report). Valutale per confermare o escludere le cause concorrenti, la decisione resta del tecnico. Nessuna esclusione automatica.</div></div>';
+  return h;
+}
+function _difUpdate(){ var el=document.getElementById('difLive'); if(!el) return; try{ _difEnsureStyle(); el.innerHTML=_difHTML(_difSali())+_evidenzeHTML(); }catch(e){ } }
+/* Stessa analisi differenziale, formattata per il report Word/PDF (riusa _difSali) */
+function _difReport(){
+  try{
+    var R=_difSali();
+    var stLab={pres:'Anione rilevato',escl:'Anione escluso (test negativo)',id:'Sale identificato',risk:'Igroscopicità attiva',warn:'Da verificare',na:'Non testato'};
+    var x='<h2>Analisi differenziale: speciazione e igroscopicità</h2>';
+    x+='<p style="font-size:11px;color:#5d4a30;font-style:italic">A supporto della diagnosi: ogni voce deriva dal filtro ionico e dalle soglie del modulo (verdetto automatico e UR di equilibrio dei sali), con la norma di riferimento. La conclusione resta del tecnico.</p>';
+    x+='<table><tr><th>Parametro / sale</th><th>Stato</th><th>Motivazione</th><th>Riferimento</th></tr>';
+    R.hyps.forEach(function(hh){ x+='<tr><td>'+esc(hh.nome)+'</td><td><strong>'+esc(stLab[hh.stato]||hh.stato)+'</strong></td><td>'+esc(hh.motivo)+'</td><td>'+esc(hh.fonte)+'</td></tr>'; });
+    x+='</table>';
+    return x;
+  }catch(e){ return ''; }
+}
+
+function attachInputs(){
+  $("stepPanel").querySelectorAll("[data-fld]").forEach(el=>{
+    const ev=el.type==="checkbox"||el.tagName==="SELECT"||el.type==="radio"?"change":"input";
+    el.addEventListener(ev,function(){
+      const k=this.dataset.fld,kind=this.dataset.kind;
+      let v;
+      if(kind==="num"){v=_mxNumero(this);}
+      else if(kind==="chk"){const cur=STATE.data[k]||[];if(this.checked){if(!cur.includes(this.value))cur.push(this.value);}else{const i=cur.indexOf(this.value);if(i>=0)cur.splice(i,1);}v=cur;}
+      else{v=this.value;}
+      setField(k,v);
+      if(["cl","no3","so4","co3","caricoClasse","salePrevalente"].includes(k))renderPanelOnly();
+    });
+  });
+}
+function render(){_mxPulisciFuori();renderStepper();const ACT=getActiveSteps();if(STATE.cur>=ACT.length)STATE.cur=ACT.length-1;const s=ACT[STATE.cur];$("stepPanel").innerHTML=panels[s.id]();attachInputs();const last=STATE.cur===ACT.length-1;$("btnPrev").disabled=STATE.cur===0;$("btnNext").style.display=last?"none":"";$("btnFinish").style.display=last?"":"none";_difUpdate();}
+function renderPanelOnly(){const s=STEPS[STATE.cur];const f=document.activeElement,fK=f?f.getAttribute("data-fld"):null;$("stepPanel").innerHTML=panels[s.id]();attachInputs();if(fK){const el=$("stepPanel").querySelector('[data-fld="'+fK+'"]');if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length);}catch(_){}}}}
+function next(){if(STATE.cur<getActiveSteps().length-1){STATE.cur++;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function prev(){if(STATE.cur>0){STATE.cur--;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function finish(){STATE.finished=true;persist();render();showToast("Diagnosi completata.","ok");setTimeout(()=>{$("mxToolbar").scrollIntoView({behavior:"smooth",block:"center"});},250);}
+
+function buildDoc(){
+  const ana=loadAna(),p=ana.perito,c=ana.immobile,d=STATE.data;
+  const v=calcVerdict();
+  const today=new Date().toLocaleDateString("it-IT",{day:"2-digit",month:"long",year:"numeric"});
+  const sale=SALI_DB.find(s=>s.id===d.salePrevalente);
+  let h="<h1>Diagnosi Sali nelle Murature</h1>";
+  h+='<p style="color:#6b5c4c;font-size:12px"><strong>Data:</strong> '+today+'</p>';
+  h+="<h2>1. Anagrafica</h2><table>";
+  h+="<tr><th>Perito</th><td>"+esc(p.nome||"n.d.")+(p.titolo?" · "+esc(p.titolo):"")+"</td></tr>";
+  if(p.albo)h+="<tr><th>Albo</th><td>"+esc(p.albo)+(p.numAlbo?" n. "+esc(p.numAlbo):"")+"</td></tr>";
+  h+="<tr><th>Committente</th><td>"+esc(c.Nome||"n.d.")+"</td></tr>";
+  if(c.Indirizzo)h+="<tr><th>Immobile</th><td>"+esc(c.Indirizzo)+"</td></tr>";
+  h+="</table>";
+  h+="<h2>2. Test ionici</h2><table>";
+  h+="<tr><th>Cl⁻</th><td>"+(d.cl!=null?d.cl+" mg/kg":"n.d.")+"</td><th>NO₃⁻</th><td>"+(d.no3!=null?d.no3+" mg/kg":"n.d.")+"</td></tr>";
+  h+="<tr><th>SO₄²⁻</th><td>"+(d.so4!=null?d.so4+" mg/kg":"n.d.")+"</td><th>CO₃²⁻</th><td>"+(d.co3!=null?d.co3+" mg/kg":"n.d.")+"</td></tr>";
+  h+="<tr><th>pH estratto</th><td>"+(d.ph!=null?d.ph:"n.d.")+"</td><th>Totale</th><td><strong>"+v.totale+" mg/kg</strong></td></tr>";
+  h+="</table>";
+  h+="<h2>3. Verdetto carico salino</h2>";
+  h+='<table><tr><th>Classe</th><td><strong>'+esc(v.verdict)+'</strong></td></tr>';
+  h+="<tr><th>Interpretazione</th><td>"+esc(v.summary)+"</td></tr></table>";
+  if(sale){
+    h+="<h2>4. Sale prevalente identificato</h2><table>";
+    h+="<tr><th>Nome</th><td>"+esc(sale.name)+"</td></tr>";
+    h+="<tr><th>Formula</th><td>"+esc(sale.formula)+"</td></tr>";
+    h+="<tr><th>Minerale</th><td>"+esc(sale.mineral)+"</td></tr>";
+    h+="<tr><th>UR eq.</th><td>"+(sale.rhEq==null?"n.d.":sale.rhEq+"%")+"</td></tr>";
+    h+="<tr><th>Distruttività</th><td>"+esc(sale.destructive)+"</td></tr>";
+    h+="<tr><th>Origine tipica</th><td>"+esc((sale.environment||[]).join(", "))+"</td></tr>";
+    h+="<tr><th>Note</th><td>"+esc(sale.notes)+"</td></tr></table>";
+  }
+  h += _difReport();
+  h+="<h2>5. Compatibilità intonaco e trattamento</h2><table>";
+  h+="<tr><th>Intonaco esistente</th><td>"+esc(mxLab("intonacoTipo",d.intonacoTipo)||"n.d.")+" · "+esc(mxLab("intonacoCondizione",d.intonacoCondizione)||"n.d.")+"</td></tr>";
+  h+="<tr><th>Compatibilità</th><td>"+esc(mxLab("compatibilita",d.compatibilita)||"n.d.")+"</td></tr>";
+  h+="<tr><th>Trattamento proposto</th><td><strong>"+esc(mxLab("trattamentoScelto",d.trattamentoScelto)||"n.d.")+"</strong></td></tr>";
+  if(d.trattamentoMot)h+="<tr><th>Motivazione</th><td>"+esc(d.trattamentoMot)+"</td></tr>";
+  h+="</table>";
+  h += _strumReport();
+  h+='<h2>Normative applicate</h2><ul style="font-size:11.5px">';
+  h+="<li><strong>UNI 11087:2003 (ritirata 2016, oggi EN 16455)</strong>, Determinazione cloruri/nitrati/solfati solubili nei beni culturali (metodo ponderale/cromatografico). Ritirata UNI nel 2016 senza sostituzione: resta il riferimento metodologico.</li>";
+  h+="<li><strong>UNI EN 16455:2014</strong>, Quantitative determination of soluble salts in porous inorganic materials.</li>";
+  h+="<li><strong>UNI 11182:2006</strong>, Beni culturali. Descrizione della forma di alterazione.</li>";
+  h+="<li><strong>UNI 11488:2021</strong>, Criteri per malte da restauro.</li>";
+  h+="<li><strong>WTA 2-9-20/D</strong> (2020), Sanierputzsysteme.</li>";
+  h+="<li><strong>WTA 3-13-19/D</strong>, Desalinizzazione di murature storiche.</li>";
+  h+="<li>Doehne &amp; Price (2010); Charola (2000); Arnold &amp; Zehnder (1989).</li></ul>";
+  h += _renderRisanamentoSali();
+  return h;}
+
+/* === #4 Tracciabilità strumentale, lettura registro condiviso mx2::strumentazione (editor nel modulo Risalita) === */
+function _strumGet(){ try{ var a=JSON.parse(localStorage.getItem('mx2::strumentazione')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function _strumReport(){
+  var list=_strumGet();
+  var x='<h2>Strumentazione utilizzata e tracciabilità</h2>';
+  if(!list.length) return x+'<p style="font-size:11.5px;color:#8a7f6c;font-style:italic">Strumentazione non ancora documentata. Compilare modello, matricola ed estremi di taratura nel modulo Risalita (toolbar &rarr; Strumentazione); il dato è condiviso tra i moduli.</p>';
+  x+='<table><tr><th>Strumento</th><th>Modello / marca</th><th>Matricola</th><th>Taratura</th><th>Norma di metodo</th></tr>';
+  list.forEach(function(r){ x+='<tr><td>'+esc(r.strumento||'n.d.')+'</td><td>'+esc(r.modello||'n.d.')+'</td><td>'+esc(r.matricola||'n.d.')+'</td><td>'+esc(r.taratura||'n.d.')+'</td><td>'+esc(r.norma||'n.d.')+'</td></tr>'; });
+  x+='</table>';
+  return x;
+}
+function openDocModal(){$("docBody").innerHTML=buildDoc();$("docModal").classList.add("show");}
+function closeDocModal(){$("docModal").classList.remove("show");}
+function exportWord(){const html='<!doctype html><html><head><meta charset="utf-8"><title>Diagnosi Sali</title><style>body{font-family:Georgia,serif;font-size:11pt;padding:20px}h1{font-size:18pt;font-style:italic}h2{font-size:13pt;color:#9c1f17;border-bottom:1pt solid #d8d3c4;padding-bottom:3pt}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9.5pt}th,td{padding:4pt 6pt;border-bottom:1pt solid #e6e0d2;text-align:left}th{background:#faf8f3;font-weight:700}</style></head><body>'+buildDoc()+'</body></html>';
+  const blob=new Blob([html],{type:"application/msword"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="Sali_"+new Date().toISOString().slice(0,10)+".doc";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500);showToast("Word salvato.","ok");}
+function exportPDF(){window.print();}
+function exportJSON(){const ana=loadAna();const b={schemaVersion:"sali-v3.1",exportedAt:new Date().toISOString(),perito:ana.perito,immobile:ana.immobile,currentStep:STATE.cur,finished:STATE.finished,data:STATE.data,verdict:calcVerdict()};const blob=new Blob([JSON.stringify(b,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="Sali_"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500);showToast("JSON salvato.","ok");}
+function addToReport(){try{const r=JSON.parse(localStorage.getItem("mx2::reports")||"[]");r.push({id:"sl_"+Date.now(),module:"sali",moduleName:"Diagnosi Sali nelle Murature",version:"v3.1",createdAt:new Date().toISOString(),immobile:_immobileId(),summary:calcVerdict().verdict,data:STATE.data,htmlSnippet:buildDoc()});localStorage.setItem("mx2::reports",JSON.stringify(r));showToast("Aggiunto al Report Builder.","ok");}catch(e){showToast("Errore: "+e.message,"err");}}
+
+/* Archivio locale */
+function listSaves(){try{return JSON.parse(localStorage.getItem(SAVES_KEY)||"[]");}catch(e){return[];}}
+function writeSaves(a){localStorage.setItem(SAVES_KEY,JSON.stringify(a));}
+function fmtTs(iso){try{return new Date(iso).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch(e){return iso;}}
+function openDlg(t,b,a){$("dlgTitle").innerHTML=t;$("dlgBody").innerHTML=b;$("dlgActions").innerHTML=a;$("dlgModal").classList.add("show");}
+function closeDlg(){$("dlgModal").classList.remove("show");}
+function openSaveDialog(){const a=loadAna(),c=a.immobile;const dn=(c.Nome?c.Nome:"Sali")+" del "+new Date().toLocaleDateString("it-IT");
+  openDlg("💾 Salva diagnosi sali",'<div class="fld"><label>Nome</label><input type="text" id="saveName" value="'+esc(dn)+'" maxlength="80"></div>','<button type="button" class="mx-shiny s-gray" id="dlgCancel" style="padding:8px 14px;font-size:12px">Annulla</button><button type="button" class="mx-shiny" id="dlgConfirm" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);box-shadow:0 3px 10px rgba(46,125,50,.42)">💾 Salva</button>');
+  setTimeout(()=>{$("saveName").focus();$("saveName").select();},60);
+  $("dlgCancel").addEventListener("click",closeDlg);
+  $("dlgConfirm").addEventListener("click",function(){const nm=($("saveName").value||"").trim()||"Senza nome";const arr=listSaves();arr.push({id:"s_"+Date.now(),name:nm,ts:new Date().toISOString(),cur:STATE.cur,finished:STATE.finished,data:JSON.parse(JSON.stringify(STATE.data))});writeSaves(arr);closeDlg();showToast('Salvata: "'+nm+'"',"ok");});}
+function openLoadDialog(){const arr=listSaves().sort((a,b)=>b.ts.localeCompare(a.ts));let body;
+  if(!arr.length)body='<div class="dlg-empty">Archivio vuoto.</div>';
+  else{body='<div class="dlg-list">';arr.forEach(s=>{body+='<div class="dlg-item"><div style="flex:1"><div style="font-weight:700">'+esc(s.name)+'</div><div style="font-size:11px;color:#8b7355;font-family:monospace">'+fmtTs(s.ts)+'</div></div><button type="button" class="mx-shiny s-blue" data-load="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px">📥 Carica</button><button type="button" class="mx-shiny" data-del="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px;background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000);box-shadow:0 3px 10px rgba(198,40,40,.42)">🗑</button></div>';});body+='</div>';}
+  openDlg("📁 Carica diagnosi",body,'<button type="button" class="mx-shiny s-gray" id="dlgClose2" style="padding:8px 14px;font-size:12px">Chiudi</button>');
+  $("dlgClose2").addEventListener("click",closeDlg);
+  $("dlgBody").querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",function(){const s=listSaves().find(x=>x.id===this.dataset.load);if(!s||!confirm('Sovrascrivere con "'+s.name+'"?'))return;STATE.cur=s.cur||0;STATE.finished=!!s.finished;STATE.data=JSON.parse(JSON.stringify(s.data));persist();render();closeDlg();showToast('Caricata.',"ok");}));
+  $("dlgBody").querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",function(){if(!confirm("Eliminare?"))return;writeSaves(listSaves().filter(x=>x.id!==this.dataset.del));openLoadDialog();}));}
+/* === Etichette leggibili delle risposte a scelta (19/11/2026) ===
+   Nel Word, nel PDF e nel Report le risposte a scelta uscivano col valore interno (es. «fascia_oriz», «mattone_pieno»).
+   mxLab() restituisce l'etichetta che si legge a schermo, presa dagli stessi pannelli del modulo. */
+var _MXLAB=null,_MXFLD=null;
+function _mxLabMap(){
+  if(_MXLAB) return _MXLAB; _MXLAB={}; _MXFLD={};
+  try{ var box=document.createElement("div");
+    Object.keys(panels).forEach(function(id){ try{ box.innerHTML=panels[id](); }catch(e){ return; }
+      box.querySelectorAll("[data-fld]").forEach(function(el){ var k=el.getAttribute("data-fld"); var m=_MXLAB[k]=_MXLAB[k]||{};
+        if(el.tagName==="SELECT"){ for(var i=0;i<el.options.length;i++){ if(el.options[i].value) m[el.options[i].value]=el.options[i].textContent; } }
+        else if(el.type==="radio"||el.type==="checkbox"){ var l=el.closest("label"); if(l&&el.value) m[el.value]=l.textContent; }
+        if(!_MXFLD[k]){ var f=el.closest(".fld"); var fl=f&&f.querySelector("label"); if(fl&&!fl.querySelector("input")) _MXFLD[k]=fl.textContent.replace(/\s+/g," ").trim(); else if(el.type==="checkbox"&&el.closest("label")) _MXFLD[k]=el.closest("label").textContent.replace(/^[^0-9A-Za-zÀ-ÿ(]+/,"").replace(/\s+/g," ").trim(); }
+      });
+    });
+  }catch(e){}
+  return _MXLAB;
+}
+function mxLab(campo,valore){
+  if(Array.isArray(valore)) return valore.map(function(x){ return mxLab(campo,x); });
+  if(valore==null||valore==="") return valore;
+  var m=_mxLabMap()[campo], l=m&&m[valore];
+  if(!l) return valore;
+  return String(l).replace(/^[^0-9A-Za-zÀ-ÿ<>≤≥(]+/,"").replace(/\s+/g," ").trim()||valore;
+}
+/* === Confronto fra due diagnosi salvate (19/11/2026) ===
+   Prima il tasto «Confronta» mostrava un avviso e apriva l'archivio di «Carica». Ora si scelgono due salvataggi
+   e una tabella li mette a fianco, con i campi diversi in arancio (come nel modulo Risalita). */
+function _mxFldName(k){ _mxLabMap(); return (_MXFLD&&_MXFLD[k])||String(k).replace(/_/g," ").replace(/([a-z0-9])([A-Z])/g,"$1 $2"); }
+function _mxCmpVal(k,v){
+  if(v===true) return "sì"; if(v===false) return "no";
+  if(v==null||v===""||(Array.isArray(v)&&!v.length)) return "n.d.";
+  if(Array.isArray(v)) return v.map(function(x){ return (x!==null&&typeof x==="object")?JSON.stringify(x):String(mxLab(k,x)); }).join(", ");
+  if(typeof v==="object") return JSON.stringify(v);
+  return String(mxLab(k,v));
+}
+function _mxRenderCmp(a,b){
+  var da=a.data||{}, db=b.data||{}, chiavi=[], righe="", diversi=0, tot=0, st="padding:4px 6px;border-bottom:1px solid #e6e0d2;text-align:left;vertical-align:top";
+  Object.keys(da).concat(Object.keys(db)).forEach(function(k){ if(chiavi.indexOf(k)<0) chiavi.push(k); });
+  chiavi.forEach(function(k){ var va=_mxCmpVal(k,da[k]), vb=_mxCmpVal(k,db[k]); if((va==="n.d."||va==="no")&&(vb==="n.d."||vb==="no")) return; tot++; var dif=(va!==vb); if(dif) diversi++;
+    righe+='<tr'+(dif?' style="background:#fff3e0"':'')+'><th style="'+st+';font-size:11px">'+esc(_mxFldName(k))+'</th><td style="'+st+'">'+esc(va)+'</td><td style="'+st+'">'+esc(vb)+'</td></tr>'; });
+  return '<div style="font-size:12.5px;margin-bottom:6px"><strong>'+(diversi?("Campi diversi: "+diversi+" su "+tot):("Nessuna differenza nei "+tot+" campi compilati"))+'</strong></div><table style="width:100%;border-collapse:collapse;font-size:11.5px"><tr><th style="'+st+'">Campo</th><th style="'+st+'">A · '+esc(a.name)+'<br><span style="font-weight:400">'+fmtTs(a.ts)+'</span></th><th style="'+st+'">B · '+esc(b.name)+'<br><span style="font-weight:400">'+fmtTs(b.ts)+'</span></th></tr>'+righe+'</table>';
+}
+function openCompareDialog(){
+  var arr=listSaves().slice().sort(function(x,y){ return String(y.ts).localeCompare(String(x.ts)); });
+  if(arr.length<2){ openDlg("⚖ Confronto",'<div class="dlg-empty">Servono almeno 2 diagnosi salvate con «Salva». Attualmente: '+arr.length+'.</div>','<button type="button" class="mx-shiny s-gray" id="dlgClose3" style="padding:8px 14px;font-size:12px">Chiudi</button>'); document.getElementById("dlgClose3").addEventListener("click",closeDlg); return; }
+  function opts(sel){ return arr.map(function(s,i){ return '<option value="'+esc(s.id)+'"'+(i===sel?" selected":"")+'>'+esc(s.name)+' · '+fmtTs(s.ts)+'</option>'; }).join(""); }
+  var stile="width:100%;padding:9px 11px;border:1px solid #d8d3c4;border-radius:8px;font:inherit;font-size:13px;background:#fff";
+  openDlg("⚖ Confronto diagnosi",'<div style="font-size:12.5px;margin-bottom:10px">Scegli due diagnosi salvate e premi «Confronta»: i campi diversi escono in arancio.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label style="display:block;font-size:11.5px;font-weight:700;margin-bottom:4px">Diagnosi A</label><select id="cmpA" style="'+stile+'">'+opts(0)+'</select></div><div><label style="display:block;font-size:11.5px;font-weight:700;margin-bottom:4px">Diagnosi B</label><select id="cmpB" style="'+stile+'">'+opts(1)+'</select></div></div><div id="cmpResult" style="margin-top:14px"></div>','<button type="button" class="mx-shiny s-gray" id="dlgClose4" style="padding:8px 14px;font-size:12px">Chiudi</button><button type="button" class="mx-shiny" id="dlgDoCompare" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#ffa726 0%,#ef6c00 45%,#bf360c 100%)">⚖ Confronta</button>');
+  document.getElementById("dlgClose4").addEventListener("click",closeDlg);
+  document.getElementById("dlgDoCompare").addEventListener("click",function(){ var all=listSaves(); var a=all.filter(function(s){return s.id===document.getElementById("cmpA").value;})[0], b=all.filter(function(s){return s.id===document.getElementById("cmpB").value;})[0]; if(!a||!b) return; document.getElementById("cmpResult").innerHTML=_mxRenderCmp(a,b); });
+}
+function resetDiagnosis(){if(!confirm("Azzerare la diagnosi corrente?"))return;Object.keys(STATE.data).forEach(k=>{const v=STATE.data[k];if(Array.isArray(v))STATE.data[k]=[];else if(typeof v==="number"||v===null)STATE.data[k]=null;else STATE.data[k]="";});STATE.cur=0;STATE.finished=false;persist();render();showToast("Azzerata.","ok");}
+
+document.addEventListener("DOMContentLoaded",function(){
+  var $=function(id){return document.getElementById(id)||document.createElement('span');};   /* init resiliente: elemento mancante (drift toolbar) non rompe la catena */
+  restore();renderAna();render();
+  $("btnPrev").addEventListener("click",prev);$("btnNext").addEventListener("click",next);$("btnFinish").addEventListener("click",finish);
+  $("btnReloadAna").addEventListener("click",function(){renderAna();showToast("Anagrafica ricaricata.","ok");});
+  $("btnSave").addEventListener("click",openSaveDialog);$("btnLoad").addEventListener("click",openLoadDialog);$("btnCompare").addEventListener("click",openCompareDialog);$("btnReset").addEventListener("click",resetDiagnosis);
+  $("dlgCloseBtn").addEventListener("click",closeDlg);$("dlgModal").addEventListener("click",function(e){if(e.target===this)closeDlg();});
+  $("btnWord").addEventListener("click",openDocModal);$("btnPDF").addEventListener("click",function(){openDocModal();setTimeout(exportPDF,300);});$("btnReport").addEventListener("click",addToReport);$("btnJSON").addEventListener("click",exportJSON);
+  $("modalCloseBtn").addEventListener("click",closeDocModal);$("btnCloseModal").addEventListener("click",closeDocModal);
+  $("btnDoExportWord").addEventListener("click",exportWord);$("btnDoExportPDF").addEventListener("click",exportPDF);$("btnDoExportJSON").addEventListener("click",exportJSON);
+  $("docModal").addEventListener("click",function(e){if(e.target===this)closeDocModal();});
+});
+window.MX_SALI={STATE,STEPS,SALI_DB,calcVerdict};
+</script>
+<script>
+/* === MX SNAPSHOT IMPORTER (auto-install, Mixando v3) ===
+ * Aggiunge bottone "Apri snapshot" accanto al "JSON" della toolbar.
+ * Importa .json esportato dallo stesso modulo, ricarica la pagina.
+ * Riconosce pattern lite (STATE.cur/finished/data → *-draft) e
+ * pattern rich (state diretto → *-vN). NON modifica codice esistente.
+ * ====================================================== */
+(function(){
+  'use strict';
+  if (window.__mxSnapImportInstalled) return;
+  window.__mxSnapImportInstalled = true;
+  function findHostBtn(){
+    return document.querySelector('button[data-act="export-json"]')
+        || document.getElementById('btnJSON')
+        || document.getElementById('btnExportJSON')
+        || document.querySelector('.mx-tb-btn.tb-save');
+  }
+  function makeBtn(){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mx-tb-btn tb-load';
+    b.id = 'btnOpenSnap';
+    b.title = 'Apri uno snapshot .json esportato in precedenza da questo modulo (sostituirà i dati correnti).';
+    b.innerHTML = '<span class="ico">\u{1F4C2}</span><span class="label">Apri snapshot</span>';
+    return b;
+  }
+  function detectModuleKeys(){
+    /* 19/11/2026: solo le chiavi di QUESTO modulo, cioè quelle che il modulo nomina nel suo codice.
+       Prima prendeva le chiavi di tutti i moduli e lo snapshot finiva nella bozza del primo trovato
+       (un file dei Sali, aperto dal modulo Sali, sovrascriveva la bozza della Risalita). */
+    var src = '';
+    try { [].forEach.call(document.scripts, function(s){ if (!s.src) src += s.textContent; }); } catch(_){}
+    var condivise = {'mx2::perito':1,'mx2::periti-v2':1,'mx2::locali-v1':1,'mx2::reports':1,'mx2::indagini':1,'mx2::strumentazione':1,'mx2::chartTheme':1,'mx2::showPhysicalScale':1,'mx2::report-meta':1,'mx2::last-backup':1};
+    var mie = {}, re = /mx2::[A-Za-z0-9_-]+/g, m;
+    while ((m = re.exec(src))) { if (!condivise[m[0]]) mie[m[0]] = 1; }
+    return Object.keys(mie);
+  }
+  /* 20/11/2026: nomi con cui un file dichiara di venire da questo modulo (in «moduleId», in «module» o nella
+     sigla di «schemaVersion», per esempio 'sali-v3.1'). Servono a non aprire qui il file di un altro modulo. */
+  var _MX_MIEI = ['sali'];
+  function _mxFileDiAltroModulo(obj){
+    if (!obj || typeof obj !== 'object') return '';
+    if (typeof obj._format === 'string' && obj._format.indexOf('mixando-backup') === 0) return 'Questo file è un backup generale di Mixando: si ripristina dalla pagina «Backup tecnico», non da qui.';
+    var d = obj.moduleId || obj.module || (typeof obj.schemaVersion === 'string' ? obj.schemaVersion : '');
+    if (typeof d !== 'string' || !d) return '';   /* il file non dice da dove viene: lo giudicano i controlli più sotto */
+    var n = d.toLowerCase().replace(/-v[\d.]+$/, '').replace(/_/g, '-');
+    if (_MX_MIEI.indexOf(n) >= 0) return '';
+    return 'Questo file viene da un altro modulo (' + (obj.moduleName || d) + ').';
+  }
+  function pickTargetKey(keys, payload){
+    var draftKeys = keys.filter(function(k){ return /-draft$/.test(k); });
+    var liteHint = payload && (payload.currentStep !== undefined || payload.data !== undefined);
+    if (liteHint && draftKeys.length){ return { key: draftKeys[0], kind: 'lite' }; }
+    var primaryKeys = keys.filter(function(k){ return !/-(saves|draft|prefs)$/.test(k); });
+    if (primaryKeys.length === 1) return { key: primaryKeys[0], kind: 'rich' };
+    if (primaryKeys.length > 1){
+      var sortable = primaryKeys.map(function(k){ try { return [k, (localStorage.getItem(k)||'').length]; } catch(_){ return [k, 0]; } });
+      sortable.sort(function(a,b){ return b[1] - a[1]; });
+      return { key: sortable[0][0], kind: 'rich' };
+    }
+    if (draftKeys.length) return { key: draftKeys[0], kind: 'lite' };
+    return null;
+  }
+  function openImportDialog(){
+    var f = document.createElement('input');
+    f.type = 'file'; f.accept = 'application/json';
+    f.style.display = 'none';
+    f.addEventListener('change', function(e){
+      var file = e.target.files && e.target.files[0]; if (!file) return;
+      var rd = new FileReader();
+      rd.onload = function(ev){
+        try {
+          var obj = JSON.parse(ev.target.result);
+          /* 20/11/2026: il tasto riapre solo i file di QUESTO modulo. Prima accettava, dopo una conferma, anche il file
+             di un altro modulo o il backup generale, e il lavoro del modulo aperto andava perso (provato: file dei Sali
+             nel Radon, file del Radon e della Risalita nei Sali). */
+          var _altro = _mxFileDiAltroModulo(obj);
+          if (_altro){ alert(_altro + '\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          /* 19/11/2026: file esportato da un modulo con la barra nuova (Glaser, Termoigrometria, Radon). Porta i dati
+             d'ingresso in «input», in una forma diversa da quella tenuta in memoria: scriverlo in memoria azzerava
+             il modulo. Qui si usa la stessa strada del tasto «Carica». */
+          if (obj && obj.input && window.MX && typeof window.MX.applyData === 'function'){
+            if (!confirm('Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.moduleName || obj.moduleId || '?') + '\n\nI dati correnti del modulo verranno SOSTITUITI.')) return;
+            var _esito = window.MX.applyData(obj.input, obj.moduleId);
+            if (_esito === 'ok') alert('Snapshot importato.');
+            else if (_esito === 'altro') alert('Questo file viene da un altro modulo (' + (obj.moduleName || obj.moduleId) + '): non importato.');
+            else alert('Il modulo non sa ricaricare questo file.');
+            return;
+          }
+          /* 20/11/2026: nei moduli con la barra nuova il solo file che si sa riaprire è quello con la voce «input».
+             Un file diverso, scritto in memoria così com'era, azzerava il modulo. */
+          if (window.MX && typeof window.MX.applyData === 'function'){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var keys = detectModuleKeys();
+          if (!keys.length){
+            alert('Nessuna chiave di lavoro trovata per questo modulo nello storage corrente.\nSuggerimento: apri il modulo, fai almeno un\'interazione, poi riprova.');
+            return;
+          }
+          var target = pickTargetKey(keys, obj);
+          if (!target){ alert('Non sono riuscito a individuare la chiave di salvataggio. Snapshot non importato.'); return; }
+          /* 20/11/2026: un file senza i dati dei passi svuotava la bozza */
+          if (target.kind === 'lite' && !(obj && (obj.data || obj.state))){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var msg = 'Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.module || obj.schemaVersion || '?') + '\n• Destinazione: ' + target.key + ' (' + target.kind + ')\n\nI dati correnti del modulo verranno SOSTITUITI.\nConsiglio: prima fai "JSON" per backup di sicurezza.\n\nProcedere?';
+          if (!confirm(msg)) return;
+          var toWrite;
+          if (target.kind === 'lite'){
+            toWrite = { ts: Date.now(), state: { cur: (obj.currentStep !== undefined ? obj.currentStep : 0), finished: !!obj.finished, data: (obj.data || obj.state || {}) } };
+          } else {
+            toWrite = obj.state || obj;
+          }
+          try { localStorage.setItem(target.key, JSON.stringify(toWrite)); }
+          catch (err) { alert('Errore scrittura storage: ' + (err.message || err)); return; }
+          alert('Snapshot importato in "' + target.key + '". Pagina in ricaricamento…');
+          location.reload();
+        } catch (err) { alert('Errore lettura JSON: ' + err.message); }
+      };
+      rd.readAsText(file);
+    });
+    document.body.appendChild(f); f.click(); setTimeout(function(){ try{ document.body.removeChild(f); }catch(_){} }, 1500);
+  }
+  function install(){
+    if (document.getElementById('btnOpenSnap')) return;
+    if (!detectModuleKeys().length) return;   /* 19/11/2026: il modulo non tiene dati in memoria, il tasto non potrebbe funzionare */
+    var host = findHostBtn();
+    if (!host || !host.parentNode){ return setTimeout(install, 250); }
+    var btn = makeBtn();
+    host.parentNode.insertBefore(btn, host.nextSibling);
+    btn.addEventListener('click', openImportDialog);
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(install, 150); });
+  } else {
+    setTimeout(install, 150);
+  }
+})();
+
+/* === Integrazione mappa-indagini (aggancio bidirezionale) === */
+function _mxIndaginiList(){
+  try{ var raw=localStorage.getItem('mx2::indagini'); if(!raw) return []; var a=JSON.parse(raw); return Array.isArray(a)?a:[]; }
+  catch(e){ return []; }
+}
+function _mxIndaginiSaveAll(list){
+  try{ localStorage.setItem('mx2::indagini', JSON.stringify(list||[])); return true; }
+  catch(e){ return false; }
+}
+function _mxIndaginiNewId(){
+  return 'ind_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+}
+
+// Mapping STATE.data → dati indagine per categoria 'sali'
+function _mxBuildDati_sali(d){
+  // Costruisce un sottoinsieme compatibile con il modal probe + preserva STATE intero
+  // I campi standard tInt, urInt, tSup vengono estratti se presenti, altrimenti restano in schedaCompleta
+  var out = {
+    schedaCompleta: JSON.parse(JSON.stringify(d || {}))
+  };
+  // Estrazione opportunistica di campi standard (se presenti con quei nomi)
+  ['tInt','urInt','tSup','tempC','urPerc','co2_ppm','pm25','pm10','tvoc','hcho','co','no2',
+   'co2','tempC2','tempInt'].forEach(function(k){
+    if(d && d[k] != null) out[k] = d[k];
+  });
+  // Eventuali sintomi/note/categoria sospetta
+  if(d){
+    if(d.sintomi) out.sintomi = d.sintomi;
+    if(d.note) out.note = d.note;
+    if(d.noteFinali) out.note = d.noteFinali;
+    if(d.tipologiaSospetta) out.tipologiaSospetta = d.tipologiaSospetta;
+    if(d.categoriaIaq) out.categoria_target = d.categoriaIaq;
+  }
+  return out;
+}
+
+/* 20/11/2026: le domande si fanno in una finestra dentro la pagina (window.mxChiedi, nel file condiviso
+   _shared/mx-switcher.js) e non più nelle finestrelle del browser. Se quel file non fosse stato caricato si torna
+   alle finestrelle di prima. _mxChiedi risponde con una promessa; _mxTesto chiede un solo testo. */
+function _mxChiedi(titolo, cfg){
+  if(window.mxChiedi) return window.mxChiedi(titolo, cfg);
+  cfg = cfg || {};
+  if(cfg.scelte){
+    var buone = cfg.scelte.filter(function(s){ return !s[2]; });
+    var r = prompt(titolo + '\n\n' + buone.map(function(s, i){ return (i+1) + '. ' + s[1]; }).join('\n') + '\n\nScrivi il numero:', '1');
+    var k = parseInt(r, 10) - 1;
+    return Promise.resolve(buone[k] ? buone[k][0] : null);
+  }
+  var out = [], campi = cfg.campi || [];
+  for(var i = 0; i < campi.length; i++){
+    var v = prompt(titolo + (campi[i][0] ? ('\n' + campi[i][0]) : ''), campi[i][1] == null ? '' : campi[i][1]);
+    if(v === null) return Promise.resolve(null);
+    out.push(v);
+  }
+  return Promise.resolve(out);
+}
+function _mxTesto(titolo, pre){ return _mxChiedi(titolo, {campi:[['', pre]]}).then(function(r){ return r ? r[0] : null; }); }
+async function _mxAggancialMappa(){
+  var cat = 'sali';
+  var moduloFile = 'sali.html';
+  var fileLabel = 'Sali';
+  // Pre-save scheda
+  try{ if(typeof persist === 'function') persist(); }catch(e){}
+  var d = STATE && STATE.data ? STATE.data : {};
+  var dati = _mxBuildDati_sali(d);
+
+  var lista = _mxIndaginiList();
+  var stessoCat = lista.filter(function(r){ return r.categoria === cat; });
+
+  /* 20/11/2026: scelta dentro la pagina (prima si scriveva 1, 2 o 3 in una finestrella del browser) */
+  var mode = await _mxChiedi('Aggancia la scheda '+fileLabel.toUpperCase()+' alla Mappa Indagini', {scelte:[['1','Nuovo punto sulla mappa'],['2','Aggiorna un punto esistente ('+(stessoCat.length?(stessoCat.length+' disponibili'):'nessuno disponibile')+')', !stessoCat.length]]});
+  if(!mode) return;
+
+  if(mode === '1'){
+    var _nn = await _mxChiedi('Nuovo punto sulla mappa', {campi:[['Nome del punto', fileLabel+' '+new Date().toLocaleDateString('it-IT')],['Stanza (facoltativa)','']], conferma:'Crea il punto'});
+    if(!_nn || !String(_nn[0]).trim()) return;
+    var nome = String(_nn[0]).trim(), stanza = String(_nn[1]||'').trim();
+    var rec = {
+      id: _mxIndaginiNewId(),
+      schemaVer: 1,
+      categoria: cat,
+      piano: 0,
+      x: 0.5, y: 0.5,
+      stanza: stanza || '',
+      nome: nome,
+      posizione: 'Da posizionare sulla mappa (apri Mappa Indagini e trascina il pin)',
+      dataCreazione: new Date().toISOString(),
+      dataModifica: new Date().toISOString(),
+      dati: dati,
+      note: 'Rilievo creato da scheda '+moduloFile,
+      foto: [],
+      termogrammi: [],
+      linkScheda: moduloFile+':'+Date.now(),
+      layerId: ''
+    };
+    lista.push(rec);
+    _mxIndaginiSaveAll(lista);
+    if(typeof showToast === 'function') showToast('✓ Punto "'+nome+'" creato sulla mappa indagini','ok');
+    setTimeout(function(){
+      if(confirm('Punto "'+nome+'" creato sulla Mappa Indagini.\nVuoi aprire ora la Mappa per posizionarlo?')){
+        window.location.href = 'mappa-indagini.html';
+      }
+    }, 500);
+  } else if(mode === '2'){
+    if(!stessoCat.length){ alert('Nessun punto di categoria '+fileLabel+' esistente sulla mappa.'); return; }
+    var ch = await _mxChiedi('Quale punto vuoi aggiornare?', {scelte: stessoCat.map(function(r, i){ return [String(i+1), r.nome+' ('+(r.stanza||'senza stanza')+')']; })});
+    if(!ch) return;
+    var idx = parseInt(ch)-1;
+    if(isNaN(idx) || idx<0 || idx>=stessoCat.length){ alert('Selezione non valida'); return; }
+    var target = stessoCat[idx];
+    target.dati = dati;
+    target.dataModifica = new Date().toISOString();
+    target.linkScheda = moduloFile+':'+Date.now();
+    target.note = (target.note || '') + (target.note ? ' · ':'') + 'Aggiornato da '+moduloFile+' il '+new Date().toLocaleDateString('it-IT');
+    for(var i=0;i<lista.length;i++){
+      if(lista[i].id === target.id){ lista[i] = target; break; }
+    }
+    _mxIndaginiSaveAll(lista);
+    if(typeof showToast === 'function') showToast('✓ Punto "'+target.nome+'" aggiornato','ok');
+  }
+}
+
+</script>
+<script src="_shared/mx-biblio.js" data-mod="sali" defer></script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

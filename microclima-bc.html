@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mixando Lab · Microclima Beni Culturali v4.0</title>
+<style>
+:root{--mx-accent:#8e6f3a;--mx-accent-strong:#5d4924;--mx-accent-soft:rgba(142,111,58,.12);
+--bg:#f8f5ee;--paper:#fff;--ink:#2b1f0a;--ink-soft:#5a4a32;--ink-mute:#8a7858;
+--line:#e6dec9;--ok:#1f7a4d;--warn:#b07820;--err:#a83232;--r:14px;
+--ff-serif:Georgia,"Cambria",serif;--ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+--ff-mono:ui-monospace,"SF Mono",Consolas,monospace;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:56px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:56px;display:flex;align-items:center;gap:14px;padding:0 20px;background:linear-gradient(180deg,#fff 0%,#f8f3e3 100%);box-shadow:0 2px 12px rgba(20,20,40,.08);border-bottom:3px solid var(--mx-accent)}
+.mx-bar .em{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong) 100%);color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35);text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;flex-shrink:0;position:relative}
+.mx-bar .meta{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--mx-accent-strong);display:inline-flex;align-items:center;gap:6px;line-height:1.2}
+.mx-bar .tag::before,.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,Cambria,serif;font-weight:700;font-style:italic;font-size:16px;color:#1a140a;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:7px 14px;border:1.5px solid var(--mx-accent);border-radius:9px;background:rgba(255,255,255,.65);transition:all .2s}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong));color:#fff;transform:translateY(-1px)}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1}
+.mx-logo-mini{height:32px;width:32px;border-radius:8px;background:#fff;padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.12);object-fit:contain;flex-shrink:0;display:none;border:1px solid var(--line)}
+.mx-bar.has-logo .em{display:none}
+@media (max-width:600px){.mx-bar{height:50px;padding:0 14px;gap:10px}body{padding-top:50px}.mx-bar .em{width:32px;height:32px;font-size:17px}.mx-bar .ti{font-size:13.5px}.mx-logo-center{height:26px;max-width:90px}}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 22px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:780px;color:var(--ink-soft);font-size:14px}
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
+.ana-strip .pc{padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700}
+.ana-strip .pc .m{font-size:11.5px;color:var(--ink-mute);margin-top:2px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card .body{padding:16px 18px}
+.norm-strip{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 14px;background:#fcf8eb;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;font-size:11.5px}
+.norm-strip .src{color:var(--ink-mute);font-style:italic}
+.norm-strip .src b{color:var(--ink);font-style:normal}
+.mode-btn{appearance:none;border:1.5px solid var(--mx-accent);background:#fff;color:var(--mx-accent-strong);padding:6px 12px;border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;letter-spacing:.04em}
+.mode-btn:hover{background:var(--mx-accent);color:#fff}
+.stepper{display:flex;flex-wrap:wrap;gap:5px;padding:10px;background:#fcf8eb;border:1px solid var(--line);border-radius:10px;margin-bottom:14px}
+.step-chip{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink-mute);padding:6px 11px;border-radius:14px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .15s}
+.step-chip.done{border-color:var(--ok);color:var(--ok);background:#e8f5e9}
+.step-chip.active{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 2px 4px rgba(0,0,0,.18)}
+.step-chip:hover:not(.active){border-color:var(--mx-accent);color:var(--mx-accent-strong);background:var(--mx-accent-soft)}
+.banner{margin:8px 0 14px;padding:10px 14px;border-radius:9px;font-size:12.5px;line-height:1.55}
+.banner.blue{background:#e3f2fd;border-left:4px solid #1976d2;color:#0d47a1}
+.banner.yellow{background:#fff8e1;border-left:4px solid #f9a825;color:#7d5a1f}
+.banner.green{background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20}
+.banner.red{background:#ffebee;border-left:4px solid var(--err);color:#7f0000}
+.banner.gold{background:#f4ecdb;border-left:4px solid var(--mx-accent);color:var(--mx-accent-strong)}
+.banner strong{font-weight:800}
+.step-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.step-head h4{margin:0;font-family:var(--ff-serif);font-size:18px;font-weight:700}
+.step-head .ref{font-size:11px;color:var(--ink-mute);font-style:italic;background:#fcf8eb;padding:4px 10px;border-radius:7px;border:1px solid var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em}
+.fld label .opz{font-weight:400;color:var(--ink-mute);font-size:10.5px}
+.fld input,.fld select,.fld textarea{padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13.5px;background:#fff;outline:none;width:100%;color:var(--ink)}
+.fld input[type=number]{font-family:var(--ff-mono)}
+.fld textarea{min-height:70px;resize:vertical;font-family:inherit}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.tipo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px}
+.tipo-card{padding:12px;border:1.5px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;transition:all .2s;text-align:center}
+.tipo-card:hover{border-color:var(--mx-accent);background:#fcf8eb;transform:translateY(-2px)}
+.tipo-card.sel{border-color:var(--mx-accent);background:linear-gradient(135deg,#f4ecdb,#fff);border-width:2px;box-shadow:0 4px 12px rgba(142,111,58,.18)}
+.tipo-card .nome{font-weight:700;color:var(--mx-accent-strong);font-size:13.5px;margin-bottom:4px}
+.mat-card{padding:13px;border:1.5px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:8px}
+.mat-card:hover{border-color:var(--mx-accent);background:#fcf8eb}
+.mat-card.sel{border-color:var(--mx-accent);background:#f4ecdb;border-width:2px}
+.mat-card.crit{border-color:var(--err);background:#fef5f4;border-width:2.5px}
+.mat-card .nome{font-weight:700;color:var(--mx-accent-strong);font-size:13.5px}
+.mat-card.crit .nome{color:#7f0000}
+.mat-card .setpoint{font-size:11.5px;color:var(--ink-soft);margin-top:5px;line-height:1.55}
+.mat-card .note{font-size:11px;color:var(--ink-mute);margin-top:3px;font-style:italic}
+.cat-card{padding:12px 14px;border:1.5px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:8px}
+.cat-card:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.08)}
+.cat-card.sel{border-width:2.5px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.cat-card .title{font-weight:700;font-size:13.5px}
+.cat-card .desc{font-size:12px;color:var(--ink-soft);margin-top:6px}
+.danno-card{padding:12px;border:1.5px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:8px}
+.danno-card:hover{border-color:var(--mx-accent);background:#fcf8eb}
+.danno-card.sel{border-color:var(--err);background:#fef5f4;border-width:2px}
+.danno-card .nome{font-weight:700;font-size:13px;color:var(--mx-accent-strong)}
+.danno-card.sel .nome{color:#7f0000}
+.danno-card .info{font-size:11.5px;color:var(--ink);margin-top:4px;line-height:1.55}
+.danno-card .info b{color:var(--mx-accent-strong)}
+.measure-card{padding:10px;border:1.5px solid var(--line);border-radius:8px;background:#fff}
+.measure-card.over{border-color:var(--err);background:rgba(168,50,50,.05)}
+.measure-card.warn{border-color:#f39c12;background:rgba(243,156,18,.05)}
+.measure-card.ok{border-color:var(--ok);background:rgba(31,122,77,.05)}
+.measure-card .lbl{font-size:11.5px;font-weight:700;margin-bottom:4px}
+.measure-card .lim{font-size:10px;color:var(--ink-mute);margin-top:3px}
+.step-nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+.mx-shiny{appearance:none;border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;letter-spacing:.04em;padding:11px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap}
+.mx-shiny::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-shiny:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-shiny:hover::before{transform:translateX(130%)}
+.s-blue{background-image:linear-gradient(135deg,#42a5f5,#1565c0 45%,#0d47a1);box-shadow:0 3px 10px rgba(21,101,192,.42)}
+.s-gray{background-image:linear-gradient(135deg,#bdbdbd,#757575 45%,#424242);box-shadow:0 3px 10px rgba(97,97,97,.42)}
+.s-violet{background-image:linear-gradient(135deg,#ab47bc,#6a1b9a 45%,#3e0a5b);box-shadow:0 3px 10px rgba(106,27,154,.42)}
+.s-green{background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);box-shadow:0 3px 10px rgba(46,125,50,.42)}
+.s-accent{background-image:linear-gradient(135deg,#8e6f3a,#5d4924);box-shadow:0 3px 10px rgba(142,111,58,.42)}
+.mx-toolbar{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin:18px 0 14px;overflow:hidden}
+.mx-toolbar-head{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),#fff);display:flex;align-items:center;gap:10px}
+.mx-toolbar-head .ico-wrap{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.mx-toolbar-head .title{flex:1}
+.mx-toolbar-head .title small{display:block;font-family:var(--ff-sans);font-style:italic;font-size:11.5px;color:var(--ink-mute);font-weight:500;margin-top:2px}
+.mx-toolbar-body{padding:14px 18px 16px}
+.mx-toolbar-inner{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.mx-tb-btn{appearance:none;border:0;color:#fff;font:inherit;font-size:13px;font-weight:700;letter-spacing:.02em;padding:12px 18px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease,background-position .35s ease;background-size:180% 180%}
+.mx-tb-btn::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-tb-btn:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-tb-btn:hover::before{transform:translateX(130%)}
+.mx-tb-btn.tb-save{background-image:linear-gradient(135deg,#64b5f6,#1976d2 45%,#0d47a1)}
+.mx-tb-btn.tb-load{background-image:linear-gradient(135deg,#ffb74d,#f57c00 45%,#bf360c)}
+.mx-tb-btn.tb-compare{background-image:linear-gradient(135deg,#ba68c8,#7b1fa2 45%,#311b92)}
+.mx-tb-btn.tb-word{background-image:linear-gradient(135deg,#5a9bd8,#2b579a 45%,#0c2e5e)}
+.mx-tb-btn.tb-pdf{background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000)}
+.mx-tb-btn.tb-report{background-image:linear-gradient(135deg,#ffd54f,#f9a825 45%,#e65100);color:#3e2e00}
+.mx-tb-btn.tb-reset{background-image:linear-gradient(135deg,#9e9e9e,#616161 45%,#212121)}
+.verdict-box{padding:18px;border-radius:12px;margin-top:14px;border:2px solid;text-align:center}
+.verdict-box.ok{background:#e8f5e9;border-color:var(--ok);color:#1b5e20}
+.verdict-box.warn{background:#fff8e1;border-color:#f9a825;color:#7d5a1f}
+.verdict-box.err{background:#ffebee;border-color:var(--err);color:#7f0000}
+.verdict-box .lbl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.verdict-box .v{font-family:var(--ff-serif);font-style:italic;font-size:22px;font-weight:700;margin-bottom:4px}
+.verdict-box .s{font-size:12.5px;line-height:1.55}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:28px 12px}
+.modal.show{display:flex}
+.modal-paper{background:#fff;max-width:840px;width:100%;border-radius:12px;box-shadow:0 18px 60px rgba(0,0,0,.4);overflow:hidden}
+.modal-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.modal-head h3{margin:0;font-family:var(--ff-serif);font-size:16px}
+.modal-close{appearance:none;border:0;background:#fcf8eb;color:var(--ink);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:17px;font-weight:800}
+.modal-body{padding:24px 28px;font-family:var(--ff-serif);font-size:13px;line-height:1.6;max-height:70vh;overflow-y:auto}
+.modal-body h1{font-size:22px;margin:0 0 12px;font-weight:700;font-style:italic}
+.modal-body h2{font-size:15px;margin:22px 0 8px;color:var(--mx-accent-strong);border-bottom:1px solid var(--line);padding-bottom:4px}
+.modal-body table{width:100%;border-collapse:collapse;margin:10px 0;font-size:11.5px}
+.modal-body table th,.modal-body table td{padding:5px 7px;border-bottom:1px solid var(--line);text-align:left}
+.modal-body table th{background:#fcf8eb;font-weight:700;text-transform:uppercase;font-size:10.5px}
+.modal-actions{padding:12px 18px;border-top:1px solid var(--line);background:#fcf8eb;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.dlg-list{max-height:50vh;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:#fcf8eb}
+.dlg-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px}
+.dlg-empty{padding:30px;text-align:center;color:var(--ink-mute);font-style:italic;font-size:13px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:10px;font-size:13.5px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.32);z-index:300;opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);max-width:88vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:var(--ok)}.toast.err{background:var(--err)}.toast.warn{background:var(--warn)}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+@media (max-width:760px){.grid2,.grid3,.grid4,.ana-strip{grid-template-columns:1fr}}
+@media print{body * {visibility:hidden !important}.mx-print, .mx-print * {visibility:visible !important}.mx-print{position:absolute;left:0;top:0;width:100%}}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab"><img id="mxLogoPerito" class="mx-logo-mini" alt="Logo perito">
+  <div class="meta"><span class="tag">Patologia · Microclima Beni Culturali</span><h1 class="ti">Diagnosi Microclima BC · v4.0</h1></div>
+  <a class="back" href="suite.html">← Suite</a>
+</header>
+<main>
+  <section class="hero">
+    <h2>Diagnosi <em>Microclima Beni Culturali</em></h2>
+    <p>Wizard 8 step (Tecnico) o 5 step (Operatore): identificazione ente, ambiente, 10 categorie di materiali (legno, carta, tessuti, dipinti, metalli, pietra, cuoio, foto, plastiche, avorio) con setpoint UNI 10829:1999 + UNI EN 15757:2010 + ASHRAE classi AA-D, misure rilevate, diagnosi 6 tipologie danno, piano mitigazione.</p>
+    <div style="margin-top:14px"><a href="assistente.html?skill=microclima" target="_blank" rel="noopener" style="display:inline-block;background-image:linear-gradient(135deg,#c79a3a,#a8791d 55%,#6e4e0a);color:#fff;font-weight:800;font-size:13.5px;text-decoration:none;padding:11px 18px;border-radius:10px;box-shadow:0 3px 10px rgba(168,121,29,.34)">💬 Assistente microclima: target dal materiale critico vs misure</a></div>
+  </section>
+  <div class="ana-strip">
+    <div class="pc" id="anaPerito"><div class="h">Perito / tecnico</div><div class="n">n.d.</div><div class="m"></div></div>
+    <div class="pc" id="anaCliente"><div class="h">Committente / immobile</div><div class="n">n.d.</div><div class="m"></div></div>
+  </div>
+  <div style="text-align:center;margin-bottom:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+    <a href="locali-cantiere.html" target="_blank" style="font-size:12px;color:var(--mx-accent-strong);font-weight:700;text-decoration:none;border:1px solid var(--mx-accent);padding:6px 13px;border-radius:8px">⚙ Modifica in Locali-Cantiere</a>
+    <button type="button" class="mx-shiny s-green" id="btnReloadAna" style="padding:6px 13px;font-size:11.5px">↻ Ricarica anagrafica</button>
+  </div>
+  <article class="card">
+    <div class="body">
+      <div class="norm-strip">
+        <div class="src">📖 Riferimento: <b id="stepRef">n.d.</b></div>
+        <div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:var(--ink-mute)">Modalità:</span><button type="button" class="mode-btn" id="btnMode">⚡ Operatore (5 step)</button></div>
+      </div>
+      <div class="stepper" id="stepper"></div>
+      <div id="stepPanel"></div>
+      <div class="step-nav">
+        <button type="button" class="mx-shiny s-gray" id="btnPrev">← Indietro</button>
+        <button type="button" class="mx-shiny s-accent" id="btnNext">Avanti →</button>
+        <button type="button" class="mx-shiny s-violet" id="btnFinish" style="display:none">✓ Concludi diagnosi</button>
+      </div>
+    </div>
+  </article>
+  <div class="mx-toolbar" id="mxToolbar">
+    <h3 class="mx-toolbar-head"><span class="ico-wrap">💾</span><span class="title">Salvataggio &amp; esportazione<small>Salva l'analisi, ricarica un'analisi precedente o esporta in Word/PDF</small></span></h3>
+    <div class="mx-toolbar-body">
+      <div class="mx-toolbar-inner">
+        <button type="button" class="mx-tb-btn tb-save"    id="btnSave"><span>💾</span><span>Salva</span></button>
+        <button type="button" class="mx-tb-btn tb-load"    id="btnLoad"><span>📁</span><span>Carica</span></button>
+        <button type="button" class="mx-tb-btn tb-compare" id="btnCompare"><span>⚖</span><span>Confronta</span></button>
+        <button type="button" class="mx-tb-btn tb-word"    id="btnWord"><span>📝</span><span>Salva Word</span></button>
+        <button type="button" class="mx-tb-btn tb-pdf"     id="btnPDF"><span>📄</span><span>Stampa / PDF</span></button>
+        <button type="button" class="mx-tb-btn tb-report"  id="btnReport"><span>📦</span><span>Al report</span></button>
+        <button type="button" class="mx-tb-btn" id="btnAggancia" style="background-image:linear-gradient(135deg,#26a69a,#00897b 45%,#004d40);box-shadow:0 3px 10px rgba(0,137,123,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)" onclick="_mxAggancialMappa()"><span class="ico">&#128205;</span><span class="label">Aggancia alla mappa</span></button>
+        <button type="button" class="mx-tb-btn tb-reset"   id="btnReset"><span>✕</span><span>Reset</span></button>
+      </div>
+    </div>
+  </div>
+  <footer class="ft">Mixando v3 · <strong>Diagnosi Microclima BC v4.0</strong> · D.Lgs 42/2004 (Codice BC) · DM 10/05/2001 · UNI 10829:1999 · UNI EN 15757:2010 · UNI EN 16242:2013 · UNI EN 16893:2018 · UNI EN ISO 7726:2026 · UNI EN 16790:2016 (IPM) · UNI EN 17820:2023 · ASHRAE Handbook HVAC Applications (classi AA/A/B/C/D) · CCI · IPI · Bizot Green Protocol 2014</footer>
+</main>
+<div class="modal" id="dlgModal"><div class="modal-paper" style="max-width:600px"><div class="modal-head"><h3 id="dlgTitle">Dialog</h3><button class="modal-close" id="dlgCloseBtn">&times;</button></div><div class="modal-body" id="dlgBody" style="padding:18px 20px;font-family:var(--ff-sans);max-height:70vh;overflow-y:auto"></div><div class="modal-actions" id="dlgActions"></div></div></div>
+<div class="modal" id="docModal"><div class="modal-paper"><div class="modal-head"><h3>📑 Anteprima documento</h3><button class="modal-close" id="modalCloseBtn">&times;</button></div><div class="modal-body mx-print" id="docBody"></div><div class="modal-actions"><button type="button" class="mx-shiny" id="btnDoExportWord" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#5a9bd8,#2b579a 45%,#0c2e5e)">📝 Scarica .doc</button><button type="button" class="mx-shiny" id="btnDoExportPDF" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000)">📄 Stampa / PDF</button><button type="button" class="mx-shiny s-blue" id="btnDoExportJSON" style="padding:8px 14px;font-size:12px">💾 .json</button><button type="button" class="mx-shiny s-gray" id="btnCloseModal" style="padding:8px 14px;font-size:12px">Chiudi</button></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+(function(){
+/* === MIXANDO v3 · Risanamento MBC: dataset embedded === */
+const SOL_MBC = [{nome:"HVAC dedicato con setpoint UNI 10829",categoria:"Climatizzazione conservativa",invasivita:"alta",tempistica:"4-12 settimane",norma:"UNI 10829:1999",normeSec:["UNI EN 15757:2010", "UNI EN 16242:2013", "ASHRAE Handbook Applications ch.23", "Bizot Green Protocol 2014"],sintesi:"Sistema HVAC con controllo separato di T, UR, qualit\u00e0 aria e illuminamento. Setpoint per categoria UNI 10829:1999 (Cat.A: T 19-24\u00b0C \u00b11,5\u00b0C, UR 50-60% \u00b15%; Cat.B-C pi\u00f9 stringenti). Filtri ePM1 + carbone attivo + HEPA H13 + lampade UV-C per sterilizzazione condotte.",limit:"Costi installazione elevatissimi. Consumi energetici significativi. Manutenzione specialistica obbligatoria."},{nome:"Controllo passivo (capacitanza igroscopica)",categoria:"Climatizzazione passiva",invasivita:"media",tempistica:"2-6 settimane",norma:"UNI EN 15757:2010 (Historic Climate)",normeSec:["UNI 10829:1999", "Bizot Green Protocol 2014", "UNI EN 16893:2018"],sintesi:"Sfruttamento della massa termica/igroscopica dell'edificio storico (murature pietra, intonaci calce) per attenuazione naturale delle escursioni T/UR. Integrato con ricambio aria controllato (VMC dimensionata o ventilazione meccanica notturna).",limit:"Efficacia limitata a escursioni di breve periodo. Per Cat.A serve comunque controllo attivo."},{nome:"Illuminazione conservativa LED filtrata",categoria:"Controllo fotodegrado",invasivita:"media",tempistica:"2-4 settimane",norma:"UNI 10829:1999",normeSec:["CIE 157:2004", "UNI EN 16163:2025", "D.Lgs 42/2004 (autorizzazione MiC)"],sintesi:"Sostituzione lampade alogene/incandescenza con LED a spettro filtrato (UV cut-off <380 nm, IR cut-off >700 nm), controllo dimming + on/off temporizzato, calcolo dose conservativa (CIE 157:2004): Cat.1 max 15.000 lux\u00b7h/anno, Cat.2 max 150.000, Cat.3 max 600.000.",limit:"Per beni vincolati MiC richiede progetto illuminotecnico approvato. Verifiche periodiche con luxmetro+radiometro UV."}];
+const DPI_MBC = [{"item": "Guanti cotone bianco", "norma": "UNI EN ISO 21420 (requisiti generali guanti)", "note": "OBBLIGATORI per manipolazione opere/superfici delicate"}, {"item": "Camice cotone", "norma": "UNI EN ISO 13688:2022", "note": "No fibre sintetiche per evitare scariche elettrostatiche su affreschi"}, {"item": "Mascherina FFP1", "norma": "UNI EN 149:2001+A1:2009", "note": "Solo se sopralluogo in depositi polverosi"}, {"item": "Calzari", "norma": "UNI EN ISO 13688:2022", "note": "Locali con pavimentazione storica o affreschi a terra"}];
+const STRUMENTI_MBC = [{"nome": "Datalogger T/UR", "norma": "UNI EN ISO 7726:2026 + UNI EN 16242:2013", "uso": "Monitoraggio continuo \\u226512 mesi per Historic Climate (UNI EN 15757:2010)"}, {"nome": "Luxmetro + radiometro UV", "norma": "UNI 10829:1999 + CIE 157:2004", "uso": "Verifica illuminamento conservativo + dose cumulativa annua"}, {"nome": "Anemometro hot-wire", "norma": "UNI EN ISO 7726:2026", "uso": "Velocit\\u00e0 aria <0,15 m/s (UNI 10829) per sale espositive"}];
+
+function _renderRisanamentoMBC(){
+  let html = '';
+  html += '<section data-pat="mbc" data-sec="risanamento" style="margin-top:14px;padding:16px 18px;background:linear-gradient(180deg,#eef9f1,#fff);border:1px solid #bce5c8;border-left:5px solid #2e7d52;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#1b5532;font-family:Georgia,serif;font-size:16px">\ud83d\udee0 Risanamento consigliato</h4>';
+  html += '<p style="margin:0 0 10px;font-size:12px;color:#1b5532;font-style:italic">Tecniche normate applicabili. Verificare prerequisiti caso per caso.</p>';
+  html += '<div style="display:grid;gap:8px">';
+  SOL_MBC.forEach(s=>{
+    html += '<div style="background:#fff;border:1px solid #d8e8db;border-left:4px solid #d4a017;border-radius:10px;padding:11px 13px">'
+      + '<div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
+        + '<span style="font-size:9.5px;font-weight:800;letter-spacing:.14em;padding:3px 9px;border-radius:11px;background:linear-gradient(135deg,#f5d164,#d4a017);color:#3a2c00">\u2b50 APPLICABILE</span>'
+        + '<strong style="flex:1;min-width:200px;font-family:Georgia,serif;font-size:14px;color:#2c1810">'+s.nome+'</strong>'
+        + '<span style="font-size:10.5px;color:#fff;background:#475569;padding:2px 8px;border-radius:9px;font-family:JetBrains Mono,monospace">'+s.tempistica+'</span>'
+      + '</div>'
+      + '<div style="font-size:12.5px;color:#5d4a30;line-height:1.5;margin-bottom:5px">'+s.sintesi+'</div>'
+      + '<div style="font-family:JetBrains Mono,monospace;font-size:11px;color:#1b5532;background:#eef9f1;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:5px"><b>Norma cardine:</b> '+s.norma+'</div>'
+      + (s.normeSec.length?'<div style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#666;margin-bottom:5px"><b>Secondarie:</b> '+s.normeSec.join(' \u00b7 ')+'</div>':'')
+      + '<div style="font-size:11.5px;color:#7f1d1d;background:#fff5f3;padding:5px 9px;border-radius:6px;border-left:3px solid #c0392b"><b>\u26a0 Limitazioni:</b> '+s.limit+'</div>'
+    + '</div>';
+  });
+  html += '</div></section>';
+  html += '<section data-pat="mbc" data-sec="dpi" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#fff5f3,#fff);border:1px solid #fdd;border-left:5px solid #c0392b;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#7f1d1d;font-family:Georgia,serif;font-size:15px">\ud83e\udd7a DPI (D.Lgs 81/2008)</h4><div style="display:grid;gap:6px">';
+  DPI_MBC.forEach(p=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #fdd;border-left:3px solid #c0392b;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+p.item+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#c0392b;background:#fff5f3;padding:2px 7px;border-radius:9px;margin-left:6px">'+p.norma+'</span><div style="font-size:11px;color:#5d1a14;margin-top:3px">'+p.note+'</div></div>';
+  });
+  html += '</div></section>';
+  html += '<section data-pat="mbc" data-sec="strumenti" style="margin-top:12px;padding:14px 18px;background:linear-gradient(180deg,#e3f3f5,#fff);border:1px solid #b3dde2;border-left:5px solid #0e7c87;border-radius:12px">';
+  html += '<h4 style="margin:0 0 4px;color:#075863;font-family:Georgia,serif;font-size:15px">\ud83d\udd2c Strumenti per verifica</h4><div style="display:grid;gap:6px">';
+  STRUMENTI_MBC.forEach(s=>{
+    html += '<div style="padding:8px 12px;background:#fff;border:1px solid #b3dde2;border-left:3px solid #0e7c87;border-radius:8px"><strong style="font-family:Georgia,serif;font-size:13px;color:#2c1810">'+s.nome+'</strong> <span style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:#075863;background:#e3f3f5;padding:2px 7px;border-radius:9px;margin-left:6px">'+s.norma+'</span><div style="font-size:11px;color:#0f3a3f;margin-top:3px">'+s.uso+'</div></div>';
+  });
+  html += '</div></section>';
+  return html;
+}
+
+function loadLg(){try{var p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");var img=document.getElementById("mxLogoPerito");var bar=document.querySelector(".mx-bar");if(img&&p&&p.logoData){img.src=p.logoData;img.style.display="block";if(bar)bar.classList.add("has-logo");}else{if(img)img.style.display="none";if(bar)bar.classList.remove("has-logo");}}catch(e){}}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",loadLg);else loadLg();})();
+const DRAFT_KEY="mx2::microbc-draft",SAVES_KEY="mx2::microbc-saves";
+const REGIONI_IT=['Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria',"Valle d'Aosta",'Veneto'];
+const TIPI_ENTE=[{id:'museo',label:'Museo / pinacoteca / galleria'},{id:'archivio',label:'Archivio (storico, di stato, ecclesiastico)'},{id:'biblioteca',label:'Biblioteca'},{id:'chiesa',label:'Chiesa / luogo di culto'},{id:'deposito',label:'Deposito / magazzino opere'},{id:'privato',label:'Collezione privata'}];
+const TIPI_SALA=[{id:'esposizione',label:'Sala espositiva (pubblico)'},{id:'deposito',label:'Deposito (riserve, magazzino)'},{id:'restauro',label:'Laboratorio di restauro'},{id:'transito',label:'Area di transito / movimentazione'}];
+const CLASSI_ASHRAE=[{id:'AA',label:'AA, Controllo di precisione',desc:'T ±2°C / UR ±5%, nessun aggiustamento stagionale. Nessun rischio per la maggior parte degli oggetti (ASHRAE Handbook, cap. Musei).',col:'#27ae60'},{id:'A',label:'A, Controllo buono',desc:'T ±5°C / UR ±10% (varianti As stagionale / Ad giornaliera). Piccolo rischio per oggetti molto vulnerabili; standard per la maggior parte dei musei.',col:'#3498db'},{id:'B',label:'B, Fluttuazioni stagionali',desc:'T 5-25°C / UR 30-70% senza fluttuazioni rapide. Per collezioni meno sensibili.',col:'#f39c12'},{id:'C',label:'C, Controllo minimo',desc:'Solo limiti estremi. Per oggetti robusti (pietra, ceramica, metalli stabili).',col:'#e67e22'},{id:'D',label:'D, Protezione minima',desc:'Solo prevenzione condensa visibile. Per oggetti molto resistenti.',col:'#c0392b'}];
+const MATERIALI=[
+{id:'legno',nome:'Legno (mobili, statue, tavole, strumenti musicali)',t_set:'19-24 °C',ur_set:'50-60%',ur_max_var_giorno:'±5%',ur_max_var_stagione:'±10% rispetto al clima storico',luce:'< 200 lux (dipinti su tavola: 150 lux)',uv:'< 75 μW/lumen',ashrae_class:'AA-A',norma:'UNI 10829:1999 + UNI EN 15757:2010',note:'Materiale igroscopico per eccellenza. Cicli rapidi di UR causano deformazioni. Valutare il "clima storico" dell\'opera.'},
+{id:'carta',nome:'Carta, manoscritti, libri, opere su carta',t_set:'18-22 °C',ur_set:'45-55%',ur_max_var_giorno:'±5%',ur_max_var_stagione:'±5%',luce:'50 lux per ora limitata; 150-300.000 lux·h/anno totale',uv:'< 75 μW/lumen',ashrae_class:'AA',norma:'UNI 10829:1999 + ISO 11799:2024',note:'Materiali "cool storage" per carte storiche fragili: T 13-18°C UR 35-45% (IPI).'},
+{id:'tessuti',nome:'Tessuti (paramenti, arazzi, costumi)',t_set:'19-24 °C',ur_set:'50-55%',ur_max_var_giorno:'±5%',ur_max_var_stagione:'±5%',luce:'< 50 lux (sensibili) / 150 lux (cotone, lino)',uv:'< 75 μW/lumen',ashrae_class:'AA',norma:'UNI 10829:1999 + UNI EN 15757:2010',note:'Tinture organiche sensibili a luce. Tessuti pre-1700 considerati molto sensibili.'},
+{id:'dipinti',nome:'Dipinti (tela, tavola, affresco staccato)',t_set:'19-24 °C',ur_set:'50-60%',ur_max_var_giorno:'±5%',ur_max_var_stagione:'±5-10%',luce:'150-200 lux',uv:'< 75 μW/lumen',ashrae_class:'AA-A',norma:'UNI 10829:1999 + UNI EN 15757:2010',note:'Dipinti su tavola particolarmente sensibili (legno + pellicola pittorica = sistema multimateriale).'},
+{id:'metalli',nome:'Metalli (rame, ferro, argento, bronzo, piombo)',t_set:'15-25 °C',ur_set:'< 40% (ferro), < 50% (rame, bronzo)',ur_max_var_giorno:'(poco sensibili)',ur_max_var_stagione:'(purché UR resti bassa)',luce:'300+ lux ammessi',uv:'non critico',ashrae_class:'B-C',norma:'UNI 10829:1999 + ISO 11799:2024 + ASHRAE',note:'Acciai e ferro: UR < 40% per prevenire ruggine. Bronzo: UR < 50% (cloruri). Argento: filtri H₂S.'},
+{id:'pietra_ceramica',nome:'Pietra, ceramica, intonaco, vetro',t_set:'15-25 °C',ur_set:'40-60%',ur_max_var_giorno:'(poco sensibili)',ur_max_var_stagione:'(poco sensibili)',luce:'300+ lux ammessi',uv:'non critico',ashrae_class:'B-D',norma:'UNI 10829:1999 + ASHRAE',note:'Pietra calcarea sensibile a inquinanti (SO₂ → gesso). Ceramica con sali solubili: UR < 40%. Vetro storico (glass disease): 40-50% UR stabile.'},
+{id:'cuoio_pergamena',nome:'Cuoio, pergamena, materiale animale',t_set:'18-22 °C',ur_set:'50-60%',ur_max_var_giorno:'±5%',ur_max_var_stagione:'±5%',luce:'< 50 lux (sensibili)',uv:'< 75 μW/lumen',ashrae_class:'AA',norma:'UNI 10829:1999 + ISO 11799:2024',note:'Materiali igroscopici molto sensibili. Pergamena: < 50% UR rischia restrizione, > 65% favorisce muffe.'},
+{id:'fotografie_film',nome:'Fotografie, negativi, film cinematografici',t_set:'< 18 °C (preferibile < 5°C cool storage)',ur_set:'30-40%',ur_max_var_giorno:'±2%',ur_max_var_stagione:'±2%',luce:'< 50 lux esposizione, conservazione al buio',uv:'0',ashrae_class:'AA (cool/cold)',norma:'ISO 18920:2011 + ISO 18923:2000 + IPI',note:'Cool storage 13°C UR 35% raddoppia vita. Cold storage 5°C UR 30% per nitrato/acetato.'},
+{id:'plastiche',nome:'Plastiche storiche (celluloide, bachelite, PVC, gomma)',t_set:'< 15 °C (preferibile)',ur_set:'30-50%',ur_max_var_giorno:'±5%',ur_max_var_stagione:'±5%',luce:'< 50 lux',uv:'< 75 μW/lumen',ashrae_class:'AA (cool storage)',norma:'AIC + V&A Plastics Conservation Guidelines',note:'Materiali moderni difficili. Celluloide degrada con emissione di acidi (auto-catalitico).'},
+{id:'avorio_osso',nome:'Avorio, osso, corno',t_set:'18-22 °C',ur_set:'50-60%',ur_max_var_giorno:'±3%',ur_max_var_stagione:'±5%',luce:'< 150 lux',uv:'< 75 μW/lumen',ashrae_class:'AA',norma:'UNI 10829 + AIC',note:'Materiale fragile, ingiallisce con luce. Sensibile a fluttuazioni rapide UR.'}
+];
+const DANNI=[
+{id:'meccanico',nome:'Danno meccanico (deformazioni, fessurazioni, distacchi)',origine:'Variazioni rapide di T/UR su materiali igroscopici (legno, carta, tessuti, dipinti, pergamena). Cicli di gonfiamento/contrazione differenziale.',sintomi:'Crepe, distacchi pellicola pittorica, deformazioni tavole lignee, ondulazioni carta, screpolature.',cause:'UR variabile rapidamente (>5%/h o >10% giornaliero) anche entro range ammessi.',norma:'UNI EN 15757:2010, fluttuazioni vs clima storico',controllo:'Ridurre fluttuazioni UR. Vetrine inerziali, sistemi HVAC non aggressivi.'},
+{id:'biologico',nome:'Danno biologico (muffe, insetti, batteri)',origine:'UR > 65-70% per periodi prolungati favorisce muffe (Aspergillus, Penicillium, Cladosporium). Insetti xilofagi e cheratinofagi.',sintomi:'Macchie nere/verdi, polvere da rosicchiamento (Anobidi), perdita di consistenza, odore di muffa.',cause:'UR > 65% persistente, T 20-30°C ottimale per muffe. Stagnazione d\'aria peggiora.',norma:'UNI EN 16790:2016 (IPM) + WHO Dampness/Mould Guidelines 2009',controllo:'UR < 60% (ideale 45-55%). Ventilazione. IPM con monitoraggio trappole. Trattamenti anossici (azoto).'},
+{id:'chimico',nome:'Danno chimico (idrolisi, ossidazione, corrosione)',origine:'Reazioni chimiche accelerate da UR alta + T alta + inquinanti (SO₂, NO₂, ozono, COV).',sintomi:'Foxing su carta, corrosione metalli (rame, ferro, piombo), ingiallimento avorio, glass disease.',cause:'UR > 60% + presenza inquinanti gassosi. Ogni 10°C di T raddoppia velocità (Arrhenius).',norma:'UNI 10829:1999 + ISO 11799:2024 + UNI EN 16893:2018',controllo:'UR 40-55% + T 18-22°C + filtrazione aria. Materiali contenitori certificati PAT.'},
+{id:'fotochimico',nome:'Danno fotochimico (sbiadimento, ingiallimento UV)',origine:'Esposizione cumulativa a luce visibile e UV. Reazioni fotochimiche che alterano pigmenti, leganti, fibre.',sintomi:'Sbiadimento (fading) pigmenti organici, carta, tessuti. Ingiallimento di vernici e leganti.',cause:'Cumulativo nel tempo: 50 lux × 8h × 365 gg = 146.000 lux·h/anno. Soglia tessuti antichi: 30.000-50.000 lux·h/anno.',norma:'UNI 10829:1999 (illuminazione) + CIE 157:2004',controllo:'50 lux materiali sensibili, 150 lux medio-sensibili, 300+ lux non sensibili. Filtri UV su lampade e finestre.'},
+{id:'termico',nome:'Danno termico (T fuori range)',origine:'T molto bassa (cere, resine fragili) o molto alta (degrado accelerato, evaporazione plastificanti).',sintomi:'Fragilità di vernici e cere a T < 5°C, ammorbidimento e migrazione plastificanti a T > 30°C.',cause:'T < 5°C o T > 30°C. Sbalzi termici differenziali tra superficie e nucleo.',norma:'UNI 10829:1999 + UNI EN 15757:2010 + ASHRAE classi AA-D',controllo:'T 18-22°C standard. Cantine museali fresche per foto/film: 0-15°C UR 30-40% (IPI).'},
+{id:'inquinanti_specifici',nome:'Danno da inquinanti aerodispersi (SO₂, NO₂, O₃, COV, PM)',origine:'Inquinanti outdoor che penetrano + emissioni materiali edili (cassette legno, vernici), arredi non idonei.',sintomi:'Annerimento argento (H₂S), corrosione piombo (Pb white efflorescence), oxidative degradation carta acida.',cause:'Concentrazione inquinanti > soglia BC (più stringente del confort umano).',norma:'UNI EN 16893:2018 + ASHRAE ch. 23',controllo:'Filtrazione aria (HEPA + carbone attivo). Materiali PAT certificati per vetrine. Cross-link modulo IAQ.'}
+];
+const STEPS_FULL=[
+{id:'identificazione',label:'1. Identificazione',src:'D.Lgs 42/2004 + DM 10/05/2001'},
+{id:'ambiente',label:'2. Tipo ambiente/edificio',src:'UNI EN 16893:2018 + Bizot Green Protocol 2014'},
+{id:'materiali',label:'3. Categorie materiali',src:'UNI 10829:1999 + UNI EN 15757:2010 + ASHRAE ch. 23'},
+{id:'setpoint',label:'4. Setpoint target T/UR/Lux',src:'UNI 10829 + ASHRAE classi AA-D + CCI + IPI'},
+{id:'misure',label:'5. Misure rilevate',src:'UNI EN 16242:2013 + UNI EN ISO 7726:2026'},
+{id:'diagnosi',label:'6. Diagnosi danni',src:'UNI EN 15757 + WHO Dampness 2009 + UNI EN 16790:2016'},
+{id:'mitigazione',label:'7. Piano mitigazione',src:'UNI EN 16893:2018 + UNI EN 17820:2023'},
+{id:'verdetto',label:'8. Verdetto + monitoraggio',src:'UNI 10829 + UNI EN 16095:2012 (condition reporting)'}
+];
+const OPERATORE_IDS=['identificazione','materiali','setpoint','misure','verdetto'];
+const STATE={cur:0,finished:false,mode:'tecnico',data:{regione:'',comune:'',tipoEnte:'',vincolo:'',annoEdificio:null,tipoPerizia:'',tipoSala:'',volume_m3:null,hasHvac:'',isolamentoEdificio:'',materialiPresenti:[],materialeCritico:'',ashrae_classe:'',t_target_min:null,t_target_max:null,ur_target_min:null,ur_target_max:null,lux_max:null,uv_max:null,t_misurata:null,ur_misurata:null,var_giornaliera_ur:null,lux_misurato:null,uv_misurato:null,durata_monitoraggio_giorni:null,danniRiscontrati:[],noteDiagnosi:'',interventiPianificati:[],urgenza:'',monitoraggioPianificato:'',noteLibere:''}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function showToast(m,k){const t=$("toast");t.textContent=m;t.className="toast show"+(k?" "+k:"");clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.className="toast",3200);}
+function persist(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify({ts:Date.now(),state:STATE}));}catch(e){}}
+function restore(){try{const r=localStorage.getItem(DRAFT_KEY);if(!r)return;const d=JSON.parse(r);if(d&&d.state){Object.assign(STATE.data,d.state.data||{});STATE.cur=d.state.cur||0;STATE.finished=!!d.state.finished;STATE.mode=d.state.mode||'tecnico';}}catch(e){}}
+function setField(k,v){STATE.data[k]=v;persist();}
+function getActiveSteps(){return STATE.mode==='operatore'?STEPS_FULL.filter(s=>OPERATORE_IDS.includes(s.id)):STEPS_FULL;}
+function loadAna(){let p={},i={};try{p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");}catch(e){}try{const l=JSON.parse(localStorage.getItem("mx2::locali-v1")||"{}");i=l.ana||{};}catch(e){}return{perito:p,immobile:i};}
+function renderAna(){const a=loadAna(),p=a.perito,c=a.immobile;const pe=$("anaPerito"),ce=$("anaCliente");pe.querySelector(".n").textContent=p.nome||"n.d.";pe.querySelector(".m").textContent=[p.titolo,p.tel,p.email].filter(Boolean).join(" · ");ce.querySelector(".n").textContent=c.Nome||"n.d.";ce.querySelector(".m").textContent=[c.Indirizzo,c.DataSopr].filter(Boolean).join(" · ");}
+function renderStepper(){const steps=getActiveSteps();let h="";steps.forEach((st,i)=>{let c="step-chip";if(i===STATE.cur)c+=" active";else if(i<STATE.cur)c+=" done";h+='<button type="button" class="'+c+'" data-i="'+i+'">'+esc(st.label)+'</button>';});$("stepper").innerHTML=h;$("stepper").querySelectorAll(".step-chip").forEach(el=>el.addEventListener("click",function(){STATE.cur=+this.dataset.i;persist();render();}));}
+/* 20/11/2026: limiti dei campi numerici. Prima il modulo prendeva per buono qualunque numero (indice VTT 10 su 6,
+   umidità 150 %, superfici negative). I limiti vengono da quello che il campo dichiara: la scala scritta nell'unità
+   («0-6»), le percentuali 0-100, le temperature da -60 a 100 °C, i decibel da -30 a 150, il pH 0-14, l'anno di
+   costruzione fino al 2100; tutte le altre grandezze non negative. Un valore fuori dai limiti non viene preso. */
+var _mxFuoriScala={};
+function _mxLimiti(f,l,u){
+  var s=String(u||""), lab=String(l||""), m=s.match(/^\s*(-?\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)\s*$/);
+  if(m) return [parseFloat(m[1].replace(",",".")), parseFloat(m[2].replace(",","."))];
+  if(/%/.test(s)) return [0,100];
+  if(/°C/.test(s)) return [-60,100];
+  if(/^dB/.test(s)) return [-30,150];
+  if(/\bpH\b/.test(lab)) return [0,14];
+  if(/^Anno /.test(lab)) return [0,2100];
+  return [0,null];
+}
+function _mxNumero(el){
+  var k=el.dataset.fld, box=el.parentNode?el.parentNode.querySelector(".mx-fuori"):null, msg="";
+  var v=(el.value==="")?null:parseFloat(el.value);
+  if(v!=null && isNaN(v)) v=null;
+  if(v!=null){
+    var lo=(el.dataset.min!==undefined&&el.dataset.min!=="")?parseFloat(el.dataset.min):null;
+    var hi=(el.dataset.max!==undefined&&el.dataset.max!=="")?parseFloat(el.dataset.max):null;
+    if((lo!=null&&v<lo)||(hi!=null&&v>hi)){
+      msg=(hi!=null)?("Fuori dai limiti: questo campo va da "+lo+" a "+hi+". Il valore non è stato preso."):("Questo campo non può essere minore di "+lo+". Il valore non è stato preso.");
+      _mxFuoriScala[k]={txt:el.value,msg:msg};
+      v=null;
+    }
+  }
+  if(!msg) delete _mxFuoriScala[k];
+  if(box){ box.textContent=msg; box.style.display=msg?"block":"none"; }
+  el.style.borderColor=msg?"#b3261e":""; el.style.background=msg?"#fdeceb":"";
+  return v;
+}
+/* la scritta resta mentre si scrive nello stesso passo; cambiando passo, azzerando o caricando si riparte puliti */
+function _mxPulisciFuori(){ var a=document.activeElement; if(!(a&&a.getAttribute&&a.getAttribute("data-fld"))) _mxFuoriScala={}; }
+function inpNum(f,l,u,h){const v=STATE.data[f];var L=_mxLimiti(f,l,u),fu=_mxFuoriScala[f];return '<div class="fld"><label>'+esc(l)+(u?' <span class="opz">('+esc(u)+')</span>':"")+'</label><input type="number" step="0.1" value="'+(fu?esc(fu.txt):(v==null?"":v))+'" placeholder="'+esc(h||"")+'" data-fld="'+f+'" data-kind="num"'+(L[0]!=null?' min="'+L[0]+'" data-min="'+L[0]+'"':'')+(L[1]!=null?' max="'+L[1]+'" data-max="'+L[1]+'"':'')+(fu?' style="border-color:#b3261e;background:#fdeceb"':'')+'><small class="mx-fuori" style="display:'+(fu?'block':'none')+';color:#b3261e;font-weight:700;font-size:11.5px;margin-top:3px">'+(fu?esc(fu.msg):'')+'</small></div>';}
+function inpInt(f,l,u,h){const v=STATE.data[f];var L=_mxLimiti(f,l,u),fu=_mxFuoriScala[f];return '<div class="fld"><label>'+esc(l)+(u?' <span class="opz">('+esc(u)+')</span>':"")+'</label><input type="number" step="1" value="'+(fu?esc(fu.txt):(v==null?"":v))+'" placeholder="'+esc(h||"")+'" data-fld="'+f+'" data-kind="int"'+(L[0]!=null?' min="'+L[0]+'" data-min="'+L[0]+'"':'')+(L[1]!=null?' max="'+L[1]+'" data-max="'+L[1]+'"':'')+(fu?' style="border-color:#b3261e;background:#fdeceb"':'')+'><small class="mx-fuori" style="display:'+(fu?'block':'none')+';color:#b3261e;font-weight:700;font-size:11.5px;margin-top:3px">'+(fu?esc(fu.msg):'')+'</small></div>';}
+function inpSel(f,l,opts){const v=STATE.data[f]||"";let h='<div class="fld"><label>'+esc(l)+'</label><select data-fld="'+f+'" data-kind="txt"><option value="">seleziona</option>';opts.forEach(o=>h+='<option value="'+esc(o[0])+'"'+(v===o[0]?" selected":"")+'>'+esc(o[1])+'</option>');return h+'</select></div>';}
+function inpTxA(f,l,h){const v=STATE.data[f]||"";return '<div class="fld"><label>'+esc(l)+'</label><textarea data-fld="'+f+'" data-kind="txt" placeholder="'+esc(h||"")+'">'+esc(v)+'</textarea></div>';}
+
+const panels={
+identificazione:function(){const d=STATE.data;let h='<div class="step-head"><h4>1. Identificazione del caso</h4><span class="ref">D.Lgs 42/2004 + DM 10/05/2001</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Inquadramento dell\'ente e del bene. La tipologia di ente determina il framework normativo e le procedure di tutela applicabili.</p>';h+='<div class="grid2">'+inpSel("regione","Regione",REGIONI_IT.map(r=>[r,r]))+'<div class="fld"><label>Comune</label><input type="text" value="'+esc(d.comune||'')+'" placeholder="es. Firenze" data-fld="comune" data-kind="txt"></div>'+'</div>';h+='<div style="margin-top:12px"><label style="font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em">Tipo ente</label><div class="tipo-grid">';TIPI_ENTE.forEach(e=>{const sel=(d.tipoEnte===e.id);h+='<div class="tipo-card'+(sel?' sel':'')+'" data-enteclick="'+e.id+'"><div class="nome">'+esc(e.label)+'</div></div>';});h+='</div></div>';h+='<div class="grid3" style="margin-top:12px">'+inpSel("vincolo","Vincolo D.Lgs 42/2004",[['vincolato','Vincolato'],['non_vincolato','Non vincolato']])+inpInt("annoEdificio","Anno edificio","","es. 1480")+inpSel("tipoPerizia","Tipo relazione",[['preventiva','Preventiva'],['assicurativa','Assicurativa'],['tecnica','Tecnica']])+'</div>';h+='<div class="banner gold" style="margin-top:12px"><strong>📚 Riferimenti:</strong> D.Lgs 42/2004 (Codice beni culturali), DM 10/05/2001 (atto indirizzo musei), UNI 10829:1999, UNI EN 17820:2023 (gestione collezioni).</div>';return h;},
+ambiente:function(){const d=STATE.data;let h='<div class="step-head"><h4>2. Tipo ambiente / edificio</h4><span class="ref">UNI EN 16893:2018 + Bizot Green 2014</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Caratterizzazione dell\'ambiente di conservazione. UNI EN 16893:2018 dà specifiche per scelta del luogo e costruzione di edifici per beni culturali.</p>';h+='<div><label style="font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em">Tipologia di sala</label><div class="tipo-grid">';TIPI_SALA.forEach(s=>{const sel=(d.tipoSala===s.id);h+='<div class="tipo-card'+(sel?' sel':'')+'" data-salaclick="'+s.id+'"><div class="nome">'+esc(s.label)+'</div></div>';});h+='</div></div>';h+='<div class="grid3" style="margin-top:12px">'+inpNum("volume_m3","Volume sala","m³","es. 350")+inpSel("hasHvac","HVAC presente",[['si','Sì, dedicato BC'],['parziale','Parziale (solo T)'],['no','No (passivo)']])+inpSel("isolamentoEdificio","Inerzia/isolamento",[['alto','Alto (muri spessi storici)'],['medio','Medio'],['basso','Basso (no isolamento)']])+'</div>';h+='<div class="banner blue" style="margin-top:12px"><strong>💡 Bizot Green Protocol (2014):</strong> per la maggior parte delle collezioni miste, range 16-25°C / 40-60% UR è accettabile. Edifici storici con alta inerzia spesso forniscono naturalmente queste condizioni senza HVAC attivi (UNI EN 16893 + Bizot Group).</div>';return h;},
+materiali:function(){const d=STATE.data;let h='<div class="step-head"><h4>3. Categorie di materiali presenti</h4><span class="ref">UNI 10829:1999 + UNI EN 15757:2010 + ASHRAE ch. 23</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Selezione delle categorie di materiali nella collezione. Ogni categoria ha setpoint specifici. Il <strong>materiale più sensibile</strong> determina il setpoint dell\'ambiente comune.</p>';MATERIALI.forEach(m=>{const sel=(d.materialiPresenti||[]).indexOf(m.id)>=0;const crit=(d.materialeCritico===m.id);h+='<div class="mat-card'+(sel?' sel':'')+(crit?' crit':'')+'" data-matclick="'+m.id+'"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><div class="nome">'+(crit?'⚠ ':sel?'☑ ':'☐ ')+esc(m.nome)+'</div><div class="setpoint"><strong>T:</strong> '+esc(m.t_set)+' · <strong>UR:</strong> '+esc(m.ur_set)+' · <strong>Lux:</strong> '+esc(m.luce)+' · <strong>Classe ASHRAE:</strong> '+esc(m.ashrae_class)+'</div><div class="note">'+esc(m.note)+'</div><div style="font-size:10.5px;color:var(--ink-mute);margin-top:3px;font-style:italic">📚 '+esc(m.norma)+'</div></div>';if(sel)h+='<button type="button" data-critclick="'+m.id+'" style="padding:6px 10px;background:'+(crit?'#c0392b':'#fff')+';color:'+(crit?'#fff':'#c0392b')+';border:1.5px solid #c0392b;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap">'+(crit?'⚠ Più sensibile':'⚠ Marca critico')+'</button>';h+='</div></div>';});if(d.materialeCritico){const m=MATERIALI.find(x=>x.id===d.materialeCritico);if(m)h+='<div class="banner red" style="margin-top:12px"><strong>⚠ Materiale critico: '+esc(m.nome)+'</strong><br>Il setpoint dell\'ambiente sarà calibrato su questo materiale. Tolleranze: T '+esc(m.t_set)+', UR '+esc(m.ur_set)+', UR variazione max giorno '+esc(m.ur_max_var_giorno)+', illuminazione '+esc(m.luce)+'.</div>';}return h;},
+setpoint:function(){const d=STATE.data;let h='<div class="step-head"><h4>4. Setpoint target (T / UR / Lux / UV)</h4><span class="ref">UNI 10829 + ASHRAE classi AA-D</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Definizione dei valori target. <strong>ASHRAE classi AA-D</strong> permettono flessibilità in funzione del rischio: AA stretto, D rilassato.</p>';CLASSI_ASHRAE.forEach(c=>{const sel=(d.ashrae_classe===c.id);h+='<div class="cat-card'+(sel?' sel':'')+'" style="border-color:'+(sel?c.col:'')+';background:'+(sel?c.col+'1A':'#fff')+'" data-ashraeclick="'+c.id+'"><div class="title" style="color:'+c.col+'">'+esc(c.label)+'</div><div class="desc">'+esc(c.desc)+'</div></div>';});h+='<div class="banner gold" style="margin-top:12px"><div style="font-weight:800;margin-bottom:6px">Setpoint specifici (numerici)</div></div>';h+='<div class="grid3">'+inpNum("t_target_min","T min","°C","18")+inpNum("t_target_max","T max","°C","22")+inpNum("ur_target_min","UR min","%","45")+'</div>';h+='<div class="grid3" style="margin-top:10px">'+inpNum("ur_target_max","UR max","%","55")+inpNum("lux_max","Lux max","lux","150")+inpNum("uv_max","UV max","μW/lm","75")+'</div>';return h;},
+misure:function(){const d=STATE.data;let h='<div class="step-head"><h4>5. Misure rilevate</h4><span class="ref">UNI EN 16242:2013 + UNI EN ISO 7726:2026</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Inserire valori medi rilevati (UNI 10829 raccomanda minimo 1 anno di monitoraggio). Sotto, confronto automatico con i target di Step 4.</p>';h+='<div class="grid3">'+inpNum("t_misurata","T media","°C","es. 21.0")+inpNum("ur_misurata","UR media","%","es. 52")+inpNum("var_giornaliera_ur","Var. UR giornaliera","%","es. 4")+'</div>';h+='<div class="grid3" style="margin-top:10px">'+inpNum("lux_misurato","Lux misurato","lux","es. 130")+inpNum("uv_misurato","UV misurato","μW/lm","es. 80")+inpInt("durata_monitoraggio_giorni","Giorni monitoraggio","","es. 365")+'</div>';function _conf(label,mis,tmin,tmax,unit){if(typeof mis!=='number'||!isFinite(mis))return null;if(typeof tmin==='number'&&typeof tmax==='number'){if(mis<tmin)return{ok:false,msg:label+' sotto target ('+mis+unit+' < '+tmin+unit+')'};if(mis>tmax)return{ok:false,msg:label+' sopra target ('+mis+unit+' > '+tmax+unit+')'};return{ok:true,msg:label+' nel range target ('+tmin+'-'+tmax+unit+')'};}return null;}let verdetti=[];let v;v=_conf('T',d.t_misurata,d.t_target_min,d.t_target_max,'°C');if(v)verdetti.push(v);v=_conf('UR',d.ur_misurata,d.ur_target_min,d.ur_target_max,'%');if(v)verdetti.push(v);if(typeof d.lux_misurato==='number'&&isFinite(d.lux_misurato)&&typeof d.lux_max==='number')verdetti.push(d.lux_misurato>d.lux_max?{ok:false,msg:'Lux sopra target ('+d.lux_misurato+' > '+d.lux_max+')'}:{ok:true,msg:'Lux nel target ('+d.lux_misurato+' ≤ '+d.lux_max+')'});if(typeof d.uv_misurato==='number'&&isFinite(d.uv_misurato)&&typeof d.uv_max==='number')verdetti.push(d.uv_misurato>d.uv_max?{ok:false,msg:'UV sopra target ('+d.uv_misurato+' > '+d.uv_max+' μW/lm)'}:{ok:true,msg:'UV nel target'});if(typeof d.var_giornaliera_ur==='number'&&isFinite(d.var_giornaliera_ur)){const matC=MATERIALI.find(m=>m.id===d.materialeCritico);if(matC&&matC.ur_max_var_giorno){const m=String(matC.ur_max_var_giorno).match(/(\d+(\.\d+)?)/);if(m){const lim=parseFloat(m[1]);if(d.var_giornaliera_ur>lim)verdetti.push({ok:false,msg:'Var. UR giornaliera '+d.var_giornaliera_ur+'% > limite '+lim+'% del materiale critico ('+matC.nome+'), UNI EN 15757:2010'});else verdetti.push({ok:true,msg:'Var. UR giornaliera entro limite '+lim+'% del materiale critico'});}}}if(verdetti.length){h+='<div style="margin-top:14px">';verdetti.forEach(v=>{h+='<div class="banner '+(v.ok?'green':'red')+'">'+(v.ok?'✅ ':'❌ ')+esc(v.msg)+'</div>';});h+='</div>';}return h;},
+diagnosi:function(){const d=STATE.data;let h='<div class="step-head"><h4>6. Diagnosi danni</h4><span class="ref">UNI EN 15757 + WHO Dampness 2009 + UNI EN 16790</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Selezione dei tipi di danno riscontrati o potenziali sui beni. Ogni tipologia ha cause, sintomi e norme di controllo specifici.</p>';h+='<div class="banner blue" style="background:#f0eef8;border-left:4px solid #693C7A;margin-bottom:10px"><strong>📦 Diagnosi differenziale:</strong> molti danni microclimatici (condense, muffe, sali) hanno origine in patologie strutturali. Verifica anche: <a href="umidita-hub.html" target="_blank" style="color:#693C7A;font-weight:800">→ Hub Umidità (triage)</a> · <a href="condensa-glaser.html" target="_blank" style="color:#693C7A;font-weight:800">→ Glaser (condensa interstiziale)</a> · <a href="termoigrometria.html" target="_blank" style="color:#693C7A;font-weight:800">→ Termoigrometria (LIM Sedlbauer)</a> · <a href="biodeteriogeni.html" target="_blank" style="color:#693C7A;font-weight:800">→ Biodeteriogeni</a> · <a href="iaq.html" target="_blank" style="color:#693C7A;font-weight:800">→ IAQ inquinanti</a></div>';DANNI.forEach(da=>{const sel=(d.danniRiscontrati||[]).indexOf(da.id)>=0;h+='<div class="danno-card'+(sel?' sel':'')+'" data-dannoclick="'+da.id+'"><div class="nome">'+(sel?'☑ ':'☐ ')+esc(da.nome)+'</div><div class="info"><b>Origine:</b> '+esc(da.origine)+'</div><div class="info"><b>Sintomi:</b> '+esc(da.sintomi)+'</div><div class="info"><b>Cause microclimatiche:</b> '+esc(da.cause)+'</div><div class="info"><b>Controllo:</b> '+esc(da.controllo)+'</div><div class="info" style="font-style:italic;color:var(--ink-mute);margin-top:4px">📚 '+esc(da.norma)+'</div></div>';});h+='<div style="margin-top:12px">'+inpTxA("noteDiagnosi","Note di diagnosi","Annotazioni sui danni rilevati, ipotesi causali, esami integrativi richiesti...")+'</div>';return h;},
+mitigazione:function(){const d=STATE.data;let h='<div class="step-head"><h4>7. Piano di mitigazione</h4><span class="ref">UNI EN 16893:2018 + UNI EN 17820:2023</span></div>';h+='<p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px">Interventi raccomandati in funzione dei danni rilevati e del materiale critico. Selezionare gli interventi pianificati e l\'urgenza.</p>';const INTERVENTI=[{id:'hvac_dedicato',nome:'Installazione/upgrade HVAC dedicato BC (UNI EN 16893)',target:'controllo T+UR stabile, classe ASHRAE AA/A'},{id:'vetrine',nome:'Vetrine inerziali con buffer igroscopico (silica gel)',target:'tamponamento fluttuazioni UR per oggetti molto sensibili'},{id:'deumidificazione',nome:'Deumidificazione locale (deumidificatori a condensazione/adsorbimento)',target:'controllo UR < 60% per prevenzione muffe'},{id:'umidificazione',nome:'Umidificazione controllata (evaporativa, vapore, ultrasonica)',target:'UR > 35% in inverno per materiali igroscopici'},{id:'filtrazione_aria',nome:'Filtrazione aria HEPA + carbone attivo',target:'rimozione PM, SO₂, NO₂, COV (UNI EN 1822-1:2019, UNI EN ISO 16890-1:2017)'},{id:'illuminazione_lux',nome:'Riduzione lux + filtri UV (UNI 10829)',target:'controllo danno fotochimico'},{id:'ipm',nome:'Integrated Pest Management (UNI EN 16790:2016)',target:'monitoraggio trappole, trattamento anossico, no chimici'},{id:'isolamento_termico',nome:'Isolamento termico edificio (vetrocamere, infissi)',target:'aumentare inerzia termoigrometrica passiva'},{id:'monitor_continuo',nome:'Sistema di monitoraggio continuo datalogger T/UR + alert',target:'tracciabilità conformità setpoint nel tempo'},{id:'spostamento',nome:'Spostamento oggetti in ambienti più idonei (deposito climatizzato)',target:'soluzione temporanea per emergenze'}];INTERVENTI.forEach(i=>{const sel=(d.interventiPianificati||[]).indexOf(i.id)>=0;h+='<div class="cat-card'+(sel?' sel':'')+'" style="border-color:'+(sel?'var(--mx-accent)':'var(--line)')+';background:'+(sel?'#f4ecdb':'#fff')+'" data-interventoclick="'+i.id+'"><div class="title" style="color:var(--mx-accent-strong)">'+(sel?'☑ ':'☐ ')+esc(i.nome)+'</div><div class="desc"><b>Target:</b> '+esc(i.target)+'</div></div>';});h+='<div class="banner gold" style="margin-top:14px"><div style="font-weight:800;margin-bottom:6px">Urgenza dell\'intervento</div><div style="display:flex;flex-wrap:wrap;gap:6px">';[{id:'critica',label:'⚠ CRITICA (danno in atto)',col:'#c0392b'},{id:'30gg',label:'Entro 30 giorni',col:'#e67e22'},{id:'90gg',label:'Entro 90 giorni',col:'#f1c40f'},{id:'programmabile',label:'Programmabile (manutenzione)',col:'#27ae60'}].forEach(u=>{const sel=(d.urgenza===u.id);h+='<div data-urgclick="'+u.id+'" style="padding:8px 12px;border:'+(sel?'2px':'1.5px')+' solid '+u.col+';background:'+(sel?u.col:'#fff')+';color:'+(sel?'#fff':u.col)+';border-radius:6px;cursor:pointer;font-size:12px;font-weight:700">'+esc(u.label)+'</div>';});h+='</div></div>';return h;},
+verdetto:function(){const d=STATE.data;const v=calcVerdict();let h='<div class="step-head"><h4>8. Verdetto + piano monitoraggio</h4><span class="ref">UNI 10829 + UNI EN 16095:2012</span></div>';h+='<div class="verdict-box '+v.kind+'"><div class="lbl">Esito conservazione</div><div class="v">'+esc(v.verdict)+'</div><div class="s">'+esc(v.summary)+'</div></div>';h+='<div style="margin-top:14px;padding:14px;background:linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong) 100%);color:#fff;border-radius:10px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.14em;opacity:.85">Sintesi diagnosi microclimatica</div><div style="font-size:18px;font-weight:700;margin-top:4px">'+(d.materialiPresenti||[]).length+' categorie materiali · '+(d.danniRiscontrati||[]).length+' danni · '+(d.interventiPianificati||[]).length+' interventi pianificati'+(d.ashrae_classe?' · Classe ASHRAE: '+d.ashrae_classe:'')+'</div>';if(d.urgenza){const u={'critica':'CRITICA','30gg':'30 giorni','90gg':'90 giorni','programmabile':'Programmabile'};h+='<div style="font-size:13px;margin-top:6px"><strong>Urgenza:</strong> '+esc(u[d.urgenza]||d.urgenza)+'</div>';}h+='</div>';if(v.azioni&&v.azioni.length){h+='<div style="margin-top:14px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:10px"><div style="font-weight:800;color:var(--mx-accent-strong);margin-bottom:8px">🔧 Raccomandazioni operative</div><ol style="margin:0;padding-left:20px;font-size:13px;line-height:1.7">';v.azioni.forEach(a=>{h+='<li>'+esc(a)+'</li>';});h+='</ol></div>';}h+='<div style="margin-top:14px">'+inpTxA("monitoraggioPianificato","Piano di monitoraggio (UNI EN 16095:2012 condition reporting)","es. datalogger T/UR ogni 10 min per 12 mesi continuativi, ispezioni semestrali, fotografia condizione opere ogni 6 mesi, report annuale alla Soprintendenza...")+'</div>';h+='<div style="margin-top:14px">'+inpTxA("noteLibere","Note tecniche / osservazioni","Annotazioni libere per il rapporto di consulenza")+'</div>';return h;}
+};
+function calcVerdict(){const d=STATE.data;const matCritico=MATERIALI.find(m=>m.id===d.materialeCritico);let problemi=[];let azioni=[];const tOk=(d.t_misurata==null)||(d.t_target_min==null||d.t_target_max==null)||(d.t_misurata>=d.t_target_min&&d.t_misurata<=d.t_target_max);const urOk=(d.ur_misurata==null)||(d.ur_target_min==null||d.ur_target_max==null)||(d.ur_misurata>=d.ur_target_min&&d.ur_misurata<=d.ur_target_max);const luxOk=(d.lux_misurato==null)||(d.lux_max==null)||(d.lux_misurato<=d.lux_max);const uvOk=(d.uv_misurato==null)||(d.uv_max==null)||(d.uv_misurato<=d.uv_max);let varOk=true;if(typeof d.var_giornaliera_ur==='number'&&isFinite(d.var_giornaliera_ur)&&matCritico&&matCritico.ur_max_var_giorno){const m=String(matCritico.ur_max_var_giorno).match(/(\d+(\.\d+)?)/);if(m){const lim=parseFloat(m[1]);if(d.var_giornaliera_ur>lim){varOk=false;problemi.push('var. UR giornaliera '+d.var_giornaliera_ur+'% > limite '+lim+'%');azioni.push('Ridurre fluttuazioni UR: bagno protettivo (vetrine inerziali con silica gel), HVAC più stabile, aumentare inerzia termoigrometrica edificio (UNI EN 15757:2010).');}}}if(!tOk){problemi.push('T '+d.t_misurata+'°C fuori range '+d.t_target_min+'-'+d.t_target_max+'°C');azioni.push('Allineare T al range target: regolazione HVAC o intervento sull\'involucro.');}if(!urOk){problemi.push('UR '+d.ur_misurata+'% fuori range '+d.ur_target_min+'-'+d.ur_target_max+'%');if(d.ur_misurata>d.ur_target_max)azioni.push('UR troppo alta: deumidificazione locale + verifica infiltrazioni d\'acqua + ventilazione.');else azioni.push('UR troppo bassa: umidificazione controllata (evaporativa o vapore).');}if(!luxOk){problemi.push('Lux '+d.lux_misurato+' > max '+d.lux_max);azioni.push('Ridurre illuminamento: ridurre lampade, schermare finestre (tende, filtri), spegnere in assenza pubblico (UNI 10829).');}if(!uvOk){problemi.push('UV '+d.uv_misurato+' > max '+d.uv_max+' μW/lm');azioni.push('Installare filtri UV su lampade e vetrate (LowE/UV filter).');}if((d.danniRiscontrati||[]).includes('biologico'))azioni.push('Danno biologico: implementare IPM (UNI EN 16790:2016) + ridurre UR < 60% + trattamenti anossici per opere infestate.');if((d.danniRiscontrati||[]).includes('chimico'))azioni.push('Danno chimico: filtrazione aria HEPA + carbone attivo (SO₂/NO₂/O₃) + materiali contenitori PAT-certificati.');if((d.danniRiscontrati||[]).includes('inquinanti_specifici'))azioni.push('Inquinanti aerodispersi: aprire modulo IAQ per misure complete + filtrazione mirata.');let verdict,kind,summary;const nProb=problemi.length;const meas=[d.t_misurata,d.ur_misurata,d.lux_misurato,d.uv_misurato].filter(x=>x!=null).length;if(meas===0){verdict="Verifica incompleta";kind="warn";summary="Nessuna misura rilevata, compilare lo Step 5 (Misure rilevate) per il verdetto.";}else if(nProb===0){verdict="MICROCLIMA CONFORME";kind="ok";summary="Tutti i parametri rilevati sono nei target target (Classe ASHRAE "+(d.ashrae_classe||"n.d.")+"). "+((d.danniRiscontrati||[]).length===0?"Nessun danno segnalato.":"Danni rilevati: "+(d.danniRiscontrati||[]).length+", interventi pianificati: "+(d.interventiPianificati||[]).length+".");}else if(nProb===1){verdict="MICROCLIMA DA OTTIMIZZARE";kind="warn";summary="1 parametro fuori target: "+problemi[0]+". Pianificare intervento mitigativo.";}else{verdict="MICROCLIMA NON CONFORME";kind="err";summary=nProb+" parametri fuori target: "+problemi.join("; ")+". Pianificare interventi prioritari (Step 7).";}return{verdict,kind,summary,azioni,problemi};}
+function attachInputs(){$("stepPanel").querySelectorAll("[data-fld]").forEach(el=>{const isNum=el.type==="number"||el.dataset.kind==="num"||el.dataset.kind==="int";const ev=(el.type==="checkbox"||el.tagName==="SELECT"||el.type==="radio"||isNum)?"change":"input";el.addEventListener(ev,function(){const k=this.dataset.fld,kind=this.dataset.kind;let v;if(kind==="num")v=_mxNumero(this);else if(kind==="int"){v=_mxNumero(this);if(v!=null)v=parseInt(v);}else v=this.value;setField(k,v);if(["regione","tipoEnte","tipoSala","ashrae_classe","t_misurata","ur_misurata","lux_misurato","uv_misurato","var_giornaliera_ur","materialeCritico","t_target_min","t_target_max","ur_target_min","ur_target_max","lux_max","uv_max"].includes(k))renderPanelOnly();});});$("stepPanel").querySelectorAll("[data-enteclick]").forEach(el=>el.addEventListener("click",function(){setField("tipoEnte",this.dataset.enteclick);renderPanelOnly();}));$("stepPanel").querySelectorAll("[data-salaclick]").forEach(el=>el.addEventListener("click",function(){setField("tipoSala",this.dataset.salaclick);renderPanelOnly();}));$("stepPanel").querySelectorAll("[data-matclick]").forEach(el=>el.addEventListener("click",function(ev){if(ev.target.dataset.critclick)return;const id=this.dataset.matclick;const arr=STATE.data.materialiPresenti||[];const i=arr.indexOf(id);if(i>=0){arr.splice(i,1);if(STATE.data.materialeCritico===id)STATE.data.materialeCritico='';}else arr.push(id);STATE.data.materialiPresenti=arr;persist();renderPanelOnly();}));$("stepPanel").querySelectorAll("[data-critclick]").forEach(el=>el.addEventListener("click",function(ev){ev.stopPropagation();const id=this.dataset.critclick;setField("materialeCritico",STATE.data.materialeCritico===id?'':id);renderPanelOnly();}));$("stepPanel").querySelectorAll("[data-ashraeclick]").forEach(el=>el.addEventListener("click",function(){setField("ashrae_classe",this.dataset.ashraeclick);renderPanelOnly();}));$("stepPanel").querySelectorAll("[data-dannoclick]").forEach(el=>el.addEventListener("click",function(){const id=this.dataset.dannoclick;const arr=STATE.data.danniRiscontrati||[];const i=arr.indexOf(id);if(i>=0)arr.splice(i,1);else arr.push(id);STATE.data.danniRiscontrati=arr;persist();renderPanelOnly();}));$("stepPanel").querySelectorAll("[data-interventoclick]").forEach(el=>el.addEventListener("click",function(){const id=this.dataset.interventoclick;const arr=STATE.data.interventiPianificati||[];const i=arr.indexOf(id);if(i>=0)arr.splice(i,1);else arr.push(id);STATE.data.interventiPianificati=arr;persist();renderPanelOnly();}));$("stepPanel").querySelectorAll("[data-urgclick]").forEach(el=>el.addEventListener("click",function(){setField("urgenza",this.dataset.urgclick);renderPanelOnly();}));}
+function render(){_mxPulisciFuori();renderStepper();const steps=getActiveSteps();const s=steps[STATE.cur];$("stepRef").textContent=s?s.src:'n.d.';$("btnMode").textContent=STATE.mode==='operatore'?'🔬 Passa a Tecnico (8 step)':'⚡ Passa a Operatore (5 step)';$("stepPanel").innerHTML=panels[s.id]();attachInputs();const last=STATE.cur===steps.length-1;$("btnPrev").disabled=STATE.cur===0;$("btnNext").style.display=last?"none":"";$("btnFinish").style.display=last?"":"none";}
+function renderPanelOnly(){const steps=getActiveSteps();const s=steps[STATE.cur];const f=document.activeElement;const fK=f?f.getAttribute("data-fld"):null;$("stepPanel").innerHTML=panels[s.id]();attachInputs();if(fK){const el=$("stepPanel").querySelector('[data-fld="'+fK+'"]');if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length);}catch(_){}}}}
+function next(){const steps=getActiveSteps();if(STATE.cur<steps.length-1){STATE.cur++;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function prev(){if(STATE.cur>0){STATE.cur--;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function finish(){STATE.finished=true;persist();render();showToast("Diagnosi Microclima BC completata.","ok");setTimeout(()=>$("mxToolbar").scrollIntoView({behavior:"smooth",block:"center"}),250);}
+function setMode(m){STATE.mode=m;STATE.cur=0;persist();render();showToast("Modalità: "+(m==='operatore'?'Operatore (5 step)':'Tecnico (8 step)'),"ok");}
+function buildDocSections(d,v){let h="<h2>1. Identificazione</h2><table>";h+="<tr><th>Regione</th><td>"+esc(d.regione||"n.d.")+"</td><th>Comune</th><td>"+esc(d.comune||"n.d.")+"</td></tr>";const tipoE=TIPI_ENTE.find(t=>t.id===d.tipoEnte);h+="<tr><th>Tipo ente</th><td>"+esc(tipoE?tipoE.label:"n.d.")+"</td><th>Vincolo D.Lgs 42/2004</th><td>"+esc(d.vincolo||"n.d.")+"</td></tr>";h+="<tr><th>Anno edificio</th><td>"+(d.annoEdificio||"n.d.")+"</td><th>Tipo relazione</th><td>"+esc(d.tipoPerizia||"n.d.")+"</td></tr>";h+="</table>";h+="<h2>2. Ambiente di conservazione</h2><table>";const tipoS=TIPI_SALA.find(t=>t.id===d.tipoSala);h+="<tr><th>Tipo sala</th><td>"+esc(tipoS?tipoS.label:"n.d.")+"</td><th>Volume</th><td>"+(d.volume_m3!=null?d.volume_m3+" m³":"n.d.")+"</td></tr>";h+="<tr><th>HVAC</th><td>"+esc(d.hasHvac||"n.d.")+"</td><th>Isolamento edificio</th><td>"+esc(d.isolamentoEdificio||"n.d.")+"</td></tr>";h+="</table>";if((d.materialiPresenti||[]).length){h+="<h2>3. Categorie materiali (UNI 10829:1999 + UNI EN 15757:2010 + ASHRAE ch. 23)</h2><table><tr><th>Materiale</th><th>T target</th><th>UR target</th><th>Lux</th><th>Classe ASHRAE</th></tr>";MATERIALI.filter(m=>(d.materialiPresenti||[]).includes(m.id)).forEach(m=>{const crit=(d.materialeCritico===m.id);h+="<tr"+(crit?" style='background:#fef5f4'":"")+"><td>"+(crit?"<strong>⚠ ":"")+esc(m.nome)+(crit?"</strong> (CRITICO)":"")+"</td><td>"+esc(m.t_set)+"</td><td>"+esc(m.ur_set)+"</td><td>"+esc(m.luce)+"</td><td>"+esc(m.ashrae_class)+"</td></tr>";});h+="</table>";}h+="<h2>4. Setpoint target</h2><table>";h+="<tr><th>Classe ASHRAE target</th><td colspan='3'>"+esc(d.ashrae_classe||"n.d.")+"</td></tr>";h+="<tr><th>T target</th><td>"+(d.t_target_min!=null?d.t_target_min:"n.d.")+" - "+(d.t_target_max!=null?d.t_target_max:"n.d.")+" °C</td><th>UR target</th><td>"+(d.ur_target_min!=null?d.ur_target_min:"n.d.")+" - "+(d.ur_target_max!=null?d.ur_target_max:"n.d.")+" %</td></tr>";h+="<tr><th>Lux max</th><td>"+(d.lux_max!=null?d.lux_max+" lux":"n.d.")+"</td><th>UV max</th><td>"+(d.uv_max!=null?d.uv_max+" μW/lm":"n.d.")+"</td></tr>";h+="</table>";h+="<h2>5. Misure rilevate (UNI EN 16242:2013 + UNI EN ISO 7726:2026)</h2><table>";h+="<tr><th>T misurata</th><td>"+(d.t_misurata!=null?d.t_misurata+" °C":"n.d.")+"</td><th>UR misurata</th><td>"+(d.ur_misurata!=null?d.ur_misurata+"%":"n.d.")+"</td></tr>";h+="<tr><th>Var. UR giornaliera</th><td>"+(d.var_giornaliera_ur!=null?d.var_giornaliera_ur+"%":"n.d.")+"</td><th>Durata monitoraggio</th><td>"+(d.durata_monitoraggio_giorni!=null?d.durata_monitoraggio_giorni+" giorni":"n.d.")+"</td></tr>";h+="<tr><th>Lux misurato</th><td>"+(d.lux_misurato!=null?d.lux_misurato+" lux":"n.d.")+"</td><th>UV misurato</th><td>"+(d.uv_misurato!=null?d.uv_misurato+" μW/lm":"n.d.")+"</td></tr>";h+="</table>";if((d.danniRiscontrati||[]).length){h+="<h2>6. Danni riscontrati</h2><table><tr><th>Tipologia</th><th>Cause microclimatiche</th><th>Norma</th></tr>";DANNI.filter(da=>(d.danniRiscontrati||[]).includes(da.id)).forEach(da=>{h+="<tr><td>"+esc(da.nome)+"</td><td>"+esc(da.cause)+"</td><td><em>"+esc(da.norma)+"</em></td></tr>";});h+="</table>";}if(d.noteDiagnosi)h+="<p><strong>Note diagnosi:</strong> "+esc(d.noteDiagnosi).replace(/\n/g,"<br>")+"</p>";if((d.interventiPianificati||[]).length){h+="<h2>7. Piano di mitigazione</h2><ul>";d.interventiPianificati.forEach(id=>{const nomi={'hvac_dedicato':'Installazione/upgrade HVAC dedicato BC (UNI EN 16893)','vetrine':'Vetrine inerziali con buffer igroscopico (silica gel)','deumidificazione':'Deumidificazione locale','umidificazione':'Umidificazione controllata','filtrazione_aria':'Filtrazione aria HEPA + carbone attivo','illuminazione_lux':'Riduzione lux + filtri UV (UNI 10829)','ipm':'Integrated Pest Management (UNI EN 16790:2016)','isolamento_termico':'Isolamento termico edificio','monitor_continuo':'Sistema di monitoraggio continuo','spostamento':'Spostamento oggetti in ambienti più idonei'};h+="<li>"+esc(nomi[id]||id)+"</li>";});h+="</ul>";if(d.urgenza){const u={'critica':'CRITICA','30gg':'Entro 30 giorni','90gg':'Entro 90 giorni','programmabile':'Programmabile'};h+="<p><strong>Urgenza:</strong> "+esc(u[d.urgenza]||d.urgenza)+"</p>";}}h+="<h2>8. Verdetto + monitoraggio</h2><table><tr><th>Esito</th><td><strong>"+esc(v.verdict)+"</strong></td></tr><tr><th>Indicazione</th><td>"+esc(v.summary)+"</td></tr></table>";if(v.azioni&&v.azioni.length){h+="<h3>Raccomandazioni operative</h3><ol>";v.azioni.forEach(a=>{h+="<li>"+esc(a)+"</li>";});h+="</ol>";}if(d.monitoraggioPianificato)h+="<p><strong>Piano monitoraggio:</strong> "+esc(d.monitoraggioPianificato).replace(/\n/g,"<br>")+"</p>";if(d.noteLibere)h+="<p><strong>Note tecniche:</strong> "+esc(d.noteLibere).replace(/\n/g,"<br>")+"</p>";h+='<h2>Riferimenti normativi consultabili</h2><ul style="font-size:11.5px">';h+='<li><strong>D.Lgs 42/2004</strong>, Codice dei beni culturali e del paesaggio.</li>';h+='<li><strong>DM 10/05/2001</strong>, Atto di indirizzo sui criteri tecnico-scientifici e standard di funzionamento e sviluppo dei musei.</li>';h+='<li><strong>UNI 10829:1999</strong>, Beni di interesse storico-artistico: condizioni ambientali di conservazione (misurazione e analisi T+UR+illuminamento).</li>';h+='<li><strong>UNI EN 15757:2010</strong>, Conservazione beni culturali: specifiche T+UR per limitare danni meccanici (concetto di "clima storico").</li>';h+='<li><strong>UNI EN 16242:2013</strong>, Procedure e strumenti per misurare umidità aria e scambi vapore aria-bene.</li>';h+='<li><strong>UNI EN 16893:2018</strong>, Specifiche per il luogo, costruzione e modifiche di edifici/locali destinati alla conservazione di collezioni.</li>';h+='<li><strong>UNI EN 16095:2012</strong>, Condition reporting di beni culturali mobili.</li>';h+='<li><strong>UNI EN 16790:2016</strong>, Integrated Pest Management (IPM) per beni culturali.</li>';h+='<li><strong>UNI EN 17820:2023</strong>, Gestione delle collezioni dei beni culturali.</li>';h+='<li><strong>UNI EN ISO 7726:2026</strong>, Strumenti per la misura delle grandezze fisiche.</li>';h+='<li><strong>ASHRAE Handbook HVAC Applications</strong>, Museums, Galleries, Archives, and Libraries (classi AA/A/B/C/D).</li>';h+='<li><strong>ISO 11799:2024</strong>, Information and documentation: requisiti per i depositi di archivi e biblioteche.</li>';h+='<li><strong>CCI (Canadian Conservation Institute)</strong>, Environmental Guidelines for Museums.</li>';h+='<li><strong>IPI (Image Permanence Institute)</strong>, Climate Notebook + Sustainable Preservation Practices.</li>';h+='<li><strong>Bizot Green Protocol 2014</strong>, Range climatico ampliato (16-25°C / 40-60% UR) per collezioni miste in edifici storici.</li>';h+='<li><strong>UNI EN 1822-1:2019 / UNI EN ISO 16890-1:2017</strong>, Filtri HEPA / ISO 16890.</li>';h+='<li><strong>WHO Dampness/Mould Guidelines 2009</strong>.</li>';h+='</ul><p style="font-size:11px;font-style:italic;color:#6b5c4c;margin-top:8px">Setpoint verificati su UNI 10829:1999 + UNI EN 15757:2010 + ASHRAE Handbook HVAC Applications (cap. Musei) + CCI/IPI guidelines. Doppio/triplo controllo su fonti istituzionali consultabili.</p>';return h;}
+function buildDoc(){const ana=loadAna(),p=ana.perito,c=ana.immobile,d=STATE.data,v=calcVerdict();const today=new Date().toLocaleDateString("it-IT",{day:"2-digit",month:"long",year:"numeric"});let h="<h1>Diagnosi Microclima Beni Culturali</h1>";h+='<p style="color:#6b5c4c;font-size:12px"><strong>Data:</strong> '+today+' · <strong>Modalità:</strong> '+(STATE.mode==='operatore'?'Operatore (5 step)':'Tecnico (8 step)')+'</p>';h+="<h2>Anagrafica</h2><table><tr><th>Perito</th><td>"+esc(p.nome||"n.d.")+"</td></tr><tr><th>Committente</th><td>"+esc(c.Nome||"n.d.")+"</td></tr>";if(c.Indirizzo)h+="<tr><th>Immobile</th><td>"+esc(c.Indirizzo)+"</td></tr>";h+="</table>";h+=buildDocSections(d,v);return h;}
+function openDocModal(){$("docBody").innerHTML=buildDoc();$("docModal").classList.add("show");}
+function closeDocModal(){$("docModal").classList.remove("show");}
+function exportWord(){const html='<!doctype html><html><head><meta charset="utf-8"><title>Diagnosi Microclima BC</title><style>body{font-family:Georgia,serif;font-size:11pt;padding:20px}h1{font-size:18pt;font-style:italic}h2{font-size:13pt;color:#5d4924;border-bottom:1pt solid #d8d3c4;padding-bottom:3pt}h3{font-size:11.5pt;color:#8e6f3a;margin-top:14pt}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9.5pt}th,td{padding:4pt 6pt;border-bottom:1pt solid #e6e0d2;text-align:left}th{background:#fcf8eb;font-weight:700}ul,ol{font-size:10pt;line-height:1.5}</style></head><body>'+buildDoc()+'</body></html>';const blob=new Blob([html],{type:"application/msword"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="microbc_"+new Date().toISOString().slice(0,10)+".doc";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500);showToast("Word salvato.","ok");}
+function exportPDF(){window.print();}
+function exportJSON(){const ana=loadAna();const b={schemaVersion:"microbc-v4.0",exportedAt:new Date().toISOString(),perito:ana.perito,immobile:ana.immobile,mode:STATE.mode,currentStep:STATE.cur,finished:STATE.finished,data:STATE.data,verdict:calcVerdict()};const blob=new Blob([JSON.stringify(b,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="microbc_"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500);showToast("JSON salvato.","ok");}
+function addToReport(){try{const r=JSON.parse(localStorage.getItem("mx2::reports")||"[]");r.push({id:"mbc_"+Date.now(),module:"microclima_bc",moduleName:"Diagnosi Microclima BC",version:"v4.0",createdAt:new Date().toISOString(),summary:calcVerdict().verdict||"OK",data:STATE.data,htmlSnippet:buildDoc()});localStorage.setItem("mx2::reports",JSON.stringify(r));showToast("Aggiunto al Report.","ok");}catch(e){showToast("Errore: "+e.message,"err");}}
+function listSaves(){try{return JSON.parse(localStorage.getItem(SAVES_KEY)||"[]");}catch(e){return[];}}
+function writeSaves(a){localStorage.setItem(SAVES_KEY,JSON.stringify(a));}
+function fmtTs(iso){try{return new Date(iso).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch(e){return iso;}}
+function openDlg(t,b,a){$("dlgTitle").innerHTML=t;$("dlgBody").innerHTML=b;$("dlgActions").innerHTML=a;$("dlgModal").classList.add("show");}
+function closeDlg(){$("dlgModal").classList.remove("show");}
+function openSaveDialog(){const a=loadAna(),c=a.immobile;const dn=(c.Nome?c.Nome:"Diagnosi Microclima BC")+" del "+new Date().toLocaleDateString("it-IT");openDlg("💾 Salva",'<div class="fld"><label>Nome</label><input type="text" id="saveName" value="'+esc(dn)+'" maxlength="80"></div>','<button type="button" class="mx-shiny s-gray" id="dlgCancel" style="padding:8px 14px;font-size:12px">Annulla</button><button type="button" class="mx-shiny s-green" id="dlgConfirm" style="padding:8px 14px;font-size:12px">💾 Salva</button>');setTimeout(()=>{$("saveName").focus();$("saveName").select();},60);$("dlgCancel").addEventListener("click",closeDlg);$("dlgConfirm").addEventListener("click",function(){const nm=($("saveName").value||"").trim()||"Senza nome";const arr=listSaves();arr.push({id:"s_"+Date.now(),name:nm,ts:new Date().toISOString(),mode:STATE.mode,cur:STATE.cur,finished:STATE.finished,data:JSON.parse(JSON.stringify(STATE.data))});writeSaves(arr);closeDlg();showToast('Salvata: "'+nm+'"',"ok");});}
+function openLoadDialog(){const arr=listSaves().sort((a,b)=>b.ts.localeCompare(a.ts));let body=!arr.length?'<div class="dlg-empty">Archivio vuoto.</div>':'<div class="dlg-list">'+arr.map(s=>'<div class="dlg-item"><div style="flex:1"><div style="font-weight:700">'+esc(s.name)+'</div><div style="font-size:11px;font-family:monospace;color:#8a7858">'+fmtTs(s.ts)+'</div></div><button type="button" class="mx-shiny s-blue" data-load="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px">📥</button><button type="button" class="mx-shiny" data-del="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px;background-image:linear-gradient(135deg,#ef5350,#c62828);box-shadow:0 3px 10px rgba(198,40,40,.42)">🗑</button></div>').join("")+'</div>';openDlg("📁 Carica",body,'<button type="button" class="mx-shiny s-gray" id="dlgClose2" style="padding:8px 14px;font-size:12px">Chiudi</button>');$("dlgClose2").addEventListener("click",closeDlg);$("dlgBody").querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",function(){const s=listSaves().find(x=>x.id===this.dataset.load);if(!s||!confirm('Caricare "'+s.name+'"?'))return;STATE.cur=s.cur||0;STATE.mode=s.mode||'tecnico';STATE.finished=!!s.finished;STATE.data=JSON.parse(JSON.stringify(s.data));persist();render();closeDlg();showToast("Caricata.","ok");}));$("dlgBody").querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",function(){if(!confirm("Eliminare?"))return;writeSaves(listSaves().filter(x=>x.id!==this.dataset.del));openLoadDialog();}));}
+/* === Etichette leggibili delle risposte a scelta (19/11/2026) ===
+   Nel Word, nel PDF e nel Report le risposte a scelta uscivano col valore interno (es. «fascia_oriz», «mattone_pieno»).
+   mxLab() restituisce l'etichetta che si legge a schermo, presa dagli stessi pannelli del modulo. */
+var _MXLAB=null,_MXFLD=null;
+function _mxLabMap(){
+  if(_MXLAB) return _MXLAB; _MXLAB={}; _MXFLD={};
+  try{ var box=document.createElement("div");
+    Object.keys(panels).forEach(function(id){ try{ box.innerHTML=panels[id](); }catch(e){ return; }
+      box.querySelectorAll("[data-fld]").forEach(function(el){ var k=el.getAttribute("data-fld"); var m=_MXLAB[k]=_MXLAB[k]||{};
+        if(el.tagName==="SELECT"){ for(var i=0;i<el.options.length;i++){ if(el.options[i].value) m[el.options[i].value]=el.options[i].textContent; } }
+        else if(el.type==="radio"||el.type==="checkbox"){ var l=el.closest("label"); if(l&&el.value) m[el.value]=l.textContent; }
+        if(!_MXFLD[k]){ var f=el.closest(".fld"); var fl=f&&f.querySelector("label"); if(fl&&!fl.querySelector("input")) _MXFLD[k]=fl.textContent.replace(/\s+/g," ").trim(); else if(el.type==="checkbox"&&el.closest("label")) _MXFLD[k]=el.closest("label").textContent.replace(/^[^0-9A-Za-zÀ-ÿ(]+/,"").replace(/\s+/g," ").trim(); }
+      });
+    });
+  }catch(e){}
+  return _MXLAB;
+}
+function mxLab(campo,valore){
+  if(Array.isArray(valore)) return valore.map(function(x){ return mxLab(campo,x); });
+  if(valore==null||valore==="") return valore;
+  var m=_mxLabMap()[campo], l=m&&m[valore];
+  if(!l) return valore;
+  return String(l).replace(/^[^0-9A-Za-zÀ-ÿ<>≤≥(]+/,"").replace(/\s+/g," ").trim()||valore;
+}
+/* === Confronto fra due diagnosi salvate (19/11/2026) ===
+   Prima il tasto «Confronta» mostrava un avviso e apriva l'archivio di «Carica». Ora si scelgono due salvataggi
+   e una tabella li mette a fianco, con i campi diversi in arancio (come nel modulo Risalita). */
+function _mxFldName(k){ _mxLabMap(); return (_MXFLD&&_MXFLD[k])||String(k).replace(/_/g," ").replace(/([a-z0-9])([A-Z])/g,"$1 $2"); }
+function _mxCmpVal(k,v){
+  if(v===true) return "sì"; if(v===false) return "no";
+  if(v==null||v===""||(Array.isArray(v)&&!v.length)) return "n.d.";
+  if(Array.isArray(v)) return v.map(function(x){ return (x!==null&&typeof x==="object")?JSON.stringify(x):String(mxLab(k,x)); }).join(", ");
+  if(typeof v==="object") return JSON.stringify(v);
+  return String(mxLab(k,v));
+}
+function _mxRenderCmp(a,b){
+  var da=a.data||{}, db=b.data||{}, chiavi=[], righe="", diversi=0, tot=0, st="padding:4px 6px;border-bottom:1px solid #e6e0d2;text-align:left;vertical-align:top";
+  Object.keys(da).concat(Object.keys(db)).forEach(function(k){ if(chiavi.indexOf(k)<0) chiavi.push(k); });
+  chiavi.forEach(function(k){ var va=_mxCmpVal(k,da[k]), vb=_mxCmpVal(k,db[k]); if((va==="n.d."||va==="no")&&(vb==="n.d."||vb==="no")) return; tot++; var dif=(va!==vb); if(dif) diversi++;
+    righe+='<tr'+(dif?' style="background:#fff3e0"':'')+'><th style="'+st+';font-size:11px">'+esc(_mxFldName(k))+'</th><td style="'+st+'">'+esc(va)+'</td><td style="'+st+'">'+esc(vb)+'</td></tr>'; });
+  return '<div style="font-size:12.5px;margin-bottom:6px"><strong>'+(diversi?("Campi diversi: "+diversi+" su "+tot):("Nessuna differenza nei "+tot+" campi compilati"))+'</strong></div><table style="width:100%;border-collapse:collapse;font-size:11.5px"><tr><th style="'+st+'">Campo</th><th style="'+st+'">A · '+esc(a.name)+'<br><span style="font-weight:400">'+fmtTs(a.ts)+'</span></th><th style="'+st+'">B · '+esc(b.name)+'<br><span style="font-weight:400">'+fmtTs(b.ts)+'</span></th></tr>'+righe+'</table>';
+}
+function openCompareDialog(){
+  var arr=listSaves().slice().sort(function(x,y){ return String(y.ts).localeCompare(String(x.ts)); });
+  if(arr.length<2){ openDlg("⚖ Confronto",'<div class="dlg-empty">Servono almeno 2 diagnosi salvate con «Salva». Attualmente: '+arr.length+'.</div>','<button type="button" class="mx-shiny s-gray" id="dlgClose3" style="padding:8px 14px;font-size:12px">Chiudi</button>'); document.getElementById("dlgClose3").addEventListener("click",closeDlg); return; }
+  function opts(sel){ return arr.map(function(s,i){ return '<option value="'+esc(s.id)+'"'+(i===sel?" selected":"")+'>'+esc(s.name)+' · '+fmtTs(s.ts)+'</option>'; }).join(""); }
+  var stile="width:100%;padding:9px 11px;border:1px solid #d8d3c4;border-radius:8px;font:inherit;font-size:13px;background:#fff";
+  openDlg("⚖ Confronto diagnosi",'<div style="font-size:12.5px;margin-bottom:10px">Scegli due diagnosi salvate e premi «Confronta»: i campi diversi escono in arancio.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label style="display:block;font-size:11.5px;font-weight:700;margin-bottom:4px">Diagnosi A</label><select id="cmpA" style="'+stile+'">'+opts(0)+'</select></div><div><label style="display:block;font-size:11.5px;font-weight:700;margin-bottom:4px">Diagnosi B</label><select id="cmpB" style="'+stile+'">'+opts(1)+'</select></div></div><div id="cmpResult" style="margin-top:14px"></div>','<button type="button" class="mx-shiny s-gray" id="dlgClose4" style="padding:8px 14px;font-size:12px">Chiudi</button><button type="button" class="mx-shiny" id="dlgDoCompare" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#ffa726 0%,#ef6c00 45%,#bf360c 100%)">⚖ Confronta</button>');
+  document.getElementById("dlgClose4").addEventListener("click",closeDlg);
+  document.getElementById("dlgDoCompare").addEventListener("click",function(){ var all=listSaves(); var a=all.filter(function(s){return s.id===document.getElementById("cmpA").value;})[0], b=all.filter(function(s){return s.id===document.getElementById("cmpB").value;})[0]; if(!a||!b) return; document.getElementById("cmpResult").innerHTML=_mxRenderCmp(a,b); });
+}
+function resetDiagnosis(){if(!confirm("Azzerare la diagnosi corrente?"))return;Object.keys(STATE.data).forEach(k=>{const v=STATE.data[k];if(Array.isArray(v))STATE.data[k]=[];else if(typeof v==="boolean")STATE.data[k]=false;else if(typeof v==="number"||v===null)STATE.data[k]=null;else STATE.data[k]="";});STATE.cur=0;STATE.finished=false;persist();render();showToast("Azzerata.","ok");}
+document.addEventListener("DOMContentLoaded",function(){restore();renderAna();render();$("btnPrev").addEventListener("click",prev);$("btnNext").addEventListener("click",next);$("btnFinish").addEventListener("click",finish);$("btnMode").addEventListener("click",function(){setMode(STATE.mode==='operatore'?'tecnico':'operatore');});$("btnReloadAna").addEventListener("click",function(){renderAna();showToast("Ricaricata.","ok");});$("btnSave").addEventListener("click",openSaveDialog);$("btnLoad").addEventListener("click",openLoadDialog);$("btnCompare").addEventListener("click",openCompareDialog);$("btnReset").addEventListener("click",resetDiagnosis);$("dlgCloseBtn").addEventListener("click",closeDlg);$("dlgModal").addEventListener("click",function(e){if(e.target===this)closeDlg();});$("btnWord").addEventListener("click",openDocModal);$("btnPDF").addEventListener("click",function(){openDocModal();setTimeout(exportPDF,300);});$("btnReport").addEventListener("click",addToReport);$("modalCloseBtn").addEventListener("click",closeDocModal);$("btnCloseModal").addEventListener("click",closeDocModal);$("btnDoExportWord").addEventListener("click",exportWord);$("btnDoExportPDF").addEventListener("click",exportPDF);$("btnDoExportJSON").addEventListener("click",exportJSON);$("docModal").addEventListener("click",function(e){if(e.target===this)closeDocModal();});});
+window.MX_MICRO_BC={STATE,STEPS_FULL,MATERIALI,DANNI,CLASSI_ASHRAE,calcVerdict,setMode};
+</script>
+<script>
+/* === MX SNAPSHOT IMPORTER (auto-install, Mixando v3) ===
+ * Aggiunge bottone "Apri snapshot" accanto al "JSON" della toolbar.
+ * Importa .json esportato dallo stesso modulo, ricarica la pagina.
+ * Riconosce pattern lite (STATE.cur/finished/data → *-draft) e
+ * pattern rich (state diretto → *-vN). NON modifica codice esistente.
+ * ====================================================== */
+(function(){
+  'use strict';
+  if (window.__mxSnapImportInstalled) return;
+  window.__mxSnapImportInstalled = true;
+  function findHostBtn(){
+    return document.querySelector('button[data-act="export-json"]')
+        || document.getElementById('btnJSON')
+        || document.getElementById('btnExportJSON')
+        || document.querySelector('.mx-tb-btn.tb-save');
+  }
+  function makeBtn(){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mx-tb-btn tb-load';
+    b.id = 'btnOpenSnap';
+    b.title = 'Apri uno snapshot .json esportato in precedenza da questo modulo (sostituirà i dati correnti).';
+    b.innerHTML = '<span class="ico">\u{1F4C2}</span><span class="label">Apri snapshot</span>';
+    return b;
+  }
+  function detectModuleKeys(){
+    /* 19/11/2026: solo le chiavi di QUESTO modulo, cioè quelle che il modulo nomina nel suo codice.
+       Prima prendeva le chiavi di tutti i moduli e lo snapshot finiva nella bozza del primo trovato
+       (un file dei Sali, aperto dal modulo Sali, sovrascriveva la bozza della Risalita). */
+    var src = '';
+    try { [].forEach.call(document.scripts, function(s){ if (!s.src) src += s.textContent; }); } catch(_){}
+    var condivise = {'mx2::perito':1,'mx2::periti-v2':1,'mx2::locali-v1':1,'mx2::reports':1,'mx2::indagini':1,'mx2::strumentazione':1,'mx2::chartTheme':1,'mx2::showPhysicalScale':1,'mx2::report-meta':1,'mx2::last-backup':1};
+    var mie = {}, re = /mx2::[A-Za-z0-9_-]+/g, m;
+    while ((m = re.exec(src))) { if (!condivise[m[0]]) mie[m[0]] = 1; }
+    return Object.keys(mie);
+  }
+  /* 20/11/2026: nomi con cui un file dichiara di venire da questo modulo (in «moduleId», in «module» o nella
+     sigla di «schemaVersion», per esempio 'sali-v3.1'). Servono a non aprire qui il file di un altro modulo. */
+  var _MX_MIEI = ['microbc', 'microclima-bc'];
+  function _mxFileDiAltroModulo(obj){
+    if (!obj || typeof obj !== 'object') return '';
+    if (typeof obj._format === 'string' && obj._format.indexOf('mixando-backup') === 0) return 'Questo file è un backup generale di Mixando: si ripristina dalla pagina «Backup tecnico», non da qui.';
+    var d = obj.moduleId || obj.module || (typeof obj.schemaVersion === 'string' ? obj.schemaVersion : '');
+    if (typeof d !== 'string' || !d) return '';   /* il file non dice da dove viene: lo giudicano i controlli più sotto */
+    var n = d.toLowerCase().replace(/-v[\d.]+$/, '').replace(/_/g, '-');
+    if (_MX_MIEI.indexOf(n) >= 0) return '';
+    return 'Questo file viene da un altro modulo (' + (obj.moduleName || d) + ').';
+  }
+  function pickTargetKey(keys, payload){
+    var draftKeys = keys.filter(function(k){ return /-draft$/.test(k); });
+    var liteHint = payload && (payload.currentStep !== undefined || payload.data !== undefined);
+    if (liteHint && draftKeys.length){ return { key: draftKeys[0], kind: 'lite' }; }
+    var primaryKeys = keys.filter(function(k){ return !/-(saves|draft|prefs)$/.test(k); });
+    if (primaryKeys.length === 1) return { key: primaryKeys[0], kind: 'rich' };
+    if (primaryKeys.length > 1){
+      var sortable = primaryKeys.map(function(k){ try { return [k, (localStorage.getItem(k)||'').length]; } catch(_){ return [k, 0]; } });
+      sortable.sort(function(a,b){ return b[1] - a[1]; });
+      return { key: sortable[0][0], kind: 'rich' };
+    }
+    if (draftKeys.length) return { key: draftKeys[0], kind: 'lite' };
+    return null;
+  }
+  function openImportDialog(){
+    var f = document.createElement('input');
+    f.type = 'file'; f.accept = 'application/json';
+    f.style.display = 'none';
+    f.addEventListener('change', function(e){
+      var file = e.target.files && e.target.files[0]; if (!file) return;
+      var rd = new FileReader();
+      rd.onload = function(ev){
+        try {
+          var obj = JSON.parse(ev.target.result);
+          /* 20/11/2026: il tasto riapre solo i file di QUESTO modulo. Prima accettava, dopo una conferma, anche il file
+             di un altro modulo o il backup generale, e il lavoro del modulo aperto andava perso (provato: file dei Sali
+             nel Radon, file del Radon e della Risalita nei Sali). */
+          var _altro = _mxFileDiAltroModulo(obj);
+          if (_altro){ alert(_altro + '\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          /* 19/11/2026: file esportato da un modulo con la barra nuova (Glaser, Termoigrometria, Radon). Porta i dati
+             d'ingresso in «input», in una forma diversa da quella tenuta in memoria: scriverlo in memoria azzerava
+             il modulo. Qui si usa la stessa strada del tasto «Carica». */
+          if (obj && obj.input && window.MX && typeof window.MX.applyData === 'function'){
+            if (!confirm('Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.moduleName || obj.moduleId || '?') + '\n\nI dati correnti del modulo verranno SOSTITUITI.')) return;
+            var _esito = window.MX.applyData(obj.input, obj.moduleId);
+            if (_esito === 'ok') alert('Snapshot importato.');
+            else if (_esito === 'altro') alert('Questo file viene da un altro modulo (' + (obj.moduleName || obj.moduleId) + '): non importato.');
+            else alert('Il modulo non sa ricaricare questo file.');
+            return;
+          }
+          /* 20/11/2026: nei moduli con la barra nuova il solo file che si sa riaprire è quello con la voce «input».
+             Un file diverso, scritto in memoria così com'era, azzerava il modulo. */
+          if (window.MX && typeof window.MX.applyData === 'function'){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var keys = detectModuleKeys();
+          if (!keys.length){
+            alert('Nessuna chiave di lavoro trovata per questo modulo nello storage corrente.\nSuggerimento: apri il modulo, fai almeno un\'interazione, poi riprova.');
+            return;
+          }
+          var target = pickTargetKey(keys, obj);
+          if (!target){ alert('Non sono riuscito a individuare la chiave di salvataggio. Snapshot non importato.'); return; }
+          /* 20/11/2026: un file senza i dati dei passi svuotava la bozza */
+          if (target.kind === 'lite' && !(obj && (obj.data || obj.state))){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var msg = 'Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.module || obj.schemaVersion || '?') + '\n• Destinazione: ' + target.key + ' (' + target.kind + ')\n\nI dati correnti del modulo verranno SOSTITUITI.\nConsiglio: prima fai "JSON" per backup di sicurezza.\n\nProcedere?';
+          if (!confirm(msg)) return;
+          var toWrite;
+          if (target.kind === 'lite'){
+            toWrite = { ts: Date.now(), state: { cur: (obj.currentStep !== undefined ? obj.currentStep : 0), finished: !!obj.finished, data: (obj.data || obj.state || {}) } };
+          } else {
+            toWrite = obj.state || obj;
+          }
+          try { localStorage.setItem(target.key, JSON.stringify(toWrite)); }
+          catch (err) { alert('Errore scrittura storage: ' + (err.message || err)); return; }
+          alert('Snapshot importato in "' + target.key + '". Pagina in ricaricamento…');
+          location.reload();
+        } catch (err) { alert('Errore lettura JSON: ' + err.message); }
+      };
+      rd.readAsText(file);
+    });
+    document.body.appendChild(f); f.click(); setTimeout(function(){ try{ document.body.removeChild(f); }catch(_){} }, 1500);
+  }
+  function install(){
+    if (document.getElementById('btnOpenSnap')) return;
+    if (!detectModuleKeys().length) return;   /* 19/11/2026: il modulo non tiene dati in memoria, il tasto non potrebbe funzionare */
+    var host = findHostBtn();
+    if (!host || !host.parentNode){ return setTimeout(install, 250); }
+    var btn = makeBtn();
+    host.parentNode.insertBefore(btn, host.nextSibling);
+    btn.addEventListener('click', openImportDialog);
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(install, 150); });
+  } else {
+    setTimeout(install, 150);
+  }
+})();
+
+/* === Integrazione mappa-indagini (aggancio bidirezionale) === */
+function _mxIndaginiList(){
+  try{ var raw=localStorage.getItem('mx2::indagini'); if(!raw) return []; var a=JSON.parse(raw); return Array.isArray(a)?a:[]; }
+  catch(e){ return []; }
+}
+function _mxIndaginiSaveAll(list){
+  try{ localStorage.setItem('mx2::indagini', JSON.stringify(list||[])); return true; }
+  catch(e){ return false; }
+}
+function _mxIndaginiNewId(){
+  return 'ind_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+}
+
+// Mapping STATE.data → dati indagine per categoria 'microclima'
+function _mxBuildDati_microclima(d){
+  // Costruisce un sottoinsieme compatibile con il modal probe + preserva STATE intero
+  // I campi standard tInt, urInt, tSup vengono estratti se presenti, altrimenti restano in schedaCompleta
+  var out = {
+    schedaCompleta: JSON.parse(JSON.stringify(d || {}))
+  };
+  // Estrazione opportunistica di campi standard (se presenti con quei nomi)
+  ['tInt','urInt','tSup','tempC','urPerc','co2_ppm','pm25','pm10','tvoc','hcho','co','no2',
+   'co2','tempC2','tempInt'].forEach(function(k){
+    if(d && d[k] != null) out[k] = d[k];
+  });
+  // Eventuali sintomi/note/categoria sospetta
+  if(d){
+    if(d.sintomi) out.sintomi = d.sintomi;
+    if(d.note) out.note = d.note;
+    if(d.noteFinali) out.note = d.noteFinali;
+    if(d.tipologiaSospetta) out.tipologiaSospetta = d.tipologiaSospetta;
+    if(d.categoriaIaq) out.categoria_target = d.categoriaIaq;
+  }
+  return out;
+}
+
+/* 20/11/2026: le domande si fanno in una finestra dentro la pagina (window.mxChiedi, nel file condiviso
+   _shared/mx-switcher.js) e non più nelle finestrelle del browser. Se quel file non fosse stato caricato si torna
+   alle finestrelle di prima. _mxChiedi risponde con una promessa; _mxTesto chiede un solo testo. */
+function _mxChiedi(titolo, cfg){
+  if(window.mxChiedi) return window.mxChiedi(titolo, cfg);
+  cfg = cfg || {};
+  if(cfg.scelte){
+    var buone = cfg.scelte.filter(function(s){ return !s[2]; });
+    var r = prompt(titolo + '\n\n' + buone.map(function(s, i){ return (i+1) + '. ' + s[1]; }).join('\n') + '\n\nScrivi il numero:', '1');
+    var k = parseInt(r, 10) - 1;
+    return Promise.resolve(buone[k] ? buone[k][0] : null);
+  }
+  var out = [], campi = cfg.campi || [];
+  for(var i = 0; i < campi.length; i++){
+    var v = prompt(titolo + (campi[i][0] ? ('\n' + campi[i][0]) : ''), campi[i][1] == null ? '' : campi[i][1]);
+    if(v === null) return Promise.resolve(null);
+    out.push(v);
+  }
+  return Promise.resolve(out);
+}
+function _mxTesto(titolo, pre){ return _mxChiedi(titolo, {campi:[['', pre]]}).then(function(r){ return r ? r[0] : null; }); }
+async function _mxAggancialMappa(){
+  var cat = 'microclima';
+  var moduloFile = 'microclima-bc.html';
+  var fileLabel = 'Microclima BC';
+  // Pre-save scheda
+  try{ if(typeof persist === 'function') persist(); }catch(e){}
+  var d = STATE && STATE.data ? STATE.data : {};
+  var dati = _mxBuildDati_microclima(d);
+
+  var lista = _mxIndaginiList();
+  var stessoCat = lista.filter(function(r){ return r.categoria === cat; });
+
+  /* 20/11/2026: scelta dentro la pagina (prima si scriveva 1, 2 o 3 in una finestrella del browser) */
+  var mode = await _mxChiedi('Aggancia la scheda '+fileLabel.toUpperCase()+' alla Mappa Indagini', {scelte:[['1','Nuovo punto sulla mappa'],['2','Aggiorna un punto esistente ('+(stessoCat.length?(stessoCat.length+' disponibili'):'nessuno disponibile')+')', !stessoCat.length]]});
+  if(!mode) return;
+
+  if(mode === '1'){
+    var _nn = await _mxChiedi('Nuovo punto sulla mappa', {campi:[['Nome del punto', fileLabel+' '+new Date().toLocaleDateString('it-IT')],['Stanza (facoltativa)','']], conferma:'Crea il punto'});
+    if(!_nn || !String(_nn[0]).trim()) return;
+    var nome = String(_nn[0]).trim(), stanza = String(_nn[1]||'').trim();
+    var rec = {
+      id: _mxIndaginiNewId(),
+      schemaVer: 1,
+      categoria: cat,
+      piano: 0,
+      x: 0.5, y: 0.5,
+      stanza: stanza || '',
+      nome: nome,
+      posizione: 'Da posizionare sulla mappa (apri Mappa Indagini e trascina il pin)',
+      dataCreazione: new Date().toISOString(),
+      dataModifica: new Date().toISOString(),
+      dati: dati,
+      note: 'Rilievo creato da scheda '+moduloFile,
+      foto: [],
+      termogrammi: [],
+      linkScheda: moduloFile+':'+Date.now(),
+      layerId: ''
+    };
+    lista.push(rec);
+    _mxIndaginiSaveAll(lista);
+    if(typeof showToast === 'function') showToast('✓ Punto "'+nome+'" creato sulla mappa indagini','ok');
+    setTimeout(function(){
+      if(confirm('Punto "'+nome+'" creato sulla Mappa Indagini.\nVuoi aprire ora la Mappa per posizionarlo?')){
+        window.location.href = 'mappa-indagini.html';
+      }
+    }, 500);
+  } else if(mode === '2'){
+    if(!stessoCat.length){ alert('Nessun punto di categoria '+fileLabel+' esistente sulla mappa.'); return; }
+    var ch = await _mxChiedi('Quale punto vuoi aggiornare?', {scelte: stessoCat.map(function(r, i){ return [String(i+1), r.nome+' ('+(r.stanza||'senza stanza')+')']; })});
+    if(!ch) return;
+    var idx = parseInt(ch)-1;
+    if(isNaN(idx) || idx<0 || idx>=stessoCat.length){ alert('Selezione non valida'); return; }
+    var target = stessoCat[idx];
+    target.dati = dati;
+    target.dataModifica = new Date().toISOString();
+    target.linkScheda = moduloFile+':'+Date.now();
+    target.note = (target.note || '') + (target.note ? ' · ':'') + 'Aggiornato da '+moduloFile+' il '+new Date().toLocaleDateString('it-IT');
+    for(var i=0;i<lista.length;i++){
+      if(lista[i].id === target.id){ lista[i] = target; break; }
+    }
+    _mxIndaginiSaveAll(lista);
+    if(typeof showToast === 'function') showToast('✓ Punto "'+target.nome+'" aggiornato','ok');
+  }
+}
+
+</script>
+<script src="_shared/mx-biblio.js" data-mod="microclima-bc" defer></script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sapere">
+<title>Mixando Lab · Sapere, Manuale Tecnico</title>
+<style>
+:root{
+  --mx-accent:#5d6d7e; --mx-accent-soft:rgba(93,109,126,.12);
+  --bg:#f5f1e8; --paper:#fff; --ink:#2c1810; --ink-soft:#6b5c4c; --ink-mute:#8b7355;
+  --line:#e6e0d2; --r:14px;
+  --ff-serif:Georgia,"Cambria","Times New Roman",serif;
+  --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:48px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--paper);border-bottom:3px solid var(--mx-accent);box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.mx-bar .em{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--mx-accent);color:#fff}
+.mx-bar .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mx-accent);line-height:1}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:14px;color:var(--ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:6px 12px;border:1px solid var(--mx-accent);border-radius:8px}
+.mx-bar a.back:hover{background:var(--mx-accent);color:#fff}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 22px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:680px;color:var(--ink-soft);font-size:14px}
+.search{width:100%;padding:12px 16px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14.5px;background:#fff;outline:none;margin-bottom:14px}
+.search:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card>h3{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),var(--paper));display:flex;align-items:center;gap:10px}
+.card>h3 .num{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:var(--ff-sans)}
+.card .body{padding:14px 18px}
+.topics{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.topic{display:block;padding:14px;border:1px solid var(--line);border-radius:10px;background:#fff;text-decoration:none;color:var(--ink);transition:all .15s}
+.topic:hover{border-color:var(--mx-accent);background:var(--mx-accent-soft);transform:translateY(-1px)}
+.topic .ic{font-size:20px;margin-bottom:6px;color:var(--mx-accent)}
+.topic .t{font-family:var(--ff-serif);font-weight:700;font-size:14px;margin-bottom:3px}
+.topic .d{font-size:11.5px;color:var(--ink-mute);line-height:1.4}
+.article{display:none;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:24px;margin-top:14px;line-height:1.65}
+.article.show{display:block}
+.article h2{font-family:var(--ff-serif);font-size:22px;color:var(--ink);margin:0 0 10px;border-bottom:2px solid var(--mx-accent);padding-bottom:8px}
+.article h3{font-family:var(--ff-serif);font-size:16px;color:var(--mx-accent);margin:18px 0 6px}
+.article p{color:var(--ink);font-size:14px}
+.article ul{padding-left:22px;color:var(--ink-soft);font-size:13.5px}
+.article li{margin-bottom:4px}
+.article .src{margin-top:18px;padding:10px 14px;background:#faf8f3;border-left:3px solid var(--mx-accent);font-size:12px;color:var(--ink-soft);border-radius:8px}
+.article .back-list{display:inline-block;margin-bottom:14px;color:var(--mx-accent);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+
+.mx-bar{position:relative}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}}
+
+/* Anagrafica perito+committente, pattern Mixando standard */
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto 8px;max-width:1080px}
+.ana-strip .pc{padding:10px 12px;background:#fff;border:1px solid #e6e0d2;border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6b5c4c;margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700;color:#2c1810}
+.ana-strip .pc .m{font-size:11.5px;color:#8b7355;margin-top:2px}
+.ana-actions{text-align:center;margin:0 auto 16px;max-width:1080px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ana-actions a,.ana-actions button{font-size:12px;font-weight:700;text-decoration:none;padding:6px 13px;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;border:1px solid currentColor}
+.ana-actions a{color:var(--mx-accent,#2c5d7c)}
+.ana-actions button.mx-reload{background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);color:#fff;border:0;box-shadow:0 3px 10px rgba(46,125,50,.42)}
+@media (max-width:760px){.ana-strip{grid-template-columns:1fr}}
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:0 !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:50px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab">
+  <div class="meta"><span class="tag">Sapere</span><h1 class="ti">Manuale Tecnico</h1></div>
+  <a class="back" href="suite.html">&larr; Suite</a>
+</header>
+
+<main>
+  
+
+  <section class="hero">
+    <h2>Conoscenze di <em>base diagnostica</em></h2>
+    <p>18 voci tecniche con riferimenti normativi cogenti + cross-link ai moduli operativi Mixando. Strumento di consultazione rapida durante il sopralluogo o la stesura della relazione tecnica.</p>
+  </section>
+
+  <div style="background:linear-gradient(180deg,rgba(93,109,126,.10),#fff);border:1px solid rgba(93,109,126,.30);border-left:4px solid #5d6d7e;border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:#2c1810;line-height:1.55">
+    <strong>📦 Per applicare in pratica</strong> ogni voce è collegata ai moduli operativi Mixando: <a href="suite.html" style="color:#34495e;font-weight:800">→ apri Suite</a> per accedere ai 23 moduli (Cantiere · Diagnostica · Salubrità · Termografia · Umidità · Sapere · Sistema).
+  </div>
+
+  <input type="search" class="search" id="qSearch" placeholder="Cerca voce... (es. risalita, condensa, ICRP)">
+
+  <article class="card">
+    <h3><span class="num">i</span> Voci disponibili</h3>
+    <div class="body"><div class="topics" id="topics"></div></div>
+  </article>
+
+  <div class="article" id="article"></div>
+
+  <footer class="ft"><strong>Mixando &middot; Manuale Tecnico v2</strong> &middot; 18 voci enciclopediche con riferimenti peer-reviewed e norme cogenti italiane/europee/internazionali. Fonti principali: UNI Ente Italiano di Normazione &middot; CEN European Committee &middot; ISO &middot; WTA Wissenschaftlich-Technische Arbeitsgemeinschaft &middot; BRE Building Research Establishment &middot; BSI British Standards Institution &middot; ASHRAE Handbook 2021 &middot; ASTM International &middot; ICRP &middot; WHO Global Air Quality 2021 &middot; ICOMOS &middot; ICCROM &middot; RICS &middot; Fraunhofer IBP.</footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var TOPICS = [
+    { id:'risalita', t:'Umidità di risalita', ic:'💧',
+      d:'Definizione, marker discriminanti, norme.',
+      body:'<h3>Definizione</h3><p>Trasporto di acqua dal terreno alla muratura per <strong>capillarità</strong> nei pori dei materiali. Si manifesta con un fronte umido orizzontale, alto fino a 1,5 m (legge di Jurin in materiali tipici).</p>'+
+           '<h3>Marker discriminanti</h3><ul><li>Profilo gravimetrico <strong>decrescente</strong> con l\'altezza</li><li>Efflorescenze saline alla base</li><li>Presenza tutto l\'anno, indipendente dalla pioggia</li><li>Solo piano terra / interrato</li></ul>'+
+           '<h3>Norme di riferimento</h3><ul><li>UNI 11085:2003, Beni culturali. Materiali lapidei naturali ed artificiali. Determinazione del contenuto d\'acqua: metodo ponderale.</li><li>UNI EN 16682:2017, Conservazione del patrimonio culturale. Metodi di misura del contenuto di umidità nei materiali porosi inorganici.</li><li>WTA 4-5-99/D, Risanamento di murature umide.</li><li>BRE Digest 245</li></ul>',
+      src:'Letteratura: M. Bowley, Damp problems (BRE 245); Künzel, Moisture in walls' },
+    { id:'condensa', t:'Condensa interstiziale (Glaser)', ic:'🌡',
+      d:'Verifica UNI EN ISO 13788, metodo grafico.',
+      body:'<h3>Metodo Glaser</h3><p>Verifica grafica della condensa interstiziale: si confronta il profilo della <strong>pressione di vapore</strong> con quello della <strong>pressione di saturazione</strong> attraverso la stratigrafia. Dove la prima supera la seconda, c\'è condensa.</p>'+
+           '<h3>fRsi (UNI EN ISO 13788)</h3><p>Fattore di temperatura sulla faccia interna: fRsi = (Tsi - Te) / (Ti - Te). Per evitare condensa superficiale: <strong>fRsi ≥ fRsi,min</strong> calcolato dal clima del sito (UNI EN ISO 13788:2013); 0,70 è la soglia fissa della DIN 4108-2:2026-05, la suite usa 0,72 come valore operativo.</p>'+
+           '<h3>Norme</h3><ul><li>UNI EN ISO 13788:2013</li><li>UNI EN ISO 6946:2018 (resistenze)</li><li>UNI 10349 (dati climatici Italia)</li><li>DM 26/06/2015 (requisiti minimi)</li></ul>',
+      src:'Sedlbauer 2001, Vorhersage von Schimmelpilzbildung auf und in Bauteilen' },
+    { id:'sali', t:'Sali igroscopici', ic:'🧂',
+      d:'Cloruri, solfati, nitrati e WTA 2-9-20/D.',
+      body:'<h3>Tre principali anioni</h3><ul><li><strong>Cloruri (Cl⁻)</strong>, origine: NaCl marino, urine animali, sali disgelo. Molto solubili, molto mobili.</li><li><strong>Solfati (SO₄²⁻)</strong>, origine: inquinamento atmosferico (SO₂), gesso, malte cementizie. Espansivi (taumasite).</li><li><strong>Nitrati (NO₃⁻)</strong>, origine: deiezioni animali, fertilizzanti, decomposizione organica. Molto igroscopici.</li></ul>'+
+           '<h3>Classificazione WTA 2-9-20/D</h3><p>Per ciascun anione, fascia <strong>bassa</strong> &lt; 0,1% (1000 mg/kg), <strong>media</strong> 0,1-0,3%, <strong>alta</strong> &gt; 0,3% (3000 mg/kg). La classe più alta tra i tre determina il sistema di risanamento ammesso.</p>'+
+           '<h3>Norme</h3><ul><li>UNI 11087:2003 (ritirata 2016, oggi EN 16455), Determinazione del contenuto di sali idrosolubili</li><li>EN 16455:2014</li><li>WTA-Merkblatt 2-9-20/D</li></ul>',
+      src:'WTA Wissenschaftlich-Technische Arbeitsgemeinschaft für Bauwerkserhaltung und Denkmalpflege' },
+    { id:'radon', t:'Gas Radon', ic:'☢',
+      d:'D.Lgs 101/2020, ICRP 137, livelli riferimento.',
+      body:'<h3>Livelli di riferimento (D.Lgs 101/2020 Art. 12)</h3><ul><li>Abitazioni <strong>esistenti</strong>: 300 Bq/m³ (media annua)</li><li>Abitazioni <strong>nuove</strong> (dal 1/1/2025): 200 Bq/m³</li><li>Luoghi di lavoro / scuole: 300 Bq/m³ (Art. 17)</li></ul>'+
+           '<h3>Calcolo dose</h3><p>Dose efficace annua = concentrazione [Bq/m³] × ore occupazione [h/anno] × coefficiente dose [6,7·10⁻⁶ mSv/(Bq·h/m³)]. Coefficiente da <strong>ICRP Publication 137 (2017)</strong>.</p>'+
+           '<h3>Strumenti di misura</h3><ul><li>Dosimetri passivi CR-39 / elettreti (UNI ISO 11665-4:2021)</li><li>Strumentazione attiva: monitor in continuo (UNI ISO 11665-1)</li></ul>',
+      src:'WHO Handbook on Indoor Radon 2009 §3' },
+    { id:'lim', t:'LIM, Lowest Isopleth for Mould', ic:'🦠',
+      d:'Sedlbauer 2001, soglia 80% UR superficie.',
+      body:'<h3>Definizione</h3><p>La <strong>Lowest Isopleth for Mould (LIM)</strong> è la combinazione di temperatura e umidità superficiale al di sotto della quale non si verifica crescita di muffe, per substrato vivo (UR ≈ 80% a 20°C).</p>'+
+           '<h3>Implicazioni</h3><ul><li>Anche senza condensa visibile, una UR superficiale &ge; 80% prolungata favorisce sporulazione di Aspergillus, Cladosporium, Penicillium.</li><li>Per evitare muffa: <strong>UR superficie &lt; 80%</strong>.</li><li>fRsi ≥ 0,70 (DIN 4108-2:2026-05) implica spesso (ma non sempre) il rispetto della LIM.</li></ul>'+
+           '<h3>Riferimenti</h3><ul><li>Sedlbauer K. (2001), Vorhersage von Schimmelpilzbildung auf und in Bauteilen, Fraunhofer IBP</li><li>UNI EN ISO 13788:2013, sezione muffe</li><li>WHO Guidelines for Indoor Air Quality: Dampness and Mould (2009)</li></ul>',
+      src:'Fraunhofer Institut für Bauphysik (IBP)' },
+    { id:'magnus', t:'Formula Magnus-Tetens', ic:'📐',
+      d:'Approssimazione standard per pSat e Td.',
+      body:'<h3>Pressione vapore saturo</h3><p>psat(T) = 610,5 · exp(17,269 · T / (237,3 + T))  [Pa], per T ≥ 0 °C; sul ghiaccio (T &lt; 0 °C): 610,5 · exp(21,875 · T / (265,5 + T))</p>'+
+           '<h3>Punto di rugiada</h3><p>α = ln(UR/100) + 17,269·T/(237,3+T)</p><p>Td = 237,3·α / (17,269 − α)</p>'+
+           '<h3>Riferimento</h3><p><strong>UNI EN ISO 13788:2013, Appendice E</strong> (formule E.1 ed E.2): sono i coefficienti usati da tutti i moduli della suite. Forma alternativa di uso meteorologico: Alduchov, O.A. and R.E. Eskridge, 1996, Improved Magnus form approximation of saturation vapor pressure, J. Appl. Meteor., 35, 601-609 (a = 17,625, b = 243,04, errore &lt; 0,4 % fra −45 e 60 °C).</p>',
+      src:'UNI EN ISO 13788:2013 App. E' },
+    { id:'infiltrazioni', t:'Infiltrazioni d\'acqua', ic:'💦',
+      d:'BS 8102:2022, BS 8104, WTA 4-5, BRE Digest 245.',
+      body:'<h3>Definizione</h3><p>Penetrazione di acqua attraverso involucro edilizio dall\'esterno: <strong>copertura</strong>, <strong>serramenti</strong>, <strong>terrazzi</strong>, <strong>controterra</strong>, <strong>facciata</strong> (fessure), <strong>pluviali</strong>, <strong>impianti</strong>.</p>'+
+           '<h3>Diagnosi differenziale (4 esclusioni)</h3><p>Prima di concludere "infiltrazione" verificare di aver escluso: 1) risalita capillare (<strong>BS 6576:2005</strong>), 2) condensa superficiale/interstiziale (<strong>UNI EN ISO 13788:2013</strong>), 3) perdita impianto, 4) umidità di costruzione (<strong>WTA 4-5-99/D</strong>). Pattern: scolature a fiamma, aloni con bordo netto, correlazione temporale con pioggia.</p>'+
+           '<h3>Strumenti diagnostici</h3><ul><li>Tubo Karsten <strong>EN 16302:2013</strong>, assorbimento superficiale</li><li>Ispezione endoscopica via gronde/cavità</li><li>Prove di tenuta (water test), <strong>ASTM E1105</strong></li><li>Gravimetrico 6 carote <strong>UNI 11085:2003</strong></li><li>Carburo di calcio <strong>UNI 11121:2004 (ritirata 2025)</strong></li></ul>'+
+           '<h3>Norme cogenti</h3><ul><li><strong>BS 8102:2022</strong> Code of Practice, Protection of below-ground structures</li><li><strong>BS 8104:1992</strong> WDR Wind-Driven Rain, esposizione facciate</li><li>UNI EN 12865:2003, assorbimento acqua sotto pioggia battente</li><li>UNI 11470:2015, sistema impermeabilizzazione</li><li>D.Lgs 36/2023 + DM MASE 24/11/2025 CAM Edilizia</li></ul>',
+      src:'BRE Digest 245 (2007); RICS Joint Damp Standard 2022; IICRC S500 Water Damage Restoration' },
+    { id:'biodet', t:'Biodeteriogeni (muffe, alghe, licheni)', ic:'🦠',
+      d:'UNI 11182, VTT Mould Index, IICRC S520, EPA Mold.',
+      body:'<h3>Tipologie</h3><ul><li><strong>Muffe</strong>: Cladosporium (nero), Aspergillus (verde/giallo), Penicillium (azzurro), Stachybotrys chartarum (nero, micotossine)</li><li><strong>Alghe</strong> (Klebsormidium, Chlorella): patine verdi su superfici esterne umide</li><li><strong>Licheni</strong>: croste circolari (UNI 11182:2006 §3.6)</li><li><strong>Patine biologiche e biofilm</strong></li></ul>'+
+           '<h3>Modelli predittivi</h3><ul><li><strong>VTT Mould Index (Hukka & Viitanen 1999)</strong>: indice 0-6 di crescita su superficie in funzione di T, UR, durata, sensibilità materiale</li><li><strong>LIM Sedlbauer (2001)</strong>: lowest isopleth a_w ≈ 0,80 (cat I biodegradabili) / 0,85 (II intermedi) / 0,90 (III inorganici)</li><li><strong>3 famiglie fungine (Adan &amp; Samson 2011)</strong>: xerofili (a_w &gt; 0,77), mesofili (a_w &gt; 0,85), idrofili (a_w &gt; 0,93)</li></ul>'+
+           '<h3>Salute</h3><p>WHO 2009, Damp and mould guidelines. Sintomi: asma, irritazione vie respiratorie, infezioni opportuniste. CDC + EPA Mold Remediation 2008.</p>'+
+           '<h3>Norme e riferimenti</h3><ul><li><strong>UNI 11182:2006</strong> §3.5/3.6, patine biologiche/licheni</li><li><strong>IICRC S520-2024</strong> Standard for Professional Mold Remediation (4ª ed.)</li><li>UNI EN ISO 16000-17 / -19 (campionamento aria)</li><li>ICOMOS-ISCS Illustrated Glossary 2008</li></ul>',
+      src:'Sedlbauer K. (2001) Fraunhofer IBP PhD; Hukka & Viitanen (1999) VTT Building and Environment 34:519-526' },
+    { id:'microclima', t:'Microclima beni culturali', ic:'🏛',
+      d:'UNI 10829, UNI EN 15757, ASHRAE A1-D, Bizot Green.',
+      body:'<h3>Norme cogenti italiane</h3><ul><li><strong>UNI 10829:1999</strong>, Beni di interesse storico-artistico. Misurazione, monitoraggio T/UR.</li><li><strong>D.Lgs 42/2004</strong> Codice Beni Culturali (artt. 10-13 vincoli + art. 21 autorizzazione Soprintendenza)</li><li><strong>DM 10/05/2001</strong> Atto di indirizzo musei statali</li></ul>'+
+           '<h3>Setpoint per categorie materiali (UNI 10829 + ASHRAE ch. 23 + UNI EN 15757:2010)</h3><ul><li>Legno: T 19-24 °C, UR 50-60 % (Δ giornaliero &lt; 5 %)</li><li>Carta e pergamena: T 18-20 °C, UR 50-55 %</li><li>Tessuti: T 16-20 °C, UR 50-55 %, lux &lt; 50</li><li>Dipinti su tela: T 19-24 °C, UR 45-55 %, lux &lt; 150</li><li>Metalli: UR &lt; 40 % (corrosione)</li><li>Marmo e pietra: T 5-25 °C, UR 35-65 %</li></ul>'+
+           '<h3>Classi ASHRAE A1-D (Conservation Heating)</h3><p>A1 (most precise) ±2°C/±5%UR · A2 ±5°C/±10% · B ±10°C/+10/-15% · C 25°C/+15% · D temperatura controllata sopra dewpoint.</p>'+
+           '<h3>Bizot Green Protocol (2014)</h3><p>Allargare i range a T 16-25 °C / UR 40-60 % per ridurre consumi HVAC nelle collezioni miste. UNI EN 16893:2018 specifica luogo/costruzione edifici per beni culturali.</p>'+
+           '<h3>Altre norme</h3><ul><li>UNI EN 16242:2013, procedure misura T/UR</li><li>UNI EN 16790:2016, IPM Integrated Pest Management</li><li>UNI EN 17820:2023, gestione collezioni</li><li>UNI EN 16095:2012, condition reporting</li></ul>',
+      src:'Camuffo D. "Microclimate for Cultural Heritage" Elsevier (3rd ed. 2019); Bizot Group/IIC Declaration on Loans 2014' },
+    { id:'iaq', t:'Qualità aria indoor (IAQ)', ic:'🌬',
+      d:'UNI EN 16798, WHO 2021, D.Lgs 81/08 Titolo VIII.',
+      body:'<h3>Categorie qualità aria (UNI EN 16798-1:2019)</h3><p>Cat I (elevata aspettativa) · Cat II (normale) · Cat III (accettabile) · Cat IV (bassa). Determinano: portata ventilazione, soglie CO₂, ricambi orari.</p>'+
+           '<h3>Soglie WHO 2021, 9 inquinanti critici</h3><ul><li><strong>CO₂</strong>: target &lt; 1000 ppm (Cat II), allerta &gt; 1500 ppm</li><li><strong>PM2.5</strong>: 5 µg/m³ (annuale), 15 (24h)</li><li><strong>PM10</strong>: 15 µg/m³ (annuale), 45 (24h)</li><li><strong>NO₂</strong>: 10 µg/m³ (annuale), 25 (24h)</li><li><strong>SO₂</strong>: 40 µg/m³ (24h)</li><li><strong>CO</strong>: 4 mg/m³ (24h)</li><li><strong>O₃</strong>: 100 µg/m³ (8h)</li><li><strong>HCHO</strong> (formaldeide): 100 µg/m³ (30 min, WHO 2010)</li><li><strong>TVOC</strong>: &lt; 300 µg/m³ (LCI Gianello 2014)</li></ul>'+
+           '<h3>Sick Building Syndrome (SBS)</h3><p>Sindrome di salute legata all\'edificio: cefalea, irritazione mucose, affaticamento, secchezza cutanea. Pattern: prevalenza maggiore in edifici con HVAC, sintomi scompaiono fuori dall\'edificio. Diagnostica differenziale: BBRI (Building-Related Illnesses), legionellosi, ipersensibilità polmonite, asma.</p>'+
+           '<h3>Norme cogenti</h3><ul><li><strong>UNI EN 16798-1:2019</strong>, prestazione energetica + IAQ</li><li><strong>WHO 2021</strong> Global Air Quality Guidelines</li><li><strong>D.Lgs 81/2008</strong> Titolo VIII (microclima/IAQ luoghi lavoro)</li><li>ASHRAE 62.1:2022, ventilation for acceptable IAQ</li><li>ISO 16000 (campionamento aria interna)</li></ul>',
+      src:'WHO Global Air Quality Guidelines 2021; UNI EN 16798-1:2019' },
+    { id:'acustica', t:'Acustica edilizia', ic:'🔊',
+      d:'DPCM 5/12/1997, UNI 11367:2023, descrittori R\'w / D2m,nT,w / L\'n,w.',
+      body:'<h3>Requisiti acustici passivi (DPCM 5/12/1997)</h3><p>Il DPCM 5 dicembre 1997 fissa i requisiti acustici passivi degli edifici per categoria d\'uso. Limiti di Tabella B (dB):</p><ul><li><strong>A, C</strong> (residenze, alberghi): R\'w &ge; 50, D2m,nT,w &ge; 40, L\'n,w &le; 63, LASmax &le; 35, LAeq &le; 35</li><li><strong>D</strong> (ospedali, cliniche, case di cura): R\'w &ge; 55, D2m,nT,w &ge; 45, L\'n,w &le; 58, LASmax &le; 35, LAeq &le; 25</li><li><strong>E</strong> (scuole): R\'w &ge; 50, D2m,nT,w &ge; 48, L\'n,w &le; 58, LASmax &le; 35, LAeq &le; 25</li><li><strong>B, F, G</strong> (uffici, ricreativi/culto, commerciali): R\'w &ge; 50, D2m,nT,w &ge; 42, L\'n,w &le; 55, LASmax &le; 35, LAeq &le; 35</li></ul><h3>I descrittori</h3><ul><li><strong>R\'w</strong>: potere fonoisolante apparente di partizioni fra ambienti di unit&agrave; immobiliari distinte (isolamento al rumore aereo interno).</li><li><strong>D2m,nT,w</strong>: isolamento acustico standardizzato di facciata (rumore aereo dall\'esterno).</li><li><strong>L\'n,w</strong>: livello di rumore di calpestio normalizzato dei solai (pi&ugrave; basso &egrave; meglio).</li><li><strong>LASmax / LAeq</strong>: rumore degli impianti, a funzionamento discontinuo (LASmax) e continuo (LAeq).</li></ul><h3>Indici di valutazione (UNI EN ISO 717)</h3><p>Gli indici unici Rw (aereo, parte 1) e Ln,w (calpestio, parte 2) si ricavano dalle misure in bande di terzo d\'ottava, con i termini di adattamento spettrale C e Ctr. Il &Delta;Lw quantifica l\'attenuazione del calpestio data da un rivestimento.</p><h3>Classificazione acustica (UNI 11367:2023)</h3><p>La UNI 11367:2023 classifica l\'unit&agrave; immobiliare in quattro classi (limiti su R\'w, D2m,nT,w, L\'n,w e rumore impianti Lic continuo / Lid discontinuo):</p><ul><li><strong>Classe I</strong> (superiore): R\'w &ge; 56, D2m,nT,w &ge; 43, L\'n,w &le; 53, Lic &le; 25, Lid &le; 30</li><li><strong>Classe II</strong> (buona, soglia minima CAM): R\'w &ge; 53, D2m,nT,w &ge; 40, L\'n,w &le; 58, Lic &le; 28, Lid &le; 33</li><li><strong>Classe III</strong> (di base): R\'w &ge; 50, D2m,nT,w &ge; 37, L\'n,w &le; 63, Lic &le; 32, Lid &le; 37</li><li><strong>Classe IV</strong> (modesta): R\'w &ge; 45, D2m,nT,w &ge; 32, L\'n,w &le; 68, Lic &le; 37, Lid &le; 42</li></ul><p>Il CAM Edilizia (DM MASE 24/11/2025) richiama la classe II come prestazione minima per il comfort acustico.</p><h3>Misura in opera e previsione</h3><ul><li><strong>Misura in opera</strong>: serie UNI EN ISO 16283 (parte 1 aereo, 2 calpestio, 3 facciata), con valutazione UNI EN ISO 717.</li><li><strong>Previsione da progetto</strong>: serie UNI EN ISO 12354 (parte 1 aereo, 2 calpestio, 3 facciata, 4 interno verso esterno) e, in via semplificata, la legge di massa.</li><li><strong>Stima legge di massa</strong> (R\'w di parete piena): R = 37,5&middot;log10(m) - 42 per m &ge; 150 kg/m&sup2;, altrimenti R = 13,5&middot;log10(m) + 13.</li><li><strong>Stima calpestio</strong> (solaio nudo): L\'n,w &asymp; 164 - 35&middot;log10(m).</li></ul><h3>Acustica interna degli ambienti</h3><p>Per il comfort interno (riverberazione, intelligibilit&agrave; del parlato) si usano UNI 11532-1 (requisiti generali) e UNI 11532-2 (scuole), con misura del tempo di riverberazione secondo UNI EN ISO 3382 e dell\'assorbimento in camera riverberante secondo UNI EN ISO 354.</p><h3>Strumenti</h3><ul><li>Fonometro integratore di classe 1 (UNI EN 61672-1, con calibratore e taratura periodica)</li><li>Sorgente omnidirezionale a dodecaedro con amplificatore (UNI EN ISO 16283-1/-3)</li><li>Macchina di calpestio normalizzata (UNI EN ISO 16283-2)</li></ul><h3>Norme</h3><ul><li>Legge 447/1995 (legge quadro)</li><li>DPCM 5/12/1997 (requisiti passivi) e DPCM 14/11/1997 (limiti sorgenti)</li><li>UNI 11367:2023 (classificazione) con UNI 11444:2012 (ritirata 2025, senza sostituzione)</li><li>UNI EN ISO 717-1/-2, 16283-1/-2/-3, 12354-1..4, 354, 3382-1/-2/-3</li><li>UNI 11532-1/-2 (acustica interna)</li><li>CAM Edilizia, DM MASE 24/11/2025</li></ul>',
+      src:'DPCM 5/12/1997 Tab. B; UNI 11367:2023; valori e formule coerenti con il modulo Acustica della suite (verifica e previsione per descrittore).' },
+    { id:'vespai', t:'Vespai aerati', ic:'🏘',
+      d:'UNI EN ISO 13370, ARPAT 1500 mm²/m, regolamenti d\'igiene comunali.',
+      body:'<h3>Funzioni</h3><ul><li>Riduzione umidità di risalita (intercapedine ventilata sotto solaio)</li><li>Dispersione gas radon (PNAR + ANSI/AARST CCAH-2020)</li><li>Isolamento termico (UNI EN ISO 13370:2018 §9)</li></ul>'+
+           '<h3>Calcolo aerazione</h3><p>Tre metodi normativi:</p><ul><li><strong>Regolamento Locale Igiene Lombardia</strong> (DGR 25596/1989): superficie bocchette / superficie solaio &ge; 1/150</li><li><strong>ARPAT (Tabella radon)</strong>: 1500 mm²/m perimetrale (≈ 4 bocchette Ø100 ogni 5 m)</li><li><strong>Interasse pratico</strong>: bocchette ogni 5-8 m perimetro</li></ul>'+
+           '<h3>Tipologie costruttive</h3><ul><li>Casseri a perdere in plastica riciclata, a cupola</li><li>Vespaio tradizionale ad archetti in muratura</li><li>Pignatte e travetti</li><li>Vespaio in pietrame ventilato</li></ul>'+
+           '<h3>Norme</h3><ul><li><strong>UNI EN ISO 13370:2018</strong> §9, trasferimento calore terreno</li><li><strong>DGR Lombardia 25596/1989</strong> (Regolamento Locale Igiene)</li><li>ANSI/AARST CCAH-2020, radon-resistant new construction</li><li>BRE BR 211, radon and ground gas</li></ul>',
+      src:'PNAR, Piano Nazionale Radon (D.Lgs 101/2020 Art. 10); ARPAT Toscana, Linee guida radon nei nuovi edifici 2008' },
+    { id:'termografia', t:'Termografia IR', ic:'🌡',
+      d:'UNI EN ISO 6781-1:2023, UNI EN 16714, Stefan-Boltzmann.',
+      body:'<h3>Principio fisico</h3><p><strong>Legge di Stefan-Boltzmann</strong>: M = ε·σ·T⁴, σ = 5,67·10⁻⁸ W/m²K⁴. Ogni corpo a T &gt; 0 K emette radiazione IR proporzionale a T⁴. Termocamera misura la radiazione e ricostruisce la mappa termica.</p>'+
+           '<h3>Apparent Temperature</h3><p>T_app = [ε·σ·T_obj⁴ + (1−ε)·σ·T_refl⁴]^(1/4). Errori da non compensata Treflected possono superare ±10 °C su materiali a bassa ε.</p>'+
+           '<h3>Emissività edilizia (FLIR Ref. Guide 2024)</h3><p>Intonaco 0,93 · Mattone 0,93 · Cemento ruvido 0,94 · Marmo 0,89-0,93 · Legno verniciato 0,90 · Vetro 0,92 · Acciaio inox lucido 0,15 · Alluminio anodizzato 0,77.</p>'+
+           '<h3>Pre-requisiti rilievo (UNI EN ISO 6781-1:2023)</h3><ul><li>ΔT interno-esterno ≥ 10 °C, stabilizzato per 12 h</li><li>No sole battente, no vento &gt; 5 m/s, no pioggia 6-12 h prima</li><li>Acclimatazione camera 15 min</li><li>Misura Treflected con metodo crumpled foil</li><li>Angolo osservazione &lt; 60° dalla normale</li></ul>'+
+           '<h3>Norme</h3><ul><li><strong>UNI EN ISO 6781-1:2023</strong>, rilievo qualitativo involucri</li><li><strong>UNI EN 16714-1:2016</strong>, PND termografia principi</li><li><strong>UNI 11867:2022</strong>, PND professionisti</li><li><strong>UNI EN ISO 9712:2022</strong>, qualifica operatori NDT (Liv 1/2/3)</li><li>ASTM E1933 (compensazione ε), E1543, E1213</li><li>ISO 18434-1:2008, maintenance industriale</li></ul>',
+      src:'Vollmer & Möllmann "Infrared Thermal Imaging" Wiley (3rd ed. 2024)' },
+    { id:'asciugatura', t:'Asciugatura muratura', ic:'☂',
+      d:'UNI 10351:2021, WTA 6-2-14, Künzel, Hall & Hoff.',
+      body:'<h3>Meccanismi fisici</h3><ul><li><strong>Capillarità</strong>: legge di Jurin h = 2γ·cosθ/(ρ·g·r)</li><li><strong>Diffusione vapore</strong>: legge di Fick J = −δ·∇p, δ permeabilità (UNI 10351:2021)</li><li><strong>Evaporazione superficiale</strong>: legge di Penman/Dalton</li></ul>'+
+           '<h3>Quattro metodi predittivi</h3><ul><li><strong>Hall & Hoff (2012)</strong>, modello capillare semi-analitico</li><li><strong>Massari</strong> (manuale storico italiano)</li><li><strong>LABC</strong> (Local Authority Building Control UK)</li><li><strong>Kettenacker</strong> (modello tedesco)</li></ul>'+
+           '<h3>Tempi indicativi</h3><p>Muratura piena spessore 30 cm con MC iniziale 8%: 6-18 mesi (asciugatura naturale). Forbice ampia a causa di: spessore, T/UR ambiente, intonaci a μ alto (cementizio rallenta), ventilazione, esposizione, sali igroscopici (creano blocco capillare).</p>'+
+           '<h3>Strumenti misura</h3><ul><li>Gravimetrico <strong>UNI 11085:2003</strong> (essiccazione 105°C)</li><li>Carburo di calcio <strong>UNI 11121:2004 (ritirata 2025)</strong></li><li>Sonde T/UR a contatto (datalogger multi-mesi)</li><li>Resistivi/capacitivi (con verifica gravimetrica)</li></ul>'+
+           '<h3>Norme e bibliografia</h3><ul><li><strong>UNI 10351:2021</strong>, materiali edilizia, conducibilità e μ</li><li><strong>UNI EN ISO 12572:2024</strong>, proprietà trasmissione vapore acqueo</li><li><strong>UNI EN ISO 15148:2016</strong>, assorbimento per immersione parziale (A_w)</li><li><strong>UNI EN 16322:2013</strong>, asciugatura beni culturali</li><li><strong>WTA 6-2-14/E</strong> Künzel, rapid drying simulation</li><li>Künzel H.M. (1995) PhD Fraunhofer IBP</li><li>Krus M. (1996) Fraunhofer IRB</li><li>Hall &amp; Hoff (2012) CRC Press</li><li>RILEM TC 195-DTD, drying behaviour concrete</li><li>DM MASE 24/11/2025 §2.3.13 CAM</li></ul>',
+      src:'Künzel H.M. "Simultaneous Heat and Moisture Transport in Building Components" PhD Fraunhofer IBP (1995)' },
+    { id:'cam2026', t:'CAM Edilizia 2026 (DM MASE 24/11/2025)', ic:'♻',
+      d:'D.Lgs 36/2023 art. 57 + DM MASE in vigore 02/02/2026.',
+      body:'<h3>Contesto</h3><p>Il <strong>CAM Edilizia 2026</strong> (DM MASE 24/11/2025) sostituisce il DM 23/06/2022. Pubblicato GU n.281 del 03/12/2025, in vigore dal <strong>02/02/2026</strong>. Per gare avviate prima resta il DM 23/06/2022.</p>'+
+           '<h3>Applicabilità</h3><p><strong>D.Lgs 36/2023 art. 57 c.2</strong>: le stazioni appaltanti DEVONO inserire i CAM in tutti i documenti di gara per appalti pubblici di lavori edilizi: specifiche tecniche, criteri premianti, clausole contrattuali.</p>'+
+           '<h3>§ 2.3.13 risanamento umidità (focus Mixando)</h3><p>Per il risanamento dell\'umidità di risalita il progettista deve <strong>scegliere il metodo basandosi su diagnosi</strong> documentata secondo: UNI 11085:2003 (gravimetrico), BRE Digest 245 (rising damp diagnosis), BS 6576:2005 (rising damp Code of Practice), WTA 4-5-99/D (risanamento murature umide), WTA 4-10:2024 (controllo efficacia barriere orizzontali).</p>'+
+           '<h3>Altri punti rilevanti</h3><ul><li>§ 2.3 specifiche tecniche materiali (% riciclato, EPD, marcatura CE)</li><li>§ 2.4 clausole contrattuali</li><li>§ 2.5 criteri premianti (sostenibilità +punteggio gara)</li><li>§ 4 verifica DL in esecuzione (SAL ambientali)</li><li>Recupero materia C&amp;D &gt; 70%</li></ul>'+
+           '<h3>Documenti correlati</h3><ul><li>DM 23/06/2022 (CAM vecchio, transitorio fino gare avviate prima)</li><li>D.Lgs 36/2023, Codice Appalti</li><li>D.Lgs 152/2006 + Decreti correlati (gestione rifiuti)</li><li>UNI EN 15804 (EPD costruzioni)</li><li>UNI 11277 (sostenibilità involucro)</li></ul>',
+      src:'MASE, Ministero Ambiente e Sicurezza Energetica; ANIT (Associazione Nazionale per l\'Isolamento Termico e Acustico)' },
+    { id:'dpr380', t:'DPR 380/2001, Titoli edilizi', ic:'🏗',
+      d:'CILA/SCIA/PdC + sicurezza D.Lgs 81/2008 cantieri.',
+      body:'<h3>7 categorie intervento (DPR 380/2001 art. 3)</h3><ul><li><strong>Manut. ordinaria</strong> lett.a, finiture/impianti senza modifica forma. Titolo: nessuno (attività libera)</li><li><strong>Manut. straord. leggera</strong> lett.b, senza opere strutturali. Titolo: <strong>CILA</strong> (art. 6-bis)</li><li><strong>Manut. straord. strutturale</strong> lett.b, con opere strutturali. Titolo: <strong>SCIA</strong> (art. 22)</li><li><strong>Restauro/risanamento conservativo</strong> lett.c, conservare organismo edilizio. Titolo: SCIA o PdC</li><li><strong>Ristrutturazione edilizia</strong> lett.d, trasformazione/cambio destinazione. Titolo: SCIA o <strong>PdC</strong> (art. 10)</li><li><strong>Nuova costruzione</strong> lett.e, trasformazione urb.edilizia. Titolo: PdC</li><li><strong>Demolizione</strong> lett.e.7 / lett.d (con ricostruzione)</li></ul>'+
+           '<h3>Sicurezza cantieri (D.Lgs 81/2008 Titolo IV)</h3><ul><li><strong>PSC</strong> art. 100, Piano Sicurezza Coordinamento (cantieri con &gt; 1 impresa o &gt; 200 uomini-giorno)</li><li><strong>POS</strong> art. 96, Piano Operativo Sicurezza (obbligatorio per ogni impresa)</li><li><strong>Notifica preliminare ASL</strong> art. 99, cantieri &gt; 30gg con ≥ 20 lavoratori OR &gt; 500 ug OR più imprese</li><li><strong>CSP/CSE</strong>, Coordinatore Sicurezza Progettazione/Esecuzione</li><li><strong>DURC</strong>, Documento Unico Regolarità Contributiva (validità 120gg)</li><li>Allegato XV, contenuti minimi PSC/POS</li></ul>'+
+           '<h3>Beni vincolati (D.Lgs 42/2004)</h3><p><strong>Autorizzazione Soprintendenza art. 21</strong> obbligatoria PREVENTIVA al titolo edilizio per ogni intervento su immobili vincolati (artt. 10-13). Per restauro decorazioni: progetto firmato da Restauratore certificato (DM 86/2009 Albo MiC).</p>'+
+           '<h3>Sismica (NTC 2018 §8 + Circ. 21/01/2019 n.7 C.S.LL.PP.)</h3><ul><li>Zona 1-2 (alta-media): autorizzazione sismica preventiva Genio Civile</li><li>Zona 3 (bassa): deposito sismico</li><li>Zona 4 (molto bassa): obblighi ridotti</li></ul>',
+      src:'Bosetti & Gatti Editori (testo consolidato); Olympus Università Urbino (D.Lgs 81/2008)' },
+    { id:'ctu', t:'Relazione tecnica: struttura e contenuti', ic:'📋',
+      d:'UNI 11150 + UNI 11182 + RICS Red Book + ASTM E2018.',
+      body:'<h3>Cos\'è</h3><p>La <strong>relazione tecnica</strong> documenta in modo tracciabile lo stato dell\'immobile e gli esiti delle indagini: metodologie, norme applicate, misure strumentali ed esito. Deve essere ricostruibile da un altro tecnico a partire dai dati riportati.</p>'+
+           '<h3>Impostazione del lavoro</h3><ol><li>Definizione dell\'oggetto e delle finalità</li><li>Sopralluogo e rilievo strumentale</li><li>Indagini di approfondimento dove necessario</li><li>Elaborazione dei dati e confronto con le norme cogenti</li><li>Conclusioni tecniche tracciabili</li></ol>'+
+           '<h3>Standard tecnici per il sopralluogo</h3><ul><li><strong>UNI 11150-3:2005</strong> §3 attività analitiche (diagnostica beni culturali)</li><li><strong>UNI 11150-4:2005</strong> sviluppo controllo progettazione riqualificazione</li><li><strong>UNI 11182:2006</strong> alterazioni materiali lapidei</li><li><strong>UNI 11337:2017+</strong> BIM/digital twin progetti</li><li><strong>RICS Red Book Global Standards 2025</strong> valutazione internazionale</li><li><strong>ASTM E2018-24</strong> Property Condition Assessment</li><li><strong>ICOMOS Venice Charter 1964</strong> documentazione restauro</li></ul>'+
+           '<h3>Contenuti della relazione</h3><ul><li>Anagrafica committente/immobile/tecnico incaricato</li><li>Oggetto e finalità</li><li>Cronologia del sopralluogo</li><li>Documentazione fotografica datata + EXIF/GPS per valore probatorio</li><li>Metodologie usate (norme citate)</li><li>Risultati delle analisi (eventuali certificati di laboratorio)</li><li>Conclusioni tecniche</li><li>Allegati (fotografie, planimetrie, report di laboratorio)</li></ul>',
+      src:'UNI Ente Italiano Normazione; RICS Royal Institution of Chartered Surveyors; ASTM International' },
+    { id:'glossario', t:'Glossario tecnico', ic:'📖',
+      d:'46 termini di patologia edilizia, con fonti.',
+      body:'<p>Definizioni dei termini tecnici ricorrenti nella diagnosi delle patologie edilizie, con i riferimenti normativi e bibliografici. Voci in ordine alfabetico.</p><p><strong>BET</strong>: Sigla di Brunauer-Emmett-Teller (1938), teoria che descrive l\'adsorbimento di gas in multistrato sulla superficie di un solido. È il metodo standard per misurare la superficie specifica (m²/g) e i pori piccoli (&lt;50 nm) dei materiali porosi via isoterma di adsorbimento di N₂ a 77 K.</p><p><strong>bloedite</strong>: Sale doppio Na₂Mg(SO₄)₂·4H₂O che precipita dopo numerosi cicli (≥6) nelle miscele Na₂SO₄+MgSO₄. È quello predetto da ECOS/RUNSALT, ma in pratica appare più tardi rispetto alla konyaite.</p><p><strong>captive head</strong>: Lavaggio a pressione controllata: testine di lavaggio a circuito chiuso applicano acqua pulita alla superficie e simultaneamente aspirano la soluzione salina risultante, evitando dispersione. Profondità fino a 150 mm, ore-giorni invece di settimane.</p><p><strong>carbonatazione</strong>: Reazione del calcestruzzo armato con la CO₂ atmosferica: il Ca(OH)₂ del cemento idratato si trasforma in CaCO₃ (calcite). Provoca riduzione del pH e perdita di passivazione delle armature in ferro.</p><p><strong>CEC</strong>: Capacità di Scambio Cationico (Cation Exchange Capacity). Misura quanti cationi una pietra può scambiare con la soluzione che la attraversa, espressa in meq/100 g di massa secca. Le argille (illite, smectite) e gli ossidi di ferro contribuiscono significativamente alla CEC. Pandey et al. 2014 ha dimostrato che pietre ad alta CEC fanno effetto cromatografico sui sali.</p><p><strong>Correns</strong>: Carl Wilhelm Correns (1893-1980), mineralogista tedesco. La sua equazione (Disc Faraday Soc 1949) P = (RT/Vm)·ln(c/cs) lega la pressione di cristallizzazione al grado di sovrasaturazione della soluzione. Formulazione termodinamica originale.</p><p><strong>cromatografia ionica</strong>: Analisi di laboratorio (sigla IC, Ion Chromatography) che separa e quantifica gli ioni in una soluzione acquosa. È il metodo di riferimento UNI 11087:2003 (ritirata 2016, oggi EN 16455) e EN 16455:2014 per la determinazione dei sali solubili nelle murature.</p><p><strong>darapskite</strong>: Sale doppio Na₃NO₃SO₄·H₂O che si forma nelle miscele Na₂SO₄+NaNO₃ (De Clercq et al. 2013).</p><p><strong>deliquescente</strong>: Si dice di un sale capace di assorbire umidità dall\'aria fino a sciogliersi (es. CaCl₂, MgCl₂, Ca(NO₃)₂). I sali deliquescenti formano zone umide persistenti invece di efflorescenze visibili.</p><p><strong>deliquescenza</strong>: Capacità di un sale di assorbire umidità dall\'aria fino a sciogliersi spontaneamente in soluzione, quando l\'umidità relativa supera la soglia DRH del sale. Es. CaCl₂ ~32% UR, NaCl ~75% UR (Tang &amp; Munkelwitz 1993).</p><p><strong>diffrattometria</strong>: Analisi di laboratorio (sigla XRD, X-Ray Diffraction) che identifica le fasi cristalline di un campione, riconoscendone la struttura atomica. Necessaria per distinguere sali doppi e idrati (es. mirabilite vs thenardite).</p><p><strong>DPC</strong>: Damp-Proof Course: barriera impermeabile alla base del muro (sopra il livello del suolo, sotto le travi del pavimento) per prevenire l\'umidità di risalita capillare. Tipi storici: catrame+sabbia, piombo, lastre di vetro. Moderni: polietilene 0,5-0,75 mm. Inseribile retroattivamente per sottostima, taglio scanalature, impregnazione chimica, elettroosmosi (David Young 2008).</p><p><strong>DRH</strong>: Sigla di "Deliquescence Relative Humidity": umidità di deliquescenza, cioè la soglia sopra cui il sale assorbe acqua dall\'aria fino a sciogliersi (Tang &amp; Munkelwitz 1993).</p><p><strong>ECOS</strong>: ECOS/RUNSALT: modello chimico esperto (Price 2000, EU Research Report 11) per determinare le condizioni ambientali necessarie a prevenire il danno da sali. Predice quale sale o sale doppio cristallizza al variare di UR e T. Limite noto: spesso prevede solo bloedite per Na₂SO₄+MgSO₄, mancando la konyaite (Godts 2014).</p><p><strong>effervescenza</strong>: Reazione di sviluppo di gas (CO₂) quando un acido (HCl o aceto) viene a contatto con carbonati. Test di campo rapido per distinguere CaCO₃ e Na₂CO₃ dagli altri sali.</p><p><strong>effetto cromatografico</strong>: Comportamento delle pietre da costruzione che si comportano come una colonna cromatografica durante il trasporto capillare dei sali. I cationi a bassa selettività (Na⁺, K⁺) viaggiano veloci e tendono a formare efflorescenze; quelli ad alta selettività (Ca²⁺, Mg²⁺) si muovono lentamente e tendono a formare subflorescenze interne distruttive (Pandey et al. 2014).</p><p><strong>efflorescenza</strong>: Deposito cristallino visibile sulla superficie esterna del muro, dovuto a sali che migrano in soluzione e cristallizzano per evaporazione dell\'acqua. Termine UNI 11182:2006 §3.5.</p><p><strong>ESPI</strong>: Electronic Speckle Pattern Interferometry: tecnica ottica per misurare microdeformazioni con risoluzione sub-micrometrica. Linnow, Steiger et al. l\'hanno usata per confermare sperimentalmente le previsioni teoriche di Steiger 2005 sulla pressione di cristallizzazione.</p><p><strong>ettringite</strong>: Sale espansivo (3CaO·Al₂O₃·3CaSO₄·32H₂O) che si forma per attacco solfatico esterno sui cementi: i solfati del terreno reagiscono con gli alluminati di calcio del cemento e producono cristalli con volume molare molto superiore ai reagenti, generando tensioni che possono fessurare il calcestruzzo.</p><p><strong>Everett</strong>: David H. Everett (1916-1995), chimico-fisico britannico. La sua equazione (Trans Faraday Soc 1961) Pr = 2σ(1/r-1/R) lega la pressione di cristallizzazione alla geometria dei pori. Pori piccoli → pressione alta → maggior rischio di danno meccanico.</p><p><strong>gesso</strong>: Solfato di calcio biidrato (CaSO₄·2H₂O). In edilizia è sia materiale da costruzione (intonaci) sia prodotto di degrado (croste nere da solfatazione di pietre calcaree).</p><p><strong>glaserite</strong>: Sale doppio NaK₃(SO₄)₂ (aphthitalite) che si forma nelle miscele Na₂SO₄+K₂SO₄.</p><p><strong>igroscopicità</strong>: Tendenza di un sale ad assorbire umidità dall\'ambiente. Sali fortemente igroscopici (es. CaCl₂, Ca(NO₃)₂) restano spesso in soluzione e producono zone umide invece che cristalli visibili.</p><p><strong>igroscopico</strong>: Aggettivo usato per i sali con forte tendenza ad assorbire umidità dall\'aria.</p><p><strong>Injektionskompressenverfahren</strong>: Metodo tedesco a compresse con iniezione (Friese &amp; Hermoneit 1993): l\'acqua è introdotta dall\'INTERNO della muratura tramite packer di 6 mm nei giunti, una compressa esterna raccoglie i sali estratti. Efficienza &gt;90 % in 5-10 giorni (vs 1-2 cm degli impacchi passivi).</p><p><strong>konyaite</strong>: Sale doppio Na₂Mg(SO₄)₂·5H₂O che precipita per primo nelle miscele equimolari Na₂SO₄+MgSO₄ (primi cicli essiccazione/riumidificazione). Il modello ECOS/RUNSALT spesso non lo predice, vedi divario teoria-pratica (Godts et al. 2014).</p><p><strong>leaching</strong>: Dilavamento, processo di lisciviazione: rimozione di sostanze solubili dall\'interno di un materiale poroso da parte dell\'acqua che lo attraversa.</p><p><strong>lisciviazione</strong>: Dilavamento di sostanze solubili dall\'interno della muratura per effetto dell\'acqua. Termine inglese equivalente: leaching.</p><p><strong>Maastricht (calcare di)</strong>: Calcare giallo pallido leggero (porosità 51 %, monomodale 10-100 µm) del Limburgo (Belgio + Paesi Bassi), molto usato nel Medioevo e Rinascimento. Bassa resistenza meccanica ma materiale modello per studi di laboratorio sui sali (Godts et al. 2014).</p><p><strong>MIP</strong>: Mercury Intrusion Porosimetry: tecnica standard per misurare la distribuzione dimensionale dei pori (~3 nm a 200 µm) tramite intrusione di mercurio sotto pressione crescente. Equazione di Washburn: r = -2σ·cos(θ)/P. Distruttiva ma di riferimento per pietre e malte (RILEM CPC 11.3).</p><p><strong>mirabilite</strong>: Solfato di sodio decaidrato (Na₂SO₄·10H₂O), forma stabile sotto i 32,4°C. Sopra questa temperatura si trasforma in thenardite con espansione di volume. Tra le forme saline più distruttive (Steiger &amp; Asmussen 2008).</p><p><strong>numero di Péclet</strong>: Pe = |U|·L/D, caratterizza la competizione tra avvezione (trasporto col flusso d\'acqua) e diffusione (livellamento concentrazione). Pe ≪ 1 → essiccazione veloce, sale concentrato in superficie (efflorescenze). Pe &gt; 1 → essiccazione lenta, sale diffuso ovunque (subflorescenze). Petković et al. 2007.</p><p><strong>PHREEQC</strong>: Programma di modellazione geochimica USGS open-source (Parkhurst &amp; Appelo 1999) per calcolare equilibri di scambio ionico, complessi superficiali, soluzioni solide. Usato in Pandey 2014 per fittare i coefficienti di selettività cationica delle arenarie.</p><p><strong>pressione di cristallizzazione</strong>: Pressione esercitata dai cristalli di sale che si formano nei pori della muratura. Può raggiungere valori (decine di MPa) sufficienti a fessurare intonaci e pietre. Formula di Scherer 1999: p = (RT/Vm) ln(c/csat).</p><p><strong>RH-eq</strong>: Sigla di "Relative Humidity at equilibrium" (UR di equilibrio): la soglia di umidità sopra cui il sale si scioglie e sotto cui cristallizza.</p><p><strong>risalita capillare</strong>: Movimento dell\'acqua dal terreno verso l\'alto attraverso i pori della muratura per effetto della tensione superficiale (legge di Jurin). L\'acqua trasporta sali disciolti che cristallizzano nella zona di evaporazione (Massari 1985).</p><p><strong>salnitro</strong>: Nome popolare del nitrato di potassio (KNO₃). Tipico delle vecchie stalle e cantine per nitrificazione di letame e materia organica.</p><p><strong>solfatazione</strong>: Trasformazione superficiale di pietre carbonatiche (CaCO₃) in gesso (CaSO₄·2H₂O) per reazione con SO₂ atmosferico ossidato a SO₄²⁻. Forma le tipiche croste nere di città.</p><p><strong>soprintendenza</strong>: Organo periferico del Ministero della Cultura competente sulla tutela dei beni culturali ai sensi del D.Lgs. 42/2004. Per gli edifici vincolati ogni intervento richiede autorizzazione preventiva (artt. 21-22), tempi 30-90 giorni.</p><p><strong>subefflorescenza</strong>: Cristallizzazione di sali al di sotto della superficie dell\'intonaco o della pietra. È più distruttiva dell\'efflorescenza visibile perché la pressione dei cristalli che si formano nei pori produce distacco dell\'intonaco (Scherer 1999). Termine UNI 11182:2006 §3.6.</p><p><strong>thaumasite</strong>: Sale che si forma a basse temperature in calcestruzzi attaccati da solfati in presenza di carbonati e silicati (CaSiO₃·CaCO₃·CaSO₄·15H₂O). Distruttiva perché trasforma il C-S-H del cemento in massa friabile.</p><p><strong>thenardite</strong>: Solfato di sodio anidro (Na₂SO₄), forma stabile sopra i 32,4°C. La transizione thenardite ⇄ mirabilite con i cicli giorno/notte amplifica enormemente il danno.</p><p><strong>Tuffeau</strong>: Calcare bianco poroso (porosità ~48 %, multiscala 6 nm-20 µm) tipico della Loira (Francia), molto usato nei castelli della Loira. Composizione: calcite ≥50 %, opale CT ≥30 %, quarzo, argille. Materiale modello per studi su risalita capillare e cristallizzazione (Beck et al. 2003, 2010).</p><p><strong>UR di equilibrio</strong>: Umidità Relativa alla quale il sale è in equilibrio fra forma cristallina e forma in soluzione. Sopra: il sale si scioglie. Sotto: il sale cristallizza. Detto anche RH-eq o DRH.</p><p><strong>whiskers</strong>: Cristalli aghiformi sottili e allungati, simili a fili di cotone, tipici di alcuni sali (es. KNO₃, MgSO₄) quando cristallizzano in condizioni di rapida evaporazione.</p><p><strong>WTA</strong>: Wissenschaftlich-Technische Arbeitsgemeinschaft für Bauwerkserhaltung und Denkmalpflege (Gruppo di lavoro tecnico-scientifico per la conservazione di edifici e monumenti). Istituto tedesco internazionale che emana le direttive tecniche più dettagliate per diagnosi e trattamento delle murature contaminate da sali (Merkblatt 2-9-20/D, 4-5-99/D, 4-10:2024, 3-13-01/E, ecc.).</p>',
+      src:'Glossario con riferimenti normativi e bibliografici (UNI 11182:2006, Scherer 1999, Correns 1949, Everett 1961, Steiger, WTA, ECOS/RUNSALT). Recupero dal Sapere storico Mixando.' },
+  ];
+
+  var topicsHost = document.getElementById('topics');
+  function renderList(filter){
+    var f = (filter||'').toLowerCase().trim();
+    var list = f ? TOPICS.filter(function(t){return (t.t+' '+t.d+' '+t.body).toLowerCase().indexOf(f)>=0;}) : TOPICS;
+    topicsHost.innerHTML = list.map(function(t){
+      return '<a href="javascript:void(0)" class="topic" data-id="'+t.id+'"><div class="ic">'+t.ic+'</div><div class="t">'+t.t+'</div><div class="d">'+t.d+'</div></a>';
+    }).join('') || '<div style="grid-column:1/-1;text-align:center;padding:20px;color:#8b7355">Nessuna voce trovata.</div>';
+    topicsHost.querySelectorAll('.topic').forEach(function(a){
+      a.addEventListener('click',function(){show(a.dataset.id);});
+    });
+  }
+  function show(id){
+    var t = TOPICS.find(function(x){return x.id===id;});
+    if(!t) return;
+    var art = document.getElementById('article');
+    art.innerHTML = '<a class="back-list" id="backList">&larr; Torna all\'elenco</a>' +
+                    '<h2>'+t.t+'</h2>' + t.body +
+                    '<div class="src">Fonte: '+t.src+'</div>';
+    art.classList.add('show');
+    document.getElementById('backList').addEventListener('click',function(){art.classList.remove('show');window.scrollTo(0,0);});
+    art.scrollIntoView({behavior:'smooth'});
+  }
+  document.getElementById('qSearch').addEventListener('input',function(){renderList(this.value);});
+  renderList('');
+})();
+</script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

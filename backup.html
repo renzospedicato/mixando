@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Backup">
+<title>Mixando Lab · Backup & Restore</title>
+<style>
+:root{
+  --mx-accent:#34495e; --mx-accent-soft:rgba(52,73,94,.12);
+  --bg:#f5f1e8; --paper:#fff; --ink:#2c1810; --ink-soft:#6b5c4c; --ink-mute:#8b7355;
+  --line:#e6e0d2; --ok:#1f7a4d; --warn:#b07820; --err:#a83232;
+  --r:14px; --ff-serif:Georgia,"Cambria","Times New Roman",serif;
+  --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:48px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--paper);border-bottom:3px solid var(--mx-accent);box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.mx-bar .em{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--mx-accent);color:#fff}
+.mx-bar .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mx-accent);line-height:1}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:14px;color:var(--ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:6px 12px;border:1px solid var(--mx-accent);border-radius:8px}
+.mx-bar a.back:hover{background:var(--mx-accent);color:#fff}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 22px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:680px;color:var(--ink-soft);font-size:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card>h3{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),var(--paper));display:flex;align-items:center;gap:10px}
+.card>h3 .num{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:var(--ff-sans)}
+.card .body{padding:16px 18px}
+.modlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-top:8px}
+.modlist .item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:9px}
+.modlist .item .dot{width:8px;height:8px;border-radius:50%;background:#cce6d8;flex:0 0 auto}
+.modlist .item.empty .dot{background:#e6dfd0}
+.modlist .item .name{flex:1;font-size:13px;color:var(--ink);font-weight:600}
+.modlist .item .size{font-size:11px;color:var(--ink-mute);font-family:"JetBrains Mono","Courier New",monospace}
+.actions{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.actions button{appearance:none;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-family:inherit;font-size:13px;letter-spacing:.10em;text-transform:uppercase;font-weight:700;padding:12px 22px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.actions button:hover{background:var(--mx-accent-soft);border-color:var(--mx-accent);color:var(--mx-accent)}
+.actions button.primary{background:var(--mx-accent);color:#fff;border-color:var(--mx-accent)}
+.actions button.danger{background:#fbf0f0;color:var(--err);border-color:#e6c8c8}
+.actions button.danger:hover{background:var(--err);color:#fff}
+.drop{padding:30px;border:2px dashed var(--line);border-radius:14px;text-align:center;color:var(--ink-mute);background:#faf8f3;cursor:pointer;transition:all .15s}
+.drop.dragover{border-color:var(--mx-accent);background:var(--mx-accent-soft);color:var(--mx-accent)}
+.drop strong{color:var(--ink);display:block;margin-bottom:4px;font-size:14px}
+.note{margin-top:10px;padding:10px 14px;border-radius:9px;background:#fafaf3;border-left:3px solid var(--mx-accent);font-size:12.5px;color:var(--ink-soft);line-height:1.55}
+.note strong{color:var(--ink)}
+.log{margin-top:14px;padding:10px 14px;border-radius:9px;background:#1f2533;color:#9ee9b8;font-family:"JetBrains Mono","Courier New",monospace;font-size:11.5px;line-height:1.6;max-height:200px;overflow-y:auto}
+.log .err{color:#ff8a8a}
+.log .warn{color:#ffd57a}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+
+.mx-bar{position:relative}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}}
+
+/* Anagrafica perito+committente, pattern Mixando standard */
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto 8px;max-width:1080px}
+.ana-strip .pc{padding:10px 12px;background:#fff;border:1px solid #e6e0d2;border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6b5c4c;margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700;color:#2c1810}
+.ana-strip .pc .m{font-size:11.5px;color:#8b7355;margin-top:2px}
+.ana-actions{text-align:center;margin:0 auto 16px;max-width:1080px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ana-actions a,.ana-actions button{font-size:12px;font-weight:700;text-decoration:none;padding:6px 13px;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;border:1px solid currentColor}
+.ana-actions a{color:var(--mx-accent,#2c5d7c)}
+.ana-actions button.mx-reload{background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);color:#fff;border:0;box-shadow:0 3px 10px rgba(46,125,50,.42)}
+@media (max-width:760px){.ana-strip{grid-template-columns:1fr}}
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:0 !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:50px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab">
+  <div class="meta"><span class="tag">Sistema</span><h1 class="ti">Backup &amp; Restore</h1></div>
+  <a class="back" href="suite.html">&larr; Suite</a>
+</header>
+
+<main>
+  
+
+  <section class="hero">
+    <h2>Salva e ripristina <em>tutti i moduli</em></h2>
+    <p>Esporta in un singolo file JSON i dati locali di tutti i moduli Mixando (prefisso <code>mx2::</code>, più i dati propri della Termografia). Reimporta in un altro browser o dopo aver svuotato la cache.</p>
+    <p>Nel file entrano anche <strong>le foto dei punti d'indagine della Mappa</strong>, a piena risoluzione: stanno in un archivio a parte del browser e qui vengono salvate, ripristinate e cancellate insieme al resto.</p>
+  </section>
+
+  <article class="card">
+    <h3><span class="num">1</span> Moduli con dati salvati</h3>
+    <div class="body">
+      <div class="modlist" id="modlist"></div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">2</span> Backup (esporta)</h3>
+    <div class="body">
+      <p style="margin:0 0 14px;color:var(--ink-soft);font-size:13.5px">Crea un file JSON con tutti i dati di tutti i moduli Mixando. Conservalo in un luogo sicuro.</p>
+      <div class="actions">
+        <button type="button" class="primary" id="btnExport">&#128229; Esporta backup completo</button>
+      </div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">3</span> Restore (importa)</h3>
+    <div class="body">
+      <div class="drop" id="drop">
+        <strong>Trascina qui un file JSON</strong>
+        oppure clicca per selezionarlo
+        <input type="file" id="fInput" accept=".json,application/json" style="display:none">
+      </div>
+      <div class="note">
+        <strong>Attenzione</strong>: l'importazione <strong>sostituisce</strong> i dati esistenti dei moduli presenti nel file. I dati degli altri moduli restano intatti.
+      </div>
+      <div class="log" id="log" style="display:none"></div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">4</span> Reset totale</h3>
+    <div class="body">
+      <p style="margin:0 0 14px;color:var(--ink-soft);font-size:13.5px">Cancella tutti i dati dei moduli Mixando dal browser. Operazione non reversibile.</p>
+      <div class="actions">
+        <button type="button" class="danger" id="btnWipe">&#9888;&#65039; Cancella tutti i dati Mixando</button>
+      </div>
+    </div>
+  </article>
+
+  <footer class="ft"><strong>Mixando · Backup v1</strong> &middot; Dati nel browser via <code>localStorage</code> &middot; Namespace: <code>mx2::</code></footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var PREFIX = 'mx2::';
+  var PREFIX2 = 'termo_';   /* 19/11/2026: il modulo dei termogrammi salva intestazione, logo, checklist, prerequisiti e trend con questo nome */
+
+  function listKeys(){
+    var ks = [];
+    for(var i=0;i<localStorage.length;i++){
+      var k = localStorage.key(i);
+      if(k && (k.indexOf(PREFIX) === 0 || k.indexOf(PREFIX2) === 0)) ks.push(k);   /* 19/11/2026: anche i dati della Termografia */
+    }
+    return ks.sort();
+  }
+  /* 20/11/2026: le foto dei punti d'indagine della Mappa stanno in un archivio a parte del browser (IndexedDB
+     «mx2-photos», scomparto «ph»). Ora entrano nel backup, tornano col ripristino e spariscono col reset totale.
+     L'archivio si apre con la stessa forma che usa la Mappa. */
+  var PDBN = 'mx2-photos';
+  function fotoDb(cb){
+    try{
+      var rq = indexedDB.open(PDBN, 1);
+      rq.onupgradeneeded = function(){ var d = rq.result; if(!d.objectStoreNames.contains('ph')) d.createObjectStore('ph', {keyPath:'id'}); };
+      rq.onsuccess = function(){ cb(null, rq.result); };
+      rq.onerror = function(){ cb(rq.error || new Error('archivio delle foto non disponibile')); };
+    }catch(e){ cb(e); }
+  }
+  function fotoConta(cb){
+    fotoDb(function(err, d){
+      if(err){ cb(0); return; }
+      try{ var rq = d.transaction('ph').objectStore('ph').count(); rq.onsuccess = function(){ cb(rq.result || 0); }; rq.onerror = function(){ cb(0); }; }catch(e){ cb(0); }
+    });
+  }
+  function fotoTutte(cb){
+    fotoDb(function(err, d){
+      if(err){ cb([]); return; }
+      try{ var rq = d.transaction('ph').objectStore('ph').getAll(); rq.onsuccess = function(){ cb(rq.result || []); }; rq.onerror = function(){ cb([]); }; }catch(e){ cb([]); }
+    });
+  }
+  function fotoMetti(arr, cb){
+    arr = (arr || []).filter(function(r){ return r && r.id && r.b64; });
+    if(!arr.length){ cb(0); return; }
+    fotoDb(function(err, d){
+      if(err){ cb(-1); return; }
+      try{
+        var tx = d.transaction('ph', 'readwrite'), st = tx.objectStore('ph');
+        arr.forEach(function(r){ st.put({id:r.id, b64:r.b64}); });
+        tx.oncomplete = function(){ cb(arr.length); };
+        tx.onerror = function(){ cb(-1); };
+      }catch(e){ cb(-1); }
+    });
+  }
+  function fotoCancella(cb){
+    fotoDb(function(err, d){
+      if(err){ cb(false); return; }
+      try{ var tx = d.transaction('ph', 'readwrite'); tx.objectStore('ph').clear(); tx.oncomplete = function(){ cb(true); }; tx.onerror = function(){ cb(false); }; }catch(e){ cb(false); }
+    });
+  }
+  function fmtSize(b){
+    if(b < 1024) return b + ' B';
+    if(b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+    return (b/1024/1024).toFixed(2) + ' MB';
+  }
+
+  function renderModList(){
+    var ks = listKeys();
+    var host = document.getElementById('modlist');
+    if(!ks.length){ host.innerHTML = '<div class="item empty"><span class="dot"></span><span class="name">Nessun modulo ha dati salvati</span></div>'; }
+    else host.innerHTML = ks.map(function(k){
+      var sz = (localStorage.getItem(k) || '').length;
+      var name = k.replace(PREFIX,'').replace(/-v\d+$/,'');
+      return '<div class="item"><span class="dot"></span><span class="name">'+name+'</span><span class="size">'+fmtSize(sz)+'</span></div>';
+    }).join('');
+    /* 20/11/2026: anche le foto della Mappa */
+    fotoConta(function(n){
+      if(!n) return;
+      if(!ks.length) host.innerHTML = '';
+      host.insertAdjacentHTML('beforeend', '<div class="item" id="rigaFoto"><span class="dot"></span><span class="name">foto dei punti d\'indagine (Mappa)</span><span class="size">'+n+' foto</span></div>');
+    });
+  }
+  renderModList();
+
+  function logMsg(msg, cls){
+    var el = document.getElementById('log');
+    el.style.display = 'block';
+    var line = document.createElement('div');
+    if(cls) line.className = cls;
+    line.textContent = '> ' + msg;
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  document.getElementById('btnExport').addEventListener('click', function(){
+    var ks = listKeys();
+    fotoTutte(function(foto){   /* 20/11/2026: nel file anche le foto della Mappa */
+      if(!ks.length && !foto.length){ alert('Nessun dato da esportare.'); return; }
+      var dump = { _format:'mixando-backup-v1', _exportedAt:new Date().toISOString(), data:{}, photos:foto };
+      ks.forEach(function(k){ dump.data[k] = localStorage.getItem(k); });
+      var blob = new Blob([JSON.stringify(dump, null, 2)], {type:'application/json'});
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'mixando-backup-' + new Date().toISOString().slice(0,10) + '.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      try{ localStorage.setItem('mx2::last-backup', new Date().toISOString()); }catch(e){}
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 300);
+      logMsg('Backup scaricato: ' + ks.length + ' voci' + (foto.length ? (' e ' + foto.length + ' foto della Mappa') : ', nessuna foto della Mappa') + '.');
+    });
+  });
+
+  function importFile(file){
+    if(!file) return;
+    var rd = new FileReader();
+    rd.onload = function(e){
+      try{
+        var parsed = JSON.parse(e.target.result);
+        if(parsed._format !== 'mixando-backup-v1') {
+          logMsg('Formato file non riconosciuto. Richiesto: mixando-backup-v1', 'err');
+          return;
+        }
+        if(!confirm('Importare il backup? I moduli interessati verranno sovrascritti.')) return;
+        var data = parsed.data || {};
+        var n = 0;
+        Object.keys(data).forEach(function(k){
+          if(k.indexOf(PREFIX) !== 0 && k.indexOf(PREFIX2) !== 0) { logMsg('Saltato (prefisso sconosciuto): ' + k, 'warn'); return; }
+          localStorage.setItem(k, data[k]);
+          logMsg('Ripristinato: ' + k);
+          n++;
+        });
+        logMsg('Completato: ' + n + ' moduli importati.');
+        renderModList();
+        /* 20/11/2026: le foto della Mappa, se il file le porta */
+        var foto = Array.isArray(parsed.photos) ? parsed.photos : [];
+        if(foto.length){
+          fotoMetti(foto, function(q){
+            if(q >= 0) logMsg('Foto della Mappa ripristinate: ' + q + '.');
+            else logMsg('Foto della Mappa NON ripristinate: l\'archivio delle foto non è disponibile in questo browser.', 'err');
+            renderModList();
+          });
+        }
+      } catch(err){
+        logMsg('Errore: ' + err.message, 'err');
+      }
+    };
+    rd.readAsText(file);
+  }
+
+  var drop = document.getElementById('drop');
+  var fInput = document.getElementById('fInput');
+  drop.addEventListener('click', function(){ fInput.click(); });
+  fInput.addEventListener('change', function(){ if(fInput.files[0]) importFile(fInput.files[0]); });
+  ['dragenter','dragover'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('dragover'); }); });
+  ['dragleave','drop'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('dragover'); }); });
+  drop.addEventListener('drop', function(e){ if(e.dataTransfer.files[0]) importFile(e.dataTransfer.files[0]); });
+
+  document.getElementById('btnWipe').addEventListener('click', function(){
+    if(!confirm('CANCELLARE tutti i dati Mixando dal browser? Operazione non reversibile.')) return;
+    if(!confirm('Sei davvero sicuro? Tutti i dati di tutti i moduli verranno persi.')) return;
+    listKeys().forEach(function(k){ localStorage.removeItem(k); });
+    logMsg('Tutti i dati Mixando cancellati.');
+    /* 20/11/2026: anche le foto della Mappa, che prima restavano nel browser */
+    fotoCancella(function(ok){ if(ok) logMsg('Foto della Mappa cancellate.'); renderModList(); });
+  });
+})();
+</script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

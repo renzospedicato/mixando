@@ -1,0 +1,12 @@
+MIXANDO LAB, VERSIONE DI QUESTA COPIA
+=====================================
+Copia dichiarata il 20/11/2026 alle 16:49 (controllo modulo per modulo del 19-20/11/2026, ripulitura dai nomi commerciali e dai prezzi, sistemazione per il telefono, avviso in fondo alle pagine).
+Firma dell'impronta: e24831cee08d
+File: 52 (elenco con gli hash in _impronta.txt)
+
+Come sapere se una copia è aggiornata
+- Le date dei file non contano: cambiano copiando da un disco all'altro.
+- Doppio clic su VERIFICA-COPIA.bat: se dice COPIA INTEGRA, questa copia è esattamente quella dichiarata qui sopra.
+- Fra due copie integre, è più recente quella con la data di dichiarazione più avanti.
+- Se dice COPIA MODIFICATA, qualcuno ha cambiato dei file dopo la dichiarazione: o è la copia di lavoro più nuova (allora va dichiarata di nuovo con dichiara_versione.py), o è una copia rovinata.
+- Due copie con la stessa firma dell'impronta sono identiche.

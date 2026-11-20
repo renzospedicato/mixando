@@ -1,0 +1,2071 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mixando Lab · Assistente</title>
+<style>
+  :root{
+    --bg:#f6f1e7; --card:#fffdf8; --ink:#2c2417; --ink-soft:#5d4f3a; --ink-mute:#8a7f6c;
+    --line:#e3dac8; --accent:#0a5d66; --accent-strong:#084a52; --ok:#1b8a4b; --warn:#e0922f;
+    --bubble-user:#0a5d66; --bubble-bot:#fffdf8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:760px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+  header{padding:16px 18px 12px;border-bottom:1px solid var(--line);background:var(--card)}
+  header h1{margin:0;font-size:18px;font-weight:800;color:var(--accent-strong)}
+  header .sub{font-size:12px;color:var(--ink-mute);margin-top:3px}
+  #log{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:86%;padding:11px 14px;border-radius:14px;font-size:14px;white-space:normal}
+  .msg.user{align-self:flex-end;background:var(--bubble-user);color:#fff;border-bottom-right-radius:4px}
+  .msg.bot{align-self:flex-start;background:var(--bubble-bot);border:1px solid var(--line);border-bottom-left-radius:4px;box-shadow:0 1px 4px rgba(40,30,10,.05)}
+  .msg.bot b{color:var(--accent-strong)}
+  .msg .head{font-weight:800;font-size:15px;margin-bottom:6px;color:var(--accent-strong)}
+  .msg .vhead{font-weight:800;font-size:16px;margin-bottom:6px}
+  .v-err{color:#b23b3b}.v-warn{color:#c77d1a}.v-ok{color:#1b8a4b}
+  .msg .why{font-size:12.5px;color:var(--ink-soft);margin-top:6px}
+  .msg table.m{border-collapse:collapse;width:100%;margin:8px 0;font-size:12px}
+  .msg table.m td{border:1px solid var(--line);padding:4px 7px}
+  .msg table.m td:last-child{text-align:right;font-family:ui-monospace,Consolas,monospace;white-space:nowrap}
+  .msg .say{font-size:15px;line-height:1.55;background:#f0f7f4;border:1px solid #cfe6da;border-radius:10px;padding:11px 13px;margin:9px 0}
+  .msg .cmp-title{font-size:11px;color:var(--ink-mute);font-weight:700;margin:12px 0 4px;text-transform:uppercase;letter-spacing:.3px}
+  .msg table.m tr.gov td{background:#e8f5e9;font-weight:700;color:#176b39}
+  .msg .formula{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:#f3eede;border-radius:6px;padding:7px 9px;margin:8px 0;color:var(--ink-soft)}
+  .msg .note{font-size:12px;background:#eef5f1;border-left:3px solid var(--ok);border-radius:4px;padding:7px 9px;margin:7px 0;color:#225a3c}
+  .msg .warnote{font-size:12px;background:#fdf3e6;border-left:3px solid var(--warn);border-radius:4px;padding:7px 9px;margin:7px 0;color:#7a4e12}
+  .msg .foot{font-size:11px;color:var(--ink-mute);font-style:italic;margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
+  .msg a{color:inherit}
+  .msg ul.flags{margin:6px 0 0 18px;font-size:12.5px;color:var(--ink-soft);padding-left:0}
+  .msg .src-pill{display:inline-block;background:#e8f5e9;color:#176b39;font-weight:700;border-radius:20px;padding:3px 10px;font-size:12.5px;margin:2px 0}
+  .msg .sol{background:#fff;border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:10px;padding:9px 11px;margin:7px 0}
+  .msg .sol.alt{border-left-color:#d4a017}
+  .msg .sol .sn{font-weight:800;color:var(--accent-strong);font-size:13.5px}
+  .msg .sol .stag{font-size:9.5px;font-weight:800;letter-spacing:.12em;padding:2px 8px;border-radius:11px;color:#fff;background:var(--ok);margin-left:6px}
+  .msg .sol.alt .stag{background:#d4a017;color:#3a2c00}
+  .msg .sol .ssyn{font-size:12px;color:#5d4a30;line-height:1.5;margin:5px 0}
+  .msg .sol .snorm{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:#1b5532;background:#eef9f1;padding:2px 7px;border-radius:6px;display:inline-block;margin:3px 0}
+  .msg .sol .slim{font-size:11.5px;color:#7f1d1d;background:#fff5f3;padding:4px 8px;border-radius:6px;border-left:3px solid #c0392b;margin-top:4px}
+  footer{padding:12px 14px;border-top:1px solid var(--line);background:var(--card);display:flex;gap:8px;align-items:flex-end}
+  #txt{flex:1;resize:none;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);min-height:44px;max-height:120px}
+  #txt:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:11px 16px;cursor:pointer}
+  #send{background:var(--accent);color:#fff}
+  #send:hover{background:var(--accent-strong)}
+  #reset{background:transparent;color:var(--ink-mute);font-weight:600;font-size:12px;padding:6px 8px}
+  .hint{padding:0 18px 10px;font-size:11.5px;color:var(--ink-mute);display:flex;flex-wrap:wrap;align-items:center;gap:2px}
+  .chip{display:inline-block;background:#efe9da;border:1px solid var(--line);border-radius:20px;padding:4px 11px;margin:2px 4px 2px 0;font-size:12px;cursor:pointer;color:var(--ink-soft)}
+  .chip:hover{background:#e6dcc4}
+  .chip.opt{background:#e8f1f1;border-color:#cfe3e3;color:var(--accent-strong);font-weight:700}
+  .chip.opt:hover{background:#d8e9e9}
+  .chip.skip{background:transparent;border-style:dashed;color:var(--ink-mute);font-weight:600}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="suite.html" style="display:inline-block;color:#0a5d66;font-size:12px;text-decoration:none;font-weight:700;margin-bottom:6px">&larr; Suite</a>
+    <h1 id="hTitle">Assistente Mixando</h1>
+    <div class="sub" id="hSub">Chiedi e ti rispondo, fedele alla norma. Niente invenzioni.</div>
+  </header>
+  <div id="log"></div>
+  <div class="hint" id="hint"></div>
+  <footer>
+    <textarea id="txt" placeholder="Scrivi qui la tua domanda o la tua risposta"></textarea>
+    <div style="display:flex;flex-direction:column;gap:4px;align-items:stretch">
+      <button id="send">Invia</button>
+      <button id="reset" title="Ricomincia">Nuova domanda</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   ASSISTENTE MIXANDO, facciata chat multi-skill a slot-filling sopra i
+   motori a regole già esistenti nei moduli. NON un LLM: offline, niente
+   allucinazioni, difendibilita' peritale. Ogni skill porta il proprio
+   motore VERBATIM dal modulo sorgente, con la stessa matematica, le stesse
+   soglie e le stesse citazioni. Se manca un dato lo chiede, non lo inventa.
+   Ogni modulo apre questa pagina con ?skill=<id> dal proprio hero.
+   ========================================================================= */
+
+/* ---- formattatori condivisi ---- */
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function itInt(n){return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
+function itDec(n,d){if(n==null||isNaN(n))return 'n.d.';return Number(n).toFixed(d).replace('.',',');}
+function fmtNum(n){return (n%1===0)?String(n):itDec(n,2);}
+function areaLeg(mm2){if(mm2==null||isNaN(mm2))return 'n.d.';return itInt(mm2/100)+' cm&sup2; ('+itDec(mm2/1e6,2)+' m&sup2;)';}
+function mrow(label,val,gov){return '<tr'+(gov?' class="gov"':'')+'><td>'+label+'</td><td>'+val+'</td></tr>';}
+function toNum(x){return parseFloat(String(x).replace(',','.'));}
+
+/* =========================================================================
+   SKILL 1, VESPAI AERATI
+   Motore portato fedelmente da moduli-v3/vespai.html (fonte di verita').
+   SOGLIE_REGIONALI / getSogliaRegionale / dimensionamento pannelli /
+   calcVerdict. Stesse costanti, stesse fonti, stesse formule.
+   ========================================================================= */
+var VESPAI=(function(){
+  var SOGLIE_REGIONALI={
+    'Lombardia':{livello:2,tipo:'norma',norma:'Reg. Locale di Igiene tipo Lombardia (strumento comunale su modello regionale; Titolo III aggiornato con DGR 25/07/1989 n. 4/45266), art. 3.2.6 «Intercapedini e vespai»: aerazione libera ≥ 1/100 della superficie del vespaio per ventilazione dal basso (grigliati a pavimento), riducibile a 1/200 per ventilazione perimetrale a finestrelle ove recepito dal Comune (es. Reg. Igiene Comune di Milano)',verifica_url:'https://comune.codogno.lo.it/wp-content/uploads/2023/03/036REG_igiene.pdf'},
+    'Toscana':{livello:2,tipo:'raccomandazione',norma:'Raccomandazione tecnica ARPAT (mitigazione radon): superficie consigliata almeno 1500 mm2 per metro di muro perimetrale. Non e una norma edilizia vincolante.',verifica_url:'https://www.arpat.toscana.it/app/uploads/temi-ambientali/radioattivita/radon/cosa-fare/radon-tecniche-mitigazione-scheda2-ventilazione-vespaio.pdf'}
+  };
+  var REGIONI_IT=['Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria',"Valle d'Aosta",'Veneto'];
+  var NOTE_REGIONALI={
+    'Lombardia':[{t:'Pavimento dei locali abitabili almeno 15 cm sopra il livello esterno (art. 3.2.6). Per le abitazioni non e fissata un altezza minima regionale del vespaio.',u:'https://comune.codogno.lo.it/wp-content/uploads/2023/03/036REG_igiene.pdf'}],
+    'Friuli-Venezia Giulia':[{t:'Altezza minima dell intercapedine/vespaio 20 cm, adeguatamente aerata (L.R. 44/1985 art. 4); pavimento 15 cm sopra il terreno impermeabilizzato per 80 cm. Nessun rapporto numerico regionale per le aperture: l area di aerazione resta sulla conservativa.',u:'https://lexview-int.regione.fvg.it/fontinormative/xml/xmllex.aspx?anno=1985&legge=44'}],
+    'Sicilia':[{t:'Altezza minima del vespaio 0,50 m, riducibile a 0,25 m solo aumentando l aerazione a 1/50 della superficie con griglie orizzontali, o 1/100 con griglie verticali (Reg. Tipo Edilizio Unico, DPRS 531/2022 art. 32 c.6).',u:'https://www.regione.sicilia.it/istituzioni/servizi-informativi/decreti-e-direttive/dp-n-531gab-20052022-allegato'}]
+  };
+  function getSogliaRegionale(regione,A_m2,P_m){
+    var s_perim=(A_m2/200)*1e6,s_grigl=(A_m2/100)*1e6,s_arpat=P_m*1500;
+    if(regione==='Lombardia')return{livello:2,tipo:'norma',regione:regione,soglia_perim:s_perim,soglia_grigl:s_grigl,soglia_arpat_radon:null,soglia_finale:s_grigl,fonte:SOGLIE_REGIONALI.Lombardia.norma,verifica_url:SOGLIE_REGIONALI.Lombardia.verifica_url};
+    if(regione==='Toscana')return{livello:2,tipo:'raccomandazione',regione:regione,soglia_perim:null,soglia_grigl:null,soglia_arpat_radon:s_arpat,soglia_finale:s_arpat,fonte:SOGLIE_REGIONALI.Toscana.norma,verifica_url:SOGLIE_REGIONALI.Toscana.verifica_url};
+    return{livello:3,tipo:'conservativa',regione:regione||'(non specificata)',soglia_perim:s_perim,soglia_grigl:s_grigl,soglia_arpat_radon:s_arpat,soglia_finale:Math.max(s_grigl,s_arpat),fonte:'Soglia conservativa = max(A/100 del Reg. Igiene tipo Lombardia verificato, ARPAT Toscana 1500 mm2/m). Per la relazione verificare il regolamento edilizio comunale.',verifica_url:null};
+  }
+  function areaSingola(forma,D){
+    if(forma==='rettangolare')return D*D;
+    if(forma==='griglia')return D*D*0.5;
+    return Math.PI*Math.pow(D/2,2);
+  }
+  function dimensiona(A,P,regione,D){
+    D=D||100;
+    var sog=getSogliaRegionale(regione,A,P);
+    var A_s=areaSingola('circolare',D);
+    var S_ric=sog.soglia_finale;
+    var N_sup=Math.ceil(S_ric/A_s);
+    var N_int=Math.ceil(P/2.5);
+    var N=Math.max(N_sup,N_int);
+    return{N:N,D:D,interasse:P/N,S_calc:N*A_s,S_ric:S_ric,A_s:A_s,N_sup:N_sup,N_int:N_int,sog:sog,
+      metodi:{s1p:(A/200)*1e6,s1g:(A/100)*1e6,s2:P*1500,n_int:N_int}};
+  }
+  /* dialogo */
+  var DLG={slots:{superficie:null,perimetro:null,regione:null,diametro:null},awaiting:null};
+  function reset(){DLG.slots={superficie:null,perimetro:null,regione:null,diametro:null};DLG.awaiting=null;}
+  function parseRegione(low){
+    var aliases={'emilia':'Emilia-Romagna','romagna':'Emilia-Romagna','friuli':'Friuli-Venezia Giulia','trentino':'Trentino-Alto Adige','alto adige':'Trentino-Alto Adige','aosta':"Valle d'Aosta"};
+    for(var k in aliases){if(low.indexOf(k)>=0)return aliases[k];}
+    for(var i=0;i<REGIONI_IT.length;i++){if(low.indexOf(REGIONI_IT[i].toLowerCase())>=0)return REGIONI_IT[i];}
+    return null;
+  }
+  function findLabeled(low,label){
+    var m=low.match(new RegExp(label+'\\s*(?:di\\s+)?(\\d+(?:[.,]\\d+)?)'));
+    if(m)return toNum(m[1]);
+    m=low.match(new RegExp('(\\d+(?:[.,]\\d+)?)\\s*(?:m(?:etri)?\\.?\\s*)?di\\s+'+label));
+    if(m)return toNum(m[1]);
+    return null;
+  }
+  function parseMessage(text,awaiting){
+    var low=' '+text.toLowerCase()+' ';
+    var out={};var labeled=false;var m,v;
+    m=low.match(/(\d+(?:[.,]\d+)?)\s*(?:mq|m2|m²|metri\s*quadr\w*)/);
+    if(m){out.superficie=toNum(m[1]);labeled=true;}
+    if(out.superficie==null){v=findLabeled(low,'(?:superfic\\w*|stanza|locale|ambiente)');if(v!=null){out.superficie=v;labeled=true;}}
+    v=findLabeled(low,'perim\\w*');if(v!=null){out.perimetro=v;labeled=true;}
+    m=low.match(/ø\s*(\d+(?:[.,]\d+)?)/);
+    if(m){out.diametro=toNum(m[1]);labeled=true;}
+    if(out.diametro==null){v=findLabeled(low,'(?:diametr\\w*|diam\\b)');if(v!=null){out.diametro=v;labeled=true;}}
+    var reg=parseRegione(low);if(reg){out.regione=reg;}
+    if(awaiting&&out[awaiting]==null&&!labeled){m=low.match(/(\d+(?:[.,]\d+)?)/);if(m)out[awaiting]=toNum(m[1]);}
+    return out;
+  }
+  function askSuperficie(){return '<div class="head">Mi serve la superficie</div>'+
+    'Per dimensionare le bocchette mi serve la <b>superficie del vespaio</b> in metri quadri. Quanto misura il locale? (es. 50 mq)';}
+  function askPerimetro(){return '<div class="head">Mi manca il perimetro</div>'+
+    'Ho la superficie, ma mi serve anche il <b>perimetro dell\'edificio</b> in metri.'+
+    '<div class="why">Mi serve perche due dei tre metodi normati sono perimetrali: ARPAT (P &times; 1500 mm&sup2;/m) e l\'interasse massimo (P / 2,5). Senza il perimetro non posso completare il calcolo, e non lo invento.</div>'+
+    'Quanto misura il perimetro? (es. 30 m)';}
+  function computeAnswer(s){
+    var D=s.diametro||100;
+    var r=dimensiona(s.superficie,s.perimetro,s.regione,D);
+    var sog=r.sog;
+    var areaGoverns=r.N_sup>=r.N_int;
+    var regTxt=s.regione?(' in '+s.regione):'';
+    var h='<div class="head">'+r.N+' bocchette &Oslash; '+r.D+' mm, interasse '+itDec(r.interasse,2)+' m</div>';
+    h+='<div class="say">Su una superficie di <b>'+fmtNum(s.superficie)+' m&sup2;</b>'+
+       (s.perimetro?(' con perimetro <b>'+fmtNum(s.perimetro)+' m</b>'):'')+regTxt+
+       ' servono <b>'+r.N+' bocchette</b> circolari da <b>&Oslash; '+r.D+' mm</b>, una ogni <b>'+itDec(r.interasse,2)+' m</b> lungo il perimetro (interasse, entro il massimo di 2,50 m).</div>';
+    var nomeCrit=(s.regione==='Lombardia')?'A/100 (Reg. di Igiene tipo Lombardia, art. 3.2.6)':
+                 (s.regione==='Toscana')?'raccomandazione ARPAT P&times;1500 (mitigazione radon)':
+                 'soglia conservativa (max tra A/100 verificato e ARPAT)';
+    var critLabel=(sog.tipo==='norma')?'Criterio normativo (verificato su fonte primaria)':
+                  (sog.tipo==='raccomandazione')?'Criterio applicato (raccomandazione tecnica, non norma vincolante)':
+                  'Criterio applicato (conservativo)';
+    var critClass=(sog.tipo==='norma')?'note':'warnote';
+    h+='<div class="'+critClass+'"><b>'+critLabel+':</b> '+nomeCrit+', aperture totali richieste '+areaLeg(r.S_ric)+'. '+sog.fonte+(sog.verifica_url?(' &middot; <a href="'+sog.verifica_url+'" target="_blank" rel="noopener">verifica fonte</a>'):'')+'</div>';
+    var noteReg=NOTE_REGIONALI[s.regione];
+    if(noteReg){noteReg.forEach(function(n){h+='<div class="why"><b>'+s.regione+':</b> '+n.t+(n.u?(' &middot; <a href="'+n.u+'" target="_blank" rel="noopener">fonte</a>'):'')+'</div>';});}
+    if(!areaGoverns){h+='<div class="why">Qui il numero non lo alza la superficie ma la <b>regola dell\'interasse</b>: almeno una bocchetta ogni 2,50 m lungo il perimetro.</div>';}
+    h+='<div class="cmp-title">Da dove esce il numero, confronto dei criteri</div>';
+    h+='<table class="m">'+
+       mrow('A/100 (Reg. Igiene tipo Lombardia, art. 3.2.6, verificato)',areaLeg(r.metodi.s1g),areaGoverns&&r.S_ric===r.metodi.s1g)+
+       mrow('A/200 (ventilazione perimetrale a finestrelle, Reg. Igiene Comune di Milano art. 3.2.6, ove recepito)',areaLeg(r.metodi.s1p),false)+
+       mrow('ARPAT P&times;1500 (raccomandazione radon, Toscana)',areaLeg(r.metodi.s2),areaGoverns&&r.S_ric===r.metodi.s2)+
+       mrow('Interasse P/2,5 (prassi di cantiere)','almeno '+r.metodi.n_int+' bocchette',!areaGoverns)+
+       '</table>';
+    h+='<div class="formula">Area di una bocchetta &Oslash;'+r.D+' = '+itDec(r.A_s/100,1)+' cm&sup2;<br>'+
+       'N = max( area richiesta / area bocchetta , perimetro / 2,5 ) = max('+r.N_sup+', '+r.N_int+') = '+r.N+'</div>';
+    if(s.diametro&&(s.diametro<80||s.diametro>120)){h+='<div class="warnote">&Oslash; '+s.diametro+' mm e fuori dal range 80-120 mm tipicamente ammesso: l\'ho usato come da tua richiesta, ma verificalo.</div>';}
+    h+='<div class="why">Distribuiscile su lati contrapposti (es. lato basso e lato alto opposto) per favorire l\'effetto camino.</div>';
+    if(!s.regione){h+='<div class="why">Se mi dici la <b>regione</b> applico la soglia esatta: per Lombardia e Toscana ho la norma specifica verificata, altrove uso la conservativa.</div>';}
+    h+='<div class="foot">La conclusione tecnica resta tua.</div>';
+    return h;
+  }
+  function respond(text){
+    var p=parseMessage(text,DLG.awaiting);
+    if(p.superficie!=null)DLG.slots.superficie=p.superficie;
+    if(p.perimetro!=null)DLG.slots.perimetro=p.perimetro;
+    if(p.regione!=null)DLG.slots.regione=p.regione;
+    if(p.diametro!=null)DLG.slots.diametro=p.diametro;
+    var s=DLG.slots;
+    if(s.superficie==null){DLG.awaiting='superficie';return askSuperficie();}
+    if(s.perimetro==null){DLG.awaiting='perimetro';return askPerimetro();}
+    DLG.awaiting=null;
+    return computeAnswer(s);
+  }
+  function greeting(){return '<div class="head">Ciao, sono l\'assistente dei vespai aerati</div>'+
+    'Dammi le misure e ti calcolo <b>quante bocchette</b> e di che <b>diametro</b> fare. Se mi manca un dato, te lo chiedo.'+
+    '<div class="why">Esempio: <i>"vespaio, stanza 50 mq, perimetro 30 m, Puglia"</i>. Mi bastano superficie e perimetro, la regione affina la soglia.</div>';}
+  function chips(){return [
+    {say:'stanza 50 mq, perimetro 30 m, Puglia',send:'vespaio, stanza 50 mq, perimetro 30 m, Puglia',cls:'chip'},
+    {say:'quante bocchette per un vespaio',send:'quante bocchette per un vespaio',cls:'chip'}
+  ];}
+  function matches(low){
+    if(/vespa|bocchett|aeraz|ventilaz/.test(low))return true;
+    if(/(\d+(?:[.,]\d+)?)\s*(?:mq|m2|m²|metri\s*quadr)/.test(low))return true;
+    return false;
+  }
+  return {id:'vespai',label:'Vespai aerati',title:'Assistente Vespai aerati',
+    sub:'So dimensionare le bocchette di aerazione: quante e di che diametro.',
+    greeting:greeting,respond:respond,chips:chips,reset:reset,matches:matches,
+    _api:{dimensiona:dimensiona,getSogliaRegionale:getSogliaRegionale}};
+})();
+
+/* =========================================================================
+   SKILL 2, INFILTRAZIONI D'ACQUA
+   Motore portato fedelmente da moduli-v3/infiltrazioni.html (fonte di
+   verita'): calcVerdict (riga 603), _suggestSource (508), SRC_GATES (323),
+   SRC_LABEL (324), MECH_MAP/FONTE2SRC (505/506), SOL_INFILTRAZ + SOL_META
+   (490/495), _calcInfiltrazioniScores (524). Stesso scoring pesato, stessi
+   verdetti, stesse citazioni. Correzione applicata anche al modulo:
+   terr_impermeabilizzazione confrontato col value reale "vecchia" (era il
+   letterale ">15 anni", ramo morto). La chat raccoglie gli stessi campi via
+   domande guidate; se un dato manca non lo inventa, lo lascia vuoto.
+   ========================================================================= */
+var INFILTR=(function(){
+  var SRC_GATES={cop:'cop_presente',plu:'plu_coinvolta',ser:'ser_coinvolta',terr:'terr_presente',ctr:'ctr_presente',fac:'fac_coinvolta',imp:'imp_coinvolta'};
+  var SRC_LABEL={cop:'Copertura',plu:'Pluviali/gronde',ser:'Serramenti',terr:'Terrazzo/lastrico',ctr:'Controterra',fac:'Facciata',imp:'Impianti'};
+  var MECH_MAP={pioggia_battente:'pioggia',ristagno:'ristagno',pressione:'pressione',perdita_attiva:'perdita',condensa_interst:null,capillarita:null};
+  var FONTE2SRC={copertura:'cop',pluviali:'plu',serramenti:'ser',terrazzo:'terr',controterra:'ctr',facciata:'fac',impianti:'imp'};
+  var SOL_INFILTRAZ=[
+    {id:"impermeabilizzazione_esterna_i",nome:"Impermeabilizzazione esterna in pressione positiva (BS 8102 Type A)",tempistica:"2-4 settimane",norma:"BS 8102:2022 Type A",normeSec:["UNI 11470:2015","UNI EN 13967:2017","UNI EN 1504-2:2005 metodo MC"],sintesi:"Applicazione esterna di sistema barriera continuo (membrana PE/PEX/EPDM, bitume polimero APP/SBS, resine poliuretaniche o cementizio osmotico). Lo strato e in pressione positiva sul lato d'ingresso dell'acqua.",limit:"Per Grade 3 (residenziale, asciutto) richiede sistema combinato Type A+B o A+C. Su murature di pregio: compatibilita chimica da verificare."},
+    {id:"calcestruzzo_strutturalmente_i",nome:"Calcestruzzo strutturalmente integrale Watertight (BS 8102 Type B)",tempistica:"fase costruttiva",norma:"BS 8102:2022 Type B",normeSec:["UNI 11104:2025","UNI EN 206:2021"],sintesi:"Progettazione del calcestruzzo stesso come barriera idrica permanente: a/c <=0,45, classe XC4/XD3, additivi cristallizzanti, water-stop nelle riprese di getto.",limit:"Solo per opere nuove. Per esistenti non applicabile."},
+    {id:"cavity_drain_system_-_canalizz",nome:"Cavity drain system - canalizzazione interna (BS 8102 Type C)",tempistica:"1-2 settimane",norma:"BS 8102:2022 Type C",normeSec:["BS 8485:2015","UNI EN 13252:2016 (geotessili)"],sintesi:"L'acqua entra ma viene raccolta e drenata con membrana di cavity (HDPE bugne) + canalette perimetrali + pozzetto + pompa. Gestita anziche esclusa.",limit:"Richiede manutenzione delle pompe (vita 8-12 anni), accesso al pozzetto. Riduce il volume utile (5-10 cm sulle pareti)."},
+    {id:"iniezione_resine_poliuretanich",nome:"Iniezione resine poliuretaniche/acriliche su lesioni",tempistica:"1-2 giorni",norma:"UNI EN 1504-5:2013",normeSec:["UNI EN 12715:2021 (jet grouting)"],sintesi:"Iniezione a pressione (50-200 bar) di resine espandenti (PU) o gel acrilici in lesioni e giunti permeabili. La resina espande a contatto con l'acqua sigillando il percorso preferenziale.",limit:"NON e una soluzione definitiva su murature umide diffuse. Verificare compatibilita chimica del substrato (sali)."},
+    {id:"manto_impermeabile_rifacimento",nome:"Manto impermeabile rifacimento copertura/terrazzo",tempistica:"1-3 settimane",norma:"UNI 11470:2015",normeSec:["UNI EN 13956:2013 (manti sintetici)","UNI EN 13707:2013 (manti bituminosi)","BS 8102:2022 Type A"],sintesi:"Rimozione del manto esistente, ripristino del massetto pendenza (>=1,5%), nuovo manto sintetico (TPO, PVC, EPDM saldato) o bituminoso polimero. Risvolti verticali >=15 cm.",limit:"Per coperture vincolate richiede compatibilita estetica/storica. Non applicabile sopra coibente bagnato: verifica con prelievi gravimetrici."},
+    {id:"pluviali_gronde_ripristino",nome:"Manutenzione e ripristino di gronde e pluviali",tempistica:"1-3 giorni",norma:"UNI EN 12056-3:2001",normeSec:["UNI EN 612 (canali e pluviali metallici)"],sintesi:"Pulizia e disostruzione di gronde e pluviali, sostituzione dei tratti forati o scollati, allontanamento dello scarico dal piede del muro, verifica del dimensionamento e delle pendenze.",limit:"La sola pulizia e manutenzione: non risolve un sotto-dimensionamento o uno scarico mal posizionato."},
+    {id:"serramenti_tenuta_ripristino",nome:"Ripristino tenuta serramenti o sostituzione",tempistica:"1 giorno - 1 settimana",norma:"UNI 11673-1:2017",normeSec:["UNI EN 14351-1","UNI EN 12208 (classi di tenuta all'acqua)","UNI EN 1027 (metodo di prova)"],sintesi:"Rifacimento di sigillature, guarnizioni e giunto di posa; ripristino davanzali con pendenza verso l'esterno e gocciolatoi; se inadeguato, sostituzione con classe di tenuta idonea all'esposizione e posa UNI 11673.",limit:"La sola sigillatura non recupera un serramento degradato o un giunto di posa errato."},
+    {id:"impianto_riparazione_collaudo",nome:"Riparazione impianto idrico/scarico con collaudo di tenuta",tempistica:"1-3 giorni",norma:"UNI EN 806-4:2010",normeSec:["UNI EN 1610 (collaudo scarichi e fognature)"],sintesi:"Localizzazione e riparazione del tratto perdente, seguita da collaudo strumentale: prova in pressione UNI EN 806-4 per l'acqua in pressione, prova ad aria/acqua UNI EN 1610 per gli scarichi a gravita.",limit:"Richiede accesso al tratto. La riparazione va sempre validata con prova di tenuta prima del ripristino delle finiture."}
+  ];
+  var SOL_META={
+    'impermeabilizzazione_esterna_i':{srcs:['ctr','terr'],mech:['pressione','ristagno']},
+    'calcestruzzo_strutturalmente_i':{srcs:['ctr'],mech:['pressione'],newOnly:true},
+    'cavity_drain_system_-_canalizz':{srcs:['ctr'],mech:['pressione','falda']},
+    'iniezione_resine_poliuretanich':{srcs:['fac','ctr'],mech:['fessure']},
+    'manto_impermeabile_rifacimento':{srcs:['cop','terr'],mech:['pioggia','ristagno']},
+    'pluviali_gronde_ripristino':{srcs:['plu'],mech:['ristagno','pioggia']},
+    'serramenti_tenuta_ripristino':{srcs:['ser'],mech:['pioggia']},
+    'impianto_riparazione_collaudo':{srcs:['imp'],mech:['perdita']}
+  };
+
+  /* stato: sottoinsieme di STATE.data del modulo, stessi nomi campo */
+  var data={};
+  function blank(){return {
+    correlazionePioggia:"",
+    cop_presente:"",cop_anomalie:[],
+    plu_coinvolta:"",plu_pluviali:"",plu_scarico:"",
+    ser_coinvolta:"",ser_condizione:"",ser_sigilli:"",
+    terr_presente:"",terr_impermeabilizzazione:"",terr_pendenze:"",
+    ctr_presente:"",ctr_impermPresente:"",
+    fac_coinvolta:"",fac_fessurazioni:"",
+    imp_coinvolta:"",imp_infiltAccertata:"",
+    grav_C1:null,grav_C2:null,grav_C3:null,grav_C4:null,grav_C5:null,grav_C6:null,
+    karsten_assorbimento:null,
+    risalitaEsclusa:"",condensaEsclusa:"",perditaImpiantoEsclusa:"",umidCostrEsclusa:""
+  };}
+  data=blank();
+
+  function srcExcluded(src){return data[SRC_GATES[src]]==='no';}
+
+  /* === _suggestSource VERBATIM da infiltrazioni.html riga 508 === */
+  function _suggestSource(){
+    var d=data, p={cop:0,plu:0,ser:0,terr:0,ctr:0,fac:0,imp:0};
+    if(d.cop_presente==="si"||(d.cop_anomalie||[]).length>=2)p.cop+=2;
+    if(d.plu_pluviali==="rotti"||d.plu_pluviali==="intasati")p.plu+=2;
+    if(d.plu_scarico==="diretto_muro")p.plu+=2;
+    if(d.ser_sigilli==="mancanti"||d.ser_condizione==="pessima")p.ser+=2;
+    if(d.terr_impermeabilizzazione==="vecchia"||d.terr_impermeabilizzazione==="assente")p.terr+=2;
+    if(d.terr_pendenze==="controppendenze")p.terr+=2;
+    if(d.ctr_impermPresente==="assente"&&d.ctr_presente==="si")p.ctr+=3;
+    if(d.fac_fessurazioni==="fessure"||d.fac_fessurazioni==="lesioni")p.fac+=2;
+    if(d.imp_infiltAccertata==="si")p.imp+=4;
+    var best=null,bestv=0;
+    Object.keys(p).forEach(function(k){if(!srcExcluded(k)&&p[k]>bestv){bestv=p[k];best=k;}});
+    return bestv>0?best:null;
+  }
+
+  /* === calcVerdict VERBATIM da infiltrazioni.html riga 603 (terr corretto) === */
+  function calcVerdict(){
+    var d=data;var flags=[];var score=0;
+    if(d.correlazionePioggia==="si_forte"){score+=4;flags.push("Correlazione FORTE con pioggia");}
+    else if(d.correlazionePioggia==="si_debole"){score+=2;flags.push("Correlazione debole con pioggia");}
+    if(!srcExcluded('cop')&&(d.cop_presente==="si"||(d.cop_anomalie||[]).length>=2)){score+=2;flags.push("Anomalie copertura rilevate");}
+    if(!srcExcluded('plu')&&(d.plu_pluviali==="rotti"||d.plu_pluviali==="intasati")){score+=2;flags.push("Pluviali compromessi");}
+    if(!srcExcluded('plu')&&d.plu_scarico==="diretto_muro"){score+=2;flags.push("Scarico pluviali diretto su muro");}
+    if(!srcExcluded('ser')&&(d.ser_sigilli==="mancanti"||d.ser_condizione==="pessima")){score+=2;flags.push("Serramenti compromessi");}
+    if(!srcExcluded('terr')&&(d.terr_impermeabilizzazione==="vecchia"||d.terr_impermeabilizzazione==="assente")){score+=2;flags.push("Impermeabilizzazione terrazzo carente");}
+    if(!srcExcluded('terr')&&d.terr_pendenze==="controppendenze"){score+=2;flags.push("Contropendenze terrazzo");}
+    if(!srcExcluded('ctr')&&d.ctr_impermPresente==="assente"&&d.ctr_presente==="si"){score+=3;flags.push("Murature controterra senza impermeabilizzazione");}
+    if(!srcExcluded('fac')&&(d.fac_fessurazioni==="fessure"||d.fac_fessurazioni==="lesioni")){score+=2;flags.push("Fessurazioni passanti in facciata");}
+    if(!srcExcluded('imp')&&d.imp_infiltAccertata==="si"){score+=4;flags.push("Perdita impianto accertata");}
+    var grav=[d.grav_C1,d.grav_C2,d.grav_C3,d.grav_C4,d.grav_C5,d.grav_C6].filter(function(x){return x!=null;});
+    if(grav.length){var max=Math.max.apply(null,grav);if(max>=4){score+=3;flags.push("MC% gravimetrico massimo "+max+"% > 4% (bagnato)");}else if(max>=2){score+=1;}}
+    if(d.karsten_assorbimento!=null&&d.karsten_assorbimento>1){score+=2;flags.push("Assorbimento Karsten "+d.karsten_assorbimento+" ml/min > 1 (permeabilita elevata)");}
+    if(d.risalitaEsclusa==="si")score+=2;
+    if(d.condensaEsclusa==="si")score+=2;
+    if(d.perditaImpiantoEsclusa==="si"||d.imp_infiltAccertata==="no")score+=1;
+    if(d.umidCostrEsclusa==="si")score+=1;
+    var verdict,kind,summary;
+    if(d.correlazionePioggia==="no"&&grav.length===0){verdict="DATI INSUFFICIENTI";kind="warn";summary="Compila almeno la correlazione con pioggia e una misura gravimetrica.";}
+    else if(score>=12){verdict="INFILTRAZIONE CONFERMATA";kind="err";summary="Quadro fortemente coerente con infiltrazione attiva (score "+score+"). Procedere con intervento.";}
+    else if(score>=7){verdict="INFILTRAZIONE PROBABILE";kind="warn";summary="Indicatori coerenti ma servono test confermativi (score "+score+"). Eseguire prove specifiche (Karsten, water test, endoscopia).";}
+    else if(score>=3){verdict="DA APPROFONDIRE";kind="warn";summary="Indicatori parziali (score "+score+"). Verificare altre cause concorrenti.";}
+    else{verdict="INFILTRAZIONE IMPROBABILE";kind="ok";summary="Pochi indicatori di infiltrazione (score "+score+"). Considerare altre patologie (risalita, condensa).";}
+    return {verdict:verdict,kind:kind,summary:summary,flags:flags,score:score};
+  }
+
+  /* === _calcInfiltrazioniScores VERBATIM da riga 524 (fontePrincipale non
+     scelta in chat -> usa _suggestSource; meccanismo non scelto -> mech null
+     -> mechOk sempre vero) === */
+  function _calcInfiltrazioniScores(){
+    var d=data,sc={};
+    var fonteP=null;
+    fonteP=fonteP||_suggestSource()||"";
+    var fonteS="";
+    var mech=MECH_MAP[d.meccanismo];
+    SOL_INFILTRAZ.forEach(function(s){
+      var m=SOL_META[s.id];if(!m)return;
+      if(m.newOnly)return;
+      if(m.srcs.every(srcExcluded))return;
+      var hitP=fonteP&&m.srcs.indexOf(fonteP)>=0;
+      var hitS=fonteS&&m.srcs.indexOf(fonteS)>=0;
+      if(!hitP&&!hitS)return;
+      var mechOk=!mech||m.mech.indexOf(mech)>=0;
+      if(hitP&&mechOk)sc[s.id]={kind:'pri',why:'Coerente con la fonte '+(SRC_LABEL[fonteP]||fonteP)+'.'};
+      else if(hitP)sc[s.id]={kind:'alt',why:'Colpisce la fonte '+(SRC_LABEL[fonteP]||fonteP)+', verificare la coerenza con il meccanismo.'};
+      else sc[s.id]={kind:'alt',why:'Pertinente alla fonte secondaria '+(SRC_LABEL[fonteS]||fonteS)+'.'};
+    });
+    return sc;
+  }
+
+  /* === FLUSSO GUIDATO (slot-filling categorico). Ogni domanda mappa un campo
+     di STATE.data del modulo, con gli stessi value che il motore controlla. === */
+  var QFLOW=[
+    {f:'correlazionePioggia',kind:'choice',q:'Il problema compare in relazione alla pioggia?',
+      opts:[['si_forte','Forte: sempre dopo la pioggia'],['si_debole','Debole / a volte'],['no','Nessuna correlazione'],['non_so','Non verificato']]},
+    {f:'cop_presente',kind:'gate',q:'La copertura / tetto e una sorgente da indagare?',
+      opts:[['si','Si, indaga'],['no','No / escludi']]},
+    {f:'plu_coinvolta',kind:'gate',q:'Gronde e pluviali sono coinvolti?',
+      opts:[['si','Si, indaga'],['no','No']]},
+    {f:'plu_pluviali',kind:'choice',when:function(d){return d.plu_coinvolta==='si';},q:'Stato dei pluviali?',
+      opts:[['ok','OK'],['intasati','Intasati'],['rotti','Rotti'],['scoperti','Scoperti vicino parete'],['assenti','Assenti']]},
+    {f:'plu_scarico',kind:'choice',when:function(d){return d.plu_coinvolta==='si';},q:'Dove scaricano al suolo?',
+      opts:[['fognario','In fognario'],['dispersione','Dispersione/aiuola'],['pozzetto','Pozzetto'],['diretto_muro','Direttamente sul muro']]},
+    {f:'ser_coinvolta',kind:'gate',q:'I serramenti sono coinvolti?',
+      opts:[['si','Si, indaga'],['no','No']]},
+    {f:'ser_condizione',kind:'choice',when:function(d){return d.ser_coinvolta==='si';},q:'Condizione generale dei serramenti?',
+      opts:[['ottima','Ottima'],['buona','Buona'],['mediocre','Mediocre'],['pessima','Pessima / da sostituire']]},
+    {f:'ser_sigilli',kind:'choice',when:function(d){return d.ser_coinvolta==='si';},q:'Sigilli e guarnizioni?',
+      opts:[['nuovi','Nuovi'],['integri','Integri'],['secchi','Secchi / screpolati'],['mancanti','Mancanti']]},
+    {f:'terr_presente',kind:'gate',q:'C\'e un terrazzo / lastrico solare sopra il locale?',
+      opts:[['si','Si, sopra il locale'],['adjacente','Adiacente'],['no','No']]},
+    {f:'terr_impermeabilizzazione',kind:'choice',when:function(d){return d.terr_presente==='si';},q:'Impermeabilizzazione del terrazzo?',
+      opts:[['recente','Recente (<5 anni)'],['media','5-15 anni'],['vecchia','Oltre 15 anni'],['assente','Assente']]},
+    {f:'terr_pendenze',kind:'choice',when:function(d){return d.terr_presente==='si';},q:'Pendenze del terrazzo?',
+      opts:[['corrette','Corrette (>1,5%)'],['scarse','Scarse'],['controppendenze','Contropendenze (ristagno)']]},
+    {f:'ctr_presente',kind:'gate',q:'Ci sono murature controterra (locale interrato o seminterrato)?',
+      opts:[['si','Si'],['no','No']]},
+    {f:'ctr_impermPresente',kind:'choice',when:function(d){return d.ctr_presente==='si';},q:'Impermeabilizzazione delle murature controterra?',
+      opts:[['presente','Presente'],['assente','Assente'],['sconosciuto','Sconosciuta']]},
+    {f:'fac_coinvolta',kind:'gate',q:'La facciata e coinvolta?',
+      opts:[['si','Si, indaga'],['no','No']]},
+    {f:'fac_fessurazioni',kind:'choice',when:function(d){return d.fac_coinvolta==='si';},q:'Fessurazioni in facciata?',
+      opts:[['nessuna','Nessuna'],['microcavillature','Microfessurazioni'],['fessure','Fessure passanti'],['lesioni','Lesioni profonde']]},
+    {f:'imp_coinvolta',kind:'gate',q:'Sospetti gli impianti idrici / di scarico?',
+      opts:[['si','Si, indaga'],['no','No']]},
+    {f:'imp_infiltAccertata',kind:'choice',when:function(d){return d.imp_coinvolta==='si';},q:'Perdita da impianto accertata con prova?',
+      opts:[['si','Si (prova di pressione)'],['no','No, esclusa'],['non_testato','Non testato']]},
+    {f:'grav_C1',kind:'num',skip:true,q:'Hai una misura gravimetrica MC% del muro (UNI 11085)? Scrivi il valore massimo, oppure salta.'},
+    {f:'karsten_assorbimento',kind:'num',skip:true,q:'Assorbimento al tubo di Karsten (UNI EN 16302) in ml/min? Scrivi il valore, oppure salta.'},
+    {f:'risalitaEsclusa',kind:'choice',skip:true,q:'Hai gia escluso la risalita capillare? (BS 6576:2005)',
+      opts:[['si','Si, esclusa'],['parziale','Parziale'],['no','No, contributo presente']]},
+    {f:'condensaEsclusa',kind:'choice',skip:true,q:'Hai gia escluso la condensa? (UNI EN ISO 13788:2013)',
+      opts:[['si','Si, esclusa'],['parziale','Parziale'],['no','No']]},
+    {f:'umidCostrEsclusa',kind:'choice',skip:true,q:'Hai escluso l\'umidita di costruzione (edificio > 3 anni)? (WTA 4-5-99/D)',
+      opts:[['si','Si, esclusa'],['parziale','Parziale'],['no','No']]}
+  ];
+
+  var cur=-1,done=false;
+  function applicable(i){
+    while(i<QFLOW.length){var q=QFLOW[i];if(!q.when||q.when(data))return i;i++;}
+    return -1;
+  }
+  function reset(){data=blank();cur=-1;done=false;}
+  function askHtml(q,prefix){
+    var h=(prefix||'');
+    h+='<div class="head">'+esc(q.q)+'</div>';
+    if(q.kind==='num')h+='<div class="why">Solo il numero, oppure scrivi "salta" se non ce l\'hai. Non lo invento.</div>';
+    return h;
+  }
+  function matchChoice(q,text){ return _matchChoice(q,text); }
+  function isSkip(text){return /salt|non ce|non ho|non lo so|non so|skip|nessun/i.test(text);}
+
+  function compute(){
+    var v=calcVerdict();var sug=_suggestSource();
+    var vc=(v.kind==='err')?'v-err':(v.kind==='ok')?'v-ok':'v-warn';
+    var h='<div class="vhead '+vc+'">'+esc(v.verdict)+' &middot; score '+v.score+'</div>';
+    h+='<div class="say">'+esc(v.summary)+'</div>';
+    if(v.flags&&v.flags.length){h+='<div class="cmp-title">Indicatori che hanno pesato</div><ul class="flags">'+v.flags.map(function(f){return '<li>'+esc(f)+'</li>';}).join('')+'</ul>';}
+    if(v.verdict==='DATI INSUFFICIENTI'){
+      h+='<div class="warnote">Mi serve almeno la correlazione con la pioggia oppure una misura gravimetrica per orientare la diagnosi. Senza, non emetto un esito: non lo invento.</div>';
+    }else if(sug){
+      h+='<div class="cmp-title">Fonte piu probabile dagli indicatori</div><div class="src-pill">'+esc(SRC_LABEL[sug]||sug)+'</div>';
+      h+='<div class="why">Dagli stessi indicatori del punteggio. Resta una proposta da confermare sul posto.</div>';
+      var sc=_calcInfiltrazioniScores();
+      var ids=Object.keys(sc);
+      if(ids.length&&v.verdict!=='INFILTRAZIONE IMPROBABILE'){
+        h+='<div class="cmp-title">Risanamento coerente con la fonte</div>';
+        SOL_INFILTRAZ.forEach(function(s){
+          var x=sc[s.id];if(!x)return;
+          var tag=(x.kind==='pri')?'CONSIGLIATA':'ALTERNATIVA';
+          var cls=(x.kind==='pri')?'sol':'sol alt';
+          h+='<div class="'+cls+'"><span class="sn">'+esc(s.nome)+'</span><span class="stag">'+tag+'</span>'+
+             '<div class="ssyn">'+esc(s.sintesi)+'</div>'+
+             '<div class="snorm"><b>Norma cardine:</b> '+esc(s.norma)+'</div>'+
+             (s.normeSec&&s.normeSec.length?'<div class="why"><b>Secondarie:</b> '+s.normeSec.map(esc).join(' &middot; ')+'</div>':'')+
+             '<div class="slim"><b>Limitazioni:</b> '+esc(s.limit)+'</div></div>';
+        });
+      }
+    }
+    if(v.verdict==='INFILTRAZIONE IMPROBABILE'){
+      h+='<div class="note">Pochi indicatori di infiltrazione: prima di concludere valuta risalita capillare (BS 6576:2005) e condensa (UNI EN ISO 13788:2013) col modulo dedicato.</div>';
+    }
+    h+='<div class="why">Esclusioni differenziali di riferimento: risalita BS 6576:2005 &middot; condensa UNI EN ISO 13788:2013 &middot; perdita impianto UNI EN 806-4:2010 &middot; umidita di costruzione WTA 4-5-99/D.</div>';
+    h+='<div class="why">Per la relazione completa (9 step, misure, esclusioni, DPI, monitoraggio) apri il modulo <a href="infiltrazioni.html" target="_blank" rel="noopener">Diagnosi Infiltrazioni</a>.</div>';
+    h+='<div class="foot">Esito calcolato col motore di infiltrazioni.html (score pesato, citazioni verificate). La conclusione tecnica resta tua.</div>';
+    done=true;
+    return h;
+  }
+
+  function greeting(){
+    reset();
+    cur=applicable(0);
+    var intro='<div class="head">Diagnosi guidata delle infiltrazioni d\'acqua</div>'+
+      'Ti faccio qualche domanda e applico il <b>motore differenziale</b> del modulo Infiltrazioni (score pesato, citazioni verificate). Le sorgenti che escludi non pesano. Le misure sono opzionali.'+
+      '<div class="why">Rispondi toccando un\'opzione qui sotto oppure scrivendo. Se un dato non ce l\'hai, salta: non lo invento.</div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0">';
+    return askHtml(QFLOW[cur],intro);
+  }
+  function respond(text){
+    if(done){
+      if(/ricomin|nuova|riparti|reset/i.test(text))return greeting();
+      return '<div class="why">Diagnosi conclusa. Tocca "Nuova domanda" per ricominciare, o apri il modulo Infiltrazioni per la relazione completa.</div>';
+    }
+    if(cur<0)return greeting();
+    var q=QFLOW[cur];
+    if(q.kind==='num'){
+      if(q.skip&&isSkip(text)){/* lascia il campo nullo */}
+      else{var n=toNum(text);if(isNaN(n))return askHtml(q,'<div class="warnote">Non ho riconosciuto un numero. Scrivi solo la cifra (es. 4,2) oppure "salta".</div>');data[q.f]=n;}
+    }else{ /* choice / gate */
+      if(q.skip&&isSkip(text)){/* skip: campo lasciato vuoto */}
+      else{
+        var val=matchChoice(q,text);
+        if(val==null)return askHtml(q,'<div class="warnote">Non ho capito la risposta. Tocca una delle opzioni qui sotto.</div>');
+        data[q.f]=val;
+      }
+    }
+    cur=applicable(cur+1);
+    if(cur<0)return compute();
+    return askHtml(QFLOW[cur]);
+  }
+  function chips(){
+    if(done||cur<0)return [];
+    var q=QFLOW[cur];var out=[];
+    if(q.opts)q.opts.forEach(function(o){out.push({say:o[1],send:o[0],cls:'chip opt'});});
+    if(q.skip)out.push({say:'salta',send:'salta',cls:'chip skip'});
+    return out;
+  }
+  function matches(low){
+    return /infiltraz|infiltr|acqua\b|pioggia|copertur|tetto|pluvial|gronda|serrament|terrazz|lastric|controterra|facciat|perdita|allagа|macchia|alone/.test(low);
+  }
+  return {id:'infiltrazioni',label:'Infiltrazioni d\'acqua',title:'Assistente Infiltrazioni d\'acqua',
+    sub:'Diagnosi differenziale guidata: ti dico se e infiltrazione, da dove, e cosa fare.',
+    greeting:greeting,respond:respond,chips:chips,reset:reset,matches:matches,
+    _api:{calcVerdict:calcVerdict,suggestSource:_suggestSource,data:function(){return data;},set:function(k,val){data[k]=val;},reset:reset}};
+})();
+
+/* =========================================================================
+   SKILL 3, RADON
+   Motore portato fedelmente da moduli-v3/radon.html (fonte di verita'):
+   SOGLIE_AMBIENTE (riga 1164), COEF_DOSE 6.7e-6 ICRP Pub.137 (1170), limiti
+   dose (1173-1175), calcLifetimeRisk Darby BMJ 2005 (1294), classifyRadon +
+   REGIONI D.Lgs 101/2020 art.11 (1254/1277), dose = media x 7000 x 6.7e-6
+   (renderStep_dose 1959), verdetto soglia (renderStep_risultato 1527-1532),
+   SOL_RADON mitigazione (1556). Stessi valori, stesse fonti. La chat chiede
+   media annua, ambiente, fumo e (opz.) regione/comune; niente dato inventato.
+   ========================================================================= */
+var RADON=(function(){
+  var SOGLIE_AMBIENTE={
+    abitazione_esistente:{val:300,lab:'Abitazione esistente',norma:'D.Lgs 101/2020 Art. 12 c.1'},
+    abitazione_nuova:{val:200,lab:'Abitazione nuova (dal 31/12/2024)',norma:'D.Lgs 101/2020 Art. 12 c.1'},
+    luogo_lavoro:{val:300,lab:'Luogo di lavoro',norma:'D.Lgs 101/2020 Art. 17'},
+    scuola:{val:300,lab:'Scuola / edificio pubblico',norma:'D.Lgs 101/2020 Art. 17 + UNI/PdR 122:2022'}
+  };
+  var COEF_DOSE=6.7e-6;               // ICRP Pub. 137 (2017), F=0.4
+  var WHO_LIVELLO=100;
+  var DOSE_LIMITE_PUBBLICO=1;         // mSv/anno
+  var DOSE_LIMITE_LAVORATORE=6;       // mSv/anno cat. B
+  var ORE_ANNO=7000;                  // occupazione abitativa (default modulo)
+  var DARBY_RISK={attribuibile:'~2% delle morti per cancro in Europa attribuibili a radon',fonte:'Darby S. et al. BMJ 2005;330:223 - 13 case-control studies pooled'};
+
+  /* calcLifetimeRisk VERBATIM da radon.html riga 1294 (Darby BMJ 2005) */
+  function calcLifetimeRisk(media,fumatore){
+    if(!media)return null;
+    var ER=0.16*(media/100);
+    var baseline={no:0.4,ex:5,si:16};
+    var b=baseline[fumatore]||1.0;
+    var risk=b*(1+ER);
+    return {baseline:b,ER:ER*100,lifetime:risk};
+  }
+
+  /* REGIONI + classifyRadon VERBATIM da radon.html (1254/1277), D.Lgs 101/2020 art.11 */
+  var REGIONI={
+    'Toscana':{pubblicata:true,n:11,atto:'DGR Toscana 23/12/2024 n. 1579',url:'https://www.arpat.toscana.it/radon-cosa-fare/',comuni:['Abbadia San Salvatore','Piancastagnaio','Arcidosso','Castel del Piano','Pitigliano','Roccastrada','Santa Fiora','Sorano','Marciana','Marciana Marina','Isola del Giglio']},
+    'Puglia':{pubblicata:true,n:8,atto:'DGR Puglia 22/10/2025 n. 1523',url:'https://www.arpa.puglia.it/pagina2842_radon.html',comuni:['Casarano','Surbo','Minervino di Lecce','Campi Salentina','Maglie','Zollino','Copertino','Lecce']},
+    'Veneto':{pubblicata:true,n:21,atto:'DGR Veneto 02/05/2025 n. 464',url:'https://www.arpa.veneto.it/temi-ambientali/radioattivita/radon/il-radon-in-veneto',comuni:['Borca di Cadore','Cibiana di Cadore','Ospitale di Cadore','Perarolo di Cadore','Rivamonte Agordino','San Vito di Cadore','Tambre','Cinto Euganeo','Torreglia',"Vo'",'Fonte','Ponzano Veneto','Vedelago','Selva di Progno','Dueville','Foza','Lusiana Conco','Schio','Valdagno','Valdastico','Valli del Pasubio']},
+    'Friuli-Venezia Giulia':{pubblicata:true,n:51,atto:'DGR FVG 31/10/2024 n. 1622 (BUR 46 del 13/11/2024; GU n. 299 del 21/12/2024)',url:'https://www.arpa.fvg.it/temi/temi/radiazioni/sezioni-principali/radon/aree-prioritarie/',comuni:['Ampezzo','Andreis','Arba','Aviano','Barcis','Bicinicco','Campoformido','Cimolais','Claut','Codroipo','Cordenons','Coseano','Dogna','Duino Aurisina','Enemonzo','Flaibano','Fogliano Redipuglia','Forgaria nel Friuli','Forni Avoltri','Lusevera','Malborghetto Valbruna','Maniago','Martignacco','Mereto di Tomba','Moggio Udinese','Montereale Valcellina','Mortegliano','Ovaro','Pasian di Prato','Pavia di Udine','Polcenigo','Pozzuolo del Friuli','Prato Carnico',"Rive d'Arcano",'Roveredo in Piano','San Quirino','Sauris','Sequals','Sgonico','Socchieve','Spilimbergo','Sutrio','Talmassons','Tarvisio','Tavagnacco','Tramonti di Sopra','Tramonti di Sotto','Travesio','Trivignano Udinese','Vajont','Visco']},
+    'Sardegna':{pubblicata:true,n:162,atto:'DGR Sardegna 30/06/2022 n. 20/71',url:'https://delibere.regione.sardegna.it/delibera/60493',comuni:['Aggius','Aglientu','Alà dei Sardi','Albagiara','Ales','Anela','Arbus','Aritzo','Arzachena','Arzana','Atzara','Austis','Badesi','Ballao','Banari','Baradili','Baressa','Bari Sardo'],note:'162 comuni totali, lista parziale verificata. Per elenco completo: allegato A della DGR 20/71/2022.'},
+    'Piemonte':{pubblicata:true,n:37,atto:'Atto pubblicato, verificare via ARPA Piemonte',url:'https://www.arpa.piemonte.it/temi/radioattivita-radiazioni-ionizzanti/radon',comuni:[]},
+    'Lombardia':{pubblicata:true,n:90,atto:'Atto pubblicato, verificare via ARPA Lombardia',url:'https://www.arpalombardia.it/temi-ambientali/radioattivita/il-radon/aree-prioritarie-in-italia/',comuni:[]},
+    'Liguria':{pubblicata:true,n:16,atto:'Atto pubblicato, verificare via ARPA Liguria',url:'https://www.arpal.liguria.it/',comuni:[]},
+    'Emilia-Romagna':{pubblicata:true,n:0,verifica_negativa:true,atto:"Presa d'atto regionale, nessun comune supera 15% sopra 300 Bq/m³",url:'https://www.arpae.it/it/temi-ambientali/radioattivita/radon-indoor',comuni:[]},
+    'Lazio':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpalazio.it/'},
+    'Campania':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpacampania.it/'},
+    'Marche':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpa.marche.it/'},
+    'Basilicata':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpab.it/'},
+    'Calabria':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpacal.it/'},
+    'Abruzzo':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.artaabruzzo.it/'},
+    'Molise':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpamolise.it/'},
+    'Umbria':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpa.umbria.it/'},
+    'Sicilia':{pubblicata:false,atto:'In attesa di delibera regionale (PNAR 2023-2032)',url:'https://www.arpa.sicilia.it/'},
+    'Trento':{pubblicata:false,atto:'In attesa, Provincia Autonoma',url:'https://appa.provincia.tn.it/'},
+    'Bolzano':{pubblicata:false,atto:'In attesa, Provincia Autonoma',url:'https://ambiente.provincia.bz.it/it/radiazioni/radon'}
+  };
+  function classifyRadon(reg,com){
+    var c=(com||'').trim().toLowerCase().replace(/[\s'’`]/g,'');
+    if(!reg)return null;
+    var d=REGIONI[reg];if(!d)return null;
+    if(d.verifica_negativa)return {livello:3,titolo:'Verifica negativa regionale, basso rischio',icona:'✅',descr:'La Regione '+reg+' ha pubblicato presa d\'atto: nessun comune supera il criterio del 15% di edifici sopra il livello di riferimento. Misurazione raccomandata solo per cautela.',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3 · PNAR 2023-2032'};
+    if(d.pubblicata){
+      if(reg==='Friuli-Venezia Giulia'&&c==='trieste')return {livello:1,titolo:'AREA PRIORITARIA, solo circoscrizioni',icona:'⚠️',descr:'A Trieste il rischio prioritario riguarda SOLO le circoscrizioni Altopiano Ovest e Altopiano Est, NON l\'intero comune.',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3'};
+      var trovato=(d.comuni||[]).some(function(x){return x.toLowerCase().replace(/[\s'’`]/g,'')===c;});
+      if(trovato)return {livello:1,titolo:'AREA PRIORITARIA RADON, obblighi di legge',icona:'🔴',descr:'Il comune di '+com+' ('+reg+') è classificato AREA PRIORITARIA RADON. Obbligo di misurazione negli ambienti di lavoro al piano terra/seminterrato. Per abitazioni: misura raccomandata.',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3'};
+      if(c)return {livello:2,titolo:'Regione con elenco pubblicato, comune NON prioritario',icona:'🟡',descr:'La Regione '+reg+' ha pubblicato l\'elenco ufficiale ('+d.n+' comuni prioritari) e il comune di '+com+' NON è incluso. Misurazione facoltativa (raccomandata WHO).',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3'};
+      return {livello:2,titolo:'Regione con '+d.n+' comuni prioritari pubblicati',icona:'🟡',descr:'La Regione '+reg+' ha pubblicato l\'elenco ufficiale. Indica il comune per la classificazione puntuale.',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3'};
+    }
+    return {livello:0,titolo:'Regione in attesa di delibera ufficiale',icona:'⏳',descr:'La Regione '+reg+' non ha ancora pubblicato l\'elenco dei comuni area prioritaria (in attesa secondo PNAR 2023-2032). Misurazione raccomandata in via cautelativa.',fonte:d.atto,url:d.url,norma:'D.Lgs 101/2020 art. 11 c. 3 · PNAR 2023-2032'};
+  }
+
+  /* SOL_RADON mitigazione VERBATIM (radon.html riga 1556), mostrate se sopra soglia */
+  var SOL_RADON=[
+    {id:'ssd',nome:'Soil Suction Depressurization (SSD), aspirazione sotto pavimento',tempistica:'1-3 giorni',norma:'ANSI/AARST SGM-SF-2023',sintesi:'Pozzetto di aspirazione (Ø 15-25 cm) sotto la soletta + ventilatore in linea + scarico sopra colmo. Crea depressione (-5/-10 Pa) e intercetta il radon prima dell\'ingresso. Tecnica di prima scelta nell\'80% dei casi.',limit:'Efficacia 70-95% se ben installato. Richiede misura post-mitigazione con monitor attivo (UNI ISO 11665-5:2020).'},
+    {id:'vespaio',nome:'Vespaio aerato attivo / passivo',tempistica:'fase costruttiva o 2-4 settimane',norma:'ANSI/AARST CCAH-2020 Rev.5/23',sintesi:'Vespaio ventilato sotto il piano di posa con bocchette perimetrali o aspirazione forzata. Il radon viene diluito ed espulso prima dell\'involucro abitato.',limit:'Su edificio esistente richiede demolizione del pavimento. Costo elevato. Verifica post-installazione.'},
+    {id:'sigillatura',nome:'Sigillatura crepe e penetrazioni',tempistica:'1-3 giorni',norma:'ANSI/AARST SGM-SF-2023 §5',sintesi:'Sigillatura di crepe pavimento-parete, giunti, passaggi impianti, scarichi, con sigillanti elastomerici + membrane radon-resistant LDPE sotto la soletta.',limit:'Efficacia limitata (30-60%) da sola: sempre complementare ad altra tecnica, da verificare.'},
+    {id:'vmc',nome:'Ventilazione meccanica in sovrappressione',tempistica:'5-15 giorni',norma:'D.Lgs 101/2020 art.17 · UNI EN 16798-1:2019',sintesi:'VMC con immissione in sovrappressione (+5/+10 Pa) per inibire l\'ingresso del radon dal sottosuolo, con monitoraggio del ricambio.',limit:'Costi energetici elevati. Non sempre efficace su concentrazioni alte (>1000 Bq/m³).'}
+  ];
+
+  var REG_KEYS=Object.keys(REGIONI);
+  function parseRegione(low){
+    var al={'friuli':'Friuli-Venezia Giulia','emilia':'Emilia-Romagna','romagna':'Emilia-Romagna','val d':"Valle d'Aosta"};
+    for(var k in al){if(low.indexOf(k)>=0&&REGIONI[al[k]])return al[k];}
+    for(var i=0;i<REG_KEYS.length;i++){if(low.indexOf(REG_KEYS[i].toLowerCase())>=0)return REG_KEYS[i];}
+    return null;
+  }
+
+  /* stato */
+  var data={};
+  function blank(){return {media:null,dueSem:null,ambiente:'',fumatore:'',regione:'',comune:''};}
+  data=blank();
+
+  var QFLOW=[
+    {f:'media',kind:'num2',q:'Concentrazione media annua del radon misurata (Bq/m³)? Se hai i due semestri, scrivili separati (es. 180 e 240) e faccio la media.'},
+    {f:'ambiente',kind:'choice',q:'Che ambiente stai valutando?',
+      opts:[['abitazione_esistente','Abitazione esistente'],['abitazione_nuova','Abitazione nuova (dal 31/12/2024)'],['luogo_lavoro','Luogo di lavoro'],['scuola','Scuola / edificio pubblico']]},
+    {f:'fumatore',kind:'choice',skip:true,q:'Per la stima del rischio sanitario (Darby 2005): chi vive/lavora nell\'ambiente è fumatore?',
+      opts:[['no','Non fumatore'],['ex','Ex fumatore (≥10 anni)'],['si','Fumatore attivo']]},
+    {f:'regione',kind:'region',skip:true,q:'Vuoi anche la classificazione "area prioritaria" (obblighi D.Lgs 101/2020 art.11)? Scrivi la regione, oppure salta.'},
+    {f:'comune',kind:'text',skip:true,when:function(d){return !!d.regione;},q:'In quale comune? (per la classificazione puntuale, oppure salta)'}
+  ];
+
+  var cur=-1,done=false;
+  function applicable(i){while(i<QFLOW.length){var q=QFLOW[i];if(!q.when||q.when(data))return i;i++;}return -1;}
+  function reset(){data=blank();cur=-1;done=false;}
+  function askHtml(q,prefix){
+    var h=(prefix||'');h+='<div class="head">'+esc(q.q)+'</div>';
+    if(q.kind==='num'||q.kind==='num2')h+='<div class="why">Solo i numeri, oppure "salta". Non invento valori.</div>';
+    return h;
+  }
+  function isSkip(t){return /salt|non ce|non ho|non lo so|non so|skip|nessun/i.test(t);}
+  function matchChoice(q,text){ return _matchChoice(q,text); }
+  function parseNums(text){
+    var m=String(text).replace(',','.').match(/-?\d+(?:\.\d+)?/g);
+    return m?m.map(parseFloat).filter(function(x){return !isNaN(x);}):[];
+  }
+
+  function compute(){
+    var media=data.media;
+    var sg=SOGLIE_AMBIENTE[data.ambiente]||{val:300,lab:'(non specificato)',norma:'D.Lgs 101/2020'};
+    var soglia=sg.val;
+    var cls=(media>soglia)?'v-err':(media>WHO_LIVELLO)?'v-warn':'v-ok';
+    var stato=(media>soglia)?'SOPRA la soglia cogente':(media>WHO_LIVELLO)?'sotto la soglia cogente ma sopra il livello WHO':'sotto i livelli di riferimento';
+    var h='<div class="vhead '+cls+'">'+itDec(media,1)+' Bq/m³ &middot; '+stato+'</div>';
+    h+='<div class="say">Media annua <b>'+itDec(media,1)+' Bq/m³</b>'+(data.dueSem?(' (media dei due semestri '+itDec(data.dueSem[0],0)+' e '+itDec(data.dueSem[1],0)+')'):'')+
+       ' su soglia <b>'+soglia+' Bq/m³</b> per '+esc(sg.lab.toLowerCase())+'. '+
+       (media>soglia?'<b>Supera</b> il livello di riferimento cogente: è raccomandato l\'intervento di mitigazione.':(media>WHO_LIVELLO?'Resta sotto il livello cogente, ma sopra il valore raccomandato WHO (100 Bq/m³): valutare azioni in ottica ALARA.':'Resta sotto tutti i livelli di riferimento.'))+'</div>';
+    h+='<div class="cmp-title">Livelli di riferimento</div><table class="m">'+
+       mrow(esc(sg.lab)+' (cogente, '+esc(sg.norma)+')',soglia+' Bq/m³',media>soglia)+
+       mrow('Raccomandazione WHO 2009 (ALARA)',WHO_LIVELLO+' Bq/m³',media>WHO_LIVELLO&&media<=soglia)+
+       '</table>';
+    // dose
+    var dose=media*ORE_ANNO*COEF_DOSE;
+    var dcls=(dose>DOSE_LIMITE_LAVORATORE)?'v-err':(dose>DOSE_LIMITE_PUBBLICO)?'v-warn':'v-ok';
+    h+='<div class="cmp-title">Dose efficace annua (ICRP Pub. 137)</div>';
+    h+='<div class="formula">Dose = '+itDec(media,1)+' Bq/m³ × '+ORE_ANNO+' h × 6,7·10⁻⁶ = <b>'+itDec(dose,2)+' mSv/anno</b></div>';
+    h+='<table class="m">'+
+       mrow('Limite popolazione (D.Lgs 101/2020 art.146)','1 mSv/anno',dose>DOSE_LIMITE_PUBBLICO)+
+       mrow('Limite lavoratori esposti cat. B (ICRP 126)','6 mSv/anno',dose>DOSE_LIMITE_LAVORATORE)+
+       '</table>';
+    h+='<div class="why">Occupazione assunta 7000 h/anno (abitativa, default). La dose scala linearmente con le ore reali di permanenza.</div>';
+    // rischio Darby (solo con profilo fumo noto: niente baseline inventata)
+    if(data.fumatore==='no'||data.fumatore==='ex'||data.fumatore==='si'){
+      var r=calcLifetimeRisk(media,data.fumatore);
+      if(r){
+        h+='<div class="cmp-title">Rischio sanitario (Darby BMJ 2005)</div>';
+        h+='<table class="m">'+
+           mrow('Rischio base cancro polmone (senza radon)',itDec(r.baseline,1)+'%',false)+
+           mrow('Eccesso di rischio da radon (+16% ogni 100 Bq/m³)','+'+itDec(r.ER,1)+'%',false)+
+           mrow('Rischio lifetime stimato',itDec(r.lifetime,1)+'%',r.lifetime>5)+
+           '</table>';
+        h+='<div class="why">Radon = cancerogeno gruppo 1 (IARC 100D), seconda causa di tumore polmonare dopo il fumo. '+esc(DARBY_RISK.attribuibile)+'. '+esc(DARBY_RISK.fonte)+'.</div>';
+      }
+    }
+    // classificazione regionale
+    if(data.regione){
+      var cz=classifyRadon(data.regione,data.comune);
+      if(cz){
+        h+='<div class="cmp-title">Area prioritaria (D.Lgs 101/2020 art.11)</div>';
+        h+='<div class="'+(cz.livello===1?'warnote':'note')+'"><b>'+esc(cz.icona)+' '+esc(cz.titolo)+'</b><br>'+esc(cz.descr)+
+           '<br><span style="font-size:11px">Fonte: '+esc(cz.fonte)+' · '+esc(cz.norma)+(cz.url?(' · <a href="'+cz.url+'" target="_blank" rel="noopener">verifica</a>'):'')+'</span></div>';
+      }
+    }
+    // mitigazione se sopra soglia
+    if(media>soglia){
+      h+='<div class="cmp-title">Mitigazione (tecniche normate)</div>';
+      SOL_RADON.forEach(function(s){
+        h+='<div class="sol"><span class="sn">'+esc(s.nome)+'</span>'+
+           '<div class="ssyn">'+esc(s.sintesi)+'</div>'+
+           '<div class="snorm"><b>Norma:</b> '+esc(s.norma)+'</div>'+
+           '<div class="slim"><b>Limitazioni:</b> '+esc(s.limit)+'</div></div>';
+      });
+    }
+    h+='<div class="why">Per il percorso completo (strategia di campionamento UNI ISO 11665-4:2021, posizionamento dosimetri, dose, salute, mitigazione, monitoraggio) apri il modulo <a href="radon.html" target="_blank" rel="noopener">Valutazione Radon</a>.</div>';
+    h+='<div class="foot">Esito calcolato col motore di radon.html (D.Lgs 101/2020, ICRP Pub. 137, WHO 2009, Darby BMJ 2005). La conclusione tecnica resta tua.</div>';
+    done=true;return h;
+  }
+
+  function greeting(){
+    reset();cur=applicable(0);
+    var intro='<div class="head">Valutazione rapida del radon</div>'+
+      'Dimmi la <b>concentrazione misurata</b> e ti dico se supera la soglia di legge, la <b>dose annua</b> (ICRP 137), il <b>rischio</b> (Darby 2005) e, se vuoi, se il comune è <b>area prioritaria</b> (D.Lgs 101/2020).'+
+      '<div class="why">Se un dato non ce l\'hai, salta: non lo invento.</div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0">';
+    return askHtml(QFLOW[cur],intro);
+  }
+  function respond(text){
+    if(done){
+      if(/ricomin|nuova|riparti|reset/i.test(text))return greeting();
+      return '<div class="why">Valutazione conclusa. Tocca "Nuova domanda" per ricominciare, o apri il modulo Radon per il percorso completo.</div>';
+    }
+    if(cur<0)return greeting();
+    var q=QFLOW[cur];
+    if(q.kind==='num2'){
+      var ns=parseNums(text);
+      if(!ns.length)return askHtml(q,'<div class="warnote">Non ho riconosciuto un numero. Scrivi la concentrazione (es. 210) o i due semestri (es. 180 e 240).</div>');
+      if(ns.length>=2){data.dueSem=[ns[0],ns[1]];data.media=(ns[0]+ns[1])/2;}
+      else{data.media=ns[0];data.dueSem=null;}
+    }else if(q.kind==='region'){
+      if(q.skip&&isSkip(text)){data.regione='';}
+      else{var rg=parseRegione(' '+text.toLowerCase()+' ');if(!rg)return askHtml(q,'<div class="warnote">Non ho riconosciuto la regione. Scrivila per esteso (es. Toscana) oppure "salta".</div>');data.regione=rg;}
+    }else if(q.kind==='text'){
+      if(q.skip&&isSkip(text)){data[q.f]='';}else{data[q.f]=text.trim();}
+    }else{ // choice
+      if(q.skip&&isSkip(text)){/* skip: campo lasciato vuoto, niente valore inventato */}
+      else{
+        var val=matchChoice(q,text);
+        if(val==null)return askHtml(q,'<div class="warnote">Non ho capito. Tocca una delle opzioni qui sotto.</div>');
+        data[q.f]=val;
+      }
+    }
+    cur=applicable(cur+1);
+    if(cur<0)return compute();
+    return askHtml(QFLOW[cur]);
+  }
+  function chips(){
+    if(done||cur<0)return [];
+    var q=QFLOW[cur];var out=[];
+    if(q.opts)q.opts.forEach(function(o){out.push({say:o[1],send:o[0],cls:'chip opt'});});
+    if(q.skip)out.push({say:'salta',send:'salta',cls:'chip skip'});
+    return out;
+  }
+  function matches(low){return /radon|bq\/?m|area prioritaria|dosimetr|pnar/.test(low);}
+  return {id:'radon',label:'Radon',title:'Assistente Radon',
+    sub:'Concentrazione misurata, soglia di legge, dose ICRP, rischio Darby e area prioritaria.',
+    greeting:greeting,respond:respond,chips:chips,reset:reset,matches:matches,
+    _api:{calcLifetimeRisk:calcLifetimeRisk,classifyRadon:classifyRadon,data:function(){return data;},set:function(k,val){data[k]=val;},reset:reset,COEF_DOSE:COEF_DOSE,SOGLIE_AMBIENTE:SOGLIE_AMBIENTE}};
+})();
+
+/* =========================================================================
+   SKILL 4, RISALITA CAPILLARE
+   Motore portato fedelmente da moduli-v3/risalita.html (fonte di verita'):
+   calcVerdict (riga 621) basato sul profilo gravimetrico UNI 11085 + HMC
+   (igroscopia da sali) + esclusioni differenziali + profilo sali; SOL_RISALITA
+   metodi WTA (riga 584). Stessi pesi (30/20/15/10/10/5/10), stessa soglia dati
+   (max_s>=60), stesse soglie verdetto (75/50), stesse fonti. La chat raccoglie
+   gli stessi campi; niente valore inventato.
+   ========================================================================= */
+var RISALITA=(function(){
+  var SOL_RISALITA=[
+    {id:'iniezione_chimica',nome:'Iniezione di barriera chimica idrofobante',tempistica:'2-3 giorni',norma:'WTA 4-10-24/D (03/2024) + WTA 4-4-04/D',sintesi:'Foratura a quota 15-20 cm dal pavimento (Ø 12-20 mm, interasse 10-12 cm), iniezione di silani/silossani/creme idrofobizzanti che formano una barriera capillare permanente.',limit:'WTA 4-10-24/D: le creme certificate operano fino a un grado di saturazione (Durchfeuchtungsgrad) ≤95%; oltre, l\'efficacia cala. Contenuto d\'acqua col metodo ponderale UNI 11085:2003. Limitata su murature molto disomogenee (tufo).'},
+    {id:'taglio_meccanico',nome:'Taglio meccanico orizzontale + DPC',tempistica:'2-4 settimane',norma:'WTA 4-7-02/D',sintesi:'Taglio orizzontale a tratte alternate (60-100 cm/tratta) con sega/filo diamantato, inserimento di lastra impermeabile (PVC ad alta densità, ardesia, acciaio inox) + ripristino con malta espansiva.',limit:'INVASIVO. Non su beni vincolati (D.Lgs 42/2004 art.21). Tratte alternate per i carichi. Progetto strutturale firmato obbligatorio (D.M. 17/01/2018).'},
+    {id:'intonaco_risanamento',nome:'Intonaco macroporoso da risanamento (sistema WTA)',tempistica:'15-30 giorni',norma:'WTA Merkblatt 2-9-20/D:2020-03',sintesi:'Scratch coat + intonaco macroporoso 2-3 cm (porosità >40%, ws<5%). I sali cristallizzano nella porosità senza danneggiare la finitura. Compatibile con beni vincolati.',limit:'NON elimina la causa: la risalita continua sotto l\'intonaco. Da abbinare a barriera chimica/meccanica se l\'umidità prosegue. Va rinnovato a saturazione (15-25 anni).'},
+    {id:'elettro_osmosi',nome:'Elettro-osmosi attiva (pulsata)',tempistica:'3-6 mesi (efficacia)',norma:'Nessuna norma di prodotto cogente (tecnica dibattuta)',sintesi:'Elettrodi anodici (quota 30-50 cm) + unità di controllo con campo elettrico pulsato che respinge l\'acqua verso il basso per effetto elettro-cinetico.',limit:'Efficacia variabile da verificare caso per caso (controversa su tufo/pietre cristalline). Richiede corrente continua e manutenzione. Monitoraggio gravimetrico UNI 11085:2003 post-installazione.'},
+    {id:'aerazione',nome:'Aerazione muraria (lama d\'aria perimetrale / vespaio)',tempistica:'3-7 giorni',norma:'Buona prassi (nessuna norma di prodotto cogente)',sintesi:'Intercapedine ventilata perimetrale (lama d\'aria 5-10 cm con griglie alto/basso) o vespaio aerato sotto pavimento: intercetta l\'umidità di risalita e la espelle con flusso d\'aria.',limit:'Richiede scavo perimetrale (3,5-6 m³/m lineare), non applicabile in contesti urbani con marciapiede pubblico/sottoservizi senza autorizzazioni.'}
+  ];
+
+  var data={};
+  function blank(){return {mc0:null,mc30:null,mc60:null,mc90:null,mc120:null,mc150:null,hmc0:null,
+    esclCondensa:'',esclInfiltrazioni:'',esclCostruzione:'',
+    cl_basso:null,no3_basso:null,so4_basso:null,cl_alto:null,no3_alto:null,so4_alto:null};}
+  data=blank();
+
+  /* calcVerdict VERBATIM da risalita.html riga 621 (d=data) */
+  function calcVerdict(){
+    var d=data;var score=0,max_s=0,flags=[];
+    var mcs=[d.mc0,d.mc30,d.mc60,d.mc90,d.mc120,d.mc150].filter(function(x){return x!=null;});
+    if(mcs.length>=3){
+      max_s+=30;var dec=0,inc=0;
+      for(var i=1;i<mcs.length;i++){if(mcs[i]<mcs[i-1])dec++;else if(mcs[i]>mcs[i-1])inc++;}
+      if(dec>=inc)score+=30*(dec/(mcs.length-1));
+      if(inc>dec)flags.push("profilo MC% non decrescente, atipico per risalita");
+    }
+    if(d.mc0!=null){max_s+=20;if(d.mc0>=4)score+=20;else if(d.mc0>=2)score+=10;else flags.push("MC% base <2%, muratura asciutta");}
+    if(d.mc0!=null&&d.hmc0!=null){
+      max_s+=15;
+      if(d.hmc0<d.mc0*0.7)score+=15;
+      else if(d.hmc0<d.mc0*0.85)score+=5;
+      else {score-=15;flags.push("HMC ≈ MC (≥85%), quadro di igroscopia da sali, non risalita libera");}
+    }
+    if(d.esclCondensa){max_s+=10;if(d.esclCondensa==="si")score+=10;else if(d.esclCondensa==="parziale")score+=3;else if(d.esclCondensa==="no"){score-=10;flags.push("condensa NON esclusa, verosimile causa primaria");}}
+    if(d.esclInfiltrazioni){max_s+=10;if(d.esclInfiltrazioni==="si")score+=10;else if(d.esclInfiltrazioni==="parziale")score+=3;else if(d.esclInfiltrazioni==="no"){score-=10;flags.push("infiltrazioni NON escluse, verosimile causa primaria");}}
+    if(d.esclCostruzione){max_s+=5;if(d.esclCostruzione==="si")score+=5;else if(d.esclCostruzione==="parziale")score+=2;else if(d.esclCostruzione==="no"){score-=5;flags.push("umidità di costruzione NON esclusa");}}
+    var saliB=(d.cl_basso||0)+(d.no3_basso||0)+(d.so4_basso||0);
+    var saliA=(d.cl_alto||0)+(d.no3_alto||0)+(d.so4_alto||0);
+    if(saliB>0||saliA>0){max_s+=10;if(saliA>saliB*1.5)score+=10;else if(saliA>saliB)score+=5;else flags.push("profilo sali non crescente verso l'alto, atipico");}
+    var enough=max_s>=60;
+    var pct=enough?Math.max(0,Math.round((score/max_s)*100)):null;
+    var verdict,kind,summary;
+    if(!enough){verdict="Dati insufficienti";kind="warn";summary="Servono almeno: profilo gravimetrico a 3+ quote, 2 esclusioni compilate. Hai compilato "+max_s+"/100 punti utili.";}
+    else if(pct>=75){verdict="Risalita capillare CONFERMATA";kind="err";summary="Profilo e indicatori coerenti con risalita capillare libera. Procedi alla scelta del metodo di intervento.";}
+    else if(pct>=50){verdict="Risalita capillare PROBABILE";kind="warn";summary="Indicatori parzialmente coerenti. Considera contributo concorrente di condensa, infiltrazioni o sali igroscopici.";}
+    else {verdict="Risalita capillare IMPROBABILE";kind="ok";summary="I dati suggeriscono altre cause prevalenti (condensa, infiltrazioni, sali igroscopici). Rivedere le esclusioni.";}
+    return {pct:pct,verdict:verdict,kind:kind,summary:summary,score:score,max:max_s,flags:flags};
+  }
+
+  var QFLOW=[
+    {f:'__profilo',kind:'numlist',q:'Profilo gravimetrico MC% (UNI 11085) dalla base verso l\'alto, alle quote 0 / 30 / 60 / 90 / 120 / 150 cm. Scrivi i valori che hai separati da virgola (es. 8, 6, 4, 2). Servono almeno 3 quote per pesare il profilo.'},
+    {f:'hmc0',kind:'num',skip:true,q:'Contenuto igroscopico HMC% alla base (campione essiccato poi riequilibrato all\'UR ambiente)? Distingue la risalita libera dall\'igroscopia da sali. Scrivi il valore, oppure salta.'},
+    {f:'esclCondensa',kind:'choice',q:'Hai escluso la condensa come causa?',
+      opts:[['si','Si, esclusa'],['parziale','Parziale'],['no','No, non esclusa']]},
+    {f:'esclInfiltrazioni',kind:'choice',q:'Hai escluso le infiltrazioni d\'acqua?',
+      opts:[['si','Si, escluse'],['parziale','Parziale'],['no','No, non escluse']]},
+    {f:'esclCostruzione',kind:'choice',skip:true,q:'Hai escluso l\'umidità di costruzione (edificio/getti non recenti)?',
+      opts:[['si','Si, esclusa'],['parziale','Parziale'],['no','No, non esclusa']]},
+    {f:'__sali',kind:'num2',skip:true,q:'Profilo dei sali solubili (somma mg/kg) in basso e in alto. Scrivi due valori (es. 400 e 1200), oppure salta.'}
+  ];
+
+  var cur=-1,done=false;
+  function applicable(i){while(i<QFLOW.length){var q=QFLOW[i];if(!q.when||q.when(data))return i;i++;}return -1;}
+  function reset(){data=blank();cur=-1;done=false;}
+  function askHtml(q,prefix){
+    var h=(prefix||'');h+='<div class="head">'+esc(q.q)+'</div>';
+    if(q.kind==='num'||q.kind==='num2'||q.kind==='numlist')h+='<div class="why">Solo i numeri, oppure "salta". Non invento valori.</div>';
+    return h;
+  }
+  function isSkip(t){return /salt|non ce|non ho|non lo so|non so|skip|nessun/i.test(t);}
+  function matchChoice(q,text){ return _matchChoice(q,text); }
+  function parseNums(text){var m=String(text).replace(/,(?=\s*\d)/g,' ').replace(',','.').match(/-?\d+(?:[.,]\d+)?/g);return m?m.map(function(x){return parseFloat(String(x).replace(',','.'));}).filter(function(x){return !isNaN(x);}):[];}
+
+  function compute(){
+    var v=calcVerdict();
+    var vc=(v.kind==='err')?'v-err':(v.kind==='ok')?'v-ok':'v-warn';
+    var head=(v.pct!=null)?(v.verdict+' &middot; '+v.pct+'%'):v.verdict;
+    var h='<div class="vhead '+vc+'">'+esc(head)+'</div>';
+    h+='<div class="say">'+esc(v.summary)+'</div>';
+    // breakdown trasparente (stesse condizioni di calcVerdict, sola visualizzazione)
+    var mcs=[data.mc0,data.mc30,data.mc60,data.mc90,data.mc120,data.mc150].filter(function(x){return x!=null;});
+    var rows='';
+    if(mcs.length>=3){var dec=0,inc=0;for(var i=1;i<mcs.length;i++){if(mcs[i]<mcs[i-1])dec++;else if(mcs[i]>mcs[i-1])inc++;}var p=(dec>=inc)?Math.round(30*(dec/(mcs.length-1))):0;rows+=mrow('Profilo MC% decrescente con l\'altezza (peso 30)',p+' / 30',p>=20);}
+    if(data.mc0!=null){var p2=(data.mc0>=4)?20:(data.mc0>=2)?10:0;rows+=mrow('MC% alla base '+itDec(data.mc0,1)+'% (peso 20)',p2+' / 20',p2>=20);}
+    if(data.mc0!=null&&data.hmc0!=null){var p3=(data.hmc0<data.mc0*0.7)?15:(data.hmc0<data.mc0*0.85)?5:-15;rows+=mrow('HMC vs MC, igroscopia da sali (peso 15)',(p3>0?'+':'')+p3+' / 15',p3>0);}
+    if(data.esclCondensa){var p4=(data.esclCondensa==='si')?10:(data.esclCondensa==='parziale')?3:-10;rows+=mrow('Esclusione condensa (peso 10)',(p4>0?'+':'')+p4+' / 10',p4>=10);}
+    if(data.esclInfiltrazioni){var p5=(data.esclInfiltrazioni==='si')?10:(data.esclInfiltrazioni==='parziale')?3:-10;rows+=mrow('Esclusione infiltrazioni (peso 10)',(p5>0?'+':'')+p5+' / 10',p5>=10);}
+    if(data.esclCostruzione){var p6=(data.esclCostruzione==='si')?5:(data.esclCostruzione==='parziale')?2:-5;rows+=mrow('Esclusione umidità di costruzione (peso 5)',(p6>0?'+':'')+p6+' / 5',p6>=5);}
+    var saliB=(data.cl_basso||0),saliA=(data.cl_alto||0);
+    if(saliB>0||saliA>0){var p7=(saliA>saliB*1.5)?10:(saliA>saliB)?5:0;rows+=mrow('Profilo sali crescente verso l\'alto (peso 10)',p7+' / 10',p7>=10);}
+    if(rows){h+='<div class="cmp-title">Come si compone il punteggio ('+v.score+' / '+v.max+')</div><table class="m">'+rows+'</table>';}
+    if(v.flags&&v.flags.length){h+='<div class="cmp-title">Note del motore</div><ul class="flags">'+v.flags.map(function(f){return '<li>'+esc(f)+'</li>';}).join('')+'</ul>';}
+    if(v.verdict==='Dati insufficienti'){
+      h+='<div class="warnote">Per un esito mi servono almeno il profilo gravimetrico a 3+ quote (UNI 11085) e due esclusioni (condensa, infiltrazioni). Senza, non emetto un verdetto: non lo invento.</div>';
+    }else if(v.pct>=50){
+      h+='<div class="cmp-title">Metodi di intervento normati</div>';
+      h+='<div class="why">La scelta dipende da contenuto d\'acqua e spessore della muratura (limite WTA 4-10-24/D: grado di saturazione ≤95%). Verifica i prerequisiti caso per caso.</div>';
+      SOL_RISALITA.forEach(function(s){
+        h+='<div class="sol"><span class="sn">'+esc(s.nome)+'</span>'+
+           '<div class="ssyn">'+esc(s.sintesi)+'</div>'+
+           '<div class="snorm"><b>Norma:</b> '+esc(s.norma)+'</div>'+
+           '<div class="slim"><b>Limitazioni:</b> '+esc(s.limit)+'</div></div>';
+      });
+    }else{
+      h+='<div class="note">Quadro non orientato alla risalita libera: verifica condensa (UNI EN ISO 13788) e infiltrazioni (BS 6576) come cause prevalenti, e l\'igroscopia da sali (HMC vs MC, UNI EN 16455).</div>';
+    }
+    h+='<div class="why">Metodo di riferimento: profilo gravimetrico UNI 11085:2003 (con UNI EN 16085:2012 per il campionamento). Discriminazione sali: UNI EN 16455:2014.</div>';
+    h+='<div class="why">Per il percorso completo (ambiente, rilievo, edificio, esclusioni, gravimetria, sali, metodo, monitoraggio) apri il modulo <a href="risalita.html" target="_blank" rel="noopener">Diagnosi Risalita Capillare</a>.</div>';
+    h+='<div class="foot">Esito calcolato col motore di risalita.html (score pesato su profilo gravimetrico, HMC, esclusioni, sali). La conclusione tecnica resta tua.</div>';
+    done=true;return h;
+  }
+
+  function greeting(){
+    reset();cur=applicable(0);
+    var intro='<div class="head">Diagnosi differenziale della risalita capillare</div>'+
+      'Applico il <b>motore</b> del modulo Risalita: pesa il profilo gravimetrico verticale (UNI 11085), l\'igroscopia da sali (HMC vs MC) e le esclusioni differenziali, e dà una <b>percentuale</b> di coerenza con la risalita libera.'+
+      '<div class="why">Il dato chiave è il profilo MC% a più quote. Se non hai un valore, salta: non lo invento.</div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0">';
+    return askHtml(QFLOW[cur],intro);
+  }
+  function respond(text){
+    if(done){
+      if(/ricomin|nuova|riparti|reset/i.test(text))return greeting();
+      return '<div class="why">Diagnosi conclusa. Tocca "Nuova domanda" per ricominciare, o apri il modulo Risalita per la relazione completa.</div>';
+    }
+    if(cur<0)return greeting();
+    var q=QFLOW[cur];
+    if(q.kind==='numlist'){
+      var ns=parseNums(text);
+      if(!ns.length)return askHtml(q,'<div class="warnote">Non ho riconosciuto numeri. Scrivi le MC% dalla base verso l\'alto separate da virgola (es. 8, 6, 4, 2).</div>');
+      var keys=['mc0','mc30','mc60','mc90','mc120','mc150'];
+      for(var k=0;k<keys.length;k++){data[keys[k]]=(k<ns.length)?ns[k]:null;}
+    }else if(q.kind==='num'){
+      if(q.skip&&isSkip(text)){/* salta */}
+      else{var n=parseNums(text);if(!n.length)return askHtml(q,'<div class="warnote">Non ho riconosciuto un numero. Scrivi solo la cifra, oppure "salta".</div>');data[q.f]=n[0];}
+    }else if(q.kind==='num2'){
+      if(q.skip&&isSkip(text)){/* salta */}
+      else{var n2=parseNums(text);if(n2.length<2)return askHtml(q,'<div class="warnote">Mi servono due numeri: sali in basso e in alto (es. 400 e 1200), oppure "salta".</div>');data.cl_basso=n2[0];data.cl_alto=n2[1];}
+    }else{ // choice
+      if(q.skip&&isSkip(text)){/* salta */}
+      else{var val=matchChoice(q,text);if(val==null)return askHtml(q,'<div class="warnote">Non ho capito. Tocca una delle opzioni qui sotto.</div>');data[q.f]=val;}
+    }
+    cur=applicable(cur+1);
+    if(cur<0)return compute();
+    return askHtml(QFLOW[cur]);
+  }
+  function chips(){
+    if(done||cur<0)return [];
+    var q=QFLOW[cur];var out=[];
+    if(q.opts)q.opts.forEach(function(o){out.push({say:o[1],send:o[0],cls:'chip opt'});});
+    if(q.skip)out.push({say:'salta',send:'salta',cls:'chip skip'});
+    return out;
+  }
+  function matches(low){return /risalit|capillar|base del? ?muro|profilo gravimetric|igroscopi/.test(low);}
+  return {id:'risalita',label:'Risalita capillare',title:'Assistente Risalita capillare',
+    sub:'Diagnosi differenziale dal profilo gravimetrico: quanto è coerente con la risalita.',
+    greeting:greeting,respond:respond,chips:chips,reset:reset,matches:matches,
+    _api:{calcVerdict:calcVerdict,data:function(){return data;},set:function(k,val){data[k]=val;},reset:reset}};
+})();
+
+/* =========================================================================
+   SKILL 5, SALI NELLE MURATURE
+   Motore portato fedelmente da moduli-v3/sali.html (fonte di verita'):
+   calcVerdict (riga 475, carico salino per anione WTA 4-5-99/D), SALI_DB
+   (riga 283, UR di equilibrio/deliquescenza + ionTest per filtro anioni),
+   logica deliquescenza UR_int >= UR_eq (_difSali 518), SOL_SALI trattamenti
+   (riga 425). SALI_DB qui e trimmato ai campi usati (valori INVARIATI: rhEq,
+   destructive, ionTest, category, environment verbatim). La chat chiede gli
+   ioni e (opz.) pH e UR; niente valore inventato.
+   ========================================================================= */
+var SALI=(function(){
+  /* SALI_DB, campi usati dalla skill (valori verbatim da sali.html riga 283) */
+  var SALI_DB=[
+    {id:'nacl',name:'Cloruro di sodio',formula:'NaCl',category:'Cloruri',rhEq:75.3,destructive:'medio-alto',ionTest:{cloruri:true},environment:['marino','stradale','suolo']},
+    {id:'na2so4',name:'Solfato di sodio',formula:'Na₂SO₄·10H₂O',category:'Solfati',rhEq:87,destructive:'molto alto',ionTest:{solfati:true},environment:['urbano','industriale','cemento']},
+    {id:'caso4',name:'Solfato di calcio (gesso)',formula:'CaSO₄·2H₂O',category:'Solfati',rhEq:null,destructive:'basso-moderato',ionTest:{solfati:true},environment:['urbano','industriale']},
+    {id:'kno3',name:'Nitrato di potassio (salnitro)',formula:'KNO₃',category:'Nitrati',rhEq:93,destructive:'medio',ionTest:{nitrati:true},environment:['biologico','agricolo','suolo']},
+    {id:'caco3',name:'Carbonato di calcio',formula:'CaCO₃',category:'Carbonati',rhEq:null,destructive:'basso',ionTest:{carbonati:true},environment:['tutti']},
+    {id:'mgso4',name:'Solfato di magnesio',formula:'MgSO₄·7H₂O',category:'Solfati',rhEq:90,destructive:'alto',ionTest:{solfati:true},environment:['suolo','dolomiti','cemento']},
+    {id:'nano3',name:'Nitrato di sodio',formula:'NaNO₃',category:'Nitrati',rhEq:74,destructive:'medio-alto',ionTest:{nitrati:true},environment:['biologico','agricolo','suolo']},
+    {id:'na2co3',name:'Carbonato di sodio',formula:'Na₂CO₃·10H₂O',category:'Carbonati',rhEq:87,destructive:'medio',ionTest:{carbonati:true},environment:['cemento','urbano']},
+    {id:'cano3_2',name:'Nitrato di calcio',formula:'Ca(NO₃)₂·4H₂O',category:'Nitrati',rhEq:50,destructive:'alto',ionTest:{nitrati:true},environment:['biologico','suolo','cimiteri']},
+    {id:'k2so4',name:'Solfato di potassio',formula:'K₂SO₄',category:'Solfati',rhEq:97,destructive:'basso-moderato',ionTest:{solfati:true},environment:['biologico','laterizio','cemento']},
+    {id:'mgcl2',name:'Cloruro di magnesio',formula:'MgCl₂·6H₂O',category:'Cloruri',rhEq:33,destructive:'alto',ionTest:{cloruri:true},environment:['marino','suolo']},
+    {id:'cacl2',name:'Cloruro di calcio',formula:'CaCl₂',category:'Cloruri',rhEq:29,destructive:'molto alto',ionTest:{cloruri:true},environment:['stradale','cemento','industriale']},
+    {id:'ettringite',name:'Ettringite',formula:'3CaO·Al₂O₃·3CaSO₄·32H₂O',category:'Solfati complessi',rhEq:null,destructive:'molto alto',ionTest:{solfati:true},environment:['cemento','industriale']},
+    {id:'thaumasite',name:'Thaumasite',formula:'CaSiO₃·CaCO₃·CaSO₄·15H₂O',category:'Solfati complessi',rhEq:null,destructive:'catastrofico',ionTest:{solfati:true,carbonati:true},environment:['suolo_solfatico','freddo_umido']},
+    {id:'nahco3',name:'Bicarbonato di sodio',formula:'NaHCO₃',category:'Carbonati',rhEq:96,destructive:'basso',ionTest:{carbonati:true},environment:['cemento']},
+    {id:'syngenite',name:'Syngenite',formula:'K₂Ca(SO₄)₂·H₂O',category:'Solfati complessi',rhEq:null,destructive:'basso-moderato',ionTest:{solfati:true},environment:['cemento']},
+    {id:'darapskite',name:'Darapskite',formula:'Na₃(NO₃)(SO₄)·H₂O',category:'Solfati complessi',rhEq:73.9,destructive:'alto',ionTest:{solfati:true,nitrati:true},environment:['agricolo','urbano','cemento']},
+    {id:'glauberite',name:'Glauberite',formula:'Na₂Ca(SO₄)₂',category:'Solfati complessi',rhEq:null,destructive:'medio-alto',ionTest:{solfati:true},environment:['cemento','industriale','laterizio']},
+    {id:'mascagnite',name:'Solfato d\'ammonio',formula:'(NH₄)₂SO₄',category:'Solfati',rhEq:80.0,destructive:'medio',ionTest:{solfati:true},environment:['urbano','industriale','agricolo']}
+  ];
+  var SOL_SALI=[
+    {id:'poultice',nome:'Poultice / impacchi adsorbenti per desalinizzazione',tempistica:'3-21 giorni',norma:'WTA 3-13-19/D',sintesi:'Impacchi adsorbenti (bentonite, sepiolite, polpa di cellulosa) saturati con acqua deionizzata: per gradiente osmotico i sali migrano dalla muratura all\'impacco, rimosso e smaltito. Cicli fino a conducibilità <500 µS/cm (NormaL 13/83 ICR).',limit:'Cicli lunghi per concentrazioni elevate. Non rimuove la causa (umidità): da abbinare a barriera capillare.'},
+    {id:'rimozione_wta',nome:'Rimozione intonaco contaminato + intonaco WTA macroporoso',tempistica:'10-25 giorni',norma:'WTA 2-9-20/D:2020-03',sintesi:'Rimozione dell\'intonaco contaminato fino a 80 cm sopra l\'altezza max dei sali + scratch coat + intonaco WTA macroporoso che intrappola i sali nella porosità senza danneggiare la finitura.',limit:'Non rimuove la causa: abbinare a intervento su risalita/infiltrazione. Va rinnovato a saturazione (15-25 anni).'},
+    {id:'elettrocinetica',nome:'Desalinizzazione elettrocinetica (Maréchal/Friese)',tempistica:'2-6 settimane',norma:'WTA 3-13-19/D',sintesi:'Campo elettrico in continua tra elettrodo nella muratura ed elettrodo in impacco esterno: gli ioni Na⁺, Cl⁻, SO₄²⁻ migrano per elettro-migrazione e vengono rimossi col bagno elettrolitico.',limit:'Costi attrezzatura elevati, tecnico specializzato. Monitoraggio cromatografico UNI EN 16455:2014 per validare.'},
+    {id:'inibitore',nome:'Biocida-inibitore di cristallizzazione',tempistica:'1 giorno',norma:'WTA 3-13-19/D',sintesi:'Inibitori di cristallizzazione (ferrocianuri, additivi anti-crystallization) che bloccano la crescita dei cristalli salini, limitando il danno meccanico da pressione di cristallizzazione (Doehne-Price 2010).',limit:'Non rimuove i sali, ne modifica solo la dinamica. Durata limitata (1-3 anni).'}
+  ];
+
+  var data={};
+  function blank(){return {cl:null,no3:null,so4:null,co3:null,ph:null,urInt:null,caricoClasse:''};}
+  data=blank();
+
+  /* calcVerdict VERBATIM da sali.html riga 475 (d=data) */
+  function calcVerdict(){
+    var d=data;
+    var tot=(d.cl||0)+(d.no3||0)+(d.so4||0)+(d.co3||0);
+    /* Classi WTA 4-5-99/D per anione (percento sulla massa secca; input in mg/kg, 1 % = 10000 mg/kg); classe complessiva = la peggiore */
+    var WTA_SOGLIE={cl:[2000,5000],no3:[1000,3000],so4:[5000,15000]},ord={basso:1,medio:2,alto:3},per={},max=null;
+    ["cl","no3","so4"].forEach(function(k){var v=d[k];var c=(v==null||isNaN(v)||v<=0)?null:(v<=WTA_SOGLIE[k][0]?"basso":(v<=WTA_SOGLIE[k][1]?"medio":"alto"));per[k]=c;if(c&&(!max||ord[c]>ord[max]))max=c;});
+    var classe=d.caricoClasse==="molto_alto"?"alto":d.caricoClasse;
+    if(!classe)classe=max;
+    var labels={basso:"Carico basso",medio:"Carico medio",alto:"Carico alto"};
+    var kinds={basso:"ok",medio:"warn",alto:"err"};
+    var summaries={
+      basso:"Carico salino basso secondo WTA 4-5-99/D: tutti gli anioni sotto la prima soglia. Monitoraggio o trattamento conservativo.",
+      medio:"Carico salino medio (WTA 4-5-99/D): almeno un anione fra le due soglie. Intonaco da risanamento Sanierputz (WTA 2-9-20/D) o intonaci sacrificali nella zona interessata.",
+      alto:"Carico salino alto (WTA 4-5-99/D): almeno un anione oltre la seconda soglia. Trattamento attivo: desalinizzazione e sistema Sanierputz; nei casi estremi sostituzione della muratura."
+    };
+    if(!classe)return{verdict:"Dati insufficienti",kind:"warn",summary:"Compila almeno un test ionico (cloruri, nitrati, solfati).",classe:null,totale:tot,perAnione:per};
+    return{verdict:labels[classe],kind:kinds[classe],summary:summaries[classe],classe:classe,totale:tot,perAnione:per};
+  }
+
+  function ionsPositive(){
+    var out=[];if(data.cl>0)out.push('cloruri');if(data.no3>0)out.push('nitrati');if(data.so4>0)out.push('solfati');if(data.co3>0)out.push('carbonati');return out;
+  }
+
+  var QFLOW=[
+    {f:'__ioni',kind:'ions',q:'Test ionici (UNI EN 16455) in mg/kg. Scrivi i valori che hai, etichettati: cloruri, nitrati, solfati, carbonati (es. "cloruri 1500, solfati 2200, nitrati 300").'},
+    {f:'ph',kind:'num',skip:true,q:'pH dell\'estratto acquoso? (acido <6, neutro 7, alcalino >8). Aiuta a discriminare. Scrivi il valore, oppure salta.'},
+    {f:'urInt',kind:'num',skip:true,q:'UR interna dell\'ambiente (%)? Serve a valutare la deliquescenza (un sale con UR di equilibrio ≤ UR ambiente resta in soluzione e perpetua il degrado). Scrivi il valore, oppure salta.'}
+  ];
+
+  var cur=-1,done=false;
+  function applicable(i){while(i<QFLOW.length){var q=QFLOW[i];if(!q.when||q.when(data))return i;i++;}return -1;}
+  function reset(){data=blank();cur=-1;done=false;}
+  function askHtml(q,prefix){
+    var h=(prefix||'');h+='<div class="head">'+esc(q.q)+'</div>';
+    if(q.kind==='num')h+='<div class="why">Solo il numero, oppure "salta". Non invento valori.</div>';
+    if(q.kind==='ions')h+='<div class="why">Almeno un anione. Solo i valori che hai (gli altri restano vuoti, non li invento).</div>';
+    return h;
+  }
+  function isSkip(t){return /salt|non ce|non ho|non lo so|non so|skip|nessun/i.test(t);}
+  function findIon(low,label){
+    var m=low.match(new RegExp(label+'\\D{0,8}(\\d+(?:[.,]\\d+)?)'));
+    if(m)return parseFloat(m[1].replace(',','.'));
+    m=low.match(new RegExp('(\\d+(?:[.,]\\d+)?)\\s*(?:mg\\/?kg)?\\s*(?:di\\s+)?'+label));
+    if(m)return parseFloat(m[1].replace(',','.'));
+    return null;
+  }
+  function parseIons(text){
+    var low=' '+text.toLowerCase()+' ';var out={};
+    out.cl=findIon(low,'(?:clorur\\w*|cl\\b|cl-)');
+    out.no3=findIon(low,'(?:nitrat\\w*|no3|no₃)');
+    out.so4=findIon(low,'(?:solfat\\w*|so4|so₄)');
+    out.co3=findIon(low,'(?:carbonat\\w*|co3|co₃)');
+    return out;
+  }
+
+  function compute(){
+    var v=calcVerdict();
+    var vc=(v.kind==='err')?'v-err':(v.kind==='ok')?'v-ok':'v-warn';
+    var h='<div class="vhead '+vc+'">'+esc(v.verdict)+(v.totale?(' &middot; '+itInt(v.totale)+' mg/kg'):'')+'</div>';
+    h+='<div class="say">'+esc(v.summary)+'</div>';
+    // tabella anioni
+    h+='<div class="cmp-title">Test ionici (UNI EN 16455)</div><table class="m">'+
+       mrow('Cloruri Cl⁻',(data.cl!=null?itInt(data.cl)+' mg/kg':'n.d.'),false)+
+       mrow('Nitrati NO₃⁻',(data.no3!=null?itInt(data.no3)+' mg/kg':'n.d.'),false)+
+       mrow('Solfati SO₄²⁻',(data.so4!=null?itInt(data.so4)+' mg/kg':'n.d.'),false)+
+       mrow('Carbonati CO₃²⁻',(data.co3!=null?itInt(data.co3)+' mg/kg':'n.d.'),false)+
+       mrow('<b>Carico totale</b>','<b>'+itInt(v.totale)+' mg/kg</b>',true)+
+       '</table>';
+    if(data.ph!=null){
+      var phn=(data.ph<6)?'estratto acido: possibile solfato d\'ammonio (NH₄, origine urbana/agricola); il pH acido lo discrimina dagli altri solfati':(data.ph>8)?'estratto alcalino: tipico di carbonati / lisciviazione del cemento':'estratto neutro';
+      h+='<div class="why"><b>pH '+itDec(data.ph,1)+':</b> '+phn+'.</div>';
+    }
+    // candidati dagli anioni positivi (filtro ionTest, come panelSale)
+    var pos=ionsPositive();
+    if(pos.length){
+      var cand=SALI_DB.filter(function(s){var it=s.ionTest||{};return pos.some(function(i){return it[i]===true;});});
+      var deliq=[],altri=[];
+      cand.forEach(function(s){
+        var isDel=(data.urInt!=null&&s.rhEq!=null&&data.urInt>=s.rhEq);
+        (isDel?deliq:altri).push(s);
+      });
+      function line(s){return '<div class="why">• <b>'+esc(s.name)+'</b> ('+esc(s.formula)+') · '+esc(s.category)+' · UR eq '+(s.rhEq==null?'n.d.':itDec(s.rhEq,0)+'%')+' · distruttività '+esc(s.destructive)+'</div>';}
+      if(deliq.length){
+        h+='<div class="warnote"><b>⚠ Sali deliquescenti alle condizioni rilevate</b> (UR ambiente '+itDec(data.urInt,0)+'% ≥ UR di equilibrio): restano in soluzione e perpetuano il degrado a prescindere dalla fonte liquida.</div>';
+        deliq.forEach(function(s){h+=line(s);});
+      }
+      h+='<div class="cmp-title">Sali compatibili con gli anioni rilevati ('+pos.join(' + ')+')</div>';
+      if(data.urInt==null)h+='<div class="why">Indica l\'UR interna per sapere quali sono deliquescenti alle condizioni reali.</div>';
+      (deliq.length?altri:cand).forEach(function(s){h+=line(s);});
+      h+='<div class="why">Filtro per anione (come il modulo): per identificare il sale singolo servono anche i cationi (Na⁺/Ca²⁺/Mg²⁺/K⁺/NH₄⁺) via ICP/AAS o test Nessler, e la morfologia.</div>';
+    }
+    // trattamento per classe
+    if(v.classe==='basso'){
+      h+='<div class="note">Carico basso: monitoraggio o trattamento conservativo. Rivalutare nel tempo (la concentrazione può aumentare con i cicli di umidità).</div>';
+    }else if(v.classe){
+      h+='<div class="cmp-title">Trattamento (WTA)</div>';
+      SOL_SALI.forEach(function(s){
+        h+='<div class="sol"><span class="sn">'+esc(s.nome)+'</span>'+
+           '<div class="ssyn">'+esc(s.sintesi)+'</div>'+
+           '<div class="snorm"><b>Norma:</b> '+esc(s.norma)+'</div>'+
+           '<div class="slim"><b>Limitazioni:</b> '+esc(s.limit)+'</div></div>';
+      });
+    }
+    h+='<div class="why">Carico salino classificato sulla somma degli anioni (UNI EN 16455:2014). I sali sono spesso <b>conseguenza</b> di risalita o infiltrazione: discrimina la causa coi moduli <a href="risalita.html" target="_blank" rel="noopener">Risalita</a> e <a href="infiltrazioni.html" target="_blank" rel="noopener">Infiltrazioni</a>.</div>';
+    h+='<div class="why">Per il percorso completo (morfologia, identificazione sale, compatibilità intonaco, trattamento, DPI) apri il modulo <a href="sali.html" target="_blank" rel="noopener">Diagnosi Sali</a>.</div>';
+    h+='<div class="foot">Esito calcolato col motore di sali.html (carico UNI EN 16455, UR di equilibrio da SALI_DB / Doehne&amp;Price 2010). La conclusione tecnica resta tua.</div>';
+    done=true;return h;
+  }
+
+  function greeting(){
+    reset();cur=applicable(0);
+    var intro='<div class="head">Classificazione dei sali nelle murature</div>'+
+      'Dammi i <b>test ionici</b> (mg/kg) e ti dico la <b>classe di carico salino</b> (WTA 4-5-99/D), i <b>sali compatibili</b> con gli anioni rilevati e quali sono <b>deliquescenti</b> alle condizioni d\'ambiente.'+
+      '<div class="why">Servono almeno gli anioni. pH e UR sono opzionali ma affinano. Se un dato non ce l\'hai, salta: non lo invento.</div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0">';
+    return askHtml(QFLOW[cur],intro);
+  }
+  function respond(text){
+    if(done){
+      if(/ricomin|nuova|riparti|reset/i.test(text))return greeting();
+      return '<div class="why">Classificazione conclusa. Tocca "Nuova domanda" per ricominciare, o apri il modulo Sali per il percorso completo.</div>';
+    }
+    if(cur<0)return greeting();
+    var q=QFLOW[cur];
+    if(q.kind==='ions'){
+      var io=parseIons(text);
+      if(io.cl==null&&io.no3==null&&io.so4==null&&io.co3==null)return askHtml(q,'<div class="warnote">Non ho riconosciuto valori ionici. Scrivili etichettati, es. "cloruri 1500, solfati 2200".</div>');
+      if(io.cl!=null)data.cl=io.cl;if(io.no3!=null)data.no3=io.no3;if(io.so4!=null)data.so4=io.so4;if(io.co3!=null)data.co3=io.co3;
+    }else{ // num skippable
+      if(q.skip&&isSkip(text)){/* salta */}
+      else{var n=parseFloat(String(text).replace(',','.').match(/-?\d+(?:\.\d+)?/)?String(text).replace(',','.').match(/-?\d+(?:\.\d+)?/)[0]:NaN);if(isNaN(n))return askHtml(q,'<div class="warnote">Non ho riconosciuto un numero. Scrivi solo la cifra, oppure "salta".</div>');data[q.f]=n;}
+    }
+    cur=applicable(cur+1);
+    if(cur<0)return compute();
+    return askHtml(QFLOW[cur]);
+  }
+  function chips(){
+    if(done||cur<0)return [];
+    var q=QFLOW[cur];var out=[];
+    if(q.skip)out.push({say:'salta',send:'salta',cls:'chip skip'});
+    return out;
+  }
+  function matches(low){return /\bsali\b|salino|efflorescen|nitrat|solfat|clorur|carbonat|deliquesc|igroscop|salnitro/.test(low);}
+  return {id:'sali',label:'Sali',title:'Assistente Sali nelle murature',
+    sub:'Dai test ionici: classe di carico, sali compatibili e rischio deliquescenza.',
+    greeting:greeting,respond:respond,chips:chips,reset:reset,matches:matches,
+    _api:{calcVerdict:calcVerdict,ionsPositive:ionsPositive,data:function(){return data;},set:function(k,val){data[k]=val;},reset:reset,SALI_DB:SALI_DB}};
+})();
+
+/* =========================================================================
+   Helper comune ai motori categorici (skill 6-9)
+   ========================================================================= */
+function _isSkip(t){return /salt|non ce|non ho|non lo so|non so|skip|nessun/i.test(t);}
+/* normalizza: minuscole, via accenti, solo lettere/cifre/spazi */
+function _normTxt(s){return String(s==null?'':s).toLowerCase()
+  .replace(/[àáâä]/g,'a').replace(/[èéêë]/g,'e').replace(/[ìíîï]/g,'i').replace(/[òóôö]/g,'o').replace(/[ùúûü]/g,'u')
+  .replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();}
+/* matching robusto delle scelte: scoring per token bidirezionale (parola dell'etichetta
+   presente nella risposta e viceversa) + value normalizzato; in caso di parità → null
+   (ri-chiede invece di indovinare: fedeltà peritale). */
+function _matchChoice(q,text){
+  var raw=String(text==null?'':text).trim();
+  for(var i=0;i<q.opts.length;i++){if(raw===q.opts[i][0])return q.opts[i][0];}   // value esatto (chip)
+  var a=_normTxt(raw); if(!a)return null;
+  var aw=a.split(' ').filter(function(w){return w.length>=2;});
+  var best=null,bestS=0,tie=false;
+  for(var j=0;j<q.opts.length;j++){
+    var val=q.opts[j][0], lab=_normTxt(q.opts[j][1]);
+    var lw=lab.split(' ').filter(function(w){return w.length>=3;});
+    var sc=0;
+    lw.forEach(function(w){ if(aw.indexOf(w)>=0) sc+=2; });               // parola etichetta ∈ risposta
+    aw.forEach(function(w){ if(w.length>=4 && (' '+lab+' ').indexOf(' '+w+' ')>=0) sc+=1; }); // parola risposta ∈ etichetta
+    var nv=_normTxt(val);
+    if(nv.length>=2 && nv.split(' ').every(function(w){return (' '+a+' ').indexOf(' '+w+' ')>=0;})) sc+=2; // value ∈ risposta
+    if(sc>bestS){bestS=sc;best=val;tie=false;}
+    else if(sc===bestS&&sc>0&&best!==val){tie=true;}
+  }
+  if(best&&bestS>0&&!tie)return best;
+  var sp=' '+a+' ';
+  if(/ (si|certo|ok|esatto|vero) /.test(sp)&&q.opts.some(function(o){return o[0]==='si';}))return 'si';
+  if(/ (no|nessuno|niente|negativo) /.test(sp)&&q.opts.some(function(o){return o[0]==='no';}))return 'no';
+  return null;
+}
+function _nums(str){
+  /* normalizza i separatori SENZA toccare i decimali: trattino-range fra cifre → spazio,
+     virgola-lista (virgola+spazio) → spazio, punto e virgola → spazio. Resta valido il
+     segno negativo standalone (es. T esterna -5) e il decimale (19,5 / 19.5). */
+  var s=String(str).replace(/(\d)\s*[--]\s*(\d)/g,'$1 $2').replace(/,(?=\s+\d)/g,' ').replace(/;\s*/g,' ');
+  var m=s.match(/-?\d+(?:[.,]\d+)?/g);
+  return m?m.map(function(x){return parseFloat(String(x).replace(',','.'));}).filter(function(x){return !isNaN(x);}):[];
+}
+function _num1(text){var n=_nums(text);return n.length?n[0]:NaN;}
+
+/* =========================================================================
+   SKILL 6, BIODETERIOGENI (muffe)
+   Motore portato verbatim da biodeteriogeni.html: calcVerdict (riga 505,
+   score/7 → basso/medio/alto/critico), _calcMuffeScores (riga 423, con il
+   ramo 'puntuale'→'puntiforme' CORRETTO anche nel modulo), SOL_MUFFE (389).
+   ========================================================================= */
+var BIODET=(function(){
+  var SOL_MUFFE=[
+    {id:'cond2',nome:'Bonifica IICRC S520 Condition 2 (settoriale)',tempistica:'3-7 giorni',norma:'ANSI/IICRC S520-2024 4ª ed.',normeSec:['EPA Mold Remediation 2008','UNI EN 14885:2023','D.Lgs 81/2008 Titolo X'],sintesi:'Containment fisico (telo PE 6 mil) + pressione negativa con air scrubber HEPA H13 (≥4 ach) + rimozione materiali porosi contaminati + pulizia HEPA vacuum + biocidi UNI EN 14885:2023 solo se necessari.',limit:'Per area estesa (soglia EPA ~9,3 m² = 100 sq ft) si passa al full containment. Richiede DPI livello B (FFP3, tuta cat.III tipo 5/6, guanti EN ISO 374-5).'},
+    {id:'cond3',nome:'Bonifica IICRC S520 Condition 3 (full containment)',tempistica:'1-3 settimane',norma:'ANSI/IICRC S520-2024 4ª ed.',normeSec:['UNI EN ISO 16000-19:2014','UNI EN 1822-1:2019 HEPA','D.Lgs 81/2008 art.272-275'],sintesi:'Doppia barriera + anteroom decontaminazione + pressione negativa permanente (-5 Pa) + HEPA H13/H14 (≥6 ach) + smaltimento rifiuti speciali + verifica post-remediation campionamento aria.',limit:'Costi elevati. Sgombero locale obbligatorio. Verifica post-remediation OBBLIGATORIA (ISO 16000-19:2012).'},
+    {id:'fonte_umidita',nome:'Eliminazione fonte umidità + RH<60% (PREREQUISITO)',tempistica:'7-30 giorni',norma:'WHO Indoor Air Quality 2009 + Sedlbauer 2001',normeSec:['UNI EN 16798-1:2019','VTT Mould Index Hukka-Viitanen 1999'],sintesi:'Identificazione + rimozione della causa primaria (risalita, infiltrazione, ponte termico) + UR<60% (Sedlbauer LIM) tramite VMC ≥0,5 vol/h o deumidificazione. La crescita fungina si arresta sotto questa soglia.',limit:'Prerequisito OBBLIGATORIO per ogni bonifica. Da sola non sufficiente: serve comunque rimozione del materiale colonizzato.'},
+    {id:'biocidi_finitura',nome:'Materiali finitura biocidi-resistenti',tempistica:'5-10 giorni',norma:'UNI EN 14885:2023',normeSec:['IICRC S520-2024'],sintesi:'Ricostruzione con materiali a bassa idrofilia + biocidi (intonaci di calce con biocidi, pitture silicato/silossanico, pannelli calcio silicato traspirante).',limit:'I biocidi nei materiali hanno durata limitata (5-10 anni). Non sostituiscono il controllo dell\'umidità.'}
+  ];
+  var data={};
+  function blank(){return {urInt:null,estensione:'',sintomiOcc:[],vttIndex:null,organismo:[]};}
+  data=blank();
+  /* calcVerdict VERBATIM (biodeteriogeni.html 505) */
+  function calcVerdict(){
+    var d=data;var level="basso",summary="";
+    var dpY=d.urInt!=null&&d.urInt>=75;
+    var extPesante=d.estensione==="estesa"||d.estensione==="pervasiva";
+    var sintomiPres=(d.sintomiOcc||[]).length>0&&d.sintomiOcc.indexOf("nessuno")<0;
+    var vttHigh=(d.vttIndex!=null&&d.vttIndex>=3);
+    var score=(dpY?1:0)+(extPesante?2:0)+(sintomiPres?2:0)+(vttHigh?2:0);
+    if(score>=5){level="critico";summary="Rischio critico, bonifica + correzione causa igrica urgente.";}
+    else if(score>=3){level="alto";summary="Rischio alto, pianificare bonifica e prevenzione entro 1 mese.";}
+    else if(score>=1){level="medio";summary="Rischio medio, monitoraggio + trattamento localizzato.";}
+    else {level="basso";summary="Rischio basso, monitoraggio periodico.";}
+    return{level:level,summary:summary,score:score};
+  }
+  /* _calcMuffeScores VERBATIM (biodeteriogeni.html 423, 'puntuale'→'puntiforme' corretto) */
+  function _calcMuffeScores(){
+    var d=data;var v=calcVerdict();var est=d.estensione||'';var org=d.organismo||[];var sc={};
+    if(est==='localizzata'||(est==='puntiforme'&&v.level!=='basso')) sc.cond2={pri:true,why:'Estensione '+est+' (Condition 2 IICRC S520-2024): bonifica settoriale con containment + HEPA H13'};
+    else sc.cond2={pri:false,why:'Per estensione '+(est||'non specificata')+' valutare se applicabile'};
+    var patogeni=org.some(function(o){return /stachybotrys|aspergillus fumigatus|fusarium/i.test(o);});
+    if(['estesa','pervasiva'].indexOf(est)>=0||patogeni) sc.cond3={pri:true,why:'Estensione '+est+' (oltre soglia EPA ~9,3 m²) → full containment (IICRC S520-2024 Condition 3)'};
+    else sc.cond3={pri:false,why:'Estensione/specie non richiede full containment'};
+    sc.fonte_umidita={pri:true,why:'PREREQUISITO: senza eliminare la fonte d\'umidità e portare UR<60% (Sedlbauer LIM) la muffa ricresce in 2-4 settimane (WHO 2009)'};
+    if(v.level==='alto'||v.level==='critico') sc.biocidi_finitura={pri:true,why:'Rischio '+v.level+' (score '+v.score+') → ricostruzione con materiali biocidi-resistenti (UNI EN 14885:2023)'};
+    else sc.biocidi_finitura={pri:false,why:'Rischio '+v.level+': utile come prevenzione ma non urgente'};
+    return sc;
+  }
+  var QFLOW=[
+    {f:'urInt',kind:'num',q:'Umidità relativa interna media dell\'ambiente (%)? (la soglia di attività biologica è UR ≥ 75%)'},
+    {f:'estensione',kind:'choice',q:'Quanto è estesa la colonizzazione visibile?',
+      opts:[['puntiforme','Puntiforme'],['localizzata','Localizzata'],['estesa','Estesa'],['pervasiva','Pervasiva']]},
+    {f:'__sintomi',kind:'choice',q:'Gli occupanti riferiscono sintomi (asma, rinite, tosse, irritazione, cefalea, allergie)?',
+      opts:[['si','Sì, uno o più'],['no','No / nessuno']]},
+    {f:'vttIndex',kind:'num',q:'Indice VTT (Mould Index) osservato in cantiere, scala 0-6? (≥3 = crescita visibile estesa)'},
+    {f:'__organismo',kind:'choice',skip:true,q:'Che organismo prevale? (facoltativo, per la relazione)',
+      opts:[['muffa_nera','Muffa nera'],['muffa_verde','Muffa verde'],['muffa_bianca','Muffa bianca'],['alga','Alga / patina'],['lichene','Lichene'],['incerto','Incerto']]}
+  ];
+  var cur=-1,done=false;
+  function applicable(i){while(i<QFLOW.length){var q=QFLOW[i];if(!q.when||q.when(data))return i;i++;}return -1;}
+  function reset(){data=blank();cur=-1;done=false;}
+  function askHtml(q,prefix){var h=(prefix||'');h+='<div class="head">'+esc(q.q)+'</div>';if(q.kind==='num')h+='<div class="why">Solo il numero, oppure "salta". Non invento valori.</div>';return h;}
+  function compute(){
+    var v=calcVerdict();var sc=_calcMuffeScores();
+    var vc=(v.level==='critico'||v.level==='alto')?'v-err':(v.level==='medio')?'v-warn':'v-ok';
+    var h='<div class="vhead '+vc+'">Rischio '+v.level.toUpperCase()+' &middot; score '+v.score+'/7</div>';
+    h+='<div class="say">'+esc(v.summary)+'</div>';
+    var fl=[];
+    if(data.urInt!=null) fl.push(data.urInt>=75?('UR '+itDec(data.urInt,0)+'% ≥ 75% → +1 (soglia di attività biologica, Sedlbauer LIM)'):('UR '+itDec(data.urInt,0)+'% < 75% → sotto soglia di crescita'));
+    if(data.estensione) fl.push((data.estensione==='estesa'||data.estensione==='pervasiva')?('estensione '+data.estensione+' → +2 (oltre soglia area EPA ~9,3 m²)'):('estensione '+data.estensione));
+    if(data.sintomiOcc.length) fl.push(data.sintomiOcc.indexOf('nessuno')<0?'sintomi riferiti → +2 (correlazione sanitaria WHO 2009)':'nessun sintomo riferito');
+    if(data.vttIndex!=null) fl.push(data.vttIndex>=3?('indice VTT '+data.vttIndex+' ≥ 3 → +2 (crescita visibile estesa)'):('indice VTT '+data.vttIndex+' < 3'));
+    if(fl.length){h+='<div class="cmp-title">Indicatori che hanno pesato</div><ul class="flags">'+fl.map(function(f){return '<li>'+esc(f)+'</li>';}).join('')+'</ul>';}
+    h+='<div class="cmp-title">Risanamento (algoritmo IICRC S520-2024)</div>';
+    SOL_MUFFE.forEach(function(s){var x=sc[s.id];var cls=(x&&x.pri)?'sol':'sol alt';var tag=(x&&x.pri)?'RACCOMANDATA':'ALTERNATIVA';
+      h+='<div class="'+cls+'"><span class="sn">'+esc(s.nome)+'</span><span class="stag">'+tag+'</span>'+
+         (x?'<div class="why" style="color:#7a4e12">'+esc(x.why)+'</div>':'')+
+         '<div class="ssyn">'+esc(s.sintesi)+'</div>'+
+         '<div class="snorm"><b>Norma:</b> '+esc(s.norma)+'</div>'+
+         '<div class="slim"><b>Limitazioni:</b> '+esc(s.limit)+'</div></div>';});
+    h+='<div class="why">La colonizzazione è una <b>manifestazione</b>: senza eliminare la fonte d\'acqua a monte (risalita / infiltrazione / condensa) ricresce. Discrimina la causa coi moduli dedicati.</div>';
+    h+='<div class="why">Per il percorso completo (identificazione specie, VTT/LIM, salute, DPI, post-bonifica) apri il modulo <a href="biodeteriogeni.html" target="_blank" rel="noopener">Diagnosi Biodeteriogeni</a>.</div>';
+    h+='<div class="foot">Esito col motore di biodeteriogeni.html (score pesato, Sedlbauer LIM, IICRC S520-2024, WHO 2009). La conclusione tecnica resta tua.</div>';
+    done=true;return h;
+  }
+  function greeting(){reset();cur=applicable(0);
+    var intro='<div class="head">Rischio muffe / biodeteriogeni</div>'+
+      'Ti chiedo 4 dati e applico il <b>motore</b> del modulo: livello di rischio (score/7) e protocollo di bonifica IICRC S520.'+
+      '<div class="why">Se un dato non ce l\'hai, salta: non lo invento.</div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0">';
+    return askHtml(QFLOW[cur],intro);}
+  function respond(text){
+    if(done){if(/ricomin|nuova|riparti|reset/i.test(text))return greeting();return '<div class="why">Diagnosi conclusa. Tocca "Nuova domanda" o apri il modulo Biodeteriogeni.</div>';}
+    if(cur<0)return greeting();
+    var q=QFLOW[cur];
+    if(q.kind==='num'){if(q.skip&&_isSkip(text)){}else{var n=_num1(text);if(isNaN(n))return askHtml(q,'<div class="warnote">Non ho riconosciuto un numero. Scrivi solo la cifra, oppure "salta".</div>');data[q.f]=n;}}
+    else{ if(q.skip&&_isSkip(text)){}
+      else{var val=_matchChoice(q,text);if(val==null)return askHtml(q,'<div class="warnote">Non ho capito. Tocca una delle opzioni qui sotto.</div>');
+        if(q.f==='__sintomi'){data.sintomiOcc=(val==='si')?['presente']:['nessuno'];}
+        else if(q.f==='__organismo'){data.organismo=[val];}
+        else data[q.f]=val;}}
+    cur=applicable(cur+1);if(cur<0)return compute();return askHtml(QFLOW[cur]);
+  }
+  function chips(){if(done||cur<0)return [];var q=QFLOW[cur];var out=[];if(q.opts)q.opts.forEach(function(o){out.push({say:o[1],send:o[0],cls:'chip opt'});});if(q.skip)out.push({say:'salta',send:'salta',cls:'chip skip'});return out;}
+  function matches(low){return /muffa|muffe|biodet|biolog|funghi|fungin|alga|alghe|lichen|spore|colonizzaz|annerimento/.test(low);}
+  return {id:'biodeteriogeni',label:'Muffe / biodeteriogeni',title:'Assistente Muffe e biodeteriogeni',
+    sub:'Da UR, estensione, sintomi e indice VTT: livello di rischio e protocollo di bonifica.',
+    greeting:greeting,respond:respond,chips:chips,reset:reset,matches:matches,
+    _api:{calcVerdict:calcVerdict,scores:_calcMuffeScores,data:function(){return data;},set:function(k,val){data[k]=val;},reset:reset}};
+})();
+
+/* =========================================================================
+   SKILL 7, IAQ (qualità aria indoor)
+   Motore portato verbatim da iaq.html: calcVerdict (riga 325, cascade su 9
+   misure vs SOGLIE riga 245 + gate CO≥9 / amianto / SBS), SOL_IAQ (275).
+   ========================================================================= */
+var IAQ=(function(){
+  var SOGLIE={co2_ppm:{warn:1000,max:1400,label:'≤1.400 ppm (UNI EN 16798-1 cat. II: outdoor +800 ppm)'},tempC:{warn:26,max:30,label:'20-26 °C confort UNI EN ISO 7730'},urPerc:{warn:65,max:75,label:'30-60% confort + prevenzione muffe'},pm25:{warn:5,max:15,label:'5 μg/m³ annuo / 15 μg/m³ 24h (WHO 2021)'},pm10:{warn:15,max:45,label:'15 μg/m³ annuo / 45 μg/m³ 24h (WHO 2021)'},tvoc:{warn:300,max:1000,label:'<300 confort, >1.000 azione'},formaldeide:{warn:30,max:100,label:'≤30 μg/m³ long-term, ≤100 μg/m³ 30min (WHO 2010)'},co_ppm:{warn:5,max:9,label:'~3,5 ppm 24h (WHO 2021) / 9 ppm 8h (EPA NAAQS)'},no2:{warn:10,max:25,label:'10 μg/m³ annuo / 25 μg/m³ 24h (WHO 2021)'}};
+  var SOL_IAQ=[
+    {nome:'Rimozione/sostituzione della fonte emissiva',tempistica:'1-15 giorni',norma:'UNI EN 16516:2017',sintesi:'Identificazione della fonte primaria (mobili truciolare urea-formaldeide, tappeti VOC, pitture) e sua rimozione/sostituzione con prodotti low-emission certificati (A+/AgBB/GreenGuard).',limit:'Non sempre identificabile la fonte unica. Costi elevati per sostituzione arredi.'},
+    {nome:'Ventilazione meccanica con filtrazione F7/F9/HEPA',tempistica:'7-21 giorni',norma:'UNI EN 16798-1:2019',sintesi:'VMC dimensionata UNI EN 16798-1 cat. I-II con filtri ePM1 ≥80% per PM2.5/PM10 + carbone attivo per VOC + HEPA H13 per ambienti sensibili.',limit:'Consumi energetici elevati. Manutenzione filtri obbligatoria (UNI EN 16798-3).'},
+    {nome:'Abbattimento formaldeide con sigillanti specifici',tempistica:'1-3 giorni',norma:'UNI EN 16516:2017',sintesi:'Sigillanti a base di urea reagente o TiO₂ fotocatalitico su pannelli emissivi (MDF, truciolato): riduzione 50-80% verificata in camera test UNI EN ISO 16000-9.',limit:'Durata efficacia limitata (3-7 anni). Verifica con campionamento DNPH-HPLC post-trattamento.'}
+  ];
+  var data={};
+  function blank(){return {co2_ppm:null,tempC:null,urPerc:null,pm25:null,pm10:null,tvoc:null,formaldeide:null,co_ppm:null,no2:null,sintomiSegnalati:[],stagionalitaSintomi:'',fontiSospette:[]};}
+  data=blank();
+  /* calcVerdict VERBATIM (iaq.html 325) */
+  function calcVerdict(){
+    var d=data;var measures=['co2_ppm','tempC','urPerc','pm25','pm10','tvoc','formaldeide','co_ppm','no2'];
+    var nOver=0,nWarn=0,nOk=0,overs=[],warns=[];
+    measures.forEach(function(m){var v=d[m];var s=SOGLIE[m];if(typeof v==='number'&&isFinite(v)&&s){if(v>s.max){nOver++;overs.push(m+'='+v);}else if(v>s.warn){nWarn++;warns.push(m+'='+v);}else nOk++;}});
+    var nSint=(d.sintomiSegnalati||[]).length;var sbs=nSint>=2&&d.stagionalitaSintomi==='lavorativo';
+    var co_critico=d.co_ppm!=null&&d.co_ppm>=9;var amianto=(d.fontiSospette||[]).indexOf('amianto_sospetto')>=0;
+    var verdict,kind,summary;
+    if(co_critico){verdict="🚨 EMERGENZA CO, INTERVENTO IMMEDIATO";kind="err";summary="CO "+d.co_ppm+" ppm (≥9 ppm, soglia media 8h WHO/EPA), possibile apparecchio a combustione difettoso. Aerare e ispezionare caldaie/stufe/camini; con valori persistenti evacuare.";}
+    else if(amianto){verdict="🚨 SOSPETTO AMIANTO";kind="err";summary="Edificio pre-1992 con possibile amianto, bonifica obbligatoria L. 257/92. Campionamento gravimetrico → analisi MOCF/SEM in laboratorio.";}
+    else if(nOver>=2||(nOver>=1&&sbs)){verdict="IAQ NON CONFORME, più inquinanti oltre soglia";kind="err";summary=nOver+" parametri sopra soglia massima ("+overs.join("; ")+"). "+(sbs?"Pattern SBS confermato. ":"")+"Pianificare interventi mitigativi prioritari.";}
+    else if(nOver>=1){verdict="IAQ DEGRADATA, almeno 1 inquinante critico";kind="warn";summary="Parametro/i sopra soglia: "+overs.join("; ")+(warns.length?". In zona giallo: "+warns.join("; "):"")+". Identificare le fonti e pianificare interventi.";}
+    else if(nWarn>=2||sbs){verdict="IAQ DA MIGLIORARE, soglie zona giallo";kind="warn";summary=nWarn+" parametri in zona warning ("+warns.join("; ")+")"+(sbs?", sintomi SBS correlati al lavoro":"")+". Ottimizzazione ventilazione raccomandata.";}
+    else if(nOk>=3){verdict="IAQ CONFORME";kind="ok";summary=nOk+" parametri entro soglia raccomandata. Confermare con monitoraggio continuativo CO₂.";}
+    else if(measures.every(function(m){return d[m]==null;})){verdict="Verifica incompleta";kind="warn";summary="Nessuna misura inserita.";}
+    else{verdict="IAQ in valutazione";kind="warn";summary="Pochi parametri rilevati. Completare le misure mancanti per un verdetto più affidabile.";}
+    var azioni=[];
+    if(co_critico)azioni.push("CO ≥9 ppm: evacuare immediatamente, escludere apparecchio difettoso, ventilare prima di rientrare.");
+    if(amianto)azioni.push("Sospetto amianto: campionamento gravimetrico → MOCF/SEM in laboratorio. Eventuale bonifica L. 257/92.");
+    if(d.co2_ppm!=null&&d.co2_ppm>1400)azioni.push("CO₂ >1.400 ppm: ricambi insufficienti. Verificare VMC o ottimizzare ventilazione naturale (UNI EN 16798-1 cat. III: 0,4-0,5 vol/h).");
+    if(d.urPerc!=null&&d.urPerc>65)azioni.push("UR >65%: rischio muffe (Sedlbauer LIM). Deumidificazione + verifica drenaggio.");
+    if(d.urPerc!=null&&d.urPerc<30)azioni.push("UR <30%: irritazione mucose (secchezza). Umidificazione controllata.");
+    return{verdict:verdict,kind:kind,summary:summary,azioni:azioni,nOver:nOver,nWarn:nWarn,nOk:nOk};
+  }
+  var MEAS=[['co2_ppm','CO₂','ppm'],['co_ppm','CO','ppm (gate emergenza ≥9)'],['pm25','PM2.5','μg/m³'],['pm10','PM10','μg/m³'],['formaldeide','Formaldeide','μg/m³'],['tvoc','TVOC','μg/m³'],['no2','NO₂','μg/m³'],['tempC','Temperatura','°C'],['urPerc','Umidità relativa','%']];
+  var QFLOW=MEAS.map(function(m){return {f:m[0],kind:'num',skip:true,q:m[1]+' misurata ('+m[2]+')? Scrivi il valore o salta.'};}).concat([
+    {f:'__nsint',kind:'num',skip:true,q:'Quanti sintomi tipo SBS riferiscono gli occupanti (cefalea, irritazione, tosse, allergie...)? Scrivi il numero (0 se nessuno) o salta.'},
+    {f:'__lavorativo',kind:'choice',skip:true,when:function(d){return (d.sintomiSegnalati||[]).length>=2;},q:'I sintomi sono correlati all\'orario passato nell\'edificio (migliorano fuori)?',
+      opts:[['si','Sì (correlazione lavorativa)'],['no','No / variabili']]},
+    {f:'__amianto',kind:'choice',skip:true,q:'Edificio antecedente al 1992 con sospetta presenza di amianto?',
+      opts:[['si','Sì, sospetto amianto'],['no','No']]}
+  ]);
+  var cur=-1,done=false;
+  function applicable(i){while(i<QFLOW.length){var q=QFLOW[i];if(!q.when||q.when(data))return i;i++;}return -1;}
+  function reset(){data=blank();cur=-1;done=false;}
+  function askHtml(q,prefix){var h=(prefix||'');h+='<div class="head">'+esc(q.q)+'</div>';if(q.kind==='num')h+='<div class="why">Solo il numero, oppure "salta". Non invento valori.</div>';return h;}
+  function compute(){
+    var v=calcVerdict();
+    var vc=(v.kind==='err')?'v-err':(v.kind==='ok')?'v-ok':'v-warn';
+    var h='<div class="vhead '+vc+'">'+esc(v.verdict)+'</div>';
+    h+='<div class="say">'+esc(v.summary)+'</div>';
+    h+='<div class="cmp-title">Misure vs soglie ('+v.nOver+' oltre · '+v.nWarn+' gialli · '+v.nOk+' ok)</div><table class="m">';
+    MEAS.forEach(function(m){var val=data[m[0]];if(val==null)return;var s=SOGLIE[m[0]];var over=val>s.max,warn=!over&&val>s.warn;
+      h+=mrow(esc(m[1])+' <span style="color:#90a0b3">('+esc(s.label)+')</span>',itDec(val,1)+' '+esc(m[2].replace(/ \(.*/,'')),over);});
+    h+='</table>';
+    if(v.azioni&&v.azioni.length){h+='<div class="cmp-title">Raccomandazioni operative</div><ul class="flags">'+v.azioni.map(function(a){return '<li>'+esc(a)+'</li>';}).join('')+'</ul>';}
+    h+='<div class="cmp-title">Tecniche normate (verificare i prerequisiti)</div>';
+    SOL_IAQ.forEach(function(s){h+='<div class="sol"><span class="sn">'+esc(s.nome)+'</span><div class="ssyn">'+esc(s.sintesi)+'</div><div class="snorm"><b>Norma:</b> '+esc(s.norma)+'</div><div class="slim"><b>Limitazioni:</b> '+esc(s.limit)+'</div></div>';});
+    h+='<div class="why">Per il percorso completo (categoria UNI EN 16798-1, SBS, diagnosi differenziale, piano intervento, monitoraggio) apri il modulo <a href="iaq.html" target="_blank" rel="noopener">Qualità Aria Indoor</a>.</div>';
+    h+='<div class="foot">Esito col motore di iaq.html (soglie WHO 2021/2010, UNI EN 16798-1, ASHRAE 62.1; gate CO/amianto/SBS). La conclusione tecnica resta tua.</div>';
+    done=true;return h;
+  }
+  function greeting(){reset();cur=applicable(0);
+    var intro='<div class="head">Qualità dell\'aria indoor (IAQ)</div>'+
+      'Dammi le <b>misure</b> che hai (puoi saltare quelle mancanti) e applico il motore del modulo: conformità vs soglie WHO/UNI, allarmi CO e amianto, pattern Sick Building Syndrome.'+
+      '<div class="why">Niente misura inventata: salta ciò che non hai.</div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0">';
+    return askHtml(QFLOW[cur],intro);}
+  function respond(text){
+    if(done){if(/ricomin|nuova|riparti|reset/i.test(text))return greeting();return '<div class="why">Diagnosi conclusa. Tocca "Nuova domanda" o apri il modulo IAQ.</div>';}
+    if(cur<0)return greeting();
+    var q=QFLOW[cur];
+    if(q.kind==='num'){
+      if(q.skip&&_isSkip(text)){}
+      else{var n=_num1(text);if(isNaN(n))return askHtml(q,'<div class="warnote">Non ho riconosciuto un numero. Scrivi solo la cifra, oppure "salta".</div>');
+        if(q.f==='__nsint'){var k=Math.max(0,Math.round(n));data.sintomiSegnalati=[];for(var z=0;z<k;z++)data.sintomiSegnalati.push('s'+z);}
+        else data[q.f]=n;}
+    }else{ if(q.skip&&_isSkip(text)){}
+      else{var val=_matchChoice(q,text);if(val==null)return askHtml(q,'<div class="warnote">Non ho capito. Tocca un\'opzione.</div>');
+        if(q.f==='__lavorativo'){data.stagionalitaSintomi=(val==='si')?'lavorativo':'sempre';}
+        else if(q.f==='__amianto'){data.fontiSospette=(val==='si')?['amianto_sospetto']:[];}
+        else data[q.f]=val;}}
+    cur=applicable(cur+1);if(cur<0)return compute();return askHtml(QFLOW[cur]);
+  }
+  function chips(){if(done||cur<0)return [];var q=QFLOW[cur];var out=[];if(q.opts)q.opts.forEach(function(o){out.push({say:o[1],send:o[0],cls:'chip opt'});});if(q.skip)out.push({say:'salta',send:'salta',cls:'chip skip'});return out;}
+  function matches(low){return /\biaq\b|qualit. ?(dell)?.?aria|aria indoor|co2|co₂|formaldeide|voc|\btvoc\b|pm2|pm10|sick building|sbs|ricambio ?aria|ventilazione meccanica/.test(low);}
+  return {id:'iaq',label:'Qualità aria indoor',title:'Assistente Qualità Aria Indoor (IAQ)',
+    sub:'Dalle misure ambientali: conformità WHO/UNI, allarmi CO e amianto, pattern SBS.',
+    greeting:greeting,respond:respond,chips:chips,reset:reset,matches:matches,
+    _api:{calcVerdict:calcVerdict,data:function(){return data;},set:function(k,val){data[k]=val;},reset:reset,SOGLIE:SOGLIE}};
+})();
+
+/* =========================================================================
+   SKILL 8, MICROCLIMA BENI CULTURALI
+   Motore portato verbatim da microclima-bc.html: calcVerdict (riga 320) +
+   MATERIALI (riga 264). NB: nel modulo i target NON sono auto-derivati →
+   rischio falso-conforme; qui PROPONGO i target dal dataset MATERIALI del
+   materiale critico (valori UNI 10829 verbatim), l'utente conferma/modifica,
+   poi gira calcVerdict identico. Niente valore inventato.
+   ========================================================================= */
+var MICRO=(function(){
+  var MATERIALI=[
+    {id:'legno',nome:'Legno (mobili, statue, tavole, strumenti)',t_set:'19-24 °C',ur_set:'50-60%',ur_max_var_giorno:'±5%',luce:'< 200 lux',uv:'< 75 μW/lumen'},
+    {id:'carta',nome:'Carta, manoscritti, libri',t_set:'18-22 °C',ur_set:'45-55%',ur_max_var_giorno:'±5%',luce:'50 lux',uv:'< 75 μW/lumen'},
+    {id:'tessuti',nome:'Tessuti (paramenti, arazzi, costumi)',t_set:'19-24 °C',ur_set:'50-55%',ur_max_var_giorno:'±5%',luce:'< 50 lux',uv:'< 75 μW/lumen'},
+    {id:'dipinti',nome:'Dipinti (tela, tavola, affresco)',t_set:'19-24 °C',ur_set:'50-60%',ur_max_var_giorno:'±5%',luce:'150-200 lux',uv:'< 75 μW/lumen'},
+    {id:'metalli',nome:'Metalli (rame, ferro, argento, bronzo)',t_set:'15-25 °C',ur_set:'< 40% (ferro), < 50% (rame, bronzo)',ur_max_var_giorno:'(poco sensibili)',luce:'300+ lux',uv:'non critico'},
+    {id:'pietra_ceramica',nome:'Pietra, ceramica, intonaco, vetro',t_set:'15-25 °C',ur_set:'40-60%',ur_max_var_giorno:'(poco sensibili)',luce:'300+ lux',uv:'non critico'},
+    {id:'cuoio_pergamena',nome:'Cuoio, pergamena, materiale animale',t_set:'18-22 °C',ur_set:'50-60%',ur_max_var_giorno:'±5%',luce:'< 50 lux',uv:'< 75 μW/lumen'},
+    {id:'fotografie_film',nome:'Fotografie, negativi, film',t_set:'< 18 °C',ur_set:'30-40%',ur_max_var_giorno:'±2%',luce:'< 50 lux',uv:'0'},
+    {id:'plastiche',nome:'Plastiche storiche (celluloide, bachelite, PVC)',t_set:'< 15 °C',ur_set:'30-50%',ur_max_var_giorno:'±5%',luce:'< 50 lux',uv:'< 75 μW/lumen'},
+    {id:'avorio_osso',nome:'Avorio, osso, corno',t_set:'18-22 °C',ur_set:'50-60%',ur_max_var_giorno:'±3%',luce:'< 150 lux',uv:'< 75 μW/lumen'}
+  ];
+  var data={};
+  function blank(){return {materialeCritico:'',t_target_min:null,t_target_max:null,ur_target_min:null,ur_target_max:null,lux_max:null,uv_max:null,t_misurata:null,ur_misurata:null,var_giornaliera_ur:null,lux_misurato:null,uv_misurato:null,danniRiscontrati:[]};}
+  data=blank();
+  function _mat(){return MATERIALI.filter(function(m){return m.id===data.materialeCritico;})[0]||null;}
+  /* calcVerdict VERBATIM (microclima-bc.html 320), porzione verdetto T/UR/Lux/UV/var + azioni */
+  function calcVerdict(){
+    var d=data;var matCritico=_mat();var problemi=[];var azioni=[];
+    var tOk=(d.t_misurata==null)||(d.t_target_min==null||d.t_target_max==null)||(d.t_misurata>=d.t_target_min&&d.t_misurata<=d.t_target_max);
+    var urOk=(d.ur_misurata==null)||(d.ur_target_min==null||d.ur_target_max==null)||(d.ur_misurata>=d.ur_target_min&&d.ur_misurata<=d.ur_target_max);
+    var luxOk=(d.lux_misurato==null)||(d.lux_max==null)||(d.lux_misurato<=d.lux_max);
+    var uvOk=(d.uv_misurato==null)||(d.uv_max==null)||(d.uv_misurato<=d.uv_max);
+    var varOk=true;
+    if(typeof d.var_giornaliera_ur==='number'&&isFinite(d.var_giornaliera_ur)&&matCritico&&matCritico.ur_max_var_giorno){var m=String(matCritico.ur_max_var_giorno).match(/(\d+(\.\d+)?)/);if(m){var lim=parseFloat(m[1]);if(d.var_giornaliera_ur>lim){varOk=false;problemi.push('var. UR giornaliera '+d.var_giornaliera_ur+'% > limite '+lim+'%');azioni.push('Ridurre fluttuazioni UR: vetrine inerziali (silica gel), HVAC più stabile, aumentare inerzia termoigrometrica (UNI EN 15757:2010).');}}}
+    if(!tOk){problemi.push('T '+d.t_misurata+'°C fuori range '+d.t_target_min+'-'+d.t_target_max+'°C');azioni.push('Allineare T al range target: regolazione HVAC o intervento sull\'involucro.');}
+    if(!urOk){problemi.push('UR '+d.ur_misurata+'% fuori range '+d.ur_target_min+'-'+d.ur_target_max+'%');if(d.ur_misurata>d.ur_target_max)azioni.push('UR troppo alta: deumidificazione locale + verifica infiltrazioni + ventilazione.');else azioni.push('UR troppo bassa: umidificazione controllata (evaporativa o vapore).');}
+    if(!luxOk){problemi.push('Lux '+d.lux_misurato+' > max '+d.lux_max);azioni.push('Ridurre illuminamento: meno lampade, schermare finestre, spegnere in assenza pubblico (UNI 10829).');}
+    if(!uvOk){problemi.push('UV '+d.uv_misurato+' > max '+d.uv_max+' μW/lm');azioni.push('Installare filtri UV su lampade e vetrate.');}
+    if((d.danniRiscontrati||[]).indexOf('biologico')>=0)azioni.push('Danno biologico: IPM (UNI EN 16790:2016) + UR<60% + trattamenti anossici.');
+    if((d.danniRiscontrati||[]).indexOf('chimico')>=0)azioni.push('Danno chimico: filtrazione aria HEPA + carbone attivo + materiali contenitori PAT-certificati.');
+    var verdict,kind,summary;var nProb=problemi.length;
+    var meas=[d.t_misurata,d.ur_misurata,d.lux_misurato,d.uv_misurato].filter(function(x){return x!=null;}).length;
+    if(meas===0){verdict="Verifica incompleta";kind="warn";summary="Nessuna misura rilevata.";}
+    else if(nProb===0){verdict="MICROCLIMA CONFORME";kind="ok";summary="Tutti i parametri rilevati sono nei target.";}
+    else if(nProb===1){verdict="MICROCLIMA DA OTTIMIZZARE";kind="warn";summary="1 parametro fuori target: "+problemi[0]+". Pianificare intervento mitigativo.";}
+    else{verdict="MICROCLIMA NON CONFORME";kind="err";summary=nProb+" parametri fuori target: "+problemi.join("; ")+".";}
+    return{verdict:verdict,kind:kind,summary:summary,azioni:azioni,problemi:problemi};
+  }
+  var QFLOW=[
+    {f:'materialeCritico',kind:'choice',q:'Qual è il materiale PIÙ sensibile della collezione/sala (su cui calibrare i limiti)?',
+      opts:MATERIALI.map(function(m){return [m.id,m.nome];})},
+    {f:'__tt',kind:'num2',q:'Target di temperatura (min e max °C).'},
+    {f:'__urt',kind:'num2',q:'Target di umidità relativa (min e max %).'},
+    {f:'t_misurata',kind:'num',q:'Temperatura MEDIA misurata (°C)?'},
+    {f:'ur_misurata',kind:'num',q:'Umidità relativa MEDIA misurata (%)?'},
+    {f:'var_giornaliera_ur',kind:'num',skip:true,q:'Variazione UR giornaliera misurata (%)? Confrontata col limite del materiale critico (UNI EN 15757). Salta se non l\'hai.'},
+    {f:'lux_misurato',kind:'num',skip:true,q:'Illuminamento misurato (lux)? Salta se non pertinente.'},
+    {f:'uv_misurato',kind:'num',skip:true,q:'UV misurato (μW/lumen)? Salta se non pertinente.'}
+  ];
+  var cur=-1,done=false;
+  function applicable(i){while(i<QFLOW.length){var q=QFLOW[i];if(!q.when||q.when(data))return i;i++;}return -1;}
+  function reset(){data=blank();cur=-1;done=false;}
+  function askHtml(q,prefix){
+    var h=(prefix||'');
+    /* proposta target dal dataset MATERIALI (UNI 10829) */
+    if(q.f==='__tt'){var m=_mat();var t=m?_nums(m.t_set):[];var hint=t.length>=2?(' Letteratura UNI 10829 per '+m.nome.split(' (')[0]+': <b>'+t[0]+'-'+t[1]+' °C</b>. Conferma o scrivi i tuoi (es. '+t[0]+' '+t[1]+').'):(m?(' Letteratura: '+esc(m.t_set)+'. Scrivi min e max.'):'');h+='<div class="head">'+esc(q.q)+'</div><div class="why">'+hint+'</div>';return h;}
+    if(q.f==='__urt'){var m2=_mat();var u=m2?_nums(m2.ur_set):[];var hint2=u.length>=2?(' Letteratura UNI 10829: <b>'+u[0]+'-'+u[1]+' %</b>. Conferma o scrivi i tuoi (es. '+u[0]+' '+u[1]+').'):(m2?(' Letteratura: '+esc(m2.ur_set)+'. Scrivi min e max.'):'');h+='<div class="head">'+esc(q.q)+'</div><div class="why">'+hint2+'</div>';return h;}
+    h+='<div class="head">'+esc(q.q)+'</div>';if(q.kind==='num'||q.kind==='num2')h+='<div class="why">Solo i numeri, oppure "salta". Non invento valori.</div>';return h;
+  }
+  function compute(){
+    var v=calcVerdict();var m=_mat();
+    var vc=(v.kind==='err')?'v-err':(v.kind==='ok')?'v-ok':'v-warn';
+    var h='<div class="vhead '+vc+'">'+esc(v.verdict)+'</div>';
+    h+='<div class="say">'+esc(v.summary)+'</div>';
+    h+='<div class="cmp-title">Target applicati'+(m?(' (materiale critico: '+esc(m.nome.split(' (')[0])+')'):'')+'</div><table class="m">'+
+       mrow('Temperatura',(data.t_target_min!=null?data.t_target_min+'-'+data.t_target_max+' °C':'n.d.'),false)+
+       mrow('Umidità relativa',(data.ur_target_min!=null?data.ur_target_min+'-'+data.ur_target_max+' %':'n.d.'),false)+
+       (data.lux_max!=null?mrow('Lux max',data.lux_max+' lux',false):'')+
+       (m?mrow('Var. UR giornaliera max (materiale critico)',esc(m.ur_max_var_giorno),false):'')+
+       '</table>';
+    if(v.problemi&&v.problemi.length){h+='<div class="cmp-title">Parametri fuori target</div><ul class="flags">'+v.problemi.map(function(p){return '<li>'+esc(p)+'</li>';}).join('')+'</ul>';}
+    if(v.azioni&&v.azioni.length){h+='<div class="cmp-title">Raccomandazioni operative</div><ul class="flags">'+v.azioni.map(function(a){return '<li>'+esc(a)+'</li>';}).join('')+'</ul>';}
+    h+='<div class="why">Target proposti dai valori di letteratura del dataset materiali (UNI 10829:1999 + UNI EN 15757:2010), confermati da te. La classe ASHRAE (AA/A/B/C/D) è etichetta gestionale, non modifica i confronti numerici.</div>';
+    h+='<div class="why">Per il percorso completo (ente, ambiente, classi ASHRAE, danni, piano mitigazione, monitoraggio UNI EN 16095) apri il modulo <a href="microclima-bc.html" target="_blank" rel="noopener">Microclima Beni Culturali</a>.</div>';
+    h+='<div class="foot">Esito col motore di microclima-bc.html (confronto misure↔target, UNI 10829/UNI EN 15757). La conclusione tecnica resta tua.</div>';
+    done=true;return h;
+  }
+  function greeting(){reset();cur=applicable(0);
+    var intro='<div class="head">Microclima per beni culturali</div>'+
+      'Scelgo i <b>target di conservazione</b> dal materiale più sensibile (valori UNI 10829), tu li confermi, e confronto con le misure: conforme / da ottimizzare / non conforme.'+
+      '<div class="why">Propongo i limiti di letteratura ma decidi tu: niente verdetto su target inventati.</div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0">';
+    return askHtml(QFLOW[cur],intro);}
+  function _applyMatDefaults(){var m=_mat();if(!m)return;var lx=_nums(m.luce);if(lx.length)data.lux_max=lx[0];var uvn=_nums(m.uv);if(uvn.length)data.uv_max=uvn[0];}
+  function respond(text){
+    if(done){if(/ricomin|nuova|riparti|reset/i.test(text))return greeting();return '<div class="why">Diagnosi conclusa. Tocca "Nuova domanda" o apri il modulo Microclima.</div>';}
+    if(cur<0)return greeting();
+    var q=QFLOW[cur];
+    if(q.kind==='num2'){
+      var ns=_nums(text);
+      if(ns.length<2){ /* "conferma" senza numeri → usa la letteratura */
+        var m=_mat();var src=(q.f==='__tt')?(m?_nums(m.t_set):[]):(m?_nums(m.ur_set):[]);
+        if(_isSkip(text)||/conferm|usa|letterat|ok\b|si\b|sì/i.test(text)){ if(src.length>=2)ns=[src[0],src[1]]; }
+        if(ns.length<2)return askHtml(q,'<div class="warnote">Mi servono due numeri (min e max), oppure scrivi "conferma" per usare i valori di letteratura.</div>');
+      }
+      if(q.f==='__tt'){data.t_target_min=Math.min(ns[0],ns[1]);data.t_target_max=Math.max(ns[0],ns[1]);}
+      else{data.ur_target_min=Math.min(ns[0],ns[1]);data.ur_target_max=Math.max(ns[0],ns[1]);}
+    }else if(q.kind==='num'){
+      if(q.skip&&_isSkip(text)){}
+      else{var n=_num1(text);if(isNaN(n))return askHtml(q,'<div class="warnote">Non ho riconosciuto un numero. Scrivi la cifra o "salta".</div>');data[q.f]=n;}
+    }else{ /* choice: materialeCritico */
+      var val=_matchChoice(q,text);if(val==null)return askHtml(q,'<div class="warnote">Non ho capito. Tocca un materiale.</div>');
+      data[q.f]=val; if(q.f==='materialeCritico')_applyMatDefaults();
+    }
+    cur=applicable(cur+1);if(cur<0)return compute();return askHtml(QFLOW[cur]);
+  }
+  function chips(){if(done||cur<0)return [];var q=QFLOW[cur];var out=[];if(q.opts)q.opts.forEach(function(o){out.push({say:o[1],send:o[0],cls:'chip opt'});});
+    if(q.kind==='num2'){var m=_mat();var src=(q.f==='__tt')?(m?_nums(m.t_set):[]):(m?_nums(m.ur_set):[]);if(src.length>=2)out.push({say:'usa '+src[0]+'-'+src[1],send:'conferma',cls:'chip opt'});}
+    if(q.skip)out.push({say:'salta',send:'salta',cls:'chip skip'});return out;}
+  function matches(low){return /microclim|beni cultural|\bmuseo\b|archivio|biblioteca|conservazione|ashrae|opera d.arte|reperto|uni 10829/.test(low);}
+  return {id:'microclima',label:'Microclima beni culturali',title:'Assistente Microclima Beni Culturali',
+    sub:'Target di conservazione dal materiale critico (UNI 10829) vs misure rilevate.',
+    greeting:greeting,respond:respond,chips:chips,reset:reset,matches:matches,
+    _api:{calcVerdict:calcVerdict,data:function(){return data;},set:function(k,val){data[k]=val;},reset:reset,MATERIALI:MATERIALI}};
+})();
+
+/* =========================================================================
+   SKILL 9, TERMOIGROMETRIA (condensa superficiale + rischio muffa LIM)
+   Motore portato verbatim da termoigrometria.html: pSat/dewPoint/rhAtSurface/
+   rhCritico/limCritical/frsiCalc/vttDays (righe 1360-1417), LIM_DATA Sedlbauer
+   2001 (1349), verdetto Sezione A (1565) + margine rugiada (B) + fRsi. Per la
+   condensa INTERSTIZIALE (stratigrafia) rimanda al modulo Glaser.
+   ========================================================================= */
+var TERMO=(function(){
+  var MAGNUS={a:17.269,b:237.3},MAGNUS_ICE={a:21.875,b:265.5},E0=610.5,FRSI_MIN_IT=0.72;
+  /* LIM ricalibrata sulla fonte primaria (Sedlbauer 2001 pp. 84-86 + Fig. 34); sotto 10°C tiene il valore a 10°C, scelta cautelativa. Allineata a termoigrometria.html v3.2.7. */
+  var LIM_DATA={temps:[10,12,20,25,30],catI:[80.3,79,75.9,75,76],catII:[84.6,83.7,80.2,79.6,79],catIII:[94,92.4,91,91,93]};
+  function pSat(T){if(T>=0)return E0*Math.exp((MAGNUS.a*T)/(MAGNUS.b+T));return E0*Math.exp((MAGNUS_ICE.a*T)/(MAGNUS_ICE.b+T));}
+  function dewPoint(T,UR){if(T==null||UR==null||UR<=0)return null;var rh=Math.max(0.001,Math.min(100,UR))/100;var alpha=Math.log(rh)+(MAGNUS.a*T)/(MAGNUS.b+T);return (MAGNUS.b*alpha)/(MAGNUS.a-alpha);}
+  function rhAtSurface(Tair,URair,Tsurf){if(Tair==null||URair==null||Tsurf==null)return null;var pAir=pSat(Tair)*(URair/100);return Math.min(100,(pAir/pSat(Tsurf))*100);}
+  function rhCritico(Tair,Tsurf){if(Tair==null||Tsurf==null)return null;return Math.min(100,Math.max(0,(pSat(Tsurf)/pSat(Tair))*100));}
+  function limCritical(T,catIdx){var arr=catIdx===0?LIM_DATA.catI:catIdx===1?LIM_DATA.catII:LIM_DATA.catIII;var temps=LIM_DATA.temps;if(T<=temps[0])return arr[0];if(T>=temps[temps.length-1])return arr[arr.length-1];for(var i=1;i<temps.length;i++){if(T<=temps[i]){var t0=temps[i-1],t1=temps[i];return arr[i-1]+(T-t0)/(t1-t0)*(arr[i]-arr[i-1]);}}return arr[arr.length-1];}
+  function frsiCalc(Tair,Tsurf,Text){if(Tair==null||Tsurf==null||Text==null)return null;var den=Tair-Text;if(Math.abs(den)<0.01)return null;return (Tsurf-Text)/den;}
+  function vttDays(T,UR,catIdx){if(T==null||UR==null||UR<=0||T<=0)return null;var tWeeks=Math.exp(-0.68*Math.log(T)-13.9*Math.log(UR)+66.02);return Math.max(1,Math.round(tWeeks*7));}
+
+  var data={};
+  function blank(){return {T:null,UR:null,Ts:null,Te:null,cat:0};}
+  data=blank();
+  function evalAll(){
+    var T=data.T,UR=data.UR,Ts=data.Ts,Te=data.Te,cat=data.cat||0;
+    var Td=dewPoint(T,UR),URsurf=rhAtSurface(T,UR,Ts),URcrit=rhCritico(T,Ts);
+    var Tsurf=(Ts!=null)?Ts:T;var lim=limCritical(Tsurf,cat);
+    var margine=(lim!=null&&URsurf!=null)?(lim-URsurf):null;
+    var fRsi=frsiCalc(T,Ts,Te);var vtt=vttDays(Tsurf,URsurf||UR,cat);
+    var rhRef=URsurf!=null?URsurf:UR;
+    return {T:T,UR:UR,Ts:Ts,Te:Te,cat:cat,Td:Td,URsurf:URsurf,URcrit:URcrit,lim:lim,margine:margine,fRsi:fRsi,vtt:vtt,rhRef:rhRef};
+  }
+  var QFLOW=[
+    {f:'T',kind:'num',q:'Temperatura dell\'aria interna del locale (°C)? (tipico 18-22)'},
+    {f:'UR',kind:'num',q:'Umidità relativa dell\'aria interna (%)? (datalogger / igrometro)'},
+    {f:'Ts',kind:'num',q:'Temperatura della superficie della parete (°C)? (termocamera o sonda, nel punto più freddo / ponte termico)'},
+    {f:'cat',kind:'choice',q:'Categoria di substrato della superficie (Sedlbauer 2001)?',
+      opts:[['0','I: biodegradabili (legno, cartongesso, carta, tessuti)'],['1','II: minerali porosi (intonaco, laterizio, malta, pitture)'],['2','III: inerti (vetro, metallo, ceramica smaltata)']]},
+    {f:'Te',kind:'num',skip:true,q:'Temperatura dell\'aria esterna (°C)? Serve solo per il fattore fRsi (soglia 0,72 IT). Salta se non ti serve.'}
+  ];
+  var cur=-1,done=false;
+  function applicable(i){while(i<QFLOW.length){var q=QFLOW[i];if(!q.when||q.when(data))return i;i++;}return -1;}
+  function reset(){data=blank();cur=-1;done=false;}
+  function askHtml(q,prefix){var h=(prefix||'');h+='<div class="head">'+esc(q.q)+'</div>';if(q.kind==='num')h+='<div class="why">Solo il numero, oppure "salta". Non invento valori.</div>';return h;}
+  function compute(){
+    var r=evalAll();var catLbl=['I','II','III'][r.cat];
+    var h='',vc,head,say;
+    /* VERDETTO Sezione A (LIM) VERBATIM (termoigrometria.html 1565) */
+    if(r.Ts!=null&&r.Td!=null&&r.Ts<r.Td){vc='v-err';head='CONDENSA IN ATTO, superficie sotto punto di rugiada';say='T parete '+itDec(r.Ts,1)+'°C < punto di rugiada '+itDec(r.Td,1)+'°C: si forma acqua liquida sulla superficie. Causa frequente: ponte termico, isolamento insufficiente, scarsa ventilazione invernale.';}
+    else if(r.URsurf!=null&&r.URsurf>=100){vc='v-err';head='SATURAZIONE 100%, condensa imminente';say='UR alla superficie pari al 100%: microcondensa intermittente probabile.';}
+    else if(r.rhRef>=r.lim){vc='v-err';head='RISCHIO MUFFA ALTO, soglia LIM superata';say='UR superficie ('+itDec(r.URsurf,1)+'%) SUPERA la soglia LIM Sedlbauer '+itDec(r.lim,1)+'% per il substrato Cat. '+catLbl+' (alla T superficie). Soglia superata di '+itDec(r.rhRef-r.lim,1)+' punti.'+(r.vtt!=null?(' Tempo stimato a Mould Index M=1 (Hukka-Viitanen): '+r.vtt+' giorni.'):'');}
+    else if(r.rhRef>=r.lim-5){vc='v-warn';head='RISCHIO MUFFA MODERATO, margine residuo sottile';say='UR superficie ('+itDec(r.URsurf,1)+'%) si avvicina alla soglia LIM critica ('+itDec(r.lim,1)+'%): margine residuo soli '+itDec(r.lim-r.rhRef,1)+' punti.';}
+    else if(r.rhRef>=60){vc='v-ok';head='RISCHIO MUFFA BASSO, sotto soglia LIM con margine';say='UR superficie ('+itDec(r.URsurf,1)+'%) è '+itDec(r.lim-r.rhRef,1)+' punti sotto la soglia LIM critica ('+itDec(r.lim,1)+'%): margine sufficiente.';}
+    else {vc='v-ok';head='NESSUN RISCHIO, UR < 60%';say='L\'UR di riferimento ('+itDec(r.rhRef,1)+'%) è sotto il 60%: nessun rischio di crescita fungina su qualsiasi substrato (Sedlbauer 2001).';}
+    h+='<div class="vhead '+vc+'">'+esc(head)+'</div><div class="say">'+esc(say)+'</div>';
+    /* KPI di supporto */
+    h+='<div class="cmp-title">Grandezze calcolate</div><table class="m">'+
+       mrow('Punto di rugiada T<sub>d</sub> (Magnus-Tetens)',itDec(r.Td,1)+' °C',false)+
+       mrow('UR alla superficie',(r.URsurf!=null?itDec(r.URsurf,1)+' %':'n.d.'),r.URsurf!=null&&r.URsurf>=r.lim)+
+       mrow('Soglia LIM Sedlbauer (Cat. '+catLbl+', @ T superficie)',itDec(r.lim,1)+' %',false)+
+       mrow('UR critica (oltre = condensa)',(r.URcrit!=null?itDec(r.URcrit,1)+' %':'n.d.'),false)+
+       (r.vtt!=null?mrow('Tempo a Mould Index M=1 (VTT, Hukka-Viitanen)',r.vtt+' giorni',r.vtt<14):'')+
+       '</table>';
+    /* margine rugiada (Sezione B) */
+    if(r.Ts!=null&&r.Td!=null){var mTs=r.Ts-r.Td;var cls=(mTs<=0)?'warnote':(mTs<=3)?'warnote':'note';
+      h+='<div class="'+cls+'"><b>Margine dal punto di rugiada:</b> '+(mTs>=0?'+':'')+itDec(mTs,1)+' °C'+(mTs<=0?' → condensa in atto.':mTs<=3?' → rischio condensa (margine sottile).':mTs<=5?' → margine ridotto.':' → nessun rischio condensa.')+'</div>';}
+    /* fRsi */
+    if(r.fRsi!=null){var ok=r.fRsi>=FRSI_MIN_IT;h+='<div class="'+(ok?'note':'warnote')+'"><b>Fattore di temperatura f<sub>Rsi</sub> = '+itDec(r.fRsi,3)+'</b> ('+(ok?'≥':'<')+' 0,72): '+(ok?'conforme al riferimento operativo IT.':'NON conforme al riferimento operativo IT (DM 26/06/2015; il valore di legge va calcolato caso per caso).')+'</div>';}
+    else h+='<div class="why">Per il fattore f<sub>Rsi</sub> serve anche la temperatura esterna.</div>';
+    h+='<div class="why">Questa è la verifica della <b>condensa superficiale</b> e del rischio muffa. Per la condensa <b>interstiziale</b> (dentro la parete) serve la stratigrafia: usa il modulo <a href="condensa-glaser.html" target="_blank" rel="noopener">Glaser (UNI EN ISO 13788)</a>.</div>';
+    h+='<div class="why">Percorso completo (diagrammi LIM/rugiada/psicrometrico, export): modulo <a href="termoigrometria.html" target="_blank" rel="noopener">Termoigrometria</a>.</div>';
+    h+='<div class="foot">Esito col motore di termoigrometria.html (Magnus-Tetens, LIM Sedlbauer 2001, VTT Hukka-Viitanen 1999, fRsi UNI EN ISO 13788). La conclusione tecnica resta tua.</div>';
+    if(r.cat===2)h+='<div class="warnote">Nota: la Cat. III è un\'estensione prudenziale del modulo, non pubblicata da Sedlbauer.</div>';
+    done=true;return h;
+  }
+  function greeting(){reset();cur=applicable(0);
+    var intro='<div class="head">Condensa superficiale e rischio muffa</div>'+
+      'Da T aria, UR aria, T superficie e tipo di substrato calcolo punto di rugiada, condensa superficiale e <b>rischio muffa LIM</b> (Sedlbauer). Con la T esterna aggiungo il fattore f<sub>Rsi</sub>.'+
+      '<div class="why">Se un dato non ce l\'hai, salta: non lo invento.</div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0">';
+    return askHtml(QFLOW[cur],intro);}
+  function respond(text){
+    if(done){if(/ricomin|nuova|riparti|reset/i.test(text))return greeting();return '<div class="why">Verifica conclusa. Tocca "Nuova domanda" o apri il modulo Termoigrometria.</div>';}
+    if(cur<0)return greeting();
+    var q=QFLOW[cur];
+    if(q.kind==='num'){if(q.skip&&_isSkip(text)){}else{var n=_num1(text);if(isNaN(n))return askHtml(q,'<div class="warnote">Non ho riconosciuto un numero. Scrivi la cifra o "salta".</div>');data[q.f]=n;}}
+    else{var rmn={'i':'0','ii':'1','iii':'2'}[String(text).trim().toLowerCase().replace(/^cat\.?\s*/,'')];var val=rmn||_matchChoice(q,text);if(val==null)return askHtml(q,'<div class="warnote">Non ho capito. Tocca una categoria (o scrivi I / II / III).</div>');data.cat=parseInt(val,10)||0;}
+    cur=applicable(cur+1);if(cur<0)return compute();return askHtml(QFLOW[cur]);
+  }
+  function chips(){if(done||cur<0)return [];var q=QFLOW[cur];var out=[];if(q.opts)q.opts.forEach(function(o){out.push({say:o[1],send:o[0],cls:'chip opt'});});if(q.skip)out.push({say:'salta',send:'salta',cls:'chip skip'});return out;}
+  function matches(low){return /condensa|rugiada|punto di rugiada|ponte termic|termoigrom|frsi|f.?rsi|temperatura superficial|muffa.*parete|parete.*fredd|sedlbauer/.test(low);}
+  return {id:'termoigrometria',label:'Condensa superficiale / muffa',title:'Assistente Condensa superficiale e muffa',
+    sub:'Da T aria, UR, T superficie: punto di rugiada, condensa superficiale, rischio muffa LIM e fRsi.',
+    greeting:greeting,respond:respond,chips:chips,reset:reset,matches:matches,
+    _api:{evalAll:evalAll,limCritical:limCritical,dewPoint:dewPoint,rhAtSurface:rhAtSurface,frsiCalc:frsiCalc,vttDays:vttDays,data:function(){return data;},set:function(k,val){data[k]=val;},reset:reset}};
+})();
+
+/* =========================================================================
+   SKILL 10, CONDENSA INTERSTIZIALE (Glaser stazionario)
+   Motore portato verbatim da condensa-glaser.html: computeGlaser (riga 1916),
+   costanti BOUNDARY_R_TABLE/RSI_FRSI/FRSI_REF_IT/E0/MAGNUS (1479-1493), verdetto
+   updateKpis (1978), _calcCondensaScores (2030) + SOL_CONDENSA (1997).
+   BUILDING_MATERIALS (riga 1496, 52 voci) trimmato a [id,nome,λ,μ] (computeGlaser
+   usa solo lambda e mu; valori INVARIATI). Stratigrafia raccolta con loop guidato
+   uno strato alla volta. Per la verifica 12 mesi e i dati climatici → modulo Glaser.
+   ========================================================================= */
+var GLASER=(function(){
+  var MAGNUS={a:17.269,b:237.3},MAGNUS_ICE={a:21.875,b:265.5},E0=610.5,RSI_FRSI=0.25,FRSI_REF_IT=0.72;
+  var BOUNDARY_R_TABLE={orizzontale:{Rsi:0.13,Rse:0.04},ascendente:{Rsi:0.10,Rse:0.04},discendente:{Rsi:0.17,Rse:0.04}};
+  function Psat(T){if(T>=0)return E0*Math.exp((MAGNUS.a*T)/(MAGNUS.b+T));return E0*Math.exp((MAGNUS_ICE.a*T)/(MAGNUS_ICE.b+T));}
+  function dewPoint(T,UR){if(T==null||UR==null||UR<=0)return null;var rh=Math.max(0.001,Math.min(100,UR))/100;var alpha=Math.log(rh)+(MAGNUS.a*T)/(MAGNUS.b+T);return (MAGNUS.b*alpha)/(MAGNUS.a-alpha);}
+  /* BUILDING_MATERIALS trimmato [id, nome, lambda, mu] (verbatim da condensa-glaser.html 1496) */
+  var MAT=[
+    ['mattone_pieno','Mattone pieno',0.72,10],['mattone_forato','Mattone forato',0.36,8],['mattone_1200','Mattone ρ=1200',0.43,8],['mattone_1400','Mattone ρ=1400',0.50,8],['mattone_1600','Mattone ρ=1600',0.59,8],
+    ['cls_strutt','Cls strutturale ρ=2000',1.16,100],['cls_2200','Cls strutturale ρ=2200',1.48,100],['cls_2400','Cls strutturale ρ=2400',1.91,100],
+    ['tufo','Tufo vulcanico',0.63,8],['tufo_2300','Tufo ρ=2300',1.70,15],['pietra_calcarea','Pietra calcarea',2.90,165],['calcare_1900','Calcare ρ=1900',1.50,40],['blocco_poroton','Blocco in laterizio porizzato (rettificato)',0.18,8],['granito','Granito',3.20,10000],['marmo','Marmo',3.00,10000],
+    ['intonaco_calce','Intonaco di calce',0.90,25],['intonaco_cem','Intonaco cementizio',1.40,25],['intonaco_gesso','Intonaco in gesso',0.35,11],['intonaco_calce_gesso','Intonaco calce e gesso',0.70,11],['malta_gesso_900','Malta di gesso ρ=900',0.41,11],['rasante','Rasante / stucco',0.70,18],
+    ['eps','EPS polistirene espanso',0.040,50],['eps_15','EPS da blocchi ρ=15',0.047,50],['xps','XPS polistirene estruso',0.034,80],['lana_roccia','Lana di roccia (rigida)',0.039,1.3],['lana_vetro','Lana di vetro (semirigida)',0.043,1.3],['lana_vetro_rigida','Lana di vetro (rigida)',0.038,1.3],['fibra_legno','Fibra di legno',0.045,5],['sughero','Sughero espanso',0.045,20],['poliuretano','Poliuretano PUR',0.032,130],['aerogel','Aerogel (pannello)',0.015,5],['vetro_cellulare','Vetro cellulare',0.060,100000],['resina_fenolica','Resina fenolica',0.044,42],['cellulosa_sfusa','Cellulosa sfusa',0.058,2],['poliuretano_situ','Poliuretano espanso in situ',0.035,55],
+    ['barriera_vapore','Barriera al vapore (PE)',0.50,100000],['freno_vapore','Freno al vapore',0.50,5000],['guaina_bitume','Guaina bituminosa',0.17,193000],['asfalto','Asfalto',0.70,193000],['fogli_sintetici','Fogli sintetici',0.23,5500],
+    ['cls_armato','Calcestruzzo armato',2.30,130],['cls_alleggerito','Cls alleggerito (argilla esp.)',0.30,8],['cls_alleg_600','Cls alleggerito ρ=600',0.19,8],['massetto_cem','Massetto cementizio',1.40,25],
+    ['cartongesso','Cartongesso (lastra)',0.210,8],['legno_abete','Legno abete',0.12,50],['legno_quercia','Legno quercia',0.22,43],['osb','OSB (trucioli)',0.12,72],['compensato','Compensato',0.15,180],['piastrelle','Piastrelle (porcellana)',1.00,1000],['legno_pino','Legno pino',0.14,43]
+  ];
+  var SOL_CONDENSA=[
+    {id:'cappotto_esterno',nome:'Cappotto termico esterno (ETICS)',tempistica:'2-6 settimane',norma:'UNI EN 13499:2005 (EPS) + UNI EN 13500:2005 (lana minerale)',sintesi:'Pannelli isolanti esterni (EPS/XPS/lana/sughero) + rasante armato + finitura. La T superficiale interna sale sopra il punto di rugiada eliminando la condensa.',limit:'Spessori 8-16 cm modificano la facciata: incompatibile con vincoli D.Lgs 42/2004.'},
+    {id:'isolamento_interno',nome:'Isolamento capillare-attivo interno (calcio silicato)',tempistica:'10-20 giorni',norma:'WTA Merkblatt 6-5-14/D',sintesi:'Pannelli in calcio silicato (λ 0,065, μ 5-6, alta capillarità) incollati con malta di calce: trasportano la condensa interstiziale verso l\'interno dove evapora.',limit:'Verifica Glaser/WTA 6-5 preventiva OBBLIGATORIA: non risolve in tutte le stratigrafie. Riduce il volume utile (5-10 cm).'},
+    {id:'freno_vapore',nome:'Barriera / freno al vapore lato caldo (sd ≥1500 m)',tempistica:'5-15 giorni',norma:'UNI EN ISO 13788:2013',sintesi:'Freno/barriera al vapore (PE/PVB/alluminio) lato caldo per ridurre il flusso di vapore. sd ≥1500 m per barriere totali, 2-100 m per freni variabili.',limit:'Una rottura anche puntuale compromette TUTTO il sistema. Difficile su serramenti e passaggi impianti.'},
+    {id:'ponti_termici',nome:'Eliminazione ponti termici localizzati',tempistica:'5-15 giorni',norma:'UNI EN ISO 14683:2018',sintesi:'Individuazione termografica (UNI EN ISO 6781-1) + intervento mirato su spalle finestre, cordoli, balconi, attraversamenti impianti.',limit:'Non risolve una stratigrafia globalmente carente: è intervento complementare.'}
+  ];
+
+  var data={};
+  function blank(){return {Ti:null,URi:null,Te:null,URe:null,dir:'orizzontale',layers:[]};}
+  data=blank();
+
+  /* computeGlaser VERBATIM (condensa-glaser.html 1916), legge data */
+  function computeGlaser(){
+    var Ti=data.Ti,URi=data.URi,Te=data.Te,URe=data.URe;
+    if(data.layers.length===0)return null;
+    if(Ti==null||URi==null||Te==null||URe==null)return null;
+    var bnd=BOUNDARY_R_TABLE[data.dir]||BOUNDARY_R_TABLE.orizzontale;var Rsi=bnd.Rsi,Rse=bnd.Rse;
+    var resistances=[Rsi].concat(data.layers.map(function(l){return l.thickness_m/l.lambda;})).concat([Rse]);
+    var Rtot=resistances.reduce(function(a,b){return a+b;},0);
+    var sdValues=[0].concat(data.layers.map(function(l){return l.mu*l.thickness_m;})).concat([0]);
+    var SdTot=sdValues.reduce(function(a,b){return a+b;},0);
+    var temperatures=[],Rcum=0,i;
+    for(i=0;i<=resistances.length;i++){temperatures.push(Ti-(Rcum/Rtot)*(Ti-Te));if(i<resistances.length)Rcum+=resistances[i];}
+    var Pint=(URi/100)*Psat(Ti),Pext=(URe/100)*Psat(Te);
+    var vaporPressures=[],SdCum=0;
+    for(i=0;i<=sdValues.length;i++){vaporPressures.push(SdTot>0?Pint-(SdCum/SdTot)*(Pint-Pext):Pint);if(i<sdValues.length)SdCum+=sdValues[i];}
+    var satPressures=temperatures.map(Psat);
+    var TOL=1e-6;var condensationPoints=[];
+    for(i=0;i<vaporPressures.length;i++){if(vaporPressures[i]>satPressures[i]+TOL)condensationPoints.push({i:i,T:temperatures[i],Pv:vaporPressures[i],Psat:satPressures[i]});}
+    var U=1/Rtot;var Rtot_fRsi=Rtot-Rsi+RSI_FRSI;var U_fRsi=1/Rtot_fRsi;var fRsi=1-RSI_FRSI*U_fRsi;
+    var Tsi_design=Ti-RSI_FRSI*U_fRsi*(Ti-Te);var Td_int=dewPoint(Ti,URi);
+    var URsi=(Tsi_design!=null)?Math.min(100,((URi/100)*Psat(Ti)/Psat(Tsi_design))*100):null;
+    return {Ti:Ti,URi:URi,Te:Te,URe:URe,Rsi:Rsi,Rse:Rse,Rtot:Rtot,U:U,SdTot:SdTot,
+      Pint:Pint,Pext:Pext,condensationPoints:condensationPoints,hasCondensation:condensationPoints.length>0,
+      fRsi:fRsi,Tsi_design:Tsi_design,URsi:URsi,Td_int:Td_int,fRsi_ok:fRsi>=FRSI_REF_IT};
+  }
+  /* _calcCondensaScores VERBATIM (condensa-glaser.html 2030) */
+  function _calcCondensaScores(g){
+    var sc={};
+    if(g.U!=null&&g.U>0.6)sc.cappotto_esterno={pri:true,why:'U='+(g.U||0).toFixed(3)+' >0,6 W/m²K, parete poco coibentata: cappotto esterno risolve a monte (UNI EN 13499:2005)'};
+    else sc.cappotto_esterno={pri:false,why:'U='+(g.U||0).toFixed(3)+' già buono o bene vincolato: valutare alternative'};
+    if(g.U!=null&&g.U>0.5)sc.isolamento_interno={pri:true,why:'U='+(g.U||0).toFixed(3)+' >0,5: alternativa per beni vincolati dove il cappotto esterno non è ammesso (WTA 6-5-14/D)'};
+    else sc.isolamento_interno={pri:false,why:'Alternativa solo se il cappotto esterno non è praticabile'};
+    if(g.hasCondensation)sc.freno_vapore={pri:true,why:(g.condensationPoints?g.condensationPoints.length+' interfacce critiche':'condensa interstiziale rilevata')+' → freno/barriera vapore lato caldo (UNI EN ISO 13788:2013)'};
+    else sc.freno_vapore={pri:false,why:'Condensa interstiziale NON rilevata: freno vapore non necessario al momento'};
+    var tsiBassa=g.Tsi_design!=null&&g.Td_int!=null&&g.Tsi_design<g.Td_int+1.5;var ursiAlta=g.URsi!=null&&g.URsi>=80;
+    if(!g.fRsi_ok||tsiBassa||ursiAlta){var why='';if(!g.fRsi_ok)why='fRsi='+(g.fRsi||0).toFixed(3)+' <0,72 (riferim. operativo)';if(tsiBassa)why=(why?why+' + ':'')+'T_si='+(g.Tsi_design||0).toFixed(1)+'°C vicino a T_rugiada';if(ursiAlta)why=(why?why+' + ':'')+'UR_si='+(g.URsi||0).toFixed(0)+'% ≥80 (rischio muffa)';sc.ponti_termici={pri:true,why:why+' → correzione ponti termici (UNI EN ISO 14683:2018)'};}
+    else sc.ponti_termici={pri:false,why:'fRsi e T_si nei limiti: intervento solo complementare'};
+    return sc;
+  }
+
+  /* matching materiale: per id esatto o per nome (scoring token) */
+  function matchMat(text){
+    var raw=String(text).trim().toLowerCase();
+    for(var k=0;k<MAT.length;k++){if(raw===MAT[k][0])return MAT[k];}
+    var a=_normTxt(text);var aw=a.split(' ').filter(function(w){return w.length>=3;});  // i numeri-ρ restano token (normTxt tiene le cifre)
+    if(!aw.length)return null;
+    var best=null,bestS=-1e9,tie=false;
+    for(var j=0;j<MAT.length;j++){var nm=_normTxt(MAT[j][1]);var nw=nm.split(' ').filter(function(w){return w.length>=3;});var sc=0;
+      nw.forEach(function(w){ if(aw.indexOf(w)>=0) sc+=2; else sc-=0.5; });   // penalità: parola dell'etichetta NON coperta dalla risposta
+      aw.forEach(function(w){if(w.length>=4&&(' '+nm+' ').indexOf(' '+w+' ')>=0)sc+=1;});
+      if(sc>bestS){bestS=sc;best=MAT[j];tie=false;}else if(sc===bestS&&best!==MAT[j])tie=true;}
+    return (best&&bestS>0&&!tie)?best:null;
+  }
+
+  var QFLOW=[
+    {f:'Ti',kind:'num',q:'Temperatura interna Ti (°C)? (tipico 20)'},
+    {f:'URi',kind:'num',q:'Umidità relativa interna URi (%)? (tipico 65)'},
+    {f:'Te',kind:'num',q:'Temperatura esterna Te (°C)? (mese o clima di progetto, es. 5)'},
+    {f:'URe',kind:'num',q:'Umidità relativa esterna URe (%)? (tipico 80)'},
+    {f:'dir',kind:'choice',q:'Tipo di elemento (fissa le resistenze superficiali Rsi/Rse)?',
+      opts:[['orizzontale','Parete verticale (flusso orizzontale)'],['ascendente','Soffitto / copertura (flusso ascendente)'],['discendente','Pavimento (flusso discendente)']]}
+  ];
+  var cur=-1,phase='fixed',pendingMat=null;
+  function reset(){data=blank();cur=-1;phase='fixed';pendingMat=null;}
+  function askHtml(q,prefix){var h=(prefix||'');h+='<div class="head">'+esc(q.q)+'</div>';if(q.kind==='num')h+='<div class="why">Solo il numero. Non invento valori.</div>';return h;}
+  var COMMON=['intonaco_calce','mattone_pieno','mattone_forato','cls_2400','cls_armato','eps','xps','poliuretano','lana_roccia','cartongesso','intonaco_cem','barriera_vapore'];
+  function layerPrompt(prefix){
+    var h=(prefix||'');
+    h+='<div class="head">Stratigrafia, strato '+(data.layers.length+1)+' (dal lato INTERNO verso l\'ESTERNO)</div>';
+    h+='<div class="why">Scrivi <b>materiale e spessore in cm</b> (es. «intonaco calce 2», «mattone pieno 25», «eps 8»). Per un materiale non in elenco: «custom λ μ cm» (es. custom 0,5 10 3). Scrivi <b>fine</b> quando la parete è completa.</div>';
+    if(data.layers.length){h+='<div class="cmp-title">Strati inseriti</div><table class="m">'+data.layers.map(function(l,i){return mrow((i+1)+'. '+esc(l.name),itDec(l.thickness_m*100,1)+' cm · λ '+l.lambda+' · μ '+l.mu,false);}).join('')+'</table>';}
+    return h;
+  }
+  function compute(){
+    var g=computeGlaser();
+    if(!g){phase='layers';return layerPrompt('<div class="warnote">Serve almeno uno strato e le 4 condizioni al contorno.</div>');}
+    var sc=_calcCondensaScores(g);
+    var vc=g.hasCondensation?'v-err':'v-ok';
+    var h='<div class="vhead '+vc+'">'+(g.hasCondensation?('CONDENSA INTERSTIZIALE · '+g.condensationPoints.length+' interfaccia/e'):'NESSUNA condensa interstiziale')+'</div>';
+    h+='<div class="say">'+(g.hasCondensation?('Il flusso di vapore supera la pressione di saturazione su '+g.condensationPoints.length+' interfaccia/e (P_v > P_sat, UNI EN ISO 13788 §6.1): si forma condensa dentro la parete. Rivedere la stratigrafia o il freno al vapore.'):'In regime stazionario la pressione di vapore resta sotto la saturazione in ogni interfaccia: nessuna condensa interstiziale.')+'</div>';
+    h+='<div class="cmp-title">Grandezze (UNI EN ISO 13788, regime stazionario)</div><table class="m">'+
+       mrow('Trasmittanza U',itDec(g.U,3)+' W/m²K',g.U>=0.6)+
+       mrow('Resistenza totale R',itDec(g.Rtot,3)+' m²K/W',false)+
+       mrow('Spessore equivalente Σ Sd',itDec(g.SdTot,2)+' m',false)+
+       mrow('Fattore di temperatura f<sub>Rsi</sub>',itDec(g.fRsi,3)+(g.fRsi_ok?' (≥0,72)':' (<0,72)'),!g.fRsi_ok)+
+       mrow('T superficie interna T<sub>si</sub>',itDec(g.Tsi_design,1)+' °C',false)+
+       mrow('Punto di rugiada interno T<sub>d</sub>',itDec(g.Td_int,1)+' °C',g.Tsi_design!=null&&g.Td_int!=null&&g.Tsi_design<g.Td_int)+
+       mrow('UR alla superficie interna',(g.URsi!=null?itDec(g.URsi,1)+' %':'n.d.'),g.URsi!=null&&g.URsi>=80)+
+       '</table>';
+    /* condensa superficiale (updateKpis) */
+    if(g.Tsi_design!=null&&g.Td_int!=null){
+      if(g.Tsi_design<g.Td_int)h+='<div class="warnote"><b>Condensa superficiale ATTIVA:</b> T_si '+itDec(g.Tsi_design,1)+'°C < punto di rugiada '+itDec(g.Td_int,1)+'°C.</div>';
+      else if(g.Tsi_design<g.Td_int+1.5)h+='<div class="warnote"><b>Margine superficiale ridotto:</b> T_si '+itDec(g.Tsi_design,1)+'°C vicino al punto di rugiada '+itDec(g.Td_int,1)+'°C.</div>';
+      else if(g.URsi!=null&&g.URsi>=80)h+='<div class="warnote"><b>UR superficie ≥80%:</b> rischio muffa anche senza condensa liquida.</div>';
+    }
+    if(!g.fRsi_ok)h+='<div class="warnote"><b>f<sub>Rsi</sub> '+itDec(g.fRsi,3)+' < 0,72</b> (riferimento operativo IT, DM 26/06/2015; il valore di legge va calcolato caso per caso §5).</div>';
+    /* risanamento: gate "conforme" verbatim (updateKpis/_renderRisanamentoCondensa 2071) */
+    if(!(!g.hasCondensation&&g.fRsi_ok&&g.URsi!=null&&g.URsi<70&&g.U<0.6)){
+      h+='<div class="cmp-title">Risanamento</div>';
+      SOL_CONDENSA.forEach(function(s){var x=sc[s.id];var cls=(x&&x.pri)?'sol':'sol alt';var tag=(x&&x.pri)?'CONSIGLIATA':'ALTERNATIVA';
+        h+='<div class="'+cls+'"><span class="sn">'+esc(s.nome)+'</span><span class="stag">'+tag+'</span>'+
+           (x?'<div class="why" style="color:#7a4e12">'+esc(x.why)+'</div>':'')+
+           '<div class="ssyn">'+esc(s.sintesi)+'</div><div class="snorm"><b>Norma:</b> '+esc(s.norma)+'</div><div class="slim"><b>Limitazioni:</b> '+esc(s.limit)+'</div></div>';});
+    }else{h+='<div class="note">Stratigrafia conforme: nessuna condensa + fRsi ≥0,72 + UR_si &lt;70% + U &lt;0,6. Mantenere il monitoraggio termoigrometrico.</div>';}
+    h+='<div class="why">Questo è il Glaser <b>stazionario</b> (screening UNI EN ISO 13788:2013 §6). Per la verifica di legge servono i <b>dati climatici mensili UNI 10349</b> e il <b>bilancio 12 mesi</b>: usali nel modulo <a href="condensa-glaser.html" target="_blank" rel="noopener">Glaser</a> (anche il diagramma e l\'export).</div>';
+    h+='<div class="foot">Esito col motore di condensa-glaser.html (computeGlaser, UNI EN ISO 13788:2013; λ/μ da UNI 10351:2021). La conclusione tecnica resta tua.</div>';
+    phase='done';return h;
+  }
+  function greeting(){reset();cur=0;
+    var intro='<div class="head">Condensa interstiziale (Glaser stazionario)</div>'+
+      'Verifico la condensa <b>dentro la parete</b> (UNI EN ISO 13788). Prima le 4 condizioni al contorno (T e UR interne/esterne) e il tipo di elemento, poi costruiamo la <b>stratigrafia</b> uno strato alla volta.'+
+      '<div class="why">Per ogni strato: materiale + spessore in cm. Niente valore inventato (λ e μ dal database UNI 10351).</div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0">';
+    return askHtml(QFLOW[cur],intro);
+  }
+  function respond(text){
+    if(phase==='done'){if(/ricomin|nuova|riparti|reset/i.test(text))return greeting();return '<div class="why">Verifica conclusa. Tocca "Nuova domanda" o apri il modulo Glaser per il 12 mesi.</div>';}
+    if(cur<0)return greeting();   // raggiunta via routing dall'hub: avvia il flusso (non ancora salutata)
+    if(phase==='fixed'){
+      var q=QFLOW[cur];
+      if(q.kind==='num'){var n=_num1(text);if(isNaN(n))return askHtml(q,'<div class="warnote">Non ho riconosciuto un numero. Scrivi la cifra.</div>');data[q.f]=n;}
+      else{var val=_matchChoice(q,text);if(val==null)return askHtml(q,'<div class="warnote">Non ho capito. Tocca un\'opzione.</div>');data.dir=val;}
+      cur++;
+      if(cur<QFLOW.length)return askHtml(QFLOW[cur]);
+      phase='layers';return layerPrompt();
+    }
+    /* phase layers */
+    if(/^\s*(fine|calcola|basta|fatto|stop|finito)\s*$/i.test(text)){
+      if(!data.layers.length)return layerPrompt('<div class="warnote">Aggiungi almeno uno strato prima di concludere.</div>');
+      return compute();
+    }
+    /* custom: "custom λ μ cm" */
+    if(/custom|personalizz/i.test(text)){
+      var cn=_nums(text);
+      if(cn.length<3)return layerPrompt('<div class="warnote">Per il materiale personalizzato scrivi: <b>custom λ μ spessore_cm</b> (es. custom 0,5 10 3).</div>');
+      data.layers.push({name:'Personalizzato (λ '+cn[0]+', μ '+cn[1]+')',lambda:cn[0],mu:cn[1],thickness_m:cn[2]/100});
+      pendingMat=null;return layerPrompt('<div class="note">Strato '+data.layers.length+' aggiunto: personalizzato, '+itDec(cn[2],1)+' cm.</div>');
+    }
+    var nums=_nums(text);var thick=nums.length?nums[nums.length-1]:null;
+    /* per il match materiale tolgo solo lo SPESSORE (ultimo numero), tengo i numeri-ρ identificativi */
+    var matText=(thick!=null)?text.replace(/(\d+(?:[.,]\d+)?)(?![\s\S]*\d)/,' '):text;
+    var mat=matchMat(matText);
+    if(mat){
+      if(thick==null){pendingMat=mat;return layerPrompt('<div class="head">Spessore di «'+esc(mat[1])+'» in cm?</div>');}
+      data.layers.push({name:mat[1],lambda:mat[2],mu:mat[3],thickness_m:thick/100});pendingMat=null;
+      return layerPrompt('<div class="note">Strato '+data.layers.length+' aggiunto: '+esc(mat[1])+', '+itDec(thick,1)+' cm.</div>');
+    }
+    if(pendingMat&&thick!=null){
+      data.layers.push({name:pendingMat[1],lambda:pendingMat[2],mu:pendingMat[3],thickness_m:thick/100});
+      var nm=pendingMat[1];pendingMat=null;
+      return layerPrompt('<div class="note">Strato '+data.layers.length+' aggiunto: '+esc(nm)+', '+itDec(thick,1)+' cm.</div>');
+    }
+    return layerPrompt('<div class="warnote">Materiale non riconosciuto. Tocca uno dei comuni qui sotto (poi lo spessore) o scrivi «nome spessore» / «custom λ μ cm».</div>');
+  }
+  function chips(){
+    if(phase==='done')return [];
+    if(phase==='fixed'){var q=QFLOW[cur];var out=[];if(q.opts)q.opts.forEach(function(o){out.push({say:o[1],send:o[0],cls:'chip opt'});});return out;}
+    /* layers */
+    var out=[];
+    if(pendingMat){return [];}
+    COMMON.forEach(function(id){var m=null;for(var k=0;k<MAT.length;k++){if(MAT[k][0]===id){m=MAT[k];break;}}if(m)out.push({say:m[1],send:m[1],cls:'chip opt'});});
+    if(data.layers.length)out.push({say:'✓ fine',send:'fine',cls:'chip'});
+    return out;
+  }
+  function matches(low){return /glaser|interstizial|stratigraf|trasmittanz/.test(low);}
+  return {id:'glaser',label:'Condensa interstiziale (Glaser)',title:'Assistente Condensa interstiziale (Glaser)',
+    sub:'Verifica Glaser stazionaria della condensa dentro la parete, da stratigrafia.',
+    greeting:greeting,respond:respond,chips:chips,reset:reset,matches:matches,
+    _api:{computeGlaser:computeGlaser,scores:_calcCondensaScores,data:function(){return data;},set:function(k,val){data[k]=val;},addLayer:function(l){data.layers.push(l);},reset:reset,MAT:MAT}};
+})();
+
+/* =========================================================================
+   SKILL 11 · ACUSTICA IN EDILIZIA (requisiti acustici passivi)
+   Motore portato VERBATIM da acustica.html (DPCM 5/12/1997 Tab.B per categoria,
+   classi UNI 11367, legge di massa / UNI EN 12354 per le stime previsionali).
+   ========================================================================= */
+var ACUSTICA=(function(){
+  /* dataset verbatim da acustica.html */
+  var CATEGORIE_DPCM=[
+    {id:'AC',label:'A, C: residenze e alberghi',Rw:50,D2m:40,Lnw:63,LASmax:35,LAeq:35},
+    {id:'D',label:'D: ospedali, cliniche, case di cura',Rw:55,D2m:45,Lnw:58,LASmax:35,LAeq:25},
+    {id:'E',label:'E: edifici scolastici',Rw:50,D2m:48,Lnw:58,LASmax:35,LAeq:25},
+    {id:'BFG',label:'B, F, G: uffici, ricreativi/culto, commerciali',Rw:50,D2m:42,Lnw:55,LASmax:35,LAeq:35}
+  ];
+  var CLASSI_11367=[
+    {id:'I',label:'Classe I (prestazione superiore)',Rw:56,D2m:43,Lnw:53,Lic:25,Lid:30},
+    {id:'II',label:'Classe II (prestazione buona, soglia CAM)',Rw:53,D2m:40,Lnw:58,Lic:28,Lid:33},
+    {id:'III',label:'Classe III (prestazione di base)',Rw:50,D2m:37,Lnw:63,Lic:32,Lid:37},
+    {id:'IV',label:'Classe IV (prestazione modesta)',Rw:45,D2m:32,Lnw:68,Lic:37,Lid:42}
+  ];
+  var _FLANK_AEREO=5,_FLANK_CALP=2;
+  var data={};
+  function blank(){return {categoriaDPCM:'',aereo_mode:'',aereo_Rw_mis:null,aereo_massa:null,aereo_deltaContro:null,facc_mode:'',facc_D2mnTw_mis:null,facc_Rw_elem:null,volumeRicevente_m3:null,superficieFacciata_m2:null,calp_mode:'',calp_Lnw_mis:null,calp_massaSolaio:null,calp_deltaLw:null,imp_presente:'',imp_LASmax_mis:null,imp_LAeq_mis:null};}
+  data=blank();
+  /* helper di calcolo VERBATIM da acustica.html */
+  function _r1(x){return Math.round(x*10)/10;}
+  function _cat(){for(var i=0;i<CATEGORIE_DPCM.length;i++){if(CATEGORIE_DPCM[i].id===data.categoriaDPCM)return CATEGORIE_DPCM[i];}return null;}
+  function _massLawRw(m){if(!(typeof m==='number'&&isFinite(m)&&m>0))return null;return m>=150?37.5*Math.log10(m)-42:13.5*Math.log10(m)+13;}
+  function _slabLnw(m){if(!(typeof m==='number'&&isFinite(m)&&m>0))return null;return 164-35*Math.log10(m);}
+  function _classOf(field,val){if(typeof val!=='number'||!isFinite(val))return null;var maxFields=['Lnw','Lic','Lid'];for(var i=0;i<CLASSI_11367.length;i++){var c=CLASSI_11367[i];var lim=c[field];if(lim==null)continue;var ok=(maxFields.indexOf(field)>=0)?(val<=lim):(val>=lim);if(ok)return c.id;}return null;}
+  function _descVals(){var d=data;var out={};
+    if(d.aereo_mode==='misura'){if(typeof d.aereo_Rw_mis==='number'&&isFinite(d.aereo_Rw_mis))out.aereo={val:d.aereo_Rw_mis,src:'misura'};}
+    else if(d.aereo_mode==='previsione'){var rw=_massLawRw(d.aereo_massa);if(rw!=null){var dc=(typeof d.aereo_deltaContro==='number'&&isFinite(d.aereo_deltaContro))?d.aereo_deltaContro:0;out.aereo={val:_r1(rw+dc-_FLANK_AEREO),src:'previsione',rwlab:_r1(rw)};}}
+    if(d.facc_mode==='misura'){if(typeof d.facc_D2mnTw_mis==='number'&&isFinite(d.facc_D2mnTw_mis))out.facc={val:d.facc_D2mnTw_mis,src:'misura'};}
+    else if(d.facc_mode==='previsione'){var rwe=d.facc_Rw_elem,V=d.volumeRicevente_m3,S=d.superficieFacciata_m2;if(typeof rwe==='number'&&isFinite(rwe)&&typeof V==='number'&&isFinite(V)&&V>0&&typeof S==='number'&&isFinite(S)&&S>0)out.facc={val:_r1(rwe+10*Math.log10(V/(3*S))),src:'previsione'};}
+    if(d.calp_mode==='misura'){if(typeof d.calp_Lnw_mis==='number'&&isFinite(d.calp_Lnw_mis))out.calp={val:d.calp_Lnw_mis,src:'misura'};}
+    else if(d.calp_mode==='previsione'){var ln=_slabLnw(d.calp_massaSolaio);if(ln!=null){var dl=(typeof d.calp_deltaLw==='number'&&isFinite(d.calp_deltaLw))?d.calp_deltaLw:0;out.calp={val:_r1(ln-dl+_FLANK_CALP),src:'previsione',lnlab:_r1(ln)};}}
+    var imp={};if(d.imp_presente==='si'){if(typeof d.imp_LASmax_mis==='number'&&isFinite(d.imp_LASmax_mis))imp.LASmax=d.imp_LASmax_mis;if(typeof d.imp_LAeq_mis==='number'&&isFinite(d.imp_LAeq_mis))imp.LAeq=d.imp_LAeq_mis;}out.imp=imp;
+    return out;}
+  function calcVerdict(){var cat=_cat();var dv=_descVals();var checks=[];var azioni=[];
+    function add(sigla,val,limit,verso,src,classField){if(val==null||limit==null)return;var ok=(verso==='min')?(val>=limit):(val<=limit);checks.push({sigla:sigla,val:val,limit:limit,cmp:(verso==='min'?'≥':'≤'),ok:ok,src:src,classe:_classOf(classField,val)});}
+    if(cat){if(dv.aereo)add("R'w",dv.aereo.val,cat.Rw,'min',dv.aereo.src,'Rw');if(dv.facc)add("D2m,nT,w",dv.facc.val,cat.D2m,'min',dv.facc.src,'D2m');if(dv.calp)add("L'n,w",dv.calp.val,cat.Lnw,'max',dv.calp.src,'Lnw');if(typeof dv.imp.LASmax==='number')add("LASmax",dv.imp.LASmax,cat.LASmax,'max','misura','Lid');if(typeof dv.imp.LAeq==='number')add("LAeq",dv.imp.LAeq,cat.LAeq,'max','misura','Lic');}
+    var fail=checks.filter(function(c){return !c.ok;});var failSig=fail.map(function(c){return c.sigla;});
+    if(failSig.indexOf("R'w")>=0)azioni.push("Isolamento aereo insufficiente: contropparete disaccoppiata o parete doppia con materassino fonoassorbente.");
+    if(failSig.indexOf("D2m,nT,w")>=0)azioni.push("Facciata insufficiente: serramenti a taglio acustico e cura della posa (controtelaio, sigillature, cassonetti coibentati).");
+    if(failSig.indexOf("L'n,w")>=0)azioni.push("Calpestio elevato: massetto galleggiante su materassino resiliente con giunto perimetrale continuo (battiscopa non rigido).");
+    if(failSig.indexOf('LASmax')>=0||failSig.indexOf('LAeq')>=0)azioni.push("Rumore impianti oltre il limite: supporti antivibranti, silenziatori e disaccoppiamento delle tubazioni (UNI EN ISO 16032).");
+    var order={'I':1,'II':2,'III':3,'IV':4};var worst=0;var classe=null;checks.forEach(function(c){if(c.classe&&order[c.classe]>worst){worst=order[c.classe];classe=c.classe;}});
+    var nTot=checks.length;var nConf=checks.filter(function(c){return c.ok;}).length;var verdict,kind,summary;
+    if(!cat){verdict="Categoria non selezionata";kind="warn";summary="Indica la categoria di edificio per applicare i limiti del DPCM 5/12/1997.";}
+    else if(nTot===0){verdict="Verifica incompleta";kind="warn";summary="Nessun descrittore inserito: serve almeno uno tra isolamento aereo, facciata, calpestio o impianti.";}
+    else if(fail.length===0){verdict="REQUISITI RISPETTATI";kind="ok";summary=nConf+" descrittori su "+nTot+" conformi ai limiti DPCM 5/12/1997 per la categoria "+cat.label+(classe?". Classe acustica indicativa: "+classe+".":".");}
+    else if(fail.length===1){verdict="UN REQUISITO NON CONFORME";kind="warn";summary="Non conforme: "+fail[0].sigla+" = "+fail[0].val+" dB (limite "+fail[0].cmp+" "+fail[0].limit+").";}
+    else{verdict="REQUISITI NON CONFORMI";kind="err";summary=fail.length+" descrittori non conformi: "+fail.map(function(c){return c.sigla+" "+c.val+" dB";}).join("; ")+".";}
+    return {verdict:verdict,kind:kind,summary:summary,checks:checks,azioni:azioni,classe:classe,nTot:nTot,nConf:nConf,fail:fail};}
+  /* flusso guidato (stesso meccanismo delle altre skill) */
+  var MODE_OPTS=[['misura','Misura in opera'],['previsione','Stima dalla massa']];
+  var QFLOW=[
+    {f:'categoriaDPCM',kind:'choice',q:'Categoria di edificio (DPCM 5/12/1997, Tab.A) per i limiti applicabili?',opts:CATEGORIE_DPCM.map(function(c){return [c.id,c.label];})},
+    {f:'aereo_mode',kind:'choice',skip:true,q:"Isolamento aereo R'w fra ambienti: hai una misura in opera o vuoi una stima dalla massa? (salta per ometterlo)",opts:MODE_OPTS},
+    {f:'aereo_Rw_mis',kind:'num',when:function(d){return d.aereo_mode==='misura';},q:"R'w misurato in opera (dB)? (UNI EN ISO 16283-1)"},
+    {f:'aereo_massa',kind:'num',when:function(d){return d.aereo_mode==='previsione';},q:"Massa areica m' della parete/solaio divisorio (kg/m2)? Stima con la legge di massa (UNI EN 12354-1)."},
+    {f:'aereo_deltaContro',kind:'num',skip:true,when:function(d){return d.aereo_mode==='previsione';},q:"Eventuale ΔRw di una contropparete (dB, dato di laboratorio)? Salta se non prevista."},
+    {f:'facc_mode',kind:'choice',skip:true,q:"Isolamento di facciata D2m,nT,w: misura in opera o stima previsionale? (salta per ometterlo)",opts:MODE_OPTS},
+    {f:'facc_D2mnTw_mis',kind:'num',when:function(d){return d.facc_mode==='misura';},q:"D2m,nT,w misurato (dB)? (UNI EN ISO 16283-3)"},
+    {f:'facc_Rw_elem',kind:'num',when:function(d){return d.facc_mode==='previsione';},q:"R'w dell'elemento di facciata (parete esterna + serramenti) (dB)?"},
+    {f:'volumeRicevente_m3',kind:'num',when:function(d){return d.facc_mode==='previsione';},q:"Volume dell'ambiente ricevente V (m3)?"},
+    {f:'superficieFacciata_m2',kind:'num',when:function(d){return d.facc_mode==='previsione';},q:"Superficie di facciata S (m2)?"},
+    {f:'calp_mode',kind:'choice',skip:true,q:"Livello di calpestio L'n,w dei solai: misura in opera o stima previsionale? (salta per ometterlo)",opts:MODE_OPTS},
+    {f:'calp_Lnw_mis',kind:'num',when:function(d){return d.calp_mode==='misura';},q:"L'n,w misurato (dB)? (UNI EN ISO 16283-2)"},
+    {f:'calp_massaSolaio',kind:'num',when:function(d){return d.calp_mode==='previsione';},q:"Massa areica del solaio grezzo m' (kg/m2)?"},
+    {f:'calp_deltaLw',kind:'num',skip:true,when:function(d){return d.calp_mode==='previsione';},q:"ΔLw del pavimento galleggiante (dB, dato di laboratorio UNI EN ISO 717-2)? Salta se solaio nudo."},
+    {f:'imp_presente',kind:'choice',q:"Impianti tecnologici presenti e misurati (ascensori, scarichi, riscaldamento, ventilazione)?",opts:[['si','Si, misurati'],['no','No / non valutati']]},
+    {f:'imp_LASmax_mis',kind:'num',skip:true,when:function(d){return d.imp_presente==='si';},q:"LASmax impianti a funzionamento discontinuo (dB(A))? Salta se non rilevato."},
+    {f:'imp_LAeq_mis',kind:'num',skip:true,when:function(d){return d.imp_presente==='si';},q:"LAeq impianti a funzionamento continuo (dB(A))? Salta se non rilevato."}
+  ];
+  var cur=-1,done=false;
+  function applicable(i){while(i<QFLOW.length){var q=QFLOW[i];if(!q.when||q.when(data))return i;i++;}return -1;}
+  function reset(){data=blank();cur=-1;done=false;}
+  function askHtml(q,prefix){var h=(prefix||'');h+='<div class="head">'+esc(q.q)+'</div>';if(q.kind==='num')h+='<div class="why">Solo il numero, oppure scrivi "salta" se non pertinente. Non invento valori.</div>';return h;}
+  function greeting(){reset();cur=applicable(0);
+    var intro='<div class="head">Requisiti acustici passivi (DPCM 5/12/1997)</div>'+
+      'Ti guido nella verifica dei descrittori (R\'w, D2m,nT,w, L\'n,w, impianti) per la categoria di edificio, con i limiti cogenti del <b>DPCM 5/12/1997</b> e la classe <b>UNI 11367</b>. Per ogni descrittore puoi dare una <b>misura in opera</b> oppure una <b>stima dalla massa</b>; le stime sono indicative, la verifica cogente resta la misura.'+
+      '<div class="why">Rispondi toccando un\'opzione o scrivendo. Se un dato non ce l\'hai, salta: non lo invento.</div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0">';
+    return askHtml(QFLOW[cur],intro);}
+  function compute(){var v=calcVerdict();var cat=_cat();
+    var vc=(v.kind==='err')?'v-err':(v.kind==='ok')?'v-ok':'v-warn';
+    var h='<div class="vhead '+vc+'">'+esc(v.verdict)+'</div>';
+    h+='<div class="say">'+esc(v.summary)+'</div>';
+    if(cat){h+='<div class="cmp-title">Limiti DPCM 5/12/1997 (Tab.B), categoria '+esc(cat.label)+'</div><table class="m">'+
+      mrow("R'w",'≥ '+cat.Rw+' dB')+mrow('D2m,nT,w','≥ '+cat.D2m+' dB')+mrow("L'n,w",'≤ '+cat.Lnw+' dB')+mrow('LASmax','≤ '+cat.LASmax+' dB(A)')+mrow('LAeq','≤ '+cat.LAeq+' dB(A)'+((cat.id==='AC'||cat.id==='BFG')?' (Allegato A: 25 cautelativo)':''))+'</table>';}
+    if(v.checks&&v.checks.length){h+='<div class="cmp-title">Descrittori verificati</div><table class="m"><tr><td><b>Descrittore</b></td><td><b>Valore</b></td><td><b>Esito</b></td></tr>';
+      v.checks.forEach(function(c){h+='<tr'+(c.ok?'':' class="gov"')+'><td>'+esc(c.sigla)+' <span style="opacity:.65">('+esc(c.src)+')</span></td><td>'+c.val+' dB '+c.cmp+' '+c.limit+'</td><td>'+(c.ok?('conforme'+(c.classe?' · Cl. '+c.classe:'')):'NON conforme')+'</td></tr>';});
+      h+='</table>';}
+    if(v.azioni&&v.azioni.length){h+='<div class="cmp-title">Raccomandazioni</div><ul class="flags">'+v.azioni.map(function(a){return '<li>'+esc(a)+'</li>';}).join('')+'</ul>';}
+    h+='<div class="say"><b>'+v.nConf+'/'+v.nTot+'</b> descrittori conformi'+(v.classe?' · classe acustica indicativa <b>'+v.classe+'</b>':'')+'.</div>';
+    h+='<div class="why">Limiti DPCM 5/12/1997 verificati per categoria. I valori di classe UNI 11367 sono ripresi dall\'ed. 2010 (da confermare sul testo UNI 11367:2023). Le stime previsionali (legge di massa, UNI EN 12354) sono indicative: la verifica cogente richiede la misura in opera (UNI EN ISO 16283).</div>';
+    h+='<div class="why">Per il percorso completo (requisiti, CAM, soluzioni di bonifica, relazione) apri il modulo <a href="acustica.html" target="_blank" rel="noopener">Acustica in edilizia</a>.</div>';
+    h+='<div class="foot">Esito col motore di acustica.html (DPCM 5/12/1997 + UNI 11367). La conclusione tecnica resta tua.</div>';
+    done=true;return h;}
+  function respond(text){
+    if(done){if(/ricomin|nuova|riparti|reset/i.test(text))return greeting();return '<div class="why">Verifica conclusa. Tocca "Nuova domanda" per ricominciare, o apri il modulo Acustica per la relazione completa.</div>';}
+    if(cur<0)return greeting();
+    var q=QFLOW[cur];
+    if(q.kind==='num'){
+      if(q.skip&&_isSkip(text)){}
+      else{var n=_num1(text);if(isNaN(n))return askHtml(q,'<div class="warnote">Non ho riconosciuto un numero. Scrivi solo la cifra (es. 52) oppure "salta".</div>');data[q.f]=n;}
+    }else{
+      if(q.skip&&_isSkip(text)){}
+      else{var val=_matchChoice(q,text);if(val==null)return askHtml(q,'<div class="warnote">Non ho capito. Tocca una delle opzioni qui sotto.</div>');data[q.f]=val;}
+    }
+    cur=applicable(cur+1);if(cur<0)return compute();return askHtml(QFLOW[cur]);}
+  function chips(){if(done||cur<0)return [];var q=QFLOW[cur];var out=[];if(q.opts)q.opts.forEach(function(o){out.push({say:o[1],send:o[0],cls:'chip opt'});});if(q.skip)out.push({say:'salta',send:'salta',cls:'chip skip'});return out;}
+  function matches(low){return /acustic|rumore|fonoisolant|insonorizz|calpestio|riverber|requisiti acustici|dpcm 5.12|11367|isolamento acustic/.test(low);}
+  return {id:'acustica',label:'Acustica in edilizia',title:'Assistente Acustica in edilizia',
+    sub:'Requisiti acustici passivi DPCM 5/12/1997: R\'w, D2m,nT,w, L\'n,w, impianti, classe UNI 11367.',
+    greeting:greeting,respond:respond,chips:chips,reset:reset,matches:matches,
+    _api:{calcVerdict:calcVerdict,descVals:_descVals,data:function(){return data;},set:function(k,val){data[k]=val;},reset:reset,CATEGORIE:CATEGORIE_DPCM,CLASSI:CLASSI_11367}};
+})();
+
+/* =========================================================================
+   SHELL multi-skill
+   ========================================================================= */
+var SKILLS={};SKILLS[VESPAI.id]=VESPAI;SKILLS[INFILTR.id]=INFILTR;SKILLS[RADON.id]=RADON;SKILLS[RISALITA.id]=RISALITA;SKILLS[SALI.id]=SALI;SKILLS[BIODET.id]=BIODET;SKILLS[IAQ.id]=IAQ;SKILLS[MICRO.id]=MICRO;SKILLS[TERMO.id]=TERMO;SKILLS[GLASER.id]=GLASER;SKILLS[ACUSTICA.id]=ACUSTICA;
+var SKILL_ORDER=[VESPAI,INFILTR,RADON,RISALITA,SALI,BIODET,IAQ,MICRO,GLASER,TERMO,ACUSTICA];
+var active=null;
+
+var logEl=document.getElementById('log');
+var txtEl=document.getElementById('txt');
+var hintEl=document.getElementById('hint');
+
+function addMsg(html,who){
+  var d=document.createElement('div');
+  d.className='msg '+who;d.innerHTML=html;
+  logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;return d;
+}
+function setHeader(title,sub){
+  document.getElementById('hTitle').textContent=title;
+  document.getElementById('hSub').textContent=sub;
+}
+function renderChips(list){
+  hintEl.innerHTML='';
+  if(!list||!list.length)return;
+  hintEl.appendChild(document.createTextNode(active?'Risposte rapide: ':'Scegli un argomento: '));
+  list.forEach(function(c){
+    var s=document.createElement('span');
+    s.className=c.cls||'chip';s.textContent=c.say;
+    s.addEventListener('click',function(){sendText(c.send,c.say);});
+    hintEl.appendChild(s);
+  });
+}
+function hubChips(){return SKILL_ORDER.map(function(s){return {say:s.label,send:'__skill:'+s.id,cls:'chip'};});}
+
+function renderActiveChips(){renderChips(active?active.chips():hubChips());}
+
+function startSkill(skill,silent){
+  active=skill;setHeader(skill.title,skill.sub);
+  if(!silent)addMsg(skill.greeting(),'bot');
+  renderActiveChips();
+}
+function hubGreeting(){
+  setHeader('Assistente Mixando','Chiedi e ti rispondo, fedele alla norma. Niente invenzioni.');
+  var names=SKILL_ORDER.map(function(s){return '<b>'+esc(s.label)+'</b>';}).join(', ');
+  addMsg('<div class="head">Ciao, sono l\'assistente Mixando</div>'+
+    'Per ora so aiutarti su: '+names+'. Di cosa parliamo? Tocca un argomento qui sotto o scrivi la tua domanda.','bot');
+  renderChips(hubChips());
+}
+
+function respondRouting(text){
+  /* selezione skill via chip */
+  if(text.indexOf('__skill:')===0){
+    var id=text.slice(8);if(SKILLS[id]){startSkill(SKILLS[id]);}return;
+  }
+  if(!active){
+    var low=text.toLowerCase();
+    var hit=null;
+    for(var i=0;i<SKILL_ORDER.length;i++){if(SKILL_ORDER[i].matches(low)){hit=SKILL_ORDER[i];break;}}
+    if(hit){active=hit;setHeader(hit.title,hit.sub);addMsg(hit.respond(text),'bot');renderActiveChips();return;}
+    /* nessuna skill riconosciuta */
+    addMsg('<div class="head">Non rientra tra le cose che so fare</div>'+
+      'Per ora tratto solo: '+SKILL_ORDER.map(function(s){return '<b>'+esc(s.label)+'</b>';}).join(', ')+'. Scegli un argomento qui sotto.','bot');
+    renderChips(hubChips());return;
+  }
+  var reply=active.respond(text);
+  if(reply!=null)addMsg(reply,'bot');
+  renderActiveChips();
+}
+
+function sendText(text,display){
+  text=(text==null?txtEl.value:text);
+  if(text==null)return;
+  text=String(text).trim();if(!text)return;
+  var shown=(display!=null)?display:text;
+  addMsg(esc(shown),'user');
+  txtEl.value='';
+  respondRouting(text);
+}
+
+document.getElementById('send').addEventListener('click',function(){sendText();});
+document.getElementById('reset').addEventListener('click',function(){
+  logEl.innerHTML='';
+  if(active){active.reset();startSkill(active);}
+  else hubGreeting();
+  txtEl.focus();
+});
+txtEl.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendText();}});
+
+/* routing iniziale: ?skill=<id> apre direttamente quel verticale */
+(function init(){
+  var m=location.search.match(/[?&]skill=([a-z]+)/i);
+  var id=m?m[1].toLowerCase():null;
+  if(id&&SKILLS[id]){startSkill(SKILLS[id]);}
+  else hubGreeting();
+})();
+
+/* esposto per test headless / preview */
+window.MXASSIST={
+  start:function(id){if(SKILLS[id])startSkill(SKILLS[id]);},
+  respond:function(t){return active?active.respond(t):null;},
+  active:function(){return active?active.id:null;},
+  sendText:sendText,
+  vespai:VESPAI._api,
+  infiltr:INFILTR._api,
+  radon:RADON._api,
+  risalita:RISALITA._api,
+  sali:SALI._api,
+  biodeteriogeni:BIODET._api,
+  iaq:IAQ._api,
+  microclima:MICRO._api,
+  termoigrometria:TERMO._api,
+  glaser:GLASER._api,
+  acustica:ACUSTICA._api,
+  SKILLS:SKILLS
+};
+</script>
+<script>
+/* ============================================================
+ * «← Suite» (20/11/2026)
+ * La suite apre i moduli in una scheda nuova (dal disco) o in un suo riquadro (server web). Il link «← Suite»
+ * caricava la suite al posto del modulo: dal disco restavano due schede con la suite, da server web usciva una
+ * suite dentro la suite. Ora il modulo chiede a chi l'ha aperto se è la suite; se sì, al clic chiude la sua scheda
+ * (o chiede alla suite di chiudere il riquadro) e si torna alla suite che è già aperta. Se il modulo è stato
+ * aperto da solo, o la suite è stata chiusa, il link porta alla suite come prima.
+ * ============================================================ */
+(function(){
+  'use strict';
+  if (window.__mxTornaSuite) return;
+  window.__mxTornaSuite = true;
+  var modo = '';   /* 'riquadro' = dentro la suite; 'scheda' = scheda aperta dalla suite; '' = modulo aperto da solo */
+  window.addEventListener('message', function(ev){
+    var d = ev.data;
+    if (!d || typeof d !== 'object' || d.mx !== 'sono-la-suite') return;
+    if (window.parent !== window && ev.source === window.parent) modo = 'riquadro';
+    else if (window.opener && ev.source === window.opener) modo = 'scheda';
+  });
+  function chiedi(w){ try{ w.postMessage({mx:'sei-la-suite?'}, '*'); }catch(_){} }
+  if (window.parent !== window) chiedi(window.parent);
+  else if (window.opener) chiedi(window.opener);
+  document.addEventListener('click', function(e){
+    if (!modo || e.defaultPrevented || e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+    if (!a || !/(^|\/)suite\.html([?#].*)?$/.test(a.getAttribute('href') || '')) return;
+    if (modo === 'riquadro'){
+      e.preventDefault();
+      try{ window.parent.postMessage({mx:'chiudi-modulo'}, '*'); }catch(_){}
+      return;
+    }
+    var aperta = false;
+    try{ aperta = !!window.opener && !window.opener.closed; }catch(_){}
+    if (!aperta) return;   /* la suite è stata chiusa: il link la riapre in questa scheda, come prima */
+    e.preventDefault();
+    var href = a.href;
+    try{ window.close(); }catch(_){}
+    setTimeout(function(){ if (!window.closed) location.href = href; }, 400);   /* se il browser non lascia chiudere la scheda */
+  });
+})();
+</script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}} .wrap{min-height:calc(100vh - var(--mxPiede,96px)) !important}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+<script>
+/* 20/11/2026: quanto spazio lasciare in fondo alla conversazione per recapiti e avviso */
+(function(){
+  function piede(){
+    var a = document.querySelector('.mx-contatti'), b = document.querySelector('.mx-avviso');
+    if (!a) return;
+    var h = (b ? b.getBoundingClientRect().bottom : a.getBoundingClientRect().bottom) - a.getBoundingClientRect().top;
+    if (h > 0) document.documentElement.style.setProperty('--mxPiede', Math.ceil(h) + 'px');
+  }
+  piede(); window.addEventListener('resize', piede); window.addEventListener('load', piede);
+})();
+</script>
+</body>
+</html>

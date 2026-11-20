@@ -1,0 +1,1887 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cantiere">
+<title>Mixando Lab · Dati del Cantiere</title>
+<style>
+:root{
+  --mx-accent:#27ae60; --mx-accent-soft:rgba(39,174,96,.12);
+  --bg:#f5f1e8; --paper:#fff; --ink:#2c1810; --ink-soft:#6b5c4c; --ink-mute:#8b7355;
+  --line:#e6e0d2; --ok:#1f7a4d; --warn:#b07820; --err:#a83232;
+  --r:14px; --ff-serif:Georgia,"Cambria","Times New Roman",serif; --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:48px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--paper);border-bottom:3px solid var(--mx-accent);box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.mx-bar .em{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--mx-accent);color:#fff}
+.mx-bar .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mx-accent);line-height:1}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:14px;color:var(--ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:6px 12px;border:1px solid var(--mx-accent);border-radius:8px}
+.mx-bar a.back:hover{background:var(--mx-accent);color:#fff}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 22px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:680px;color:var(--ink-soft);font-size:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card>h3{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),var(--paper));display:flex;align-items:center;gap:10px}
+.card>h3 .num{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:var(--ff-sans)}
+.card .body{padding:16px 18px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em}
+.field input,.field select,.field textarea{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:14.5px;background:#fff;outline:none;min-width:0;width:100%}
+.field textarea{min-height:70px;resize:vertical;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.locali-list{display:flex;flex-direction:column;gap:8px}
+.locale-item{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.locale-item .name{flex:1;font-weight:700;color:var(--ink)}
+.locale-item .det{font-size:11.5px;color:var(--ink-mute)}
+.locale-item button.rm{appearance:none;width:32px;height:32px;border:0;border-radius:8px;color:#fff;cursor:pointer;font-size:14px;font-weight:800;background-image:linear-gradient(135deg,#ef5350 0%,#c62828 45%,#7f0000 100%);box-shadow:0 2px 6px rgba(198,40,40,.38),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 3px rgba(0,0,0,.15);position:relative;overflow:hidden;transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease}
+.locale-item button.rm::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.locale-item button.rm:hover{transform:translateY(-1px) scale(1.05);filter:brightness(1.08) saturate(1.15)}
+.locale-item button.rm:hover::before{transform:translateX(130%)}
+.locale-item button.rm:active{transform:translateY(0) scale(.97);transition-duration:.05s}
+.empty{padding:30px;text-align:center;color:var(--ink-mute);font-size:13px}
+.add-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:10px}
+.add-form input,.add-form select{padding:9px 11px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:14px;background:#fff}
+/* === SHIMMER BUTTON BASE === */
+.mx-shiny{appearance:none;border:0;color:#fff;font:inherit;font-weight:700;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;padding:10px 16px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap}
+.mx-shiny::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-shiny:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-shiny:hover::before{transform:translateX(130%)}
+.mx-shiny:active{transform:translateY(0) scale(.98);transition-duration:.05s}
+/* 19/11/2026: colori dei tasti delle finestre. Mancavano, e «Chiudi», «Annulla» e «.json» restavano bianchi su grigio chiaro. Stessi valori del modulo Risalita. */
+.s-blue{background-image:linear-gradient(135deg,#42a5f5 0%,#1565c0 45%,#0d47a1 100%);box-shadow:0 3px 10px rgba(21,101,192,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.s-green{background-image:linear-gradient(135deg,#66bb6a 0%,#2e7d32 45%,#1b5e20 100%);box-shadow:0 3px 10px rgba(46,125,50,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.s-gray{background-image:linear-gradient(135deg,#bdbdbd 0%,#757575 45%,#424242 100%);box-shadow:0 3px 10px rgba(97,97,97,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.s-orange{background-image:linear-gradient(135deg,#ffa726 0%,#ef6c00 45%,#bf360c 100%);box-shadow:0 3px 10px rgba(239,108,0,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.add-form button{background-image:linear-gradient(135deg,#66bb6a 0%,#2e7d32 45%,#1b5e20 100%);box-shadow:0 3px 10px rgba(46,125,50,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+#btnReset{background-image:linear-gradient(135deg,#bdbdbd 0%,#757575 45%,#424242 100%);box-shadow:0 3px 10px rgba(97,97,97,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+#btnExport{background-image:linear-gradient(135deg,#66bb6a 0%,#2e7d32 45%,#1b5e20 100%);box-shadow:0 3px 10px rgba(46,125,50,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+#pLogoRm.mx-shiny{padding:7px 13px;font-size:11.5px;background-image:linear-gradient(135deg,#ef9a9a 0%,#e57373 45%,#c62828 100%);box-shadow:0 2px 7px rgba(198,40,40,.35),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 3px rgba(0,0,0,.15)}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+@media (max-width:600px){ .row2,.add-form{grid-template-columns:1fr} }
+.mx-logo-mini{height:32px;width:32px;border-radius:8px;background:#fff;padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.12);object-fit:contain;flex-shrink:0;display:none;border:1px solid var(--line,#e6e0d2)}
+.mx-bar.has-logo .em{display:none}
+
+.mx-bar{position:relative}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}}
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:0 !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:50px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+
+/* === SCHEDA SOPRALLUOGO, banner + sezioni Mixando === */
+.spr-intro{padding:11px 14px;background:#e8f5e9;border-left:4px solid #2e7d32;border-radius:8px;font-size:12.5px;color:#1b5e20;line-height:1.55;margin-bottom:12px}
+.spr-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:8px}
+.spr-row .field{margin:0}
+.spr-gps-btn{height:42px;padding:0 18px;font-weight:800;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;border:0;border-radius:9px;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background-image:linear-gradient(135deg,#66bb6a 0%,#2e7d32 45%,#1b5e20 100%);box-shadow:0 3px 10px rgba(46,125,50,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18);position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s}
+.spr-gps-btn::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s}
+.spr-gps-btn:hover{transform:translateY(-2px) scale(1.03);filter:brightness(1.08) saturate(1.15)}
+.spr-gps-btn:hover::before{transform:translateX(130%)}
+.spr-status{margin-top:6px;font-size:11.5px;color:var(--ink-mute);font-style:italic;min-height:14px}
+.spr-status.ok{color:#1b5e20;font-style:normal}
+.spr-status.err{color:#7f0000;font-style:normal}
+.spr-gps-info{margin-top:6px;font-size:10.5px;color:var(--ink-mute);font-family:ui-monospace,monospace}
+.spr-card-wx{margin:14px 0;padding:14px 16px;background:linear-gradient(180deg,#dff5e0 0%,#c8ecd0 100%);border:1px solid #a9d8b3;border-radius:10px}
+.spr-card-wx .h{font-size:10.5px;font-weight:800;color:#1e6b3a;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px}
+.spr-card-wx .place{font-size:15px;font-weight:700;color:#1e3a1e;margin-bottom:8px}
+.spr-card-wx .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:13px;color:#1e3a1e}
+.spr-card-wx .src{margin-top:6px;font-size:10px;color:#3a6b3a;font-style:italic}
+.spr-card-rain{margin:12px 0;padding:14px 16px;background:#eef6fc;border:1px solid #b8d4f0;border-radius:10px}
+.spr-card-rain .h{font-size:10.5px;font-weight:800;color:#1a5276;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px}
+.spr-card-rain .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;font-size:12.5px}
+.spr-card-rain .grid .v{font-size:18px;font-weight:800;color:#1a5276}
+.spr-card-rain .grid .l{font-size:10.5px;color:#34495e;margin-bottom:2px}
+.spr-card-rain .src{margin-top:6px;font-size:10px;color:#34495e;font-style:italic}
+.spr-card-meas{margin:14px 0 8px;padding:14px 16px;background:linear-gradient(180deg,#fef9ea 0%,#fcefc9 100%);border:1.5px solid #d4a017;border-radius:10px}
+.spr-card-meas .h{font-size:10.5px;font-weight:800;color:#7d5a1f;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
+.spr-card-meas .sub{font-size:11px;color:#7d5a1f;margin-bottom:12px;line-height:1.5}
+.spr-card-meas .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.spr-card-meas .row2-3{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.spr-card-meas label{display:block;font-size:11px;color:#7d5a1f;margin-bottom:4px;font-weight:700}
+.spr-card-meas input,.spr-card-meas select{width:100%;padding:9px 12px;border:1.5px solid #d4a017;border-radius:7px;font:inherit;font-size:14px;background:#fff;outline:none}
+.spr-card-meas input:focus,.spr-card-meas select:focus{box-shadow:0 0 0 3px rgba(212,160,23,.18)}
+.spr-card-idro{margin:12px 0;padding:14px 16px;background:#fdf6e3;border:1px solid #e8d4a0;border-radius:10px}
+.spr-card-idro .h{font-size:13px;font-weight:800;color:#7d5a1f;margin-bottom:8px}
+.spr-card-idro .links{margin-top:10px;padding:10px;background:#fff;border-radius:8px}
+.spr-card-idro .links .t{font-size:11px;font-weight:800;margin-bottom:6px}
+.spr-card-idro .links a{display:block;color:var(--mx-accent);font-size:12px;text-decoration:none;margin:3px 0;padding:2px 0}
+.spr-card-idro .links a:hover{text-decoration:underline}
+.spr-card-falda{margin:12px 0;padding:14px 16px;background:#f0f4ff;border:1px solid #c4d4ff;border-radius:10px}
+.spr-card-falda .h{font-size:13px;font-weight:800;color:#1f3a7d;margin-bottom:6px}
+.spr-card-falda .sub{font-size:11px;color:var(--ink-mute);margin-bottom:10px;line-height:1.5}
+.spr-card-falda .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.spr-card-falda label{display:flex;flex-direction:column;font-size:11px;color:var(--ink-soft);font-weight:700}
+.spr-card-falda input,.spr-card-falda select,.spr-card-falda textarea{margin-top:4px;padding:9px 11px;border:1.5px solid #c4d4ff;border-radius:7px;font:inherit;font-size:13px;background:#fff;outline:none}
+.spr-card-falda .full{grid-column:span 2}
+.spr-card-photos{margin:12px 0;padding:14px 16px;background:#f0f7f0;border:1px solid #c4dcc4;border-radius:10px}
+.spr-card-photos .h{font-size:13px;font-weight:800;color:#1e6b3a;margin-bottom:4px}
+.spr-card-photos .sub{font-size:11px;color:var(--ink-mute);margin-bottom:10px;line-height:1.5}
+.spr-card-photos .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:10px;min-height:90px}
+.spr-card-photos .ph{position:relative;width:100%;aspect-ratio:1/1;border-radius:8px;background:#e6efe6 center/cover;border:1px solid #c4dcc4;overflow:hidden;cursor:pointer}
+.spr-card-photos .ph .rm{position:absolute;top:4px;right:4px;width:22px;height:22px;background:rgba(198,40,40,.92);color:#fff;border:0;border-radius:50%;font-weight:800;cursor:pointer;font-size:11px}
+.spr-card-photos .empty{padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;font-style:italic;grid-column:1/-1}
+.s-falda-save{background-image:linear-gradient(135deg,#64b5f6 0%,#1976d2 45%,#0d47a1 100%) !important;box-shadow:0 3px 10px rgba(25,118,210,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18) !important}
+
+/* === MULTI-PERITO selector + email tag === */
+.mp-bar{display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(180deg,#f0fff5,#e8f5e9);border:1.5px solid #c8e6c9;border-radius:9px;margin-bottom:12px;flex-wrap:wrap}
+.mp-bar .lbl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#1b5e20}
+.mp-bar select{flex:1;min-width:160px;padding:8px 10px;border:1px solid #c8e6c9;border-radius:7px;font:inherit;font-size:13.5px;background:#fff;font-weight:600;color:#1b5e20}
+.mp-bar .mp-actions{display:flex;gap:6px;flex-wrap:wrap}
+.mp-btn{appearance:none;border:0;color:#fff;font:inherit;font-size:11px;font-weight:700;letter-spacing:.04em;padding:8px 13px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease;background-size:180% 180%;background-position:0% 0%}
+.mp-btn::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mp-btn:hover{transform:translateY(-2px) scale(1.03);filter:brightness(1.08) saturate(1.15);background-position:100% 100%}
+.mp-btn:hover::before{transform:translateX(130%)}
+.mp-btn.add{background-image:linear-gradient(135deg,#66bb6a 0%,#2e7d32 45%,#1b5e20 100%);box-shadow:0 2px 8px rgba(46,125,50,.42),inset 0 1px 0 rgba(255,255,255,.30)}
+.mp-btn.dup{background-image:linear-gradient(135deg,#42a5f5 0%,#1565c0 45%,#0d47a1 100%);box-shadow:0 2px 8px rgba(21,101,192,.42),inset 0 1px 0 rgba(255,255,255,.30)}
+.mp-btn.rm{background-image:linear-gradient(135deg,#ef5350 0%,#c62828 45%,#7f0000 100%);box-shadow:0 2px 8px rgba(198,40,40,.42),inset 0 1px 0 rgba(255,255,255,.30)}
+.email-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.email-row{display:flex;gap:6px;align-items:center}
+.email-row input{flex:1;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13.5px;background:#fff;outline:none}
+.email-row input:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.email-row button.rm{appearance:none;width:32px;height:32px;border:0;border-radius:7px;color:#fff;cursor:pointer;font-size:13px;font-weight:800;background-image:linear-gradient(135deg,#ef9a9a 0%,#e57373 45%,#c62828 100%);box-shadow:0 2px 6px rgba(198,40,40,.32);flex-shrink:0;transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s}
+.email-row button.rm:hover{transform:translateY(-1px) scale(1.05);filter:brightness(1.1)}
+.email-list .add-row{display:flex;gap:6px;margin-top:4px}
+.email-list .add-row input{flex:1;padding:8px 11px;border:1.5px dashed var(--line);border-radius:8px;font:inherit;font-size:13px;background:#fafaf6;outline:none;color:var(--ink-soft);font-style:italic}
+.email-list .add-row input:focus{border-style:solid;border-color:var(--mx-accent);background:#fff;font-style:normal;color:var(--ink);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+
+/* === BANNER RADON real-time Mixando === */
+.radon-banner{margin:10px 0;padding:14px 16px;border-radius:10px;border-left:5px solid;font-size:12.5px;line-height:1.55;position:relative;overflow:hidden}
+.radon-banner.green{background:linear-gradient(180deg,#f1faf3,#e8f5e9);border-color:#2e7d32;color:#1b5e20}
+.radon-banner.yellow{background:linear-gradient(180deg,#fffcec,#fff8e1);border-color:#f9a825;color:#7d5a1f}
+.radon-banner.red{background:linear-gradient(180deg,#fff5f5,#ffebee);border-color:#c62828;color:#7f0000}
+.radon-banner.grey{background:linear-gradient(180deg,#fafafa,#f0f0f0);border-color:#9e9e9e;color:#424242}
+.radon-banner .h{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.radon-banner .h .badge{padding:2px 8px;background:currentColor;color:#fff;border-radius:10px;font-size:9.5px;letter-spacing:.10em}
+.radon-banner .lvl{font-family:Georgia,serif;font-style:italic;font-size:15px;font-weight:700;margin-bottom:4px}
+.radon-banner .det{font-size:12px;line-height:1.55}
+.radon-banner .src{margin-top:6px;font-size:10.5px;font-style:italic;opacity:.85}
+.radon-banner a{color:inherit;text-decoration:underline;font-weight:700}
+.radon-banner a:hover{text-decoration:none}
+.cmn-input-wrap{position:relative}
+.cmn-suggestions{position:absolute;top:100%;left:0;right:0;z-index:30;background:#fff;border:1px solid var(--line);border-top:0;border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;display:none;box-shadow:0 8px 20px rgba(0,0,0,.10)}
+.cmn-suggestions.open{display:block}
+.cmn-suggestions .item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cmn-suggestions .item:hover{background:var(--mx-accent-soft)}
+.cmn-suggestions .item:last-child{border-bottom:0}
+.cmn-suggestions .item .priority{font-size:9.5px;background:#c62828;color:#fff;padding:2px 7px;border-radius:10px;letter-spacing:.06em;font-weight:800}
+
+.norme-banner{margin:10px 0;padding:14px 16px;border-radius:10px;border-left:5px solid var(--mx-accent);background:linear-gradient(180deg,#fdfcf6,#faf8ee);font-size:12.5px}
+.norme-banner .h{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mx-accent-strong);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.norme-banner ul{margin:0;padding:0 0 0 18px;line-height:1.7}
+.norme-banner li{margin:3px 0}
+.norme-banner li strong{color:var(--ink)}
+.norme-banner li .tag{display:inline-block;padding:1px 7px;background:var(--mx-accent);color:#fff;border-radius:8px;font-size:9.5px;letter-spacing:.06em;font-weight:800;margin-right:5px;vertical-align:middle}
+.norme-banner li .tag.cogente{background:#c62828}
+.norme-banner li .tag.linee_guida{background:#f57c00}
+.norme-banner li .tag.regolamento{background:#1976d2}
+.norme-banner a{color:var(--mx-accent-strong);text-decoration:underline}
+.norme-banner a:hover{text-decoration:none}
+.norme-banner .empty{color:var(--ink-mute);font-style:italic;font-size:11.5px}
+
+/* === TOOLBAR STANDARD MIXANDO 7 PULSANTI === */
+.mx-toolbar{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin:18px 0 14px;overflow:hidden}
+.mx-toolbar-head{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),#fff);display:flex;align-items:center;gap:10px}
+.mx-toolbar-head .ico-wrap{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.mx-toolbar-head .title{flex:1}
+.mx-toolbar-head .title small{display:block;font-family:var(--ff-sans);font-style:italic;font-size:11.5px;color:var(--ink-mute);font-weight:500;margin-top:2px}
+.mx-toolbar-body{padding:14px 18px 16px}
+.mx-toolbar-inner{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.mx-tb-btn{appearance:none;border:0;color:#fff;font:inherit;font-size:13px;font-weight:700;letter-spacing:.02em;padding:12px 18px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease,background-position .35s ease;background-size:180% 180%}
+.mx-tb-btn::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-tb-btn:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-tb-btn:hover::before{transform:translateX(130%)}
+.mx-tb-btn.tb-save{background-image:linear-gradient(135deg,#64b5f6,#1976d2 45%,#0d47a1)}
+.mx-tb-btn.tb-load{background-image:linear-gradient(135deg,#ffb74d,#f57c00 45%,#bf360c)}
+.mx-tb-btn.tb-compare{background-image:linear-gradient(135deg,#ba68c8,#7b1fa2 45%,#311b92)}
+.mx-tb-btn.tb-word{background-image:linear-gradient(135deg,#5a9bd8,#2b579a 45%,#0c2e5e)}
+.mx-tb-btn.tb-pdf{background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000)}
+.mx-tb-btn.tb-report{background-image:linear-gradient(135deg,#ffd54f,#f9a825 45%,#e65100);color:#3e2e00}
+.mx-tb-btn.tb-reset{background-image:linear-gradient(135deg,#9e9e9e,#616161 45%,#212121)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:28px 12px}
+.modal.show{display:flex}
+.modal-paper{background:#fff;max-width:840px;width:100%;border-radius:12px;box-shadow:0 18px 60px rgba(0,0,0,.4);overflow:hidden}
+.modal-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.modal-head h3{margin:0;font-family:var(--ff-serif);font-size:16px}
+.modal-close{appearance:none;border:0;background:#f5f1e8;color:var(--ink);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:17px;font-weight:800}
+.modal-body{padding:24px 28px;font-family:var(--ff-serif);font-size:13px;line-height:1.6;max-height:70vh;overflow-y:auto}
+.modal-body h1{font-size:22px;margin:0 0 12px;font-weight:700;font-style:italic}
+.modal-body h2{font-size:15px;margin:22px 0 8px;color:var(--mx-accent-strong);border-bottom:1px solid var(--line);padding-bottom:4px}
+.modal-body table{width:100%;border-collapse:collapse;margin:10px 0;font-size:11.5px}
+.modal-body table th,.modal-body table td{padding:5px 7px;border-bottom:1px solid var(--line);text-align:left}
+.modal-body table th{background:#fafaf6;font-weight:700;text-transform:uppercase;font-size:10.5px}
+.modal-actions{padding:12px 18px;border-top:1px solid var(--line);background:#fafaf6;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:10px;font-size:13.5px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.32);z-index:300;opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);max-width:88vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:var(--ok)}.toast.err{background:var(--err)}.toast.warn{background:var(--warn)}
+@media print{body * {visibility:hidden !important}.mx-print, .mx-print * {visibility:visible !important}.mx-print{position:absolute;left:0;top:0;width:100%}}
+.dlg-list{max-height:50vh;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:#fafaf6}
+.dlg-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px}
+.dlg-empty{padding:30px;text-align:center;color:var(--ink-mute);font-style:italic;font-size:13px}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab"><img id="mxLogoPerito" class="mx-logo-mini" alt="Logo perito">
+  <div class="meta"><span class="tag">Cantiere</span><h1 class="ti">Dati del Cantiere</h1></div>
+  <a class="back" href="suite.html">&larr; Suite</a>
+</header>
+
+<main>
+  <section class="hero">
+    <h2>Dati del <em>Cantiere</em></h2>
+    <p>Anagrafica perito, committente, immobile, contesto normativo regionale (radon + norme cogenti) e scheda sopralluogo. I dati sono salvati localmente sul tuo browser e disponibili per tutti i moduli diagnostici. La gestione dei singoli locali (stanze, marker, foto del problema) si fa direttamente nei moduli diagnostici.</p>
+  </section>
+
+  <div class="mp-bar" id="mpBar" style="margin-bottom:0">
+    <span class="lbl">👤 Perito attivo</span>
+    <select id="mpSelect" aria-label="Seleziona perito attivo"></select>
+    <div class="mp-actions">
+      <button type="button" class="mp-btn add" id="mpAdd">➕ Nuovo perito</button>
+      <button type="button" class="mp-btn dup" id="mpDup">📋 Duplica</button>
+      <button type="button" class="mp-btn rm" id="mpRm">🗑 Rimuovi</button>
+    </div>
+  </div>
+  <div style="font-size:11.5px;color:var(--ink-mute);margin:-6px 0 12px;font-style:italic">Tutti gli altri moduli (Radon, Vespai, IAQ, ecc.) leggono i dati del <strong>perito attivo</strong> selezionato qui sopra.</div>
+  <article class="card">
+    <h3><span class="num">1</span> Anagrafica perito / tecnico</h3>
+    <div class="body">
+      <div style="padding:10px 12px;background:#e8f5e9;border-left:4px solid #2e7d32;border-radius:8px;font-size:12.5px;color:#1b5e20;line-height:1.55;margin-bottom:12px"><strong>I dati del perito</strong> sono salvati una volta sola e riutilizzati automaticamente in tutti i moduli (intestazione Word/PDF, relazioni). Modificali qui per aggiornarli ovunque.</div>
+      <div style="padding:10px 14px;background:#f0f7ff;border-left:4px solid #1976d2;border-radius:9px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <span style="font-size:11px;font-weight:800;color:#0d47a1;letter-spacing:.12em;text-transform:uppercase">Tipo soggetto</span>
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:7px 12px;border:1.5px solid #1976d2;border-radius:8px;background:#fff;font-weight:700;color:#0d47a1;font-size:12.5px"><input type="radio" name="pTipoSoggetto" id="pTipoPF" value="PF" style="accent-color:#1976d2;margin:0"> 👤 Professionista individuale</label>
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:7px 12px;border:1.5px solid #1976d2;border-radius:8px;background:#fff;font-weight:700;color:#0d47a1;font-size:12.5px"><input type="radio" name="pTipoSoggetto" id="pTipoPG" value="PG" style="accent-color:#1976d2;margin:0"> 🏢 Studio / Società (S.t.p., S.r.l., Associato)</label>
+      </div>
+      <div class="row2">
+        <div class="field" id="pNomeField"><label for="pNome">Nome e cognome</label><input type="text" id="pNome" placeholder="es. Renzo Spedicato"></div>
+        <div class="field" id="pRagSocField" style="display:none"><label for="pRagSoc">Ragione sociale studio/società</label><input type="text" id="pRagSoc" placeholder="es. Studio Tecnico Rossi & Associati / ABC S.r.l. / S.t.p."></div>
+        <div class="field"><label for="pTitolo">Qualifica / Titolo</label><input type="text" id="pTitolo" placeholder="es. Geom., Ing., Arch., Perito"></div>
+        <div class="field"><label for="pPiva">P.IVA</label><input type="text" id="pPiva" placeholder="12345678901"></div>
+        <div class="field" id="pCfField"><label for="pCf">Codice Fiscale</label><input type="text" id="pCf" placeholder="RSSMRA70..."></div>
+        <div class="field"><label for="pStudio">Studio / Indirizzo</label><input type="text" id="pStudio" placeholder="Via, n., città, CAP"></div>
+        <div class="field"><label for="pAlbo">Iscrizione albo / ordine</label><input type="text" id="pAlbo" placeholder="es. Albo Geometri prov. Milano"></div>
+        <div class="field"><label for="pNumAlbo">N. iscrizione</label><input type="text" id="pNumAlbo" placeholder="es. 1234"></div>
+        <div class="field"><label for="pTelUff">Telefono ufficio</label><input type="tel" id="pTelUff" placeholder="+39 02 ..."></div>
+        <div class="field"><label for="pCell">Cellulare</label><input type="tel" id="pCell" placeholder="+39 333 ..."></div>
+        <div class="field" style="grid-column:1/-1"><label>E-mail (principale + alternative, una per riga)</label><div class="email-list" id="pEmailList"></div></div>
+        <div class="field"><label for="pPec">PEC</label><input type="email" id="pPec" placeholder="nome@pec.dominio.it"></div>
+      </div>
+      <div class="field" style="margin-top:12px"><label for="pLogoFile">Logo (opzionale, max 200 KB)</label><input type="file" id="pLogoFile" accept="image/png,image/jpeg,image/svg+xml"></div>
+      <div id="pLogoPreview" style="margin-top:8px"></div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">2</span> Anagrafica committente / immobile</h3>
+    <div class="body">
+      <div style="padding:10px 14px;background:#f0f7ff;border-left:4px solid #1976d2;border-radius:9px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <span style="font-size:11px;font-weight:800;color:#0d47a1;letter-spacing:.12em;text-transform:uppercase">Tipo soggetto</span>
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:7px 12px;border:1.5px solid #1976d2;border-radius:8px;background:#fff;font-weight:700;color:#0d47a1;font-size:12.5px"><input type="radio" name="fTipoSoggetto" id="fTipoPF" value="PF" style="accent-color:#1976d2;margin:0"> 👤 Persona fisica</label>
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:7px 12px;border:1.5px solid #1976d2;border-radius:8px;background:#fff;font-weight:700;color:#0d47a1;font-size:12.5px"><input type="radio" name="fTipoSoggetto" id="fTipoPG" value="PG" style="accent-color:#1976d2;margin:0"> 🏢 Persona giuridica (società/ente)</label>
+      </div>
+      <div class="row2">
+        <div class="field" id="fNomeField"><label for="fNome" id="fNomeLabel">Nome e cognome</label><input type="text" id="fNome" placeholder="es. Mario Rossi"></div>
+        <div class="field" id="fRagSocField" style="display:none"><label for="fRagSoc">Ragione sociale</label><input type="text" id="fRagSoc" placeholder="es. Acme S.r.l., Studio Tecnico Rossi & Associati"></div>
+        <div class="field"><label for="fCF" id="fCFLabel">Codice Fiscale</label><input type="text" id="fCF" placeholder="RSSMRA70..."></div>
+        <div class="field"><label for="fIndirizzo">Indirizzo</label><input type="text" id="fIndirizzo" placeholder="Via, n., città, CAP"></div>
+        <div class="field"><label for="fRegione">Regione <span style="font-weight:400;color:var(--ink-mute);font-size:10.5px">(usata da Vespai/Radon/IAQ/Microclima)</span></label><select id="fRegione"><option value="">seleziona</option><option>Abruzzo</option><option>Basilicata</option><option>Calabria</option><option>Campania</option><option>Emilia-Romagna</option><option>Friuli-Venezia Giulia</option><option>Lazio</option><option>Liguria</option><option>Lombardia</option><option>Marche</option><option>Molise</option><option>Piemonte</option><option>Puglia</option><option>Sardegna</option><option>Sicilia</option><option>Toscana</option><option>Trentino-Alto Adige</option><option>Umbria</option><option>Valle d'Aosta</option><option>Veneto</option></select></div>
+        <div class="field cmn-input-wrap"><label for="fComune">Comune</label><input type="text" id="fComune" placeholder="es. Firenze" autocomplete="off"><div class="cmn-suggestions" id="fComuneSuggest"></div></div>
+        
+        <div class="field"><label for="fGps">Coordinate GPS (opzionale)</label><input type="text" id="fGps" placeholder="45.4642, 9.1900"></div>
+        <div class="field"><label for="fCatasto">Riferimenti catastali</label><input type="text" id="fCatasto" placeholder="Foglio / Mappale / Sub"></div>
+        <div class="field"><label for="fAnno">Anno costruzione</label><input type="number" id="fAnno" min="1500" max="2099" placeholder="es. 1965"></div>
+        <div class="field"><label for="fDataSopr">Data sopralluogo</label><input type="date" id="fDataSopr"></div>
+        <div class="field"><label for="fIncarico">Riferimento incarico</label><input type="text" id="fIncarico" placeholder="es. Prot. 2026/045"></div>
+      </div>
+      <div class="field" style="margin-top:12px"><label for="fOggetto">Oggetto della relazione tecnica</label><input type="text" id="fOggetto" placeholder="es. Verifica condensa muraria pareti perimetrali nord"></div>
+      <div class="field" style="margin-top:12px"><label for="fNote">Note</label><textarea id="fNote" placeholder="Vincoli, peculiarità..."></textarea></div>
+      <div class="row2" style="margin-top:12px">
+        <div class="field"><label for="fTelUff">Telefono ufficio committente</label><input type="tel" id="fTelUff" placeholder="+39 02 ..."></div>
+        <div class="field"><label for="fCell">Cellulare committente</label><input type="tel" id="fCell" placeholder="+39 333 ..."></div>
+        <div class="field" style="grid-column:1/-1"><label>E-mail committente (principale + alternative, una per riga)</label><div class="email-list" id="fEmailList"></div></div>
+        <div class="field" style="grid-column:1/-1"><label for="fPec">PEC committente</label><input type="email" id="fPec" placeholder="nome@pec.dominio.it"></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">3</span> Contesto normativo, Radon + Norme regionali (calcolato dai dati committente)</h3>
+    <div class="body">
+      <div style="padding:10px 14px;background:#f0f7ff;border-left:4px solid #1976d2;border-radius:9px;font-size:12px;color:#0d47a1;line-height:1.55;margin-bottom:12px">Questi banner si aggiornano automaticamente in base a <strong>Regione</strong> e <strong>Comune</strong> inseriti nell'anagrafica committente (o rilevati da GPS / risoluzione indirizzo). Le norme cogenti regionali si applicano in aggiunta alle norme nazionali sempre valide.</div>
+      <div id="radonBanner"></div>
+      <div id="normeBanner"></div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3><span class="num">4</span> Scheda Sopralluogo, GPS + meteo + falda</h3>
+    <div class="body">
+      <div class="spr-intro">Cliccando <strong>GPS</strong> il modulo raccoglie posizione, indirizzo (OpenStreetMap/Nominatim), meteo attuale e precipitazioni storiche 365 gg (Open-Meteo / Copernicus ERA5) in un colpo solo. I dati vengono inclusi automaticamente nel report finale.</div>
+      <div class="spr-row">
+        <div class="field" style="margin:0"><label for="sprIndirizzo">Indirizzo edificio (auto-popolato da GPS o da risoluzione manuale)</label><input type="text" id="sprIndirizzo" placeholder="Via, civico, CAP, città, provincia"></div>
+        <button type="button" class="spr-gps-btn" id="btnSprGps">📍 GPS</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <button type="button" class="mx-shiny" id="btnSprResolveAddr" style="background-image:linear-gradient(135deg,#42a5f5,#1565c0 45%,#0d47a1);box-shadow:0 3px 10px rgba(21,101,192,.42);padding:9px 16px;font-size:11.5px;letter-spacing:.06em">🔍 Risolvi da Regione+Comune+Indirizzo (meteo, pioggia, radon senza GPS)</button>
+        <button type="button" class="mx-shiny" id="btnSprResetGps" style="background-image:linear-gradient(135deg,#bdbdbd,#757575 45%,#424242);box-shadow:0 3px 10px rgba(97,97,97,.42);padding:9px 16px;font-size:11.5px;letter-spacing:.06em">🗑 Reset GPS + meteo + pioggia</button>
+      </div>
+      <div class="spr-status" id="sprStatusGps"></div>
+      <div class="spr-status" id="sprStatusAddr" style="color:#1b5e20"></div>
+      <div class="spr-gps-info" id="sprGpsInfo"></div>
+      <div id="sprWxHost"></div>
+      <div style="margin-top:10px"><button type="button" class="mx-shiny" id="btnSprManualWx" style="background-image:linear-gradient(135deg,#ffd54f 0%,#f9a825 45%,#e65100 100%);box-shadow:0 3px 10px rgba(249,168,37,.50),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -2px 4px rgba(0,0,0,.10);color:#3e2e00;padding:9px 16px;font-size:11.5px">✏️ Inserisci T/UR manualmente (misura del perito)</button></div>
+      <div id="sprManualWxForm" style="display:none;margin-top:10px;padding:13px 16px;background:#fff8ed;border:1.5px solid #d4a017;border-radius:10px">
+        <div style="font-size:11px;font-weight:800;color:#7d5a1f;margin-bottom:8px;letter-spacing:.06em">✏️ INSERIMENTO MANUALE T/UR (sostituisce Open-Meteo)</div>
+        <div style="font-size:11px;color:#7d5a1f;margin-bottom:10px;line-height:1.5">Inserisci le misure del tuo termoigrometro tarato. La fonte verrà tracciata nella relazione tecnica come <strong>"Misura strumentale del perito"</strong>. Glaser e Termo erediteranno questi valori.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div><label style="display:block;font-size:11px;color:#7d5a1f;margin-bottom:4px;font-weight:700">Temperatura (°C)</label><input type="number" id="sprMxT" step="0.1" min="-30" max="60" placeholder="es. 18.5" style="width:100%;padding:9px 12px;border:1.5px solid #d4a017;border-radius:7px;font:inherit;font-size:14px"></div>
+          <div><label style="display:block;font-size:11px;color:#7d5a1f;margin-bottom:4px;font-weight:700">Umidità Relativa (%)</label><input type="number" id="sprMxUR" step="1" min="0" max="100" placeholder="es. 72" style="width:100%;padding:9px 12px;border:1.5px solid #d4a017;border-radius:7px;font:inherit;font-size:14px"></div>
+        </div>
+        <div><label style="display:block;font-size:11px;color:#7d5a1f;margin-bottom:4px;font-weight:700">Strumento utilizzato (opzionale)</label><input type="text" id="sprMxInstr" placeholder="es. marca e modello, taratura 12/2025" style="width:100%;padding:9px 12px;border:1.5px solid #d4a017;border-radius:7px;font:inherit;font-size:13px;margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button type="button" class="mx-shiny" id="btnSprMxCancel" style="background-image:linear-gradient(135deg,#bdbdbd 0%,#757575 45%,#424242 100%);box-shadow:0 3px 10px rgba(97,97,97,.42)">Annulla</button>
+          <button type="button" class="mx-shiny" id="btnSprMxSave" style="background-image:linear-gradient(135deg,#66bb6a 0%,#2e7d32 45%,#1b5e20 100%);box-shadow:0 3px 10px rgba(46,125,50,.42)">💾 Salva misura</button>
+        </div>
+      </div>
+<div id="sprRainHost"></div>
+      <div class="row2" style="margin-top:12px">
+        <div class="field"><label for="sprFloor">Piano / Locale</label><input type="text" id="sprFloor" placeholder="Es. piano terra, cantina, scala B"></div>
+        <div class="field"><label for="sprSiteNotes">Note sopralluogo</label><textarea id="sprSiteNotes" placeholder="Osservazioni generali (esposizione, contesto, accessibilità)"></textarea></div>
+      </div>
+      <div class="spr-card-photos">
+        <div class="h">📷 Foto del cantiere</div>
+        <div class="sub">Panoramica, esterno/interno, contesto, accessi. Massimo 12 foto, ridimensionate a 1024 px lato lungo, conservate in localStorage.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button type="button" class="mx-shiny" id="btnSprAddPhoto" style="background-image:linear-gradient(135deg,#66bb6a 0%,#2e7d32 45%,#1b5e20 100%);box-shadow:0 3px 10px rgba(46,125,50,.42)">➕ Aggiungi foto</button><input type="file" id="sprPhotoFile" accept="image/*" multiple style="display:none"><span id="sprPhotoCount" style="font-size:11px;color:var(--ink-mute);font-style:italic"></span></div>
+        <div class="gallery" id="sprPhotoGallery"></div>
+      </div>
+      <div class="spr-card-idro">
+        <div class="h">🗺 Contesto idrogeologico, Regione e risorse autorevoli</div>
+        <label style="display:block;font-size:11px;color:var(--ink-mute);margin-bottom:6px">Regione del cantiere (auto-rilevata se hai usato il GPS, modificabile)</label>
+        <select id="sprArpaRegion" style="padding:8px 12px;border:1px solid var(--line);border-radius:7px;font:inherit;font-size:13px;width:100%;max-width:380px;background:#fff"></select>
+        <div class="links">
+          <div class="t">Risorse nazionali ISPRA (sempre disponibili):</div>
+          <a href="https://climadat.isprambiente.it/dati-e-indicatori/indicatori-di-impatto-dei-cambiamenti-climatici/livello-delle-falde-acquifere/" target="_blank" rel="noopener">→ ISPRA Climadat, Livello delle falde acquifere (indicatore nazionale)</a>
+          <a href="https://www.isprambiente.gov.it/it/attivita/suolo-e-territorio/idrogeologia" target="_blank" rel="noopener">→ ISPRA, Indagini idrogeologiche e monitoraggio acque sotterranee</a>
+          <a href="https://scia.isprambiente.it/" target="_blank" rel="noopener">→ SCIA-ISPRA, Sistema nazionale dati climatici</a>
+          <div id="sprArpaRegional"></div>
+        </div>
+      </div>
+      <div class="spr-card-falda">
+        <div class="h">💧 Livello falda freatica (manuale, da fonte autorevole)</div>
+        <div class="sub">Compila <strong>solo</strong> se hai consultato i link sopra e hai un dato. Niente dati inventati: se non disponibile lascia vuoto.</div>
+        <div class="row2">
+          <label>Livello statico (m sotto p.c.)<input type="number" step="0.1" id="sprGwLevel"></label>
+          <label>Data misurazione<input type="date" id="sprGwDate"></label>
+          <label>Tipo acquifero<select id="sprGwType"><option value="">n.d.</option><option value="freatico">Freatico (libero)</option><option value="confinato">Confinato (in pressione)</option><option value="semiconfinato">Semiconfinato</option><option value="non_noto">Non noto</option></select></label>
+          <label>Fonte (es. ARPA Lombardia stazione XYZ)<input type="text" id="sprGwSource"></label>
+          <label class="full">URL fonte<input type="url" id="sprGwUrl" placeholder="https://…"></label>
+          <label class="full">Note falda<textarea id="sprGwNotes" rows="2"></textarea></label>
+        </div>
+        <button type="button" class="mx-shiny s-falda-save" id="btnSprGwSave" style="margin-top:6px">💾 Salva dati falda</button>
+      </div>
+    </div>
+  </article>
+
+  <div class="mx-toolbar" id="mxToolbar">
+    <h3 class="mx-toolbar-head"><span class="ico-wrap">💾</span><span class="title">Salvataggio &amp; esportazione<small>Salva lo stato del cantiere, esporta in Word/PDF/JSON o ricarica un'anagrafica precedente</small></span></h3>
+    <div class="mx-toolbar-body">
+      <div class="mx-toolbar-inner">
+        <button type="button" class="mx-tb-btn tb-save"    id="btnSave"><span>💾</span><span>Salva</span></button>
+        <button type="button" class="mx-tb-btn tb-load"    id="btnLoad"><span>📁</span><span>Carica</span></button>
+        <button type="button" class="mx-tb-btn tb-compare" id="btnCompare"><span>⚖</span><span>Confronta</span></button>
+        <button type="button" class="mx-tb-btn tb-word"    id="btnWord"><span>📝</span><span>Salva Word</span></button>
+        <button type="button" class="mx-tb-btn tb-pdf"     id="btnPDF"><span>📄</span><span>Stampa / PDF</span></button>
+        <button type="button" class="mx-tb-btn tb-report"  id="btnReport"><span>📦</span><span>Al report</span></button>
+        <button type="button" class="mx-tb-btn tb-reset"   id="btnReset"><span>✕</span><span>Reset</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="dlgModal"><div class="modal-paper" style="max-width:600px"><div class="modal-head"><h3 id="dlgTitle">Dialog</h3><button class="modal-close" id="dlgCloseBtn">&times;</button></div><div class="modal-body" id="dlgBody" style="padding:18px 20px;font-family:var(--ff-sans);max-height:70vh;overflow-y:auto"></div><div class="modal-actions" id="dlgActions"></div></div></div>
+  <div class="modal" id="docModal"><div class="modal-paper"><div class="modal-head"><h3>📑 Anteprima anagrafica cantiere</h3><button class="modal-close" id="modalCloseBtn">&times;</button></div><div class="modal-body mx-print" id="docBody"></div><div class="modal-actions"><button type="button" class="mx-shiny" id="btnDoExportWord" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#5a9bd8,#2b579a 45%,#0c2e5e)">📝 Scarica .doc</button><button type="button" class="mx-shiny" id="btnDoExportPDF" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000)">📄 Stampa / PDF</button><button type="button" class="mx-shiny s-blue" id="btnDoExportJSON" style="padding:8px 14px;font-size:12px">💾 .json</button><button type="button" class="mx-shiny s-gray" id="btnCloseModal" style="padding:8px 14px;font-size:12px">Chiudi</button></div></div></div>
+  <div class="toast" id="toast"></div>
+
+  <footer class="ft"><strong>Mixando &middot; Dati del Cantiere v4.0</strong> &middot; Anagrafica perito (PF/PG, multi-perito) + committente (PF/PG, contatti completi) + immobile + Contesto normativo (radon DB 20 regioni + norme cogenti regionali) + Scheda Sopralluogo (GPS + meteo + falda) &middot; Schema mx2::locali-v1 retrocompatibile &middot; GDPR Reg. UE 2016/679</footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+/* Mini-logo perito da mx2::perito.logoData */
+(function(){
+  function loadLg(){
+    try{
+      var p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");
+      var img=document.getElementById("mxLogoPerito");
+      var bar=document.querySelector(".mx-bar");
+      if(img && p && p.logoData){ img.src=p.logoData; img.style.display="block"; if(bar)bar.classList.add("has-logo"); }
+      else { if(img)img.style.display="none"; if(bar)bar.classList.remove("has-logo"); }
+    }catch(e){}
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",loadLg);
+  else loadLg();
+})();
+
+  /* =====================================================================
+   * Storage Mixando v3.1:
+   *   mx2::periti-v2     -> { schemaVersion:2, list:[ {id, nome, ragione_sociale, titolo, piva, cf, studio, albo, numAlbo, tel_ufficio, cellulare, email_list:[], pec, logoData, createdAt} ], activeId }
+   *   mx2::perito        -> RETROCOMPAT: SEMPRE allineato col perito attivo (legacy fields per altri moduli)
+   *   mx2::locali-v1     -> { schemaVersion:1, ana:{...committente+immobile}, sopralluogo:{...}, locali:[...] }
+   * ===================================================================== */
+  var KEY_PERITI = 'mx2::periti-v2';
+  var KEY_PERITO_LEGACY = 'mx2::perito';
+  var KEY_LOCALI = 'mx2::locali-v1';
+
+  function _newPeritoId(){ return 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6); }
+  function _emptyPerito(){ return {id:_newPeritoId(), tipo_soggetto:'PF', nome:'', ragione_sociale:'', titolo:'', piva:'', cf:'', studio:'', albo:'', numAlbo:'', tel_ufficio:'', cellulare:'', email_list:[''], pec:'', logoData:'', createdAt:new Date().toISOString()}; }
+
+  function _legacyToV2(){
+    /* Migrazione da mx2::perito singleton (schema v1) → mx2::periti-v2 array */
+    var legacy = null;
+    try{ legacy = JSON.parse(localStorage.getItem(KEY_PERITO_LEGACY)||'null'); }catch(_){}
+    var p = _emptyPerito();
+    if(legacy){
+      p.tipo_soggetto = legacy.tipo_soggetto || 'PF';
+      p.nome = legacy.nome || '';
+      p.ragione_sociale = legacy.ragione_sociale || '';
+      p.titolo = legacy.titolo || '';
+      p.piva = legacy.piva || '';
+      p.cf = legacy.cf || '';
+      p.studio = legacy.studio || '';
+      p.albo = legacy.albo || '';
+      p.numAlbo = legacy.numAlbo || '';
+      p.tel_ufficio = legacy.tel_ufficio || legacy.tel || '';
+      p.cellulare = legacy.cellulare || '';
+      p.email_list = legacy.email ? [legacy.email] : [''];
+      p.pec = legacy.pec || '';
+      p.logoData = legacy.logoData || '';
+    }
+    return {schemaVersion:2, list:[p], activeId:p.id};
+  }
+
+  function loadPeriti(){
+    try{
+      var s = JSON.parse(localStorage.getItem(KEY_PERITI));
+      if(s && s.list && s.list.length) return s;
+    }catch(_){}
+    var migrated = _legacyToV2();
+    try{ localStorage.setItem(KEY_PERITI, JSON.stringify(migrated)); }catch(_){}
+    return migrated;
+  }
+  function savePeriti(pp){ try{ localStorage.setItem(KEY_PERITI, JSON.stringify(pp)); }catch(_){} _syncLegacy(pp); }
+
+  function _syncLegacy(pp){
+    /* Mantiene mx2::perito aggiornato col perito attivo per retrocompat con altri moduli */
+    if(!pp || !pp.list || !pp.list.length) return;
+    var a = pp.list.find(function(x){return x.id===pp.activeId;}) || pp.list[0];
+    /* Nome unificato per altri moduli: per PG → ragione sociale; per PF → nome */
+    var nomeUnif = (a.tipo_soggetto==='PG' && a.ragione_sociale) ? a.ragione_sociale : (a.nome||'');
+    var legacy = {
+      schemaVersion: 1,
+      tipo_soggetto: a.tipo_soggetto || 'PF',
+      nome: nomeUnif,
+      cognome_o_ragsoc: a.ragione_sociale || a.nome || '',
+      titolo: a.titolo || '',
+      piva: a.piva || '',
+      cf: a.cf || '',
+      studio: a.studio || '',
+      albo: a.albo || '',
+      numAlbo: a.numAlbo || '',
+      tel: a.cellulare || a.tel_ufficio || '',
+      email: (a.email_list && a.email_list[0]) || '',
+      pec: a.pec || '',
+      ragione_sociale: a.ragione_sociale || '',
+      tel_ufficio: a.tel_ufficio || '',
+      cellulare: a.cellulare || '',
+      logoData: a.logoData || ''
+    };
+    try{ localStorage.setItem(KEY_PERITO_LEGACY, JSON.stringify(legacy)); }catch(_){}
+  }
+
+  function getActivePerito(){
+    var pp = loadPeriti();
+    return pp.list.find(function(x){return x.id===pp.activeId;}) || pp.list[0];
+  }
+  function setActivePerito(id){
+    var pp = loadPeriti();
+    if(pp.list.find(function(x){return x.id===id;})){ pp.activeId = id; savePeriti(pp); }
+  }
+  function addPerito(){
+    var pp = loadPeriti();
+    var p = _emptyPerito();
+    pp.list.push(p);
+    pp.activeId = p.id;
+    savePeriti(pp);
+    return p;
+  }
+  function duplicateActivePerito(){
+    var pp = loadPeriti();
+    var a = getActivePerito();
+    var c = JSON.parse(JSON.stringify(a));
+    c.id = _newPeritoId();
+    c.nome = (a.nome||'') + ' (copia)';
+    c.createdAt = new Date().toISOString();
+    pp.list.push(c);
+    pp.activeId = c.id;
+    savePeriti(pp);
+    return c;
+  }
+  function removeActivePerito(){
+    var pp = loadPeriti();
+    if(pp.list.length<=1){ alert('Deve esserci almeno 1 perito.'); return false; }
+    pp.list = pp.list.filter(function(x){return x.id!==pp.activeId;});
+    pp.activeId = pp.list[0].id;
+    savePeriti(pp);
+    return true;
+  }
+  function updateActivePerito(patch){
+    var pp = loadPeriti();
+    var idx = pp.list.findIndex(function(x){return x.id===pp.activeId;});
+    if(idx<0) return;
+    Object.assign(pp.list[idx], patch);
+    savePeriti(pp);
+  }
+
+  /* Wrapper retrocompat con codice già esistente nel file (perito = oggetto singolo attivo) */
+  function loadPerito(){ return getActivePerito(); }
+  function savePerito(p){ updateActivePerito(p); }
+
+  function loadLocali(){
+    try{
+      var s = JSON.parse(localStorage.getItem(KEY_LOCALI));
+      if (!s) return {schemaVersion:1, ana:{}, locali:[]};
+      if (!s.schemaVersion) s.schemaVersion = 1;
+      if (!s.ana) s.ana = {};
+      if (!Array.isArray(s.locali)) s.locali = [];
+      return s;
+    } catch(_){ return {schemaVersion:1, ana:{}, locali:[]}; }
+  }
+  function saveLocali(s){ try{ localStorage.setItem(KEY_LOCALI, JSON.stringify(s)); }catch(_){} }
+
+  var perito = loadPerito();
+  var state  = loadLocali();
+
+  /* ========== Multi-perito: UI selector + bind dinamico campi ========== */
+  var PERITO_FIELDS = [
+    ['pNome','nome'],['pRagSoc','ragione_sociale'],['pTitolo','titolo'],['pPiva','piva'],['pCf','cf'],['pStudio','studio'],
+    ['pAlbo','albo'],['pNumAlbo','numAlbo'],['pTelUff','tel_ufficio'],['pCell','cellulare'],['pPec','pec']
+  ];
+
+  function _peritoLabel(p){
+    var parts = [];
+    if (p.tipo_soggetto === 'PG' && p.ragione_sociale) {
+      parts.push('🏢 '+p.ragione_sociale);
+    } else if (p.nome) {
+      parts.push(p.nome);
+      if (p.titolo) parts.push('('+p.titolo+')');
+    } else if (p.ragione_sociale) {
+      parts.push('🏢 '+p.ragione_sociale);
+    }
+    if (!parts.length) parts.push('(senza nome)');
+    return parts.join(' ');
+  }
+  function renderPeritoSelector(){
+    var sel = document.getElementById('mpSelect'); if(!sel) return;
+    var pp = loadPeriti();
+    var opts = pp.list.map(function(p){ var s=(p.id===pp.activeId?' selected':''); return '<option value="'+p.id+'"'+s+'>'+(_peritoLabel(p).replace(/</g,'&lt;'))+'</option>'; }).join('');
+    sel.innerHTML = opts;
+    /* Disabilita "Rimuovi" se solo 1 perito */
+    var rmBtn = document.getElementById('mpRm');
+    if(rmBtn){ rmBtn.disabled = pp.list.length<=1; rmBtn.style.opacity = pp.list.length<=1 ? '.45' : '1'; rmBtn.style.cursor = pp.list.length<=1 ? 'not-allowed' : 'pointer'; }
+  }
+  function applyPeritoTipoSoggetto(t){
+    var nomeField = document.getElementById('pNomeField');
+    var ragSocField = document.getElementById('pRagSocField');
+    var cfField = document.getElementById('pCfField');
+    if (t === 'PG'){
+      if (nomeField) nomeField.style.display = 'none';
+      if (ragSocField) ragSocField.style.display = '';
+      /* Per PG: CF e P.IVA spesso coincidono. Lasciamo entrambi visibili ma label CF "(coincide con P.IVA)" */
+      if (cfField){ var lbl = cfField.querySelector('label'); if(lbl) lbl.innerHTML='Codice Fiscale <span style="font-weight:400;color:var(--ink-mute);font-size:10.5px">(per PG può coincidere con P.IVA)</span>'; }
+    } else {
+      if (nomeField) nomeField.style.display = '';
+      if (ragSocField) ragSocField.style.display = 'none';
+      if (cfField){ var lbl2 = cfField.querySelector('label'); if(lbl2) lbl2.textContent='Codice Fiscale'; }
+    }
+  }
+  function bindActivePeritoToForm(){
+    perito = getActivePerito();
+    PERITO_FIELDS.forEach(function(f){
+      var el = document.getElementById(f[0]); if(!el) return;
+      el.value = (perito[f[1]] != null ? perito[f[1]] : '');
+    });
+    /* Radio tipo soggetto */
+    var t = perito.tipo_soggetto || 'PF';
+    var rPF = document.getElementById('pTipoPF'); if(rPF) rPF.checked = (t==='PF');
+    var rPG = document.getElementById('pTipoPG'); if(rPG) rPG.checked = (t==='PG');
+    applyPeritoTipoSoggetto(t);
+    renderEmailList();
+    renderLogoPreview();
+  }
+  function attachPeritoFieldListeners(){
+    PERITO_FIELDS.forEach(function(f){
+      var el = document.getElementById(f[0]); if(!el) return;
+      el.addEventListener('input', function(){
+        var patch = {}; patch[f[1]] = el.value;
+        updateActivePerito(patch);
+        if (f[1]==='nome' || f[1]==='titolo' || f[1]==='ragione_sociale') renderPeritoSelector();
+      });
+    });
+    /* Radio tipo soggetto perito */
+    function _onPeritoTipoChange(){
+      var rPG = document.getElementById('pTipoPG');
+      var t = (rPG && rPG.checked) ? 'PG' : 'PF';
+      updateActivePerito({tipo_soggetto: t});
+      applyPeritoTipoSoggetto(t);
+      renderPeritoSelector();
+    }
+    var rPF = document.getElementById('pTipoPF'); if(rPF) rPF.addEventListener('change', _onPeritoTipoChange);
+    var rPG = document.getElementById('pTipoPG'); if(rPG) rPG.addEventListener('change', _onPeritoTipoChange);
+  }
+  /* Selector handler */
+  var mpSel = document.getElementById('mpSelect');
+  if(mpSel) mpSel.addEventListener('change', function(){ setActivePerito(mpSel.value); bindActivePeritoToForm(); });
+  /* Aggiungi nuovo */
+  var mpAdd = document.getElementById('mpAdd');
+  if(mpAdd) mpAdd.addEventListener('click', function(){ addPerito(); renderPeritoSelector(); bindActivePeritoToForm(); });
+  /* Duplica */
+  var mpDup = document.getElementById('mpDup');
+  if(mpDup) mpDup.addEventListener('click', function(){ duplicateActivePerito(); renderPeritoSelector(); bindActivePeritoToForm(); });
+  /* Rimuovi */
+  var mpRm = document.getElementById('mpRm');
+  if(mpRm) mpRm.addEventListener('click', function(){
+    var p = getActivePerito();
+    if(!confirm('Eliminare il perito "'+_peritoLabel(p)+'"?\nL\'azione è definitiva.')) return;
+    if(removeActivePerito()){ renderPeritoSelector(); bindActivePeritoToForm(); }
+  });
+
+  /* ====== Email list dinamica GENERICA (perito + cliente) ====== */
+  function renderEmailListGeneric(hostId, current, onChange){
+    var host = document.getElementById(hostId); if(!host) return;
+    var newId = hostId.replace('EmailList','') + 'EmailNew';
+    var emails = (current && current.length) ? current.slice() : [''];
+    var h = '';
+    emails.forEach(function(em, i){
+      h += '<div class="email-row" data-idx="'+i+'">';
+      h += '<input type="email" value="'+(em||'').replace(/"/g,'&quot;')+'" placeholder="'+(i===0?'email principale (es. nome@dominio.it)':'email alternativa')+'" data-emidx="'+i+'">';
+      if (i>0 || emails.length>1) h += '<button type="button" class="rm" data-rmemidx="'+i+'" title="Rimuovi email">✕</button>';
+      h += '</div>';
+    });
+    h += '<div class="add-row"><input type="email" id="'+newId+'" placeholder="+ aggiungi un\'altra email (premi Invio o Tab)"></div>';
+    host.innerHTML = h;
+    host.querySelectorAll('input[data-emidx]').forEach(function(inp){
+      inp.addEventListener('input', function(){
+        var idx = parseInt(inp.dataset.emidx,10);
+        var arr = emails.slice(); arr[idx] = inp.value; onChange(arr);
+      });
+    });
+    host.querySelectorAll('button[data-rmemidx]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var idx = parseInt(b.dataset.rmemidx,10);
+        var arr = emails.slice(); arr.splice(idx,1); if(!arr.length) arr = [''];
+        onChange(arr); renderEmailListGeneric(hostId, arr, onChange);
+      });
+    });
+    var addNew = document.getElementById(newId);
+    if(addNew){
+      function commit(){
+        var v = addNew.value.trim(); if(!v) return;
+        var arr = emails.slice();
+        if(!arr[0]) arr[0] = v; else arr.push(v);
+        onChange(arr); renderEmailListGeneric(hostId, arr, onChange);
+        setTimeout(function(){ var n = document.getElementById(newId); if(n) n.focus(); }, 50);
+      }
+      addNew.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key==='Tab'){ if(addNew.value.trim()){ e.preventDefault(); commit(); } } });
+      addNew.addEventListener('blur', function(){ if(addNew.value.trim()) commit(); });
+    }
+  }
+  function renderEmailList(){
+    renderEmailListGeneric('pEmailList', perito.email_list, function(arr){ updateActivePerito({email_list:arr}); });
+  }
+  function renderClienteEmailList(){
+    var cur = (state.ana.EmailList && state.ana.EmailList.length) ? state.ana.EmailList : [''];
+    renderEmailListGeneric('fEmailList', cur, function(arr){ state.ana.EmailList = arr; saveLocali(state); });
+  }
+
+  /* INIT bind */
+  attachPeritoFieldListeners();
+  renderPeritoSelector();
+  bindActivePeritoToForm();
+
+  /* Logo */
+  function renderLogoPreview(){
+    var host = document.getElementById('pLogoPreview');
+    if (!host) return;
+    if (perito.logoData){
+      host.innerHTML = '<img src="'+perito.logoData+'" style="max-height:80px;max-width:240px;border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff" alt="Logo perito"> <button type="button" id="pLogoRm" class="mx-shiny" style="margin-left:10px">Rimuovi logo</button>';
+      var rm = document.getElementById('pLogoRm');
+      if (rm) rm.addEventListener('click', function(){
+        delete perito.logoData; savePerito(perito); renderLogoPreview();
+      });
+    } else {
+      host.innerHTML = '<div style="font-size:12px;color:var(--ink-mute);font-style:italic">Nessun logo caricato (opzionale).</div>';
+    }
+  }
+  renderLogoPreview();
+  var pLogoFile = document.getElementById('pLogoFile');
+  if (pLogoFile) pLogoFile.addEventListener('change', function(ev){
+    var file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    if (file.size > 200*1024){ alert('Il logo supera 200 KB. Riduci la dimensione e riprova.'); ev.target.value=''; return; }
+    var reader = new FileReader();
+    reader.onload = function(e){
+      perito.logoData = e.target.result;
+      savePerito(perito);
+      renderLogoPreview();
+      ev.target.value = '';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  /* ========== Bind COMMITTENTE / IMMOBILE / SOPRALLUOGO ========== */
+  var IMMOBILE_FIELDS = ['Nome','RagSoc','CF','Indirizzo','Regione','Comune','Gps','Catasto','Anno','Note','DataSopr','Incarico','Oggetto','TelUff','Cell','Pec'];
+  var TIPO_SOGGETTO_KEY = 'TipoSoggetto';
+  IMMOBILE_FIELDS.forEach(function(k){
+    var el = document.getElementById('f'+k);
+    if (!el) return;
+    if (state.ana[k] != null) el.value = state.ana[k];
+    el.addEventListener('input',function(){ state.ana[k]=el.value; saveLocali(state); });
+  });
+  /* Email list committente */
+  renderClienteEmailList();
+
+  /* ====== Tipo soggetto (Persona fisica / Persona giuridica) ====== */
+  function applyTipoSoggetto(t){
+    var nomeField = document.getElementById('fNomeField');
+    var ragSocField = document.getElementById('fRagSocField');
+    var nomeLabel = document.getElementById('fNomeLabel');
+    var cfLabel = document.getElementById('fCFLabel');
+    var cfInput = document.getElementById('fCF');
+    if (t === 'PG'){
+      if (nomeField) nomeField.style.display = 'none';
+      if (ragSocField) ragSocField.style.display = '';
+      if (cfLabel) cfLabel.textContent = 'P.IVA';
+      if (cfInput) cfInput.placeholder = '12345678901';
+    } else {
+      /* default PF */
+      if (nomeField) nomeField.style.display = '';
+      if (ragSocField) ragSocField.style.display = 'none';
+      if (nomeLabel) nomeLabel.textContent = 'Nome e cognome';
+      if (cfLabel) cfLabel.textContent = 'Codice Fiscale';
+      if (cfInput) cfInput.placeholder = 'RSSMRA70...';
+    }
+  }
+  /* Bind radio + persistenza */
+  var rPF = document.getElementById('fTipoPF');
+  var rPG = document.getElementById('fTipoPG');
+  var currentTipo = state.ana[TIPO_SOGGETTO_KEY] || 'PF';
+  if (currentTipo === 'PG'){ if(rPG) rPG.checked = true; } else { if(rPF) rPF.checked = true; }
+  applyTipoSoggetto(currentTipo);
+  function _onTipoChange(){
+    var t = (rPG && rPG.checked) ? 'PG' : 'PF';
+    state.ana[TIPO_SOGGETTO_KEY] = t;
+    saveLocali(state);
+    applyTipoSoggetto(t);
+    /* Sync intelligente: quando PG, l'oggetto "Nome" del cantiere = RagioneSociale (per gli altri moduli che leggono ana.Nome) */
+    if (t === 'PG' && state.ana.RagSoc) {
+      state.ana.Nome = state.ana.RagSoc;
+      var nEl = document.getElementById('fNome'); if(nEl) nEl.value = state.ana.RagSoc;
+      saveLocali(state);
+    }
+  }
+  if(rPF) rPF.addEventListener('change', _onTipoChange);
+  if(rPG) rPG.addEventListener('change', _onTipoChange);
+  /* Quando in PG l'utente edita RagSoc, sincronizza anche ana.Nome (retrocompat altri moduli) */
+  var rsEl = document.getElementById('fRagSoc');
+  if(rsEl){
+    rsEl.addEventListener('input', function(){
+      if((state.ana[TIPO_SOGGETTO_KEY]||'PF') === 'PG'){
+        state.ana.Nome = rsEl.value;
+        var nEl = document.getElementById('fNome'); if(nEl) nEl.value = rsEl.value;
+        saveLocali(state);
+      }
+    });
+  }
+
+
+  /* ===================================================================
+   * TOOLBAR Mixando standard 7 pulsanti (Salva/Carica/Confronta/Word/PDF/Report/Reset)
+   * Esporta l'intero stato del cantiere in vari formati.
+   * =================================================================== */
+  var SAVES_KEY = 'mx2::locali-saves';
+  function $(id){return document.getElementById(id);}
+  function showToast(m,k){var t=$("toast"); if(!t) return; t.textContent=m; t.className='toast show'+(k?' '+k:''); clearTimeout(showToast._t); showToast._t=setTimeout(function(){t.className='toast';},3200);}
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  function buildDoc(){
+    var p = getActivePerito();
+    var d = state.ana || {};
+    var loc = state.locali || [];
+    var spr = state.sopralluogo || {};
+    var pp = loadPeriti();
+    var today = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+    var h = '<h1>Scheda anagrafica del cantiere</h1>';
+    h += '<p style="color:#6b5c4c;font-size:12px"><strong>Data documento:</strong> '+today+'</p>';
+    /* PERITO */
+    h += '<h2>1. Perito / tecnico'+(pp.list.length>1?(' (attivo · '+pp.list.length+' periti registrati)') :'')+'</h2><table>';
+    var nomePerito = (p.tipo_soggetto==='PG' && p.ragione_sociale) ? '🏢 '+p.ragione_sociale : p.nome;
+    h += '<tr><th>Soggetto</th><td>'+esc(nomePerito||'n.d.')+'</td><th>Tipo</th><td>'+(p.tipo_soggetto==='PG'?'Società/Studio (PG)':'Professionista individuale (PF)')+'</td></tr>';
+    if(p.titolo) h += '<tr><th>Qualifica</th><td colspan="3">'+esc(p.titolo)+'</td></tr>';
+    h += '<tr><th>P.IVA</th><td>'+esc(p.piva||'n.d.')+'</td><th>Codice Fiscale</th><td>'+esc(p.cf||'n.d.')+'</td></tr>';
+    if(p.studio) h += '<tr><th>Studio / indirizzo</th><td colspan="3">'+esc(p.studio)+'</td></tr>';
+    if(p.albo||p.numAlbo) h += '<tr><th>Albo</th><td>'+esc(p.albo||'n.d.')+'</td><th>N. iscrizione</th><td>'+esc(p.numAlbo||'n.d.')+'</td></tr>';
+    if(p.tel_ufficio||p.cellulare) h += '<tr><th>Tel ufficio</th><td>'+esc(p.tel_ufficio||'n.d.')+'</td><th>Cellulare</th><td>'+esc(p.cellulare||'n.d.')+'</td></tr>';
+    var emails = (p.email_list||[]).filter(function(e){return e;});
+    if(emails.length) h += '<tr><th>E-mail</th><td colspan="3">'+esc(emails.join(' · '))+'</td></tr>';
+    if(p.pec) h += '<tr><th>PEC</th><td colspan="3">'+esc(p.pec)+'</td></tr>';
+    h += '</table>';
+    /* COMMITTENTE */
+    h += '<h2>2. Committente / immobile</h2><table>';
+    h += '<tr><th>Tipo soggetto</th><td>'+(d.TipoSoggetto==='PG'?'Persona giuridica (società/ente)':'Persona fisica')+'</td><th>Nome / Ragione sociale</th><td>'+esc((d.TipoSoggetto==='PG'?d.RagSoc:d.Nome)||d.Nome||'n.d.')+'</td></tr>';
+    h += '<tr><th>'+(d.TipoSoggetto==='PG'?'P.IVA':'Codice Fiscale')+'</th><td>'+esc(d.CF||'n.d.')+'</td><th>Anno costruzione</th><td>'+esc(d.Anno||'n.d.')+'</td></tr>';
+    if(d.Indirizzo) h += '<tr><th>Indirizzo</th><td colspan="3">'+esc(d.Indirizzo)+'</td></tr>';
+    h += '<tr><th>Regione</th><td>'+esc(d.Regione||'n.d.')+'</td><th>Comune</th><td>'+esc(d.Comune||'n.d.')+'</td></tr>';
+    if(d.Catasto) h += '<tr><th>Riferimenti catastali</th><td colspan="3">'+esc(d.Catasto)+'</td></tr>';
+    if(d.Gps) h += '<tr><th>Coordinate GPS</th><td colspan="3">'+esc(d.Gps)+'</td></tr>';
+    if(d.DataSopr) h += '<tr><th>Data sopralluogo</th><td>'+esc(d.DataSopr)+'</td><th>Rif. incarico</th><td>'+esc(d.Incarico||'n.d.')+'</td></tr>';
+    if(d.Oggetto) h += '<tr><th>Oggetto relazione tecnica</th><td colspan="3">'+esc(d.Oggetto)+'</td></tr>';
+    if(d.TelUff||d.Cell) h += '<tr><th>Tel ufficio</th><td>'+esc(d.TelUff||'n.d.')+'</td><th>Cellulare</th><td>'+esc(d.Cell||'n.d.')+'</td></tr>';
+    var emailsC = (d.EmailList||[]).filter(function(e){return e;});
+    if(emailsC.length) h += '<tr><th>E-mail</th><td colspan="3">'+esc(emailsC.join(' · '))+'</td></tr>';
+    if(d.Pec) h += '<tr><th>PEC</th><td colspan="3">'+esc(d.Pec)+'</td></tr>';
+    if(d.Note) h += '<tr><th>Note</th><td colspan="3">'+esc(d.Note)+'</td></tr>';
+    h += '</table>';
+    /* CONTESTO NORMATIVO */
+    var rk = (typeof _regKey==='function') ? _regKey(d.Regione||'') : '';
+    var rInfo = rk && typeof REGIONI_RADON_DB!=='undefined' ? REGIONI_RADON_DB[rk] : null;
+    if(rInfo){
+      h += '<h2>3. Contesto normativo, Radon</h2><table>';
+      h += '<tr><th>Stato regione</th><td>'+esc(rInfo.stato)+'</td><th>DGR</th><td>'+esc(rInfo.dgr||'non emanata')+'</td></tr>';
+      if(rInfo.data) h += '<tr><th>Data atto</th><td>'+esc(rInfo.data)+'</td><th>N° comuni prioritari</th><td>'+rInfo.n_comuni+'</td></tr>';
+      if(d.Comune && rInfo.comuni && rInfo.comuni.length){
+        var inLista = rInfo.comuni.some(function(c){return c.toLowerCase().trim()===String(d.Comune).toLowerCase().trim();});
+        h += '<tr><th>Comune '+esc(d.Comune)+' in lista prioritaria?</th><td colspan="3"><strong>'+(inLista?'⚠ SÌ - AREA PRIORITARIA':'NO')+'</strong></td></tr>';
+      }
+      if(rInfo.note) h += '<tr><th>Note</th><td colspan="3">'+esc(rInfo.note)+'</td></tr>';
+      h += '</table>';
+      h += '<p style="font-size:11px"><strong>Soglie D.Lgs 101/2020:</strong> 300 Bq/m³ esistenti · 200 Bq/m³ nuove costruzioni post 31/12/2024</p>';
+    }
+    /* NORME REGIONALI */
+    var nReg = (typeof NORME_PER_REGIONE!=='undefined' && rk) ? (NORME_PER_REGIONE[rk]||[]) : [];
+    if(nReg.length){
+      h += '<h2>4. Norme regionali applicabili</h2><table><tr><th>Tipo</th><th>Riferimento</th><th>Tema</th><th>Dettaglio</th></tr>';
+      nReg.forEach(function(nr){ h += '<tr><td>'+esc((nr.tipo||'').toUpperCase())+'</td><td>'+esc(nr.n)+'</td><td>'+esc(nr.tema||'')+'</td><td>'+esc(nr.det||'')+'</td></tr>'; });
+      h += '</table>';
+    }
+    h += '<h2>5. Norme nazionali sempre applicabili</h2><ul style="font-size:11.5px">';
+    if(typeof NORME_NAZIONALI_BASE!=='undefined') NORME_NAZIONALI_BASE.forEach(function(nr){ h += '<li><strong>'+esc(nr.n)+'</strong>, '+esc(nr.tema||'')+': '+esc(nr.det||'')+'</li>'; });
+    h += '</ul>';
+    /* SOPRALLUOGO sintetico */
+    if(spr && (spr.gps||spr.address||spr.weather||spr.rainfall||spr.groundwater)){
+      h += '<h2>6. Scheda Sopralluogo</h2><table>';
+      if(spr.gps) h += '<tr><th>GPS</th><td colspan="3">Lat '+spr.gps.lat.toFixed(5)+', Lon '+spr.gps.lon.toFixed(5)+' (±'+Math.round(spr.gps.accuracy_m||0)+' m), '+esc(spr.gps.source||'')+'</td></tr>';
+      if(spr.weather){ var wx=spr.weather; h += '<tr><th>T aria (outdoor)</th><td>'+(wx.temperature_C!=null?wx.temperature_C+' °C':'n.d.')+'</td><th>UR (outdoor)</th><td>'+(wx.relative_humidity_pct!=null?wx.relative_humidity_pct+'%':'n.d.')+'</td></tr>'; if(wx.pressure_hPa!=null) h += '<tr><th>Pressione</th><td>'+wx.pressure_hPa+' hPa</td><th>Vento</th><td>'+(wx.wind_speed_kmh||0)+' km/h</td></tr>'; if(wx.source_type==='manual') h += '<tr><th>Fonti</th><td colspan="3">T e UR: misura strumentale del perito ('+esc(wx.source||'inserita manualmente')+').'+(wx.pressure_hPa!=null?' Pressione e vento: Open-Meteo.':'')+'</td></tr>'; }
+      if(spr.rainfall){ var r=spr.rainfall; h += '<tr><th>Pioggia 30 gg</th><td>'+r.last_30d_mm+' mm</td><th>Pioggia 365 gg</th><td>'+r.last_365d_mm+' mm</td></tr>'; }
+      if(spr.groundwater && spr.groundwater.static_level_m!=null){ h += '<tr><th>Falda</th><td colspan="3">Livello statico '+spr.groundwater.static_level_m+' m sotto p.c. · Acquifero: '+esc(spr.groundwater.aquifer_type||'n.d.')+' · Fonte: '+esc(spr.groundwater.source_label||'n.d.')+'</td></tr>'; }
+      h += '</table>';
+    }
+    h += '<p style="font-size:10.5px;font-style:italic;color:#6b5c4c;margin-top:14px">Documento generato da Mixando v3, Dati del Cantiere v4.0. Tutti i dati salvati localmente nel browser (mx2::locali-v1, mx2::periti-v2). Fonti normative consultabili nei link associati ai banner. La gestione dei singoli locali (stanze, marker, foto del problema) avviene nei moduli diagnostici.</p>';
+    return h;
+  }
+  function openDocModal(){ var b=$("docBody"); if(b){ b.innerHTML=buildDoc(); } $("docModal").classList.add('show'); }
+  function closeDocModal(){ $("docModal").classList.remove('show'); }
+  function exportWord(){
+    var html = '<!doctype html><html><head><meta charset="utf-8"><title>Anagrafica cantiere</title><style>body{font-family:Georgia,serif;font-size:11pt;padding:20px}h1{font-size:18pt;font-style:italic}h2{font-size:13pt;color:#27ae60;border-bottom:1pt solid #d8d3c4;padding-bottom:3pt}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9.5pt}th,td{padding:4pt 6pt;border-bottom:1pt solid #e6e0d2;text-align:left}th{background:#fafaf6;font-weight:700}ul{font-size:10pt;line-height:1.5}</style></head><body>'+buildDoc()+'</body></html>';
+    var blob = new Blob([html],{type:'application/msword'});
+    var url = URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download='cantiere_'+new Date().toISOString().slice(0,10)+'.doc';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1500);
+    showToast('Word salvato.','ok');
+  }
+  function exportPDF(){ window.print(); }
+  function exportJSON(){
+    var bundle = {
+      schemaVersion: 'locali-v3.9',
+      exportedAt: new Date().toISOString(),
+      periti: loadPeriti(),
+      cantiere: state
+    };
+    var blob = new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download='cantiere_'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1500);
+    showToast('JSON salvato.','ok');
+  }
+  function addToReport(){
+    try {
+      var r = JSON.parse(localStorage.getItem('mx2::reports')||'[]');
+      r.push({id:'loc_'+Date.now(),module:'locali-cantiere',moduleName:'Anagrafica cantiere',version:'v3.9',createdAt:new Date().toISOString(),summary:(state.ana&&state.ana.Nome)||'Anagrafica',data:state,perito:getActivePerito(),htmlSnippet:buildDoc()});
+      localStorage.setItem('mx2::reports', JSON.stringify(r));
+      showToast('Aggiunto al Report.','ok');
+    } catch(e){ showToast('Errore: '+e.message,'err'); }
+  }
+  /* Save/Load (archivio anagrafica) */
+  function listSaves(){try{return JSON.parse(localStorage.getItem(SAVES_KEY)||'[]');}catch(e){return[];}}
+  function writeSaves(a){localStorage.setItem(SAVES_KEY,JSON.stringify(a));}
+  function fmtTs(iso){try{return new Date(iso).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch(e){return iso;}}
+  function openDlg(t,b,a){$("dlgTitle").innerHTML=t;$("dlgBody").innerHTML=b;$("dlgActions").innerHTML=a;$("dlgModal").classList.add('show');}
+  function closeDlg(){$("dlgModal").classList.remove('show');}
+  function openSaveDialog(){
+    var dn = (state.ana && state.ana.Nome ? state.ana.Nome : 'Cantiere')+' del '+new Date().toLocaleDateString('it-IT');
+    openDlg('💾 Salva snapshot anagrafica','<div class="field"><label>Nome snapshot</label><input type="text" id="saveName" value="'+esc(dn)+'" maxlength="80" style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13.5px"></div>','<button type="button" class="mx-shiny s-gray" id="dlgCancel" style="padding:8px 14px;font-size:12px">Annulla</button><button type="button" class="mx-shiny s-green" id="dlgConfirm" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20)">💾 Salva</button>');
+    setTimeout(function(){var sn=$("saveName"); if(sn){sn.focus();sn.select();}},60);
+    $("dlgCancel").addEventListener('click',closeDlg);
+    $("dlgConfirm").addEventListener('click',function(){
+      var nm=($("saveName").value||'').trim()||'Senza nome';
+      var arr=listSaves();
+      arr.push({id:'s_'+Date.now(),name:nm,ts:new Date().toISOString(),periti:loadPeriti(),cantiere:JSON.parse(JSON.stringify(state))});
+      writeSaves(arr); closeDlg(); showToast('Salvato: "'+nm+'"','ok');
+    });
+  }
+  function openLoadDialog(){
+    var arr=listSaves().sort(function(a,b){return b.ts.localeCompare(a.ts);});
+    var body = !arr.length ? '<div class="dlg-empty">Archivio snapshot vuoto.</div>' : '<div class="dlg-list">'+arr.map(function(s){return '<div class="dlg-item"><div style="flex:1"><div style="font-weight:700">'+esc(s.name)+'</div><div style="font-size:11px;font-family:monospace;color:#8b7355">'+fmtTs(s.ts)+'</div></div><button type="button" class="mx-shiny s-blue" data-load="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px">📥</button><button type="button" class="mx-shiny" data-del="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px;background-image:linear-gradient(135deg,#ef5350,#c62828);box-shadow:0 3px 10px rgba(198,40,40,.42)">🗑</button></div>';}).join('')+'</div>';
+    openDlg('📁 Carica snapshot',body,'<button type="button" class="mx-shiny s-gray" id="dlgClose2" style="padding:8px 14px;font-size:12px">Chiudi</button>');
+    $("dlgClose2").addEventListener('click',closeDlg);
+    $("dlgBody").querySelectorAll('[data-load]').forEach(function(b){b.addEventListener('click',function(){
+      var s=listSaves().find(function(x){return x.id===this.dataset.load;}.bind(this));
+      if(!s||!confirm('Caricare "'+s.name+'"?\nLa diagnosi corrente verrà sostituita.')) return;
+      if(s.periti){ try{localStorage.setItem(KEY_PERITI,JSON.stringify(s.periti));}catch(_){} _syncLegacy(s.periti); }
+      if(s.cantiere){ state = JSON.parse(JSON.stringify(s.cantiere)); saveLocali(state); }
+      closeDlg(); showToast('Caricato.','ok');
+      setTimeout(function(){ location.reload(); },800);
+    });});
+    $("dlgBody").querySelectorAll('[data-del]').forEach(function(b){b.addEventListener('click',function(){
+      if(!confirm('Eliminare?')) return;
+      writeSaves(listSaves().filter(function(x){return x.id!==this.dataset.del;}.bind(this)));
+      openLoadDialog();
+    });});
+  }
+  /* Confronto fra due snapshot salvati. Corretto il 19/11/2026: prima il tasto «Confronta» mostrava un avviso e apriva
+     l'archivio di «Carica». Come nel modulo Risalita: si scelgono due salvataggi e i campi diversi escono in arancio. */
+  function cmpCampi(s){
+    var c = s.cantiere||{}, d = c.ana||{}, spr = c.sopralluogo||{};
+    var pp = s.periti||{}, pl = pp.list||[];
+    var per = pl.filter(function(x){return x.id===pp.activeId;})[0] || pl[0] || {};
+    var wx = spr.weather||{}, r = spr.rainfall||{}, gw = spr.groundwater||{};
+    function num(v,u){ return (v==null||v==='') ? '' : (v+u); }
+    return [
+      ['Perito attivo', (per.tipo_soggetto==='PG' && per.ragione_sociale) ? per.ragione_sociale : per.nome],
+      ['Committente', (d.TipoSoggetto==='PG'?d.RagSoc:d.Nome)||d.Nome],
+      ['Tipo soggetto', d.TipoSoggetto==='PG'?'Persona giuridica':'Persona fisica'],
+      ['CF / P.IVA', d.CF],
+      ['Indirizzo', d.Indirizzo],
+      ['Comune', d.Comune],
+      ['Regione', d.Regione],
+      ['Rif. catastali', d.Catasto],
+      ['Coordinate GPS (scheda)', d.Gps],
+      ['Anno costruzione', d.Anno],
+      ['Data sopralluogo', d.DataSopr],
+      ['Rif. incarico', d.Incarico],
+      ['Oggetto', d.Oggetto],
+      ['Note', d.Note],
+      ['Tel ufficio', d.TelUff],
+      ['Cellulare', d.Cell],
+      ['E-mail', (d.EmailList||[]).filter(function(e){return e;}).join(' · ')],
+      ['PEC', d.Pec],
+      ['Posizione', spr.gps ? ((+spr.gps.lat).toFixed(5)+', '+(+spr.gps.lon).toFixed(5)) : ''],
+      ['Indirizzo edificio', (spr.address||{}).full],
+      ['T aria', num(wx.temperature_C,' °C')],
+      ['UR', num(wx.relative_humidity_pct,' %')],
+      ['Fonte di T e UR', spr.weather ? (wx.source_type==='manual'?'misura del perito':'Open-Meteo') : ''],
+      ['Pioggia 30 gg', num(r.last_30d_mm,' mm')],
+      ['Pioggia 365 gg', num(r.last_365d_mm,' mm')],
+      ['Falda', gw.static_level_m!=null ? (gw.static_level_m+' m sotto p.c.'+(gw.aquifer_type?' · '+gw.aquifer_type:'')) : ''],
+      ['Piano / Locale', spr.floor_room],
+      ['Note sopralluogo', spr.site_notes],
+      ['Foto', (spr.foto||[]).length ? String((spr.foto||[]).length) : '']
+    ];
+  }
+  function renderCmp(a,b){
+    var ra = cmpCampi(a), rb = cmpCampi(b), diversi = 0, righe = '';
+    function val(v){ return (v==null||v==='') ? 'n.d.' : String(v); }
+    for(var i=0;i<ra.length;i++){
+      var va = val(ra[i][1]), vb = val(rb[i][1]);
+      var dif = (va!==vb); if(dif) diversi++;
+      righe += '<tr'+(dif?' style="background:#fff3e0"':'')+'><th>'+esc(ra[i][0])+'</th><td>'+esc(va)+'</td><td>'+esc(vb)+'</td></tr>';
+    }
+    return '<div style="font-size:12.5px;margin-bottom:6px"><strong>'+(diversi?('Campi diversi: '+diversi+' su '+ra.length):'Nessuna differenza nei '+ra.length+' campi confrontati')+'</strong></div>'+
+      '<table><tr><th>Campo</th><th>A · '+esc(a.name)+'<br><span style="font-weight:400;text-transform:none">'+fmtTs(a.ts)+'</span></th><th>B · '+esc(b.name)+'<br><span style="font-weight:400;text-transform:none">'+fmtTs(b.ts)+'</span></th></tr>'+righe+'</table>';
+  }
+  function openCompareDialog(){
+    var arr = listSaves().sort(function(a,b){return b.ts.localeCompare(a.ts);});
+    if(arr.length<2){
+      openDlg('⚖ Confronto','<div class="dlg-empty">Servono almeno 2 snapshot salvati con «Salva». Attualmente: '+arr.length+'.</div>','<button type="button" class="mx-shiny s-gray" id="dlgClose3" style="padding:8px 14px;font-size:12px">Chiudi</button>');
+      $("dlgClose3").addEventListener('click',closeDlg);
+      return;
+    }
+    function opts(sel){ return arr.map(function(s,i){ return '<option value="'+esc(s.id)+'"'+(i===sel?' selected':'')+'>'+esc(s.name)+' · '+fmtTs(s.ts)+'</option>'; }).join(''); }
+    var stile = 'width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;background:#fff';
+    var body = '<div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px">Scegli due snapshot e premi «Confronta»: i campi diversi escono in arancio.</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label for="cmpA">Snapshot A</label><select id="cmpA" style="'+stile+'">'+opts(0)+'</select></div><div class="field"><label for="cmpB">Snapshot B</label><select id="cmpB" style="'+stile+'">'+opts(1)+'</select></div></div>'+
+      '<div id="cmpResult" style="margin-top:14px"></div>';
+    openDlg('⚖ Confronto snapshot',body,'<button type="button" class="mx-shiny s-gray" id="dlgClose4" style="padding:8px 14px;font-size:12px">Chiudi</button><button type="button" class="mx-shiny s-orange" id="dlgDoCompare" style="padding:8px 14px;font-size:12px">⚖ Confronta</button>');
+    $("dlgClose4").addEventListener('click',closeDlg);
+    $("dlgDoCompare").addEventListener('click',function(){
+      var all = listSaves();
+      var a = all.filter(function(s){return s.id===$("cmpA").value;})[0], b = all.filter(function(s){return s.id===$("cmpB").value;})[0];
+      if(!a||!b) return;
+      $("cmpResult").innerHTML = renderCmp(a,b);
+    });
+  }
+  function resetAll(){
+    if(!confirm('Azzerare TUTTI i dati del cantiere (anagrafica committente, immobile, sopralluogo)?\n\n⚠ L\'anagrafica perito NON viene toccata. Operazione irreversibile.')) return;
+    state = {schemaVersion:1, ana:{}, sopralluogo:{}, locali:[]};
+    saveLocali(state);
+    showToast('Dati cantiere azzerati.','ok');
+    setTimeout(function(){location.reload();},800);
+  }
+  /* Bind toolbar */
+  if($("btnSave")) $("btnSave").addEventListener('click',openSaveDialog);
+  if($("btnLoad")) $("btnLoad").addEventListener('click',openLoadDialog);
+  if($("btnCompare")) $("btnCompare").addEventListener('click',openCompareDialog);
+  if($("btnWord")) $("btnWord").addEventListener('click',openDocModal);
+  if($("btnPDF")) $("btnPDF").addEventListener('click',function(){openDocModal(); setTimeout(exportPDF,300);});
+  if($("btnReport")) $("btnReport").addEventListener('click',addToReport);
+  if($("btnReset")) $("btnReset").addEventListener('click',resetAll);
+  if($("dlgCloseBtn")) $("dlgCloseBtn").addEventListener('click',closeDlg);
+  if($("dlgModal")) $("dlgModal").addEventListener('click',function(e){if(e.target===this)closeDlg();});
+  if($("modalCloseBtn")) $("modalCloseBtn").addEventListener('click',closeDocModal);
+  if($("btnCloseModal")) $("btnCloseModal").addEventListener('click',closeDocModal);
+  if($("btnDoExportWord")) $("btnDoExportWord").addEventListener('click',exportWord);
+  if($("btnDoExportPDF")) $("btnDoExportPDF").addEventListener('click',exportPDF);
+  if($("btnDoExportJSON")) $("btnDoExportJSON").addEventListener('click',exportJSON);
+  if($("docModal")) $("docModal").addEventListener('click',function(e){if(e.target===this)closeDocModal();});
+
+
+
+  /* ===================================================================
+   * SCHEDA SOPRALLUOGO, estratta da app4 (Mixando-style, no bug madre)
+   * Storage in mx2::locali-v1.sopralluogo (NON sali_site_v1 dell'app madre).
+   * API esterne: Nominatim/OpenStreetMap, Open-Meteo (CC-BY), navigator.geolocation (W3C)
+   * =================================================================== */
+  var ARPA_DIRECTORY = [
+    {key:'abruzzo',name:'Abruzzo',arpa:'ARTA Abruzzo',home:'https://www.artaabruzzo.it/'},
+    {key:'basilicata',name:'Basilicata',arpa:'ARPAB',home:'https://www.arpab.it/'},
+    {key:'calabria',name:'Calabria',arpa:'ARPACAL',home:'https://www.arpacal.it/'},
+    {key:'campania',name:'Campania',arpa:'ARPA Campania',home:'https://www.arpacampania.it/',deep_link:'https://www.arpacampania.it/en-US/acque-sotterranee',deep_label:'Acque sotterranee'},
+    {key:'emilia-romagna',name:'Emilia-Romagna',arpa:'Arpae',home:'https://www.arpae.it/'},
+    {key:'fvg',name:'Friuli-Venezia Giulia',arpa:'ARPA FVG',home:'https://www.arpa.fvg.it/'},
+    {key:'lazio',name:'Lazio',arpa:'ARPA Lazio',home:'https://www.arpalazio.it/'},
+    {key:'liguria',name:'Liguria',arpa:'ARPAL',home:'https://www.arpal.liguria.it/'},
+    {key:'lombardia',name:'Lombardia',arpa:'ARPA Lombardia',home:'https://www.arpalombardia.it/',deep_link:'https://www.arpalombardia.it/temi-ambientali/acqua/acque-sotterranee/quantita/acque-di-falda-rete-di-monitoraggio/',deep_label:'Acque di falda, rete monitoraggio'},
+    {key:'marche',name:'Marche',arpa:'ARPA Marche',home:'https://www.arpa.marche.it/',deep_link:'https://www.arpa.marche.it/acque-sotterranee-nuovo',deep_label:'Acque sotterranee'},
+    {key:'molise',name:'Molise',arpa:'ARPA Molise',home:'https://www.arpamolise.it/'},
+    {key:'piemonte',name:'Piemonte',arpa:'Arpa Piemonte',home:'https://www.arpa.piemonte.it/'},
+    {key:'puglia',name:'Puglia',arpa:'ARPA Puglia',home:'https://www.arpa.puglia.it/'},
+    {key:'sardegna',name:'Sardegna',arpa:'ARPAS',home:'https://www.sardegnaambiente.it/arpas/'},
+    {key:'sicilia',name:'Sicilia',arpa:'ARPA Sicilia',home:'https://www.arpa.sicilia.it/'},
+    {key:'toscana',name:'Toscana',arpa:'ARPAT',home:'https://www.arpat.toscana.it/'},
+    {key:'tn',name:'Trentino (Trento)',arpa:'APPA Trento',home:'https://appa.provincia.tn.it/'},
+    {key:'bz',name:'Alto Adige (Bolzano)',arpa:'APPA Bolzano',home:'https://ambiente.provincia.bz.it/'},
+    {key:'umbria',name:'Umbria',arpa:'ARPA Umbria',home:'https://www.arpa.umbria.it/'},
+    {key:'aosta',name:"Valle d'Aosta",arpa:"ARPA Valle d'Aosta",home:'https://www.arpa.vda.it/'},
+    {key:'veneto',name:'Veneto',arpa:'ARPA Veneto',home:'https://www.arpa.veneto.it/'}
+  ];
+  var WMO_DESC = {0:['☀️','Sereno'],1:['🌤','Prev. sereno'],2:['⛅','Parz. nuvoloso'],3:['☁️','Coperto'],45:['🌫','Nebbia'],48:['🌫','Nebbia con brina'],51:['🌦','Pioviggine leggera'],53:['🌦','Pioviggine moderata'],55:['🌦','Pioviggine intensa'],61:['🌧','Pioggia leggera'],63:['🌧','Pioggia moderata'],65:['🌧','Pioggia forte'],71:['🌨','Neve leggera'],73:['🌨','Neve moderata'],75:['🌨','Neve forte'],80:['🌧','Rovesci leggeri'],81:['🌧','Rovesci moderati'],82:['⛈','Rovesci violenti'],95:['⛈','Temporale'],96:['⛈','Temporale + grandine'],99:['⛈','Temporale grandine forte']};
+
+  function sprState(){ if(!state.sopralluogo) state.sopralluogo={}; return state.sopralluogo; }
+  function sprSave(partial){
+    state.sopralluogo = Object.assign({}, sprState(), partial||{});
+    saveLocali(state);
+    try{ window.dispatchEvent(new CustomEvent('mx2:sopralluogo:saved',{detail:state.sopralluogo})); }catch(_){}
+  }
+  function sprStatus(id,msg,kind){ var el=document.getElementById(id); if(el){ el.textContent=msg||''; el.className='spr-status'+(kind?' '+kind:''); } }
+  function sprEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function mapRegionToArpa(name){
+    if(!name) return '';
+    var n = String(name).toLowerCase();
+    var pairs = [['abruzzo','abruzzo'],['basilicata','basilicata'],['calabria','calabria'],['campania','campania'],['emilia','emilia-romagna'],['friuli','fvg'],['lazio','lazio'],['liguria','liguria'],['lombardia','lombardia'],['marche','marche'],['molise','molise'],['piemonte','piemonte'],['puglia','puglia'],['sardegna','sardegna'],['sicilia','sicilia'],['sicily','sicilia'],['toscana','toscana'],['trento','tn'],['bolzano','bz'],['umbria','umbria'],["aosta",'aosta'],['veneto','veneto']];
+    for(var i=0;i<pairs.length;i++) if(n.indexOf(pairs[i][0])>=0) return pairs[i][1];
+    return '';
+  }
+  function regionKeyToItalianName(key){
+    var m=ARPA_DIRECTORY.find(function(r){return r.key===key;});
+    if(!m) return '';
+    // Mappa ad esempio "fvg" -> "Friuli-Venezia Giulia"
+    return m.name.replace(/\s*\(Trento\)|\s*\(Bolzano\)/,'');
+  }
+
+  /* ---------- GPS + reverse + meteo + pioggia (one-click, app4 style) ---------- */
+  function sprCaptureAll(){
+    if(!('geolocation' in navigator)){ sprStatus('sprStatusGps','⚠ Il browser non supporta la geolocalizzazione.','err'); return; }
+    sprStatus('sprStatusGps','Acquisizione posizione GPS…');
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var c = pos.coords;
+      sprSave({gps:{lat:c.latitude,lon:c.longitude,accuracy_m:c.accuracy,altitude_m:c.altitude,captured_at:new Date(pos.timestamp).toISOString(),source:'navigator.geolocation (W3C)'}});
+      sprStatus('sprStatusGps','✓ Posizione acquisita (±'+Math.round(c.accuracy)+' m), recupero indirizzo e meteo…','ok');
+      sprRenderGpsInfo();
+      Promise.allSettled([sprReverseGeocode(c.latitude,c.longitude), sprFetchWeather(), sprFetchPrecipitation()]).then(function(){ sprRenderAll(); });
+    }, function(err){
+      sprStatus('sprStatusGps','✗ Errore GPS: '+(err.message||err.code),'err');
+    }, {enableHighAccuracy:true,timeout:20000,maximumAge:60000});
+  }
+
+  function sprReverseGeocode(lat,lon){
+    sprStatus('sprStatusAddr','Compilo l\'indirizzo da OpenStreetMap…');
+    var url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lon)+'&zoom=18&addressdetails=1&accept-language=it';
+    var ctrl = new AbortController(); var t=setTimeout(function(){ctrl.abort();},15000);
+    return fetch(url,{signal:ctrl.signal,headers:{'Accept':'application/json'}})
+      .then(function(r){return r.ok?r.json():Promise.reject('HTTP '+r.status);})
+      .then(function(data){
+        clearTimeout(t);
+        var a = (data && data.address) || {};
+        var street = [a.road, a.house_number].filter(Boolean).join(' ');
+        var city = a.city || a.town || a.village || a.hamlet || a.municipality || '';
+        var province = a.county || a.state_district || '';
+        var region = a.state || '';
+        var country = a.country || '';
+        var postcode = a.postcode || '';
+        var fullAddress = [street, [postcode,city].filter(Boolean).join(' '), province, country].filter(Boolean).join(', ');
+        var regionKey = mapRegionToArpa(region);
+        sprSave({address:{street:street,city:city,postcode:postcode,province:province,region_name:region,country:country,full:fullAddress||data.display_name||'',source:'Nominatim, OpenStreetMap Foundation (© OpenStreetMap contributors)'},region:regionKey||sprState().region||''});
+        /* SYNC verso ana di Mixando (retrocompatibile per gli altri moduli) */
+        if(fullAddress && !state.ana.Indirizzo){ state.ana.Indirizzo=fullAddress; var ei=document.getElementById('fIndirizzo'); if(ei) ei.value=fullAddress; }
+        if(city && !state.ana.Comune){ state.ana.Comune=city; var ec=document.getElementById('fComune'); if(ec) ec.value=city; }
+        if(region){ var ita=regionKey?regionKeyToItalianName(regionKey):''; if(ita && !state.ana.Regione){ state.ana.Regione=ita; var er=document.getElementById('fRegione'); if(er){ er.value=ita; } } }
+        saveLocali(state);
+        sprStatus('sprStatusAddr','✓ Indirizzo compilato automaticamente (© OpenStreetMap contributors)','ok');
+        var sa = document.getElementById('sprIndirizzo'); if(sa && fullAddress) sa.value = fullAddress;
+        sprRenderArpa();
+        return data;
+      })
+      .catch(function(err){ clearTimeout(t); sprStatus('sprStatusAddr','⚠ Reverse geocoding non disponibile: '+(err.message||err)+', Compila i campi manualmente.','err'); throw err; });
+  }
+
+  function sprFetchWeather(){
+    var s = sprState(); if(!s.gps||!s.gps.lat) return Promise.reject('no GPS');
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude='+encodeURIComponent(s.gps.lat)+'&longitude='+encodeURIComponent(s.gps.lon)+'&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation,weather_code&timezone=auto';
+    var ctrl=new AbortController(); var t=setTimeout(function(){ctrl.abort();},15000);
+    return fetch(url,{signal:ctrl.signal}).then(function(r){return r.ok?r.json():Promise.reject('HTTP '+r.status);})
+      .then(function(data){
+        clearTimeout(t);
+        var cur = data && data.current;
+        if(!cur) throw new Error('Risposta inattesa');
+        sprSave({weather:{temperature_C:cur.temperature_2m,apparent_temperature_C:cur.apparent_temperature,relative_humidity_pct:cur.relative_humidity_2m,pressure_hPa:cur.pressure_msl,wind_speed_kmh:cur.wind_speed_10m,wind_direction_deg:cur.wind_direction_10m,precipitation_mm:cur.precipitation,weather_code:cur.weather_code,measured_at:cur.time,elevation_m:data.elevation,timezone:data.timezone,source:'Open-Meteo (api.open-meteo.com), ItaliaMeteo. Licenza CC-BY.'}});
+        sprRenderWx();
+        return data;
+      })
+      .catch(function(err){ clearTimeout(t); throw err; });
+  }
+
+  function sprFetchPrecipitation(){
+    var s = sprState(); if(!s.gps||!s.gps.lat) return Promise.reject('no GPS');
+    function fmtDate(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+    var today = new Date();
+    var end = new Date(today.getTime()-5*86400000);
+    var start = new Date(end.getTime()-365*86400000);
+    var url = 'https://archive-api.open-meteo.com/v1/archive?latitude='+encodeURIComponent(s.gps.lat)+'&longitude='+encodeURIComponent(s.gps.lon)+'&start_date='+fmtDate(start)+'&end_date='+fmtDate(end)+'&daily=precipitation_sum&timezone=auto';
+    var ctrl=new AbortController(); var t=setTimeout(function(){ctrl.abort();},20000);
+    return fetch(url,{signal:ctrl.signal}).then(function(r){return r.ok?r.json():Promise.reject('HTTP '+r.status);})
+      .then(function(data){
+        clearTimeout(t);
+        var series = data && data.daily && data.daily.precipitation_sum;
+        var times = data && data.daily && data.daily.time;
+        if(!series||!series.length) throw new Error('Serie pluvio vuota');
+        var sum365=0,sum90=0,sum30=0,rainDays30=0,maxDay30=0,maxDate30='';
+        for(var i=0;i<series.length;i++){
+          var v = series[i]||0; sum365+=v;
+          if(i>=series.length-90) sum90+=v;
+          if(i>=series.length-30){ sum30+=v; if(v>=1.0) rainDays30++; if(v>maxDay30){ maxDay30=v; maxDate30=times[i]; } }
+        }
+        sprSave({rainfall:{last_30d_mm:Math.round(sum30*10)/10,last_90d_mm:Math.round(sum90*10)/10,last_365d_mm:Math.round(sum365*10)/10,rain_days_30d:rainDays30,max_daily_30d_mm:Math.round(maxDay30*10)/10,max_daily_30d_date:maxDate30,period_start:times[0],period_end:times[times.length-1],source:'Open-Meteo Historical (archive-api.open-meteo.com) basato su Copernicus ERA5. Licenza CC-BY.'}});
+        sprRenderRain();
+        return data;
+      })
+      .catch(function(err){ clearTimeout(t); throw err; });
+  }
+
+  /* ---------- Render: GPS info, meteo, pioggia, ARPA ---------- */
+  function sprRenderGpsInfo(){
+    var s = sprState(); var el=document.getElementById('sprGpsInfo'); if(!el) return;
+    if(!s.gps||!s.gps.lat){ el.innerHTML=''; return; }
+    var alt = (s.gps.altitude_m!=null)?(' · Quota: '+Math.round(s.gps.altitude_m)+' m s.l.m.'):'';
+    el.innerHTML='Lat '+(+s.gps.lat).toFixed(6)+', Lon '+(+s.gps.lon).toFixed(6)+' (±'+Math.round(s.gps.accuracy_m)+' m)'+alt+(s.gps.note?(' · <strong>⚠ '+sprEsc(s.gps.note)+'</strong>'):'')+' · <a href="https://www.openstreetmap.org/?mlat='+s.gps.lat+'&mlon='+s.gps.lon+'#map=18/'+s.gps.lat+'/'+s.gps.lon+'" target="_blank" rel="noopener" style="color:var(--mx-accent)">apri mappa</a>';
+  }
+  function sprRenderWx(){
+    var host = document.getElementById('sprWxHost'); if(!host) return;
+    var s = sprState(); var wx = s.weather;
+    if(!wx){ host.innerHTML='<div class="spr-status" style="margin-top:10px">Card meteo: clicca <strong>GPS</strong> per popolare oppure inserisci a mano sotto</div>'; return; }
+    /* Corretto il 19/11/2026: con la misura a mano del perito si distinguono le due fonti (T e UR dal suo strumento,
+       il resto da Open-Meteo), non si mostra la temperatura percepita, che Open-Meteo calcola sulla sua temperatura,
+       e il cielo si scrive solo se c'è il dato (prima, senza dato, usciva «Sereno»). */
+    var manuale = (wx.source_type==='manual');
+    var d = (wx.weather_code!=null) ? (WMO_DESC[wx.weather_code] || ['🌡','Condizioni meteo']) : null;
+    var altriDati = !!(d || wx.wind_speed_kmh!=null || wx.precipitation_mm!=null || wx.pressure_hPa!=null);
+    var time = wx.measured_at ? new Date(wx.measured_at).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}) : '';
+    var a = s.address||{};
+    var place = a.city ? (sprEsc(a.city) + (a.country?', '+sprEsc(a.country):'')) : '';
+    var h = '<div class="spr-card-wx"><div class="h">Condizioni meteo al momento del sopralluogo</div>';
+    if(place) h += '<div class="place">📍 '+place+'</div>';
+    h += '<div class="grid">';
+    if(d) h += '<div>'+d[0]+' <strong>'+sprEsc(d[1])+'</strong></div>';
+    h += '<div>🌡 <strong>'+wx.temperature_C+'°C</strong>'+((!manuale && wx.apparent_temperature_C!=null)?' (percepita '+wx.apparent_temperature_C+'°C)':'')+'</div>';
+    h += '<div>💧 UR: <strong>'+wx.relative_humidity_pct+'%</strong></div>';
+    if(wx.wind_speed_kmh!=null) h += '<div>🍃 Vento: <strong>'+wx.wind_speed_kmh+' km/h</strong></div>';
+    if(wx.precipitation_mm!=null) h += '<div>🌧 Precip.: <strong>'+wx.precipitation_mm+' mm</strong></div>';
+    if(wx.pressure_hPa!=null) h += '<div>📊 Pressione: <strong>'+wx.pressure_hPa+' hPa</strong></div>';
+    h += '</div>';
+    if(time) h += '<div style="margin-top:8px;font-size:11.5px;color:#2f5e3a">🕗 Rilevamento ore: <strong>'+time+'</strong></div>';
+    if(manuale){
+      h += '<div class="src">Fonte di temperatura e umidità: ✏️ misura strumentale del perito ('+sprEsc(wx.source||'inserita manualmente')+')</div>';
+      if(altriDati) h += '<div class="src">Fonte di cielo, vento, pioggia e pressione: 🌐 '+sprEsc(wx.om_source||'Open-Meteo (api.open-meteo.com)')+'</div>';
+    } else {
+      h += '<div class="src">Fonte: 🌐 '+sprEsc(wx.source||'Open-Meteo')+'</div>';
+    }
+    h += '</div>';
+    host.innerHTML = h;
+  }
+  function sprRenderRain(){
+    var host = document.getElementById('sprRainHost'); if(!host) return;
+    var s = sprState(); var r = s.rainfall;
+    if(!r){ host.innerHTML=''; return; }
+    var h = '<div class="spr-card-rain"><div class="h">🌧 Precipitazioni storiche, capire il carico idrico recente</div><div class="grid">';
+    h += '<div><div class="l">Ultimi 30 giorni</div><div class="v">'+r.last_30d_mm+' mm</div><div style="font-size:10px;color:#7f8c8d">'+r.rain_days_30d+' giorni di pioggia</div></div>';
+    h += '<div><div class="l">Ultimi 90 giorni</div><div class="v">'+r.last_90d_mm+' mm</div></div>';
+    h += '<div><div class="l">Ultimi 365 giorni</div><div class="v">'+r.last_365d_mm+' mm</div></div>';
+    if(r.max_daily_30d_mm>0) h += '<div><div class="l">Max giornaliera (30 gg)</div><div class="v">'+r.max_daily_30d_mm+' mm</div><div style="font-size:10px;color:#7f8c8d">il '+r.max_daily_30d_date+'</div></div>';
+    h += '</div>';
+    h += '<div class="src">Periodo: '+r.period_start+' → '+r.period_end+' · Fonte: '+sprEsc(r.source||'Open-Meteo Historical')+'</div></div>';
+    host.innerHTML = h;
+  }
+  function sprRenderArpa(){
+    var sel = document.getElementById('sprArpaRegion'); if(!sel) return;
+    var cur = sprState().region || '';
+    var opts = '<option value="">seleziona regione</option>';
+    ARPA_DIRECTORY.forEach(function(r){ opts += '<option value="'+r.key+'"'+(cur===r.key?' selected':'')+'>'+sprEsc(r.name)+'</option>'; });
+    sel.innerHTML = opts;
+    var reg = document.getElementById('sprArpaRegional'); if(!reg) return;
+    if(!cur){ reg.innerHTML=''; return; }
+    var r = ARPA_DIRECTORY.find(function(x){return x.key===cur;}); if(!r){ reg.innerHTML=''; return; }
+    var h='<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:11px;font-weight:800;margin-bottom:4px">Risorse regionali, '+sprEsc(r.name)+':</div>';
+    h += '<a href="'+sprEsc(r.home)+'" target="_blank" rel="noopener">→ '+sprEsc(r.arpa)+' (homepage ufficiale)</a>';
+    if(r.deep_link) h += '<a href="'+sprEsc(r.deep_link)+'" target="_blank" rel="noopener">→ '+sprEsc(r.deep_label)+' (link diretto verificato)</a>';
+    else h += '<div style="font-size:11px;color:var(--ink-mute);font-style:italic;margin-top:4px">Dalla homepage cerca la sezione "acque sotterranee" o "falda".</div>';
+    reg.innerHTML = h;
+  }
+  function sprRenderAll(){ sprRenderGpsInfo(); sprRenderWx(); sprRenderRain(); sprRenderArpa(); sprRenderPhotos(); }
+
+  /* ---------- Bind input testuali / numerici / select ---------- */
+  function sprBindField(elId, key, kind){
+    var el = document.getElementById(elId); if(!el) return;
+    var v = sprState()[key];
+    if(v!=null) el.value = v;
+    el.addEventListener('change', function(){
+      var val = el.value;
+      if(kind==='num'){ val = (val===''?null:parseFloat(val)); if(isNaN(val)) val=null; }
+      sprSave(_objSet(key,val));
+    });
+  }
+  function sprBindMeas(elId, mkey, kind){
+    var el = document.getElementById(elId); if(!el) return;
+    var m = sprState().measurements||{};
+    if(m[mkey]!=null) el.value = m[mkey];
+    el.addEventListener('change',function(){
+      var val = el.value;
+      if(kind==='num'){ val = (val===''?null:parseFloat(val)); if(isNaN(val)) val=null; }
+      var mObj = Object.assign({}, sprState().measurements||{});
+      mObj[mkey] = val;
+      mObj.measured_at = new Date().toISOString();
+      sprSave({measurements:mObj});
+    });
+  }
+  function _objSet(k,v){ var o={}; o[k]=v; return o; }
+
+  /* ---------- Foto cantiere ---------- */
+  function sprResizePhoto(file, maxSide, qual){
+    return new Promise(function(resolve,reject){
+      var reader = new FileReader();
+      reader.onload = function(e){
+        var img = new Image();
+        img.onload = function(){
+          var w = img.width, h = img.height;
+          if(Math.max(w,h)>maxSide){ if(w>h){ h=Math.round(h*maxSide/w); w=maxSide; } else { w=Math.round(w*maxSide/h); h=maxSide; } }
+          var c = document.createElement('canvas'); c.width=w; c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(c.toDataURL('image/jpeg',qual||0.82));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  function sprRenderPhotos(){
+    var gal = document.getElementById('sprPhotoGallery'); if(!gal) return;
+    var foto = (sprState().foto)||[];
+    var cnt = document.getElementById('sprPhotoCount');
+    var totalKB = Math.round(foto.reduce(function(a,b){return a+(b.length||0);},0)/1024);
+    if(cnt) cnt.textContent = foto.length+' foto · storage '+totalKB+' KB';
+    if(!foto.length){ gal.innerHTML='<div class="empty">Nessuna foto. Clicca "Aggiungi foto" per scattare con la fotocamera o caricare da galleria.</div>'; return; }
+    gal.innerHTML = foto.map(function(d,i){ return '<div class="ph" style="background-image:url(\''+d+'\')" data-idx="'+i+'" title="Clicca per ingrandire"><button type="button" class="rm" data-rmidx="'+i+'" title="Rimuovi">✕</button></div>'; }).join('');
+    gal.querySelectorAll('[data-rmidx]').forEach(function(b){ b.addEventListener('click',function(ev){ ev.stopPropagation(); var arr = (sprState().foto)||[]; arr.splice(parseInt(this.dataset.rmidx,10),1); sprSave({foto:arr}); sprRenderPhotos(); }); });
+    gal.querySelectorAll('.ph').forEach(function(p){ p.addEventListener('click',function(){ var idx=parseInt(this.dataset.idx,10); var d=(sprState().foto||[])[idx]; if(d){ var w=window.open(); if(w) w.document.write('<title>Foto cantiere</title><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="'+d+'" style="max-width:100%;max-height:100vh"></body>'); } }); });
+  }
+  function sprAddPhotoFiles(files){
+    var arr = (sprState().foto)||[];
+    if(arr.length+files.length > 12){ alert('Massimo 12 foto. Rimuovine alcune prima di aggiungerne altre.'); return; }
+    Promise.all(Array.prototype.map.call(files,function(f){ return sprResizePhoto(f,1024,0.82); }))
+      .then(function(dataUrls){
+        var fresh = arr.concat(dataUrls);
+        sprSave({foto:fresh});
+        sprRenderPhotos();
+      })
+      .catch(function(err){ alert('Errore caricamento foto: '+(err.message||err)); });
+  }
+
+  /* ---------- RESET GPS (cancella dati GPS+meteo+pioggia senza ricaricare) ---------- */
+  function sprResetGps(){
+    if(!confirm('Cancellare tutti i dati GPS / meteo / precipitazioni del sopralluogo?\nLe altre informazioni (anagrafica, misure, foto, falda) restano salvate.')) return;
+    var s = sprState();
+    delete s.gps; delete s.address; delete s.weather; delete s.rainfall;
+    sprSave(s);
+    /* Ricarico esplicitamente lo state.sopralluogo */
+    state.sopralluogo = JSON.parse(JSON.stringify(s));
+    saveLocali(state);
+    /* Pulisci campi UI */
+    sprStatus('sprStatusGps','✓ Reset eseguito. GPS / meteo / pioggia cancellati.','ok');
+    sprStatus('sprStatusAddr','');
+    var info = document.getElementById('sprGpsInfo'); if(info) info.innerHTML = '';
+    sprRenderAll();
+    setTimeout(function(){ sprStatus('sprStatusGps',''); }, 3500);
+  }
+
+  /* ---------- FORWARD GEOCODING (Nominatim search da indirizzo/regione/comune) ----------
+     Corretto il 19/11/2026. Prima si prendeva il primo risultato di Nominatim, e «Via Roma 1, Udine»
+     finiva ad Aquileia (provincia di Udine) senza avviso. Ora si tengono solo i risultati che stanno
+     nel comune scritto dal perito, in tre tentativi: indirizzo completo, via senza numero civico,
+     centro del comune. Quando il civico o la via non si trovano, lo si scrive nello stato e nella riga GPS. */
+  function sprNormName(s){ return String(s==null?'':s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  function sprNameForms(s){ /* «Bolzano - Bozen», «Aosta/Aoste»: vale ogni parte del nome */
+    var out=[]; var all=[s].concat(String(s==null?'':s).split(/\s+-\s+|\//));
+    all.forEach(function(p){ var n=sprNormName(p); if(n && out.indexOf(n)<0) out.push(n); });
+    return out;
+  }
+  function sprSameName(a,b){ var fa=sprNameForms(a), fb=sprNameForms(b); return fa.some(function(x){ return fb.indexOf(x)>=0; }); }
+  function sprHitInComune(hit,com,reg){
+    var a=(hit&&hit.address)||{};
+    /* se la regione è indicata, un comune omonimo di un'altra regione non vale */
+    if(reg && a.state){ var k1=mapRegionToArpa(reg), k2=mapRegionToArpa(a.state); if(k1 && k2 && k1!==k2) return false; }
+    var keys=['city','town','village','municipality','hamlet','suburb','city_district','borough','quarter'];
+    for(var i=0;i<keys.length;i++){ if(a[keys[i]] && sprSameName(a[keys[i]],com)) return true; }
+    /* Nei piccoli comuni con frazioni Nominatim può non riportare il comune nei campi e lasciarlo solo nel nome
+       completo: valgono le parti del nome completo che non corrispondono a nessun campo (la provincia omonima,
+       che un campo ce l'ha, resta fuori). */
+    var vals=Object.keys(a).map(function(k){ return sprNormName(a[k]); });
+    if(hit && hit.name) vals.push(sprNormName(hit.name));
+    var parts=String((hit&&hit.display_name)||'').split(',');
+    for(var j=0;j<parts.length;j++){ var p=sprNormName(parts[j]); if(p && vals.indexOf(p)<0 && sprSameName(parts[j],com)) return true; }
+    return false;
+  }
+  function sprNominatimSearch(params){
+    var qs=Object.keys(params).filter(function(k){ return params[k]; }).map(function(k){ return k+'='+encodeURIComponent(params[k]); }).join('&');
+    var url='https://nominatim.openstreetmap.org/search?format=jsonv2&'+qs+'&limit=10&addressdetails=1&accept-language=it';
+    var ctrl=new AbortController(); var t=setTimeout(function(){ctrl.abort();},15000);
+    return fetch(url,{signal:ctrl.signal,headers:{'Accept':'application/json'}})
+      .then(function(r){ clearTimeout(t); return r.ok?r.json():Promise.reject('HTTP '+r.status); }, function(e){ clearTimeout(t); throw e; });
+  }
+  function sprPausa(ms){ return new Promise(function(ok){ setTimeout(ok,ms); }); } /* Nominatim: al più una richiesta al secondo */
+
+  function sprResolveAddress(){
+    var regE = document.getElementById('fRegione');
+    var cmE = document.getElementById('fComune');
+    var inE = document.getElementById('fIndirizzo');
+    var sprInE = document.getElementById('sprIndirizzo');
+    var reg = (regE && regE.value) || state.ana.Regione || '';
+    var com = (cmE && cmE.value) || state.ana.Comune || '';
+    var ind = (inE && inE.value) || (sprInE && sprInE.value) || state.ana.Indirizzo || '';
+    /* Almeno regione+comune o indirizzo per fare la ricerca */
+    if (!reg && !com && !ind){
+      sprStatus('sprStatusGps','⚠ Inserisci prima almeno Regione, Comune o Indirizzo (card committente o sopralluogo).','err');
+      return;
+    }
+    com = String(com).trim(); ind = String(ind).trim();
+    var query = [ind, com, reg, 'Italia'].filter(Boolean).join(', ');
+    sprStatus('sprStatusGps','Risoluzione posizione da indirizzo: '+query+' …');
+    /* la via senza il numero civico in coda: «Via Roma 1», «Via Roma, 1/A», «Via Roma n. 12» diventano «Via Roma» */
+    var via = ind.replace(/[\s,]+(?:n\.?\s*|n°\s*|nr\.?\s*|num\.?\s*|civ\.?\s*|civico\s*)?\d+\s*[a-zA-Z]?(?:\s*[\/\-]\s*\w+)?\s*$/i,'').trim() || ind;
+    var haCivico = (via !== ind);
+    var primo = null; /* primo risultato in assoluto: serve solo al messaggio, se nel comune non si trova niente */
+    function nelComune(arr, soloIndirizzi){
+      if(!arr || !arr.length) return null;
+      if(!primo) primo = arr[0];
+      if(!com) return arr[0]; /* senza comune non c'è niente con cui confrontare: come prima, il primo risultato */
+      for(var i=0;i<arr.length;i++){
+        var a = arr[i].address||{};
+        if(soloIndirizzi && !a.road && !a.house_number) continue;
+        if(sprHitInComune(arr[i],com,reg)) return arr[i];
+      }
+      return null;
+    }
+    sprNominatimSearch({q:query})
+      .then(function(arr){
+        /* 1° tentativo: indirizzo completo */
+        var hit = nelComune(arr, !!ind);
+        if(hit || !com || !ind) return hit;
+        /* 2° tentativo: la via, senza numero civico, dentro il comune */
+        sprStatus('sprStatusGps','Cerco la via nel comune di '+com+' …');
+        return sprPausa(1100).then(function(){ return sprNominatimSearch({street:via, city:com, state:reg, country:'Italia'}); })
+          .then(function(arr2){ return nelComune(arr2, true); });
+      })
+      .then(function(hit){
+        if(hit || !com) return hit;
+        /* 3° tentativo: il centro del comune */
+        sprStatus('sprStatusGps','Cerco il centro del comune di '+com+' …');
+        return sprPausa(1100).then(function(){ return sprNominatimSearch({city:com, state:reg, country:'Italia'}); })
+          .then(function(arr3){ return nelComune(arr3, false); });
+      })
+      .then(function(hit){
+        if(!hit){
+          if(com) throw new Error('nessun risultato nel comune di «'+com+'»'+(reg?' ('+reg+')':'')+'. Controlla come sono scritti comune e regione'+(primo?'; il primo risultato trovato era: '+primo.display_name:'')+'.');
+          throw new Error('Indirizzo non trovato (Nominatim)');
+        }
+        var lat = parseFloat(hit.lat), lon = parseFloat(hit.lon);
+        if(isNaN(lat)||isNaN(lon)) throw new Error('Coordinate non valide');
+        var addr = (hit.address)||{};
+        /* Precisione del risultato rispetto a quello che il perito ha scritto */
+        var nota = '';
+        if(com && ind){
+          if(!addr.road && !addr.house_number) nota = 'centro del comune: indirizzo non trovato';
+          else if(!addr.house_number && haCivico) nota = 'posizione sulla via: numero civico non trovato';
+        }
+        var gps = {lat:lat,lon:lon,accuracy_m:1000,altitude_m:null,captured_at:new Date().toISOString(),source:'Nominatim forward geocoding (OpenStreetMap)'};
+        if(nota) gps.note = nota;
+        sprSave({gps:gps});
+        /* Sync indirizzo se vuoto */
+        var street = [addr.road, addr.house_number].filter(Boolean).join(' ');
+        var city = addr.city || addr.town || addr.village || addr.hamlet || addr.municipality || com || '';
+        var province = addr.county || addr.state_district || '';
+        var region = addr.state || reg || '';
+        var country = addr.country || 'Italia';
+        var postcode = addr.postcode || '';
+        var fullAddress = hit.display_name || [street,[postcode,city].filter(Boolean).join(' '),province,country].filter(Boolean).join(', ');
+        sprSave({address:{street:street,city:city,postcode:postcode,province:province,region_name:region,country:country,full:fullAddress,source:'Nominatim forward geocoding (© OpenStreetMap contributors)'}, region: mapRegionToArpa(region)||sprState().region||''});
+        /* Corretto il 19/11/2026: il campo «Indirizzo edificio» mostra sempre l'indirizzo dell'ultima ricerca, che è quello
+           salvato e che ricompare riaprendo il modulo. Prima si riempiva solo se era vuoto e restava quello della prima
+           ricerca. L'indirizzo scritto dal perito resta nella scheda del committente. */
+        if (sprInE) sprInE.value = fullAddress;
+        if(!nota) sprStatus('sprStatusGps','✓ Posizione risolta da indirizzo, recupero meteo e pioggia…','ok');
+        else if(addr.road) sprStatus('sprStatusGps','⚠ Trovata la via, non il numero civico: la posizione è sulla via (comune di '+com+'). Recupero meteo e pioggia…','err');
+        else sprStatus('sprStatusGps','⚠ Indirizzo non trovato nel comune di '+com+': la posizione è il centro del comune. Recupero meteo e pioggia…','err');
+        sprStatus('sprStatusAddr','✓ Coordinate: '+lat.toFixed(5)+', '+lon.toFixed(5)+' (© OpenStreetMap contributors)','ok');
+        sprRenderGpsInfo();
+        return Promise.allSettled([sprFetchWeather(), sprFetchPrecipitation()]);
+      })
+      .then(function(){ sprRenderAll(); if(typeof renderRadonBanner==='function') renderRadonBanner(); if(typeof renderNormeBanner==='function') renderNormeBanner(); })
+      .catch(function(err){ sprStatus('sprStatusGps','✗ Errore risoluzione indirizzo: '+(err.message||err),'err'); });
+  }
+
+  /* ---------- INIT Sopralluogo ---------- */
+  function sprInit(){
+    /* Bind indirizzo (sync con state.ana.Indirizzo se non già impostato) */
+    var ind = document.getElementById('sprIndirizzo');
+    if(ind){
+      var addr = (sprState().address||{}).full || state.ana.Indirizzo || '';
+      if(addr) ind.value = addr;
+      ind.addEventListener('change', function(){
+        var v = ind.value;
+        sprSave({address: Object.assign({}, sprState().address||{}, {full:v, source: (sprState().address&&sprState().address.source)||'Compilato manualmente'})});
+        state.ana.Indirizzo = v; saveLocali(state);
+        var ei = document.getElementById('fIndirizzo'); if(ei) ei.value = v;
+      });
+    }
+
+    /* Pulsante GPS one-click */
+    var bGps = document.getElementById('btnSprGps'); if(bGps) bGps.addEventListener('click', sprCaptureAll);
+    var bResolve = document.getElementById('btnSprResolveAddr'); if(bResolve) bResolve.addEventListener('click', sprResolveAddress);
+    var bReset = document.getElementById('btnSprResetGps'); if(bReset) bReset.addEventListener('click', sprResetGps);
+
+    /* T/UR manuali (override Open-Meteo) */
+    var bMx = document.getElementById('btnSprManualWx'); var fMx = document.getElementById('sprManualWxForm');
+    if(bMx && fMx){
+      bMx.addEventListener('click', function(){ fMx.style.display = (fMx.style.display==='block')?'none':'block'; if(fMx.style.display==='block'){ var wx=sprState().weather||{}; var t=document.getElementById('sprMxT'); var u=document.getElementById('sprMxUR'); var i=document.getElementById('sprMxInstr'); if(t&&wx.temperature_C!=null) t.value=wx.temperature_C; if(u&&wx.relative_humidity_pct!=null) u.value=wx.relative_humidity_pct; if(i&&wx.source_type==='manual') i.value=wx.source||''; setTimeout(function(){t&&t.focus();},50); } });
+    }
+    var bMxC = document.getElementById('btnSprMxCancel'); if(bMxC) bMxC.addEventListener('click', function(){ fMx.style.display='none'; });
+    var bMxS = document.getElementById('btnSprMxSave');
+    if(bMxS) bMxS.addEventListener('click', function(){
+      var t = parseFloat(document.getElementById('sprMxT').value);
+      var u = parseFloat(document.getElementById('sprMxUR').value);
+      var i = (document.getElementById('sprMxInstr').value||'').trim();
+      if(isNaN(t)||t<-30||t>60){ alert('Temperatura non plausibile (-30..+60 °C).'); return; }
+      if(isNaN(u)||u<0||u>100){ alert('Umidità relativa non plausibile (0..100 %).'); return; }
+      var prev = sprState().weather||{};
+      /* Corretto il 19/11/2026: la misura del perito sostituisce solo T e UR. La temperatura percepita di Open-Meteo
+         si toglie; la fonte degli altri valori (cielo, vento, pioggia, pressione) si conserva in om_source. */
+      var omSource = (prev.source_type==='manual') ? (prev.om_source||'') : (prev.source||'');
+      sprSave({weather: Object.assign({},prev,{temperature_C:t,relative_humidity_pct:u,apparent_temperature_C:null,source:i||'inserita manualmente dal perito',source_type:'manual',om_source:omSource,measured_at:new Date().toISOString()})});
+      fMx.style.display='none';
+      sprRenderWx();
+    });
+
+    /* Piano + note */
+    var f = document.getElementById('sprFloor'); if(f){ if(sprState().floor_room) f.value=sprState().floor_room; f.addEventListener('change',function(){ sprSave({floor_room:f.value}); }); }
+    var n = document.getElementById('sprSiteNotes'); if(n){ if(sprState().site_notes) n.value=sprState().site_notes; n.addEventListener('change',function(){ sprSave({site_notes:n.value}); }); }
+
+    /* Foto */
+    var bAdd = document.getElementById('btnSprAddPhoto'); var inp = document.getElementById('sprPhotoFile');
+    if(bAdd && inp){
+      bAdd.addEventListener('click', function(){ inp.click(); });
+      inp.addEventListener('change', function(ev){ var fs=ev.target.files; if(fs && fs.length) sprAddPhotoFiles(fs); ev.target.value=''; });
+    }
+
+    /* Regione ARPA select */
+    var rSel = document.getElementById('sprArpaRegion');
+    if(rSel) rSel.addEventListener('change', function(){ sprSave({region:rSel.value}); sprRenderArpa(); /* propaga a state.ana.Regione */ if(rSel.value){ var ita=regionKeyToItalianName(rSel.value); if(ita){ state.ana.Regione=ita; saveLocali(state); var fR=document.getElementById('fRegione'); if(fR) fR.value=ita; } } });
+
+    /* Falda manuale */
+    var gw = sprState().groundwater||{};
+    var glvl=document.getElementById('sprGwLevel'); if(glvl && gw.static_level_m!=null) glvl.value=gw.static_level_m;
+    var gdt =document.getElementById('sprGwDate');  if(gdt  && gw.measurement_date) gdt.value=gw.measurement_date;
+    var gty =document.getElementById('sprGwType');  if(gty  && gw.aquifer_type) gty.value=gw.aquifer_type;
+    var gsr =document.getElementById('sprGwSource');if(gsr  && gw.source_label) gsr.value=gw.source_label;
+    var gur =document.getElementById('sprGwUrl');   if(gur  && gw.source_url) gur.value=gw.source_url;
+    var gno =document.getElementById('sprGwNotes'); if(gno  && gw.notes) gno.value=gw.notes;
+    var bGw = document.getElementById('btnSprGwSave');
+    if(bGw) bGw.addEventListener('click', function(){
+      var d = {
+        static_level_m: (glvl&&glvl.value!=='')?parseFloat(glvl.value):null,
+        measurement_date: gdt?gdt.value:null,
+        aquifer_type: gty?gty.value:null,
+        source_label: gsr?gsr.value:null,
+        source_url: gur?gur.value:null,
+        notes: gno?gno.value:null
+      };
+      sprSave({groundwater:d});
+      bGw.textContent='✓ Salvato';
+      setTimeout(function(){ bGw.innerHTML='💾 Salva dati falda'; },1800);
+    });
+
+    /* Render iniziale */
+    sprRenderAll();
+  }
+
+  /* Esponi su MX */
+  window.MX = window.MX || {};
+  window.MX.getSopralluogo = function(){ return JSON.parse(JSON.stringify(sprState())); };
+  window.MX.captureSiteAll = sprCaptureAll;
+
+  sprInit();
+
+
+  /* =====================================================================
+   * REGIONI_RADON_DB, verifica triplo controllo 25/05/2026
+   * Vedi: NORMATIVE_RADON_NAZIONALI_VERIFICATE_20260525.md
+   * Stati: 'emanata' | 'iter' | 'non_emanata' | 'non_rischio'
+   * ===================================================================== */
+  var REGIONI_RADON_DB = {
+    'piemonte':       {nome:'Piemonte', dgr:'DGR n.61-6054/2022', data:'25/11/2022', n_comuni:37, comuni:[], stato:'emanata', note:'37 comuni prioritari + 241 in zona di attenzione (elenco BUR Allegato)', fonti:['https://www.regione.piemonte.it/governo/bollettino/abbonati/2023/02/attach/dgr_06054_1050_25112022.pdf','https://www.arpa.piemonte.it/temi/radioattivita-radiazioni-ionizzanti/radon']},
+    'valle-aosta':    {nome:"Valle d'Aosta", dgr:'DGR n.1630/2025', data:'12/12/2025', n_comuni:11, comuni:['Avise','Bionaz','Courmayeur','Gressoney-La-Trinité','La Salle','Oyace','Rhêmes-Notre-Dame','Saint-Oyen','Saint-Rhémy-en-Bosses','Valsavarenche','Villeneuve'], stato:'emanata', fonti:['https://www.arpa.vda.it/images/stories/ARPA/news/2025/20251216_aree_prioritarie_radon/deliberaTesto_2025_1630.pdf']},
+    'lombardia':      {nome:'Lombardia', dgr:'DGR XII/508', data:'26/06/2023', n_comuni:90, comuni:[], stato:'emanata', note:'90 comuni distribuiti: Bergamo 34, Sondrio 23, Brescia 19, Lecco 6, Varese 6, Milano 2', fonti:['https://www.arpalombardia.it/temi-ambientali/radioattivita/il-radon/aree-prioritarie-rischio-radon/']},
+    'trentino-alto-adige': {nome:'Trentino-Alto Adige', dgr:'Delibera PAT n.287/2026 (Trento, in iter) + DGP n.114/2026 (Bolzano)', data:'27/02/2026', n_comuni:58, comuni:['Appiano','Brennero','Bressanone','Bronzolo','Brunico','Caldaro'], stato:'emanata', note:'Bolzano: 58 comuni in GU 24/03/2026. Trento: mappa approvata 27/02/2026, NON ancora pubblicata in GU.', fonti:['https://www.ufficiostampa.provincia.tn.it/Comunicati/Radon-approvata-la-prima-mappa-delle-aree-prioritarie-in-Trentino','https://olympus.uniurb.it/index.php?option=com_content&view=article&id=35980']},
+    'veneto':         {nome:'Veneto', dgr:'DGR n.464 (All.B)', data:'02/05/2025', n_comuni:21, comuni:[], stato:'emanata', fonti:['https://bur.regione.veneto.it/BurvServices/Pubblica/HomePage.aspx']},
+    'friuli-venezia giulia': {nome:'Friuli-Venezia Giulia', dgr:'DGR n.1622/2024', data:'31/10/2024', n_comuni:52, comuni:[], stato:'emanata', note:'52 comuni + 2 circoscrizioni Trieste (Altopiano Ovest/Est). GU n.299 21/12/2024.', fonti:['https://www.arpa.fvg.it/temi/temi/radiazioni/sezioni-principali/radon/aree-prioritarie/']},
+    'liguria':        {nome:'Liguria', dgr:'DGR n.58/2026', data:'19/02/2026', n_comuni:16, comuni:[], stato:'emanata', note:'16 comuni tutti in provincia di Savona. GU n.51 03/03/2026.', fonti:['https://www.arpal.liguria.it/arpal/item/faq-radon.html']},
+    'emilia-romagna': {nome:'Emilia-Romagna', dgr:null, data:null, n_comuni:0, comuni:[], stato:'non_rischio', note:'Regione classificata come "non a rischio" (da verificare conferma ufficiale ARPAE).', fonti:['https://www.arpae.it/it/temi-ambientali/radioattivita/radon-indoor']},
+    'toscana':        {nome:'Toscana', dgr:'Delibera n.1579/2024', data:'23/12/2024', n_comuni:13, comuni:['Abbadia San Salvatore','Arcidosso','Castel del Piano','Isola del Giglio','Marciana','Marciana Marina','Montecatini Val di Cecina','Piancastagnaio','Piteglio','Pitigliano','Roccastrada'], stato:'emanata', fonti:['https://www.arpat.toscana.it/radon-cosa-fare/']},
+    'marche':         {nome:'Marche', dgr:null, data:null, n_comuni:0, comuni:[], stato:'non_emanata', note:'Termine 21/02/2026 D.Lgs 101 art.11 scaduto senza DGR.', fonti:['https://www.arpa.marche.it/']},
+    'umbria':         {nome:'Umbria', dgr:null, data:null, n_comuni:0, comuni:[], stato:'non_emanata', note:'Termine 21/02/2026 D.Lgs 101 art.11 scaduto senza DGR.', fonti:['https://www.arpa.umbria.it/']},
+    'lazio':          {nome:'Lazio', dgr:null, data:null, n_comuni:0, comuni:[], stato:'non_emanata', note:'Termine scaduto. Campagne ARPA Lazio in corso.', fonti:['https://www.arpalazio.it/en/ambiente/radioattivita/monitoraggio-del-radon-nel-lazio']},
+    'abruzzo':        {nome:'Abruzzo', dgr:null, data:null, n_comuni:0, comuni:[], stato:'non_emanata', note:'Termine scaduto. Linee guida DGR 642/2019 + 552/2020 ma non aree prioritarie ex art.11.', fonti:['https://www.artaabruzzo.it/radon.php']},
+    'molise':         {nome:'Molise', dgr:null, data:null, n_comuni:0, comuni:[], stato:'non_emanata', note:'Termine 21/02/2026 scaduto senza DGR.', fonti:['https://www.arpamolise.it/']},
+    'campania':       {nome:'Campania', dgr:null, data:null, n_comuni:0, comuni:[], stato:'non_emanata', note:'LR Campania 13/2019: studi preliminari obbligatori + limite 200 Bq/m³ nuove. NON è DGR aree prioritarie ex art.11.', fonti:['https://www.regione.campania.it/normativa/userFile/documents/attachments/1842_13_2019Storico.pdf']},
+    'puglia':         {nome:'Puglia', dgr:'DGR n.1523/2025', data:'22/10/2025', n_comuni:8, comuni:['Casarano','Surbo','Minervino di Lecce','Campi Salentina','Maglie','Zollino','Copertino','Lecce'], stato:'emanata', note:'Tutti in provincia di Lecce. LR 30/2016 mod. LR 36/2017 in vigore.', fonti:['https://www.arpa.puglia.it/pagina2842_radon.html']},
+    'basilicata':     {nome:'Basilicata', dgr:null, data:null, n_comuni:0, comuni:[], stato:'non_emanata', note:'Termine scaduto. Campagne ARPAB in corso.', fonti:['https://www.arpab.it/temi-ambientali/radioattivita/radon/']},
+    'calabria':       {nome:'Calabria', dgr:null, data:null, n_comuni:0, comuni:[], stato:'non_emanata', note:'Termine 21/02/2026 scaduto senza DGR.', fonti:['https://www.arpacal.it/']},
+    'sardegna':       {nome:'Sardegna', dgr:'DGR n.20/71', data:'30/06/2022', n_comuni:162, comuni:['Aggius','Aglientu','Alà dei Sardi','Albagiara','Ales','Anela','Arbus','Aritzo','Arzachena','Arzana','Atzara','Austis','Badesi','Ballao','Banari','Baradili','Baressa','Bari Sardo'], stato:'emanata', note:'162 comuni totali (elenco completo nell\'Allegato). Verificati primi 18.', fonti:['https://www.regione.sardegna.it/']},
+    'sicilia':        {nome:'Sicilia', dgr:null, data:null, n_comuni:0, comuni:[], stato:'non_emanata', note:'Termine 21/02/2026 scaduto senza DGR.', fonti:['https://www.arpa.sicilia.it/']}
+  };
+  var SOGLIE_RADON_NAZIONALI = {esistenti_Bq_m3:300, nuove_post_2024_Bq_m3:200, riferimento:'D.Lgs 101/2020 art. 12', cutoff_nuove:'31/12/2024'};
+
+  function _regKey(label){
+    if(!label) return '';
+    var n = String(label).toLowerCase().trim();
+    var map = {
+      'abruzzo':'abruzzo','basilicata':'basilicata','calabria':'calabria','campania':'campania',
+      'emilia-romagna':'emilia-romagna','emilia romagna':'emilia-romagna',
+      'friuli-venezia giulia':'friuli-venezia giulia','friuli venezia giulia':'friuli-venezia giulia','friuli':'friuli-venezia giulia',
+      'lazio':'lazio','liguria':'liguria','lombardia':'lombardia','marche':'marche','molise':'molise',
+      'piemonte':'piemonte','puglia':'puglia','sardegna':'sardegna','sicilia':'sicilia','toscana':'toscana',
+      'trentino-alto adige':'trentino-alto-adige','trentino alto adige':'trentino-alto-adige','trentino':'trentino-alto-adige',
+      'umbria':'umbria',"valle d'aosta":'valle-aosta',"valle d aosta":'valle-aosta','aosta':'valle-aosta',
+      'veneto':'veneto'
+    };
+    return map[n] || '';
+  }
+
+  function _comuneInLista(nomeC, lista){
+    if(!nomeC||!lista||!lista.length) return false;
+    var n = String(nomeC).toLowerCase().trim();
+    return lista.some(function(c){ return String(c).toLowerCase().trim()===n; });
+  }
+
+  function renderRadonBanner(){
+    var host = document.getElementById('radonBanner'); if(!host) return;
+    var reg = (document.getElementById('fRegione')||{}).value || state.ana.Regione || '';
+    var com = (document.getElementById('fComune')||{}).value || state.ana.Comune || '';
+    var rk = _regKey(reg);
+    if(!rk){ host.innerHTML=''; return; }
+    var info = REGIONI_RADON_DB[rk]; if(!info){ host.innerHTML=''; return; }
+    var inPriority = _comuneInLista(com, info.comuni);
+    /* Determina colore e contenuto */
+    var col, head, lvl, det;
+    if (info.stato==='non_rischio'){
+      col='green'; head='✅ Radon, '+info.nome; lvl='Regione non a rischio radon';
+      det='Secondo i dati ARPAE l\'Emilia-Romagna non rientra nelle zone prioritarie radon ex D.Lgs 101/2020 art. 11.';
+    } else if (info.stato==='non_emanata'){
+      col='grey'; head='⚠ Radon, '+info.nome+' <span class="badge">DGR non emanata</span>'; lvl='Aree prioritarie regionali NON definite';
+      det='Termine del 21/02/2026 (D.Lgs 101/2020 art. 11) scaduto senza DGR pubblica. Per le relazioni tecniche applicare comunque la soglia nazionale '+SOGLIE_RADON_NAZIONALI.esistenti_Bq_m3+' Bq/m³ (esistenti) / '+SOGLIE_RADON_NAZIONALI.nuove_post_2024_Bq_m3+' Bq/m³ (nuove post '+SOGLIE_RADON_NAZIONALI.cutoff_nuove+').';
+      if(info.note) det += '<br><strong>Nota:</strong> '+info.note;
+    } else if (info.stato==='iter'){
+      col='yellow'; head='⏳ Radon, '+info.nome+' <span class="badge">in iter</span>'; lvl='DGR aree prioritarie in via di pubblicazione';
+      det='Atto: '+info.dgr+' del '+info.data+'. Non ancora pubblicato in GU.'+(info.note?(' '+info.note):'');
+    } else if (info.stato==='emanata'){
+      if(com && inPriority){
+        col='red'; head='🚨 Radon, '+info.nome+' <span class="badge">'+com+' AREA PRIORITARIA</span>';
+        lvl='Il Comune di '+com+' è classificato AREA PRIORITARIA RADON';
+        det='Atto: '+info.dgr+' del '+info.data+'. Soglia D.Lgs 101/2020: '+SOGLIE_RADON_NAZIONALI.esistenti_Bq_m3+' Bq/m³ (esistenti) / '+SOGLIE_RADON_NAZIONALI.nuove_post_2024_Bq_m3+' Bq/m³ (nuove post '+SOGLIE_RADON_NAZIONALI.cutoff_nuove+'). <strong>Per le relazioni tecniche in questo comune: misurazione radon obbligatoria + valutazione mitigazione.</strong>';
+      } else if(com){
+        col='yellow'; head='ℹ Radon, '+info.nome+' <span class="badge">comune NON in lista prioritaria</span>';
+        lvl='Comune di '+com+' non risulta in '+info.n_comuni+' comuni prioritari';
+        det='Atto regionale: '+info.dgr+' del '+info.data+'. '+(info.note||'')+'<br>Anche fuori dalle aree prioritarie, la soglia D.Lgs 101/2020 ('+SOGLIE_RADON_NAZIONALI.esistenti_Bq_m3+'/'+SOGLIE_RADON_NAZIONALI.nuove_post_2024_Bq_m3+' Bq/m³) si applica.';
+      } else {
+        col='yellow'; head='ℹ Radon, '+info.nome+' <span class="badge">'+info.n_comuni+' comuni prioritari</span>';
+        lvl='Regione con DGR aree prioritarie emanata';
+        det='Atto: '+info.dgr+' del '+info.data+'. <strong>Inserisci il Comune per vedere se è classificato area prioritaria.</strong>'+(info.note?('<br>'+info.note):'');
+      }
+    } else { host.innerHTML=''; return; }
+    var fontiHtml = (info.fonti||[]).map(function(u){ return '<a href="'+u+'" target="_blank" rel="noopener">'+u.replace(/^https?:\/\//,'').replace(/\/.*/,'')+'</a>'; }).join(' · ');
+    host.innerHTML = '<div class="radon-banner '+col+'"><div class="h">'+head+'</div><div class="lvl">'+lvl+'</div><div class="det">'+det+'</div>'+(fontiHtml?'<div class="src">Fonti: '+fontiHtml+'</div>':'')+'</div>';
+  }
+
+  /* Suggestions Comune basato su DGR regione corrente */
+  function renderComuneSuggestions(query){
+    var host = document.getElementById('fComuneSuggest'); if(!host) return;
+    var reg = (document.getElementById('fRegione')||{}).value || state.ana.Regione || '';
+    var rk = _regKey(reg);
+    var info = rk ? REGIONI_RADON_DB[rk] : null;
+    if(!info || !info.comuni || !info.comuni.length){ host.classList.remove('open'); host.innerHTML=''; return; }
+    var q = String(query||'').toLowerCase().trim();
+    var matches = info.comuni.filter(function(c){ return c.toLowerCase().indexOf(q)>=0; }).slice(0,8);
+    if(!matches.length){ host.classList.remove('open'); host.innerHTML=''; return; }
+    host.innerHTML = matches.map(function(c){ return '<div class="item" data-cmn="'+c.replace(/"/g,'&quot;')+'">'+c+'<span class="priority">PRIORITARIA</span></div>'; }).join('');
+    host.classList.add('open');
+    host.querySelectorAll('[data-cmn]').forEach(function(el){
+      el.addEventListener('mousedown', function(ev){ ev.preventDefault(); var v=el.dataset.cmn; var fc=document.getElementById('fComune'); if(fc){ fc.value=v; state.ana.Comune=v; saveLocali(state); } host.classList.remove('open'); renderRadonBanner(); });
+    });
+  }
+
+  /* Bind cambio Regione / Comune → render banner + suggestion */
+  (function(){
+    var rEl = document.getElementById('fRegione');
+    var cEl = document.getElementById('fComune');
+    if(rEl){ rEl.addEventListener('change', function(){ renderRadonBanner(); /* clear suggest se cambia regione */ var h=document.getElementById('fComuneSuggest'); if(h){ h.classList.remove('open'); h.innerHTML=''; } }); }
+    if(cEl){
+      cEl.addEventListener('input', function(){ renderComuneSuggestions(cEl.value); renderRadonBanner(); });
+      cEl.addEventListener('focus', function(){ renderComuneSuggestions(cEl.value); });
+      cEl.addEventListener('blur', function(){ setTimeout(function(){ var h=document.getElementById('fComuneSuggest'); if(h) h.classList.remove('open'); },180); });
+    }
+    /* Render iniziale */
+    setTimeout(renderRadonBanner, 100);
+  })();
+
+  /* Hook: quando il GPS aggiorna Regione/Comune via sprReverseGeocode, ridisegniamo il banner */
+  window.addEventListener('mx2:sopralluogo:saved', function(){
+    setTimeout(renderRadonBanner, 50);
+  });
+
+  /* Esponi API */
+  window.MX.getRadonInfo = function(regione, comune){
+    var rk=_regKey(regione); if(!rk) return null;
+    var info = REGIONI_RADON_DB[rk]; if(!info) return null;
+    var inPriority = comune ? _comuneInLista(comune, info.comuni) : null;
+    return Object.assign({}, info, {comuneInPriorita: inPriority, key:rk});
+  };
+
+
+  /* =====================================================================
+   * NORME_PER_REGIONE, norme cogenti / linee guida specifiche per regione
+   * applicabili a relazioni tecniche edilizie. Verificate su fonti istituzionali.
+   * Tipo: 'cogente' (legge/DGR vincolante) | 'linee_guida' (raccomandazioni)
+   *      | 'regolamento' (regolamenti comunali/regionali standard)
+   * ===================================================================== */
+  var NORME_PER_REGIONE = {
+    'lombardia':[
+      {n:'Regolamento Locale di Igiene tipo Lombardia art. 3.2.6', tipo:'regolamento', tema:'Vespai aerati', det:'1/100 (vent. dal basso) o 1/200 (vent. perimetrale)', url:'https://www.comune.milano.it/documents/20118/708304/Regolamento+di+igiene+titolo+III.pdf/762b02d9-f927-eb69-74d6-6dce77212fe7?version=1.0&t=1752660049575&download=true'},
+      {n:'DGR XII/508/2023', tipo:'cogente', tema:'Radon aree prioritarie', det:'90 comuni classificati area prioritaria (D.Lgs 101/2020 art. 11)', url:'https://www.arpalombardia.it/temi-ambientali/radioattivita/il-radon/aree-prioritarie-rischio-radon/'}
+    ],
+    'toscana':[
+      {n:'Linea guida ARPAT, Mitigazione radon vespai', tipo:'linee_guida', tema:'Vespai aerati', det:'1500 mm²/m di perimetro edificio', url:'https://www.arpat.toscana.it/app/uploads/temi-ambientali/radioattivita/radon/cosa-fare/radon-tecniche-mitigazione-scheda2-ventilazione-vespaio.pdf'},
+      {n:'Delibera n. 1579/2024', tipo:'cogente', tema:'Radon aree prioritarie', det:'13 comuni classificati area prioritaria', url:'https://www.arpat.toscana.it/radon-cosa-fare/'}
+    ],
+    'campania':[
+      {n:'LR Campania 13/2019', tipo:'cogente', tema:'Radon edilizia', det:'Studi preliminari del suolo + progettazione vespai obbligatori; limite 200 Bq/m³ nuove costruzioni', url:'https://www.regione.campania.it/normativa/userFile/documents/attachments/1842_13_2019Storico.pdf'}
+    ],
+    'puglia':[
+      {n:'LR Puglia 30/2016 mod. LR 36/2017', tipo:'cogente', tema:'Radon edilizia', det:'Studi preliminari + progettazione vespai obbligatori; limite 300 Bq/m³', url:'https://burp.regione.puglia.it/documents/20135/1027820/LR30.pdf'},
+      {n:'DGR Puglia n.1523/2025', tipo:'cogente', tema:'Radon aree prioritarie', det:'8 comuni provincia Lecce classificati', url:'https://www.arpa.puglia.it/pagina2842_radon.html'}
+    ],
+    'lazio':[
+      {n:'Regolamento Edilizio Comune di Roma', tipo:'regolamento', tema:'Vespai aerati', det:'Altezza minima vespaio ≥ 30 cm (parametro dimensionale, non aerazione)', url:'https://www.comune.roma.it/web/it/dettaglio-regolamento.page?contentId=REG1517715'}
+    ],
+    'liguria':[
+      {n:'Reg.Edilizio Genova DCC 42/2020 art. 58', tipo:'regolamento', tema:'Radon', det:'Intervento anti-radon prescritto (qualitativo, senza soglia)', url:'https://www.comune.genova.it/sites/default/files/2023-11/regolamento_edilizio_2020-dcc-42.pdf'},
+      {n:'DGR Liguria n.58/2026', tipo:'cogente', tema:'Radon aree prioritarie', det:'16 comuni prov. Savona classificati (GU 51/2026)', url:'https://www.arpal.liguria.it/arpal/item/faq-radon.html'}
+    ],
+    'abruzzo':[
+      {n:'DGR Abruzzo 642/2019 + 552/2020', tipo:'linee_guida', tema:'Radon edilizia', det:'Linee guida regolamenti edilizi anti-radon (qualitative)', url:'https://www.regione.abruzzo.it/'}
+    ],
+    'piemonte':[
+      {n:'DGR Piemonte 61-6054/2022', tipo:'cogente', tema:'Radon aree prioritarie', det:'37 comuni prioritari + 241 in zona attenzione', url:'https://www.arpa.piemonte.it/temi/radioattivita-radiazioni-ionizzanti/radon'}
+    ],
+    'valle-aosta':[
+      {n:'DGR Valle d\'Aosta n.1630/2025', tipo:'cogente', tema:'Radon aree prioritarie', det:'11 comuni classificati area prioritaria', url:'https://www.arpa.vda.it/'}
+    ],
+    'veneto':[
+      {n:'DGR Veneto n.464/2025 All.B', tipo:'cogente', tema:'Radon aree prioritarie', det:'21 comuni classificati area prioritaria', url:'https://bur.regione.veneto.it/BurvServices/Pubblica/HomePage.aspx'}
+    ],
+    'friuli-venezia giulia':[
+      {n:'DGR FVG n.1622/2024', tipo:'cogente', tema:'Radon aree prioritarie', det:'52 comuni + 2 circoscrizioni Trieste (GU 299/2024)', url:'https://www.arpa.fvg.it/'}
+    ],
+    'sardegna':[
+      {n:'DGR Sardegna n.20/71/2022', tipo:'cogente', tema:'Radon aree prioritarie', det:'162 comuni classificati area prioritaria', url:'https://www.regione.sardegna.it/'}
+    ],
+    'trentino-alto-adige':[
+      {n:'DGP Bolzano n.114/2026', tipo:'cogente', tema:'Radon aree prioritarie', det:'58 comuni Alto Adige classificati (GU 24/03/2026)', url:'https://olympus.uniurb.it/index.php?option=com_content&view=article&id=35980'},
+      {n:'Delibera PAT Trento 287/2026', tipo:'linee_guida', tema:'Radon aree prioritarie', det:'Mappa approvata 27/02/2026 ma non ancora in GU', url:'https://www.ufficiostampa.provincia.tn.it/Comunicati/Radon-approvata-la-prima-mappa-delle-aree-prioritarie-in-Trentino'}
+    ]
+    /* Regioni senza norme cogenti regionali specifiche (solo nazionali D.Lgs 101/2020, DM 5/7/1975, NTC 2018, ecc.):
+       Marche, Umbria, Molise, Basilicata, Calabria, Sicilia, Emilia-Romagna */
+  };
+  var NORME_NAZIONALI_BASE = [
+    {n:'D.Lgs 101/2020 art. 12 + 17', tipo:'cogente', tema:'Radon', det:'300 Bq/m³ esistenti · 200 Bq/m³ nuove costruzioni dopo 31/12/2024'},
+    {n:'DM Sanità 5/7/1975', tipo:'cogente', tema:'Igiene abitazioni', det:'Requisiti igienico-sanitari (altezze, superfici minime)'},
+    {n:'DPR 380/2001 art. 24', tipo:'cogente', tema:'Agibilità', det:'Testo Unico Edilizia'},
+    {n:'UNI EN ISO 13788:2013', tipo:'cogente', tema:'Verifica termoigrometrica', det:'Condensa interstiziale e superficiale (Glaser)'},
+    {n:'DPCM 11/01/2024 PNAR 2023-2032', tipo:'cogente', tema:'Radon', det:'Piano Nazionale d\'Azione Radon'}
+  ];
+
+  function renderNormeBanner(){
+    var host = document.getElementById('normeBanner'); if(!host) return;
+    var reg = (document.getElementById('fRegione')||{}).value || state.ana.Regione || '';
+    var rk = _regKey(reg);
+    var listReg = rk ? (NORME_PER_REGIONE[rk]||[]) : [];
+    var info = rk ? REGIONI_RADON_DB[rk] : null;
+    var nomeReg = info ? info.nome : (reg||'(regione non specificata)');
+    var html_ = '<div class="norme-banner"><div class="h">📚 Norme di riferimento, '+nomeReg+'</div>';
+    if(rk && listReg.length){
+      html_ += '<ul>';
+      listReg.forEach(function(nrm){
+        var tagCol = nrm.tipo==='cogente'?'cogente':(nrm.tipo==='linee_guida'?'linee_guida':'regolamento');
+        var tagLbl = nrm.tipo==='cogente'?'COGENTE':(nrm.tipo==='linee_guida'?'LINEE GUIDA':'REGOLAMENTO');
+        html_ += '<li><span class="tag '+tagCol+'">'+tagLbl+'</span> <strong>'+nrm.n+'</strong>, <em>'+nrm.tema+'</em>: '+nrm.det+(nrm.url?' · <a href="'+nrm.url+'" target="_blank" rel="noopener">fonte</a>':'')+'</li>';
+      });
+      html_ += '</ul>';
+    } else if (rk){
+      html_ += '<div class="empty">Nessuna norma regionale specifica verificata. Si applicano le sole norme nazionali (sotto).</div>';
+    } else {
+      html_ += '<div class="empty">Seleziona una Regione per vedere le norme cogenti applicabili.</div>';
+    }
+    /* Sempre: norme nazionali base */
+    if(rk){
+      html_ += '<div style="margin-top:10px;font-size:10.5px;color:var(--ink-mute);font-weight:700;letter-spacing:.06em;text-transform:uppercase">Norme nazionali sempre applicabili</div><ul style="margin-top:4px">';
+      NORME_NAZIONALI_BASE.forEach(function(nrm){
+        html_ += '<li><span class="tag cogente">COGENTE</span> <strong>'+nrm.n+'</strong>, <em>'+nrm.tema+'</em>: '+nrm.det+'</li>';
+      });
+      html_ += '</ul>';
+    }
+    html_ += '</div>';
+    host.innerHTML = html_;
+  }
+
+  /* Re-bind cambio Regione → render anche norme */
+  (function(){
+    var rEl = document.getElementById('fRegione');
+    if(rEl){ rEl.addEventListener('change', function(){ setTimeout(renderNormeBanner, 30); }); }
+    /* Re-render dopo evento GPS */
+    window.addEventListener('mx2:sopralluogo:saved', function(){ setTimeout(renderNormeBanner, 60); });
+    /* Render iniziale */
+    setTimeout(renderNormeBanner, 150);
+  })();
+
+  /* API pubblica */
+  window.MX.getNormeRegione = function(regione){
+    var rk = _regKey(regione); if(!rk) return [];
+    return (NORME_PER_REGIONE[rk]||[]).concat(NORME_NAZIONALI_BASE);
+  };
+
+  /* API globale per modal anteprima dei singoli moduli */
+  window.MX = window.MX || {};
+  window.MX.getPerito = function(){ return JSON.parse(JSON.stringify(loadPerito())); };
+  window.MX.getImmobile = function(){ return JSON.parse(JSON.stringify(loadLocali())); };
+})();
+</script>
+<!-- MX-BUILD: 2026-05-25-cantiere-v4 perito PF/PG + multi-perito + committente PF/PG + contatti + contesto normativo + sopralluogo (no locali) -->
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono. Fanno eccezione la ricerca dell'indirizzo e il meteo: per rispondere mandano l'indirizzo e la posizione a due servizi esterni.</div>
+</body>
+</html>

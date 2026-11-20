@@ -1,0 +1,1469 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mixando Lab · Hub Umidità - Triage Differenziale v3.0</title>
+<style>
+:root{--mx-accent:#5e35b1;--mx-accent-strong:#311b92;--mx-accent-soft:rgba(94,53,177,.12);
+--bg:#f5f1e8;--paper:#fff;--ink:#2c1810;--ink-soft:#6b5c4c;--ink-mute:#8b7355;
+--line:#e6e0d2;--ok:#1f7a4d;--warn:#b07820;--err:#a83232;--r:14px;
+--ff-serif:Georgia,"Cambria",serif;--ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+--ff-mono:ui-monospace,"SF Mono",Consolas,monospace;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:0px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--paper);border-bottom:3px solid var(--mx-accent);box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.mx-bar .em{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--mx-accent);color:#fff}
+.mx-bar .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mx-accent);line-height:1}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:14px;color:var(--ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent);text-decoration:none;padding:6px 12px;border:1px solid var(--mx-accent);border-radius:8px}
+.mx-bar a.back:hover{background:var(--mx-accent);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:14px 6px 22px;text-align:center}
+.hero h2{margin:0 0 6px;font-family:var(--ff-serif);font-size:clamp(20px,4vw,28px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent);font-style:italic}
+.hero p{margin:0 auto;max-width:720px;color:var(--ink-soft);font-size:14px}
+.ana-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
+.ana-strip .pc{padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:9px;font-size:13px}
+.ana-strip .pc .h{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px}
+.ana-strip .pc .n{font-weight:700;color:var(--ink)}
+.ana-strip .pc .m{font-size:11.5px;color:var(--ink-mute);margin-top:2px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card .body{padding:16px 18px}
+.stepper{display:flex;flex-wrap:wrap;gap:5px;padding:10px;background:#fafaf6;border:1px solid var(--line);border-radius:10px;margin-bottom:14px}
+.step-chip{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink-mute);padding:6px 11px;border-radius:14px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .15s}
+.step-chip.done{border-color:var(--ok);color:var(--ok);background:#e8f5e9}
+.step-chip.active{color:#fff;border-color:#0a5b64;background:linear-gradient(180deg,#18a4b0,#0e7c87 55%,#0a5b64);box-shadow:0 2px 7px rgba(14,124,135,.34),inset 0 1px 0 rgba(255,255,255,.34);text-shadow:0 1px 1px rgba(0,0,0,.22)}
+.step-chip:hover:not(.active){border-color:var(--mx-accent);color:var(--mx-accent-strong);background:var(--mx-accent-soft)}
+.banner{margin:8px 0 14px;padding:10px 14px;border-radius:9px;font-size:12.5px;line-height:1.55}
+.banner.blue{background:#e3f2fd;border-left:4px solid #1976d2;color:#0d47a1}
+.banner.yellow{background:#fff8e1;border-left:4px solid #f9a825;color:#7d5a1f}
+.banner.green{background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20}
+.banner.red{background:#ffebee;border-left:4px solid var(--err);color:#7f0000}
+.step-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.step-head h4{margin:0;font-family:var(--ff-serif);font-size:18px;color:var(--ink);font-weight:700}
+.step-head .ref{font-size:11px;color:var(--ink-mute);font-style:italic;background:#faf8f3;padding:4px 10px;border-radius:7px;border:1px solid var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em}
+.fld label .opz{font-weight:400;color:var(--ink-mute);font-size:10.5px}
+.fld input,.fld select,.fld textarea{padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13.5px;background:#fff;outline:none;width:100%;color:var(--ink)}
+.fld input[type=number]{font-family:var(--ff-mono)}
+.fld textarea{min-height:60px;resize:vertical;font-family:inherit}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--mx-accent);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+.fld .calc{background:#faf8f3 !important;font-family:var(--ff-mono);font-weight:700}
+.chkgrp{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.chkgrp label{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border:1px solid var(--line);border-radius:18px;font-size:12px;cursor:pointer;background:#fff;font-weight:600;color:var(--ink-soft);transition:all .15s}
+.chkgrp label:has(input:checked){border-color:var(--mx-accent);background:var(--mx-accent-soft);color:var(--mx-accent-strong)}
+.chkgrp input{margin:0}
+.radio-row{display:flex;flex-wrap:wrap;gap:6px}
+.radio-row label{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;cursor:pointer;background:#fff;font-weight:700;color:var(--ink-soft);transition:all .15s}
+.radio-row label:has(input:checked){border-color:var(--mx-accent);background:var(--mx-accent);color:#fff}
+.radio-row input{display:none}
+.step-nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+.mx-shiny{appearance:none;border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;letter-spacing:.04em;padding:11px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap}
+.mx-shiny::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-shiny:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-shiny:hover::before{transform:translateX(130%)}
+.s-blue{background-image:linear-gradient(135deg,#42a5f5,#1565c0 45%,#0d47a1);box-shadow:0 3px 10px rgba(21,101,192,.42)}
+.s-gray{background-image:linear-gradient(135deg,#bdbdbd,#757575 45%,#424242);box-shadow:0 3px 10px rgba(97,97,97,.42)}
+.s-violet{background-image:linear-gradient(135deg,#ab47bc,#6a1b9a 45%,#3e0a5b);box-shadow:0 3px 10px rgba(106,27,154,.42)}
+.s-green{background-image:linear-gradient(135deg,#66bb6a,#2e7d32 45%,#1b5e20);box-shadow:0 3px 10px rgba(46,125,50,.42)}
+.s-accent{background-image:linear-gradient(135deg,#5e35b1,#311b92);box-shadow:0 3px 10px rgba(94,53,177,.42)}
+.mx-toolbar{background:#fff;border:1px solid #e6e0d2;border-radius:14px;box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin:18px 0 14px;overflow:hidden}
+.mx-toolbar-head{margin:0;padding:13px 18px;font-family:Georgia,serif;font-size:15px;color:#2c1810;font-weight:700;border-bottom:1px solid #e6e0d2;background:linear-gradient(180deg,rgba(94,53,177,.10),#fff);display:flex;align-items:center;gap:10px}
+.mx-toolbar-head .ico-wrap{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.mx-toolbar-head .title{flex:1}
+.mx-toolbar-head .title small{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-style:italic;font-size:11.5px;color:#8b7355;font-weight:500;letter-spacing:0;margin-top:2px}
+.mx-toolbar-body{padding:14px 18px 16px}
+.mx-toolbar-inner{max-width:1080px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.mx-tb-btn{appearance:none;border:0;color:#fff;font:inherit;font-size:13px;font-weight:700;letter-spacing:.02em;padding:12px 18px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.12);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease,background-position .35s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap}
+.mx-tb-btn::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-tb-btn:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.mx-tb-btn:hover::before{transform:translateX(130%)}
+.mx-tb-btn .ico{font-size:16px;line-height:1}
+.mx-tb-btn.tb-save{background-image:linear-gradient(135deg,#64b5f6,#1976d2 45%,#0d47a1);box-shadow:0 3px 10px rgba(25,118,210,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-load{background-image:linear-gradient(135deg,#ffb74d,#f57c00 45%,#bf360c);box-shadow:0 3px 10px rgba(245,124,0,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-compare{background-image:linear-gradient(135deg,#ba68c8,#7b1fa2 45%,#311b92);box-shadow:0 3px 10px rgba(123,31,162,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-word{background-image:linear-gradient(135deg,#5a9bd8,#2b579a 45%,#0c2e5e);box-shadow:0 3px 10px rgba(43,87,154,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-pdf{background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000);box-shadow:0 3px 10px rgba(198,40,40,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.mx-tb-btn.tb-report{background-image:linear-gradient(135deg,#ffd54f,#f9a825 45%,#e65100);color:#3e2e00;box-shadow:0 3px 10px rgba(249,168,37,.50),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -2px 4px rgba(0,0,0,.10)}
+.mx-tb-btn.tb-reset{background-image:linear-gradient(135deg,#9e9e9e,#616161 45%,#212121);box-shadow:0 3px 10px rgba(97,97,97,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.verdict{padding:18px;border-radius:12px;margin-top:14px;border:2px solid;text-align:center}
+.verdict.ok{background:#e8f5e9;border-color:var(--ok);color:#1b5e20}
+.verdict.warn{background:#fff8e1;border-color:#f9a825;color:#7d5a1f}
+.verdict.err{background:#ffebee;border-color:var(--err);color:#7f0000}
+.verdict .lbl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.verdict .v{font-family:var(--ff-serif);font-style:italic;font-size:22px;font-weight:700;margin-bottom:4px}
+.verdict .s{font-size:12.5px;line-height:1.55}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:28px 12px}
+.modal.show{display:flex}
+.modal-paper{background:#fff;max-width:840px;width:100%;border-radius:12px;box-shadow:0 18px 60px rgba(0,0,0,.4);overflow:hidden}
+.modal-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.modal-head h3{margin:0;font-family:var(--ff-serif);font-size:16px;color:var(--ink)}
+.modal-close{appearance:none;border:0;background:#f5f1e8;color:var(--ink);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:17px;font-weight:800}
+.modal-body{padding:24px 28px;font-family:Georgia,serif;color:var(--ink);font-size:13px;line-height:1.6}
+.modal-body h1{font-size:22px;margin:0 0 12px;font-weight:700;font-style:italic}
+.modal-body h2{font-size:15px;margin:22px 0 8px;color:var(--mx-accent-strong);border-bottom:1px solid #d8d3c4;padding-bottom:4px}
+.modal-body table{width:100%;border-collapse:collapse;margin:10px 0;font-size:11.5px}
+.modal-body table th,.modal-body table td{padding:5px 7px;border-bottom:1px solid var(--line);text-align:left}
+.modal-body table th{background:#faf8f3;font-weight:700;text-transform:uppercase;font-size:10.5px}
+.modal-actions{padding:12px 18px;border-top:1px solid var(--line);background:#faf8f3;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.dlg-list{max-height:50vh;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:#faf8f3}
+.dlg-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px}
+.dlg-empty{padding:30px;text-align:center;color:var(--ink-mute);font-style:italic;font-size:13px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:10px;font-size:13.5px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.32);z-index:300;opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);max-width:88vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:var(--ok)}.toast.err{background:var(--err)}.toast.warn{background:var(--warn)}
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+@media (max-width:760px){.grid2,.grid3,.grid4,.ana-strip{grid-template-columns:1fr}}
+@media print{body * {visibility:hidden !important}.mx-print, .mx-print * {visibility:visible !important}.mx-print{position:absolute;left:0;top:0;width:100%}}
+.mx-logo-mini{height:32px;width:32px;border-radius:8px;background:#fff;padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.12);object-fit:contain;flex-shrink:0;display:none;border:1px solid var(--line,#e6e0d2)}
+.mx-bar.has-logo .em{display:none}
+
+.mx-bar{position:relative}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}}
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:0px !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:0px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab"><img id="mxLogoPerito" class="mx-logo-mini" alt="Logo perito">
+  <div class="meta"><span class="tag">Hub · Triage</span><h1 class="ti">Hub Umidità - Triage Differenziale · v3.0</h1></div>
+  <a class="back" href="suite.html">← Suite</a>
+</header>
+<main>
+  <section class="hero"><h2 id="heroTitle"></h2><p id="heroSub"></p></section>
+  <div class="ana-strip">
+    <div class="pc" id="anaPerito"><div class="h">Perito / tecnico</div><div class="n">n.d.</div><div class="m"></div></div>
+    <div class="pc" id="anaCliente"><div class="h">Committente / immobile</div><div class="n">n.d.</div><div class="m"></div></div>
+  </div>
+  <div style="text-align:center;margin-bottom:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+    <a href="locali-cantiere.html" target="_blank" style="font-size:12px;color:var(--mx-accent-strong);font-weight:700;text-decoration:none;border:1px solid var(--mx-accent);padding:6px 13px;border-radius:8px">⚙ Modifica in Locali-Cantiere</a>
+    <button type="button" class="mx-shiny s-green" id="btnReloadAna" style="padding:6px 13px;font-size:11.5px">↻ Ricarica anagrafica</button>
+  </div>
+  <article class="card">
+    <div class="body">
+      <div class="stepper" id="stepper"></div>
+      <div id="difLive"></div>
+      <div id="stepPanel"></div>
+      <div class="step-nav">
+        <button type="button" class="mx-shiny s-gray" id="btnPrev">← Indietro</button>
+        <button type="button" class="mx-shiny s-accent" id="btnNext">Avanti →</button>
+        <button type="button" class="mx-shiny s-violet" id="btnFinish" style="display:none">✓ Concludi diagnosi</button>
+      </div>
+    </div>
+  </article>  
+  <article class="card" id="bibPatologieCard">
+    <h3><span class="num">📚</span> Biblioteca Patologie, Database tecnico (cuore app4)</h3>
+    <div class="body">
+      <p style="color:#6b5c4c;font-size:12.5px;margin:0 0 12px">Database delle <strong>9 tipologie di umidità</strong> patologica con: origine fisica, meccanismo, pattern diagnostico, segni distintivi, tempi, cause concomitanti, storia ricerche peer-reviewed, norme di riferimento. Estratto verbatim da app4 UMIDITA_WIZ (verifica 2026-05-02).</p>
+      <input type="search" id="bibPatSearch" placeholder="Cerca patologia... (risalita · condensa · meteorica · falda · igroscopica · rimbalzo · costruzione · accidentale)" style="width:100%;padding:9px 12px;border:1px solid #e6e0d2;border-radius:9px;font:inherit;font-size:13.5px;background:#fff;margin-bottom:10px">
+      <div id="bibPatList"></div>
+    </div>
+  </article>
+
+  <article class="card" id="kitStrumentiCard">
+    <h3><span class="num">🧰</span> Kit strumenti diagnostici (14 strumenti)</h3>
+    <div class="body">
+      <p style="color:#6b5c4c;font-size:12.5px;margin:0 0 12px">Strumentazione di campo per la diagnosi differenziale dell'umidità. Estratto da app4 UMIDITA_WIZ con specifiche tecniche e riferimenti normativi.</p>
+      <div id="kitStrumentiList"></div>
+    </div>
+  </article>
+
+  
+  <div class="mx-toolbar" id="mxToolbar">
+    <h3 class="mx-toolbar-head"><span class="ico-wrap">💾</span><span class="title">Salvataggio &amp; esportazione<small>Salva l'analisi, ricarica un'analisi precedente o esporta in Word/PDF per la relazione tecnica</small></span></h3>
+    <div class="mx-toolbar-body">
+      <div class="mx-toolbar-inner">
+        <button type="button" class="mx-tb-btn tb-save"    id="btnSave"><span class="ico">💾</span><span class="label">Salva</span></button>
+        <button type="button" class="mx-tb-btn tb-load"    id="btnLoad"><span class="ico">📁</span><span class="label">Carica</span></button>
+        <button type="button" class="mx-tb-btn tb-compare" id="btnCompare"><span class="ico">⚖</span><span class="label">Confronta</span></button>
+        <button type="button" class="mx-tb-btn tb-word"    id="btnWord"><span class="ico">📝</span><span class="label">Salva Word</span></button>
+        <button type="button" class="mx-tb-btn tb-pdf"     id="btnPDF"><span class="ico">📄</span><span class="label">Stampa / PDF</span></button>
+        <button type="button" class="mx-tb-btn tb-report"  id="btnReport"><span class="ico">📦</span><span class="label">Al report</span></button>
+        <button type="button" class="mx-tb-btn" id="btnAggancia" style="background-image:linear-gradient(135deg,#26a69a,#00897b 45%,#004d40);box-shadow:0 3px 10px rgba(0,137,123,.42),0 1px 2px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)" onclick="_mxAggancialMappa()"><span class="ico">&#128205;</span><span class="label">Aggancia alla mappa</span></button>
+        <button type="button" class="mx-tb-btn tb-reset"   id="btnReset"><span class="ico">✕</span><span class="label">Reset</span></button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ft">Mixando v3 · <strong>Hub Umidità - Triage Differenziale v3.0</strong> · Decision tree multi-fattoriale basato su BRE Digest 245 · UNI 11085 · UNI EN ISO 13788 · WHO 2009. Non sostitutivo della relazione tecnica di dettaglio.</footer>
+</main>
+<div class="modal" id="dlgModal"><div class="modal-paper" style="max-width:600px"><div class="modal-head"><h3 id="dlgTitle">Dialog</h3><button class="modal-close" id="dlgCloseBtn">&times;</button></div><div class="modal-body" id="dlgBody" style="padding:18px 20px;font-family:var(--ff-sans)"></div><div class="modal-actions" id="dlgActions"></div></div></div>
+<div class="modal" id="docModal"><div class="modal-paper"><div class="modal-head"><h3>📑 Anteprima documento</h3><button class="modal-close" id="modalCloseBtn">&times;</button></div><div class="modal-body mx-print" id="docBody"></div><div class="modal-actions"><button type="button" class="mx-shiny" id="btnDoExportWord" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#5a9bd8,#2b579a 45%,#0c2e5e)">📑 Scarica .doc</button><button type="button" class="mx-shiny" id="btnDoExportPDF" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#ef5350,#c62828 45%,#7f0000)">📄 Stampa / PDF</button><button type="button" class="mx-shiny s-blue" id="btnDoExportJSON" style="padding:8px 14px;font-size:12px">💾 .json</button><button type="button" class="mx-shiny s-gray" id="btnCloseModal" style="padding:8px 14px;font-size:12px">Chiudi</button></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+/* Mini-logo perito da mx2::perito.logoData */
+(function(){
+  function loadLg(){
+    try{
+      var p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");
+      var img=document.getElementById("mxLogoPerito");
+      var bar=document.querySelector(".mx-bar");
+      if(img && p && p.logoData){ img.src=p.logoData; img.style.display="block"; if(bar)bar.classList.add("has-logo"); }
+      else { if(img)img.style.display="none"; if(bar)bar.classList.remove("has-logo"); }
+    }catch(e){}
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",loadLg);
+  else loadLg();
+})();
+
+const DRAFT_KEY="mx2::hub-draft",SAVES_KEY="mx2::hub-saves";
+const STEPS=[
+  {"id":"rilievo","label":"1. Rilievo iniziale","hero_h2":"Hub <em>Umidità Diagnostica</em>","hero_sub":"Wizard di triage differenziale (Tecnico 6 step / Operatore 4 step) che indirizza al modulo specifico più appropriato: Risalita, Condensa (Glaser/Termo), Infiltrazione, Sali igroscopici, Umidità di costruzione (Asciugatura)."},
+  {"id":"patologie","label":"2. Patologie","src":"BRE Digest 245 + RICS Joint Damp 2022"},
+  {"id":"strumenti","label":"3. Strumenti rilevati","src":"EN 16682 + UNI 11085 + UNI 11087 (ritirata 2016, oggi EN 16455)"},
+  {"id":"ambt","label":"4. Ambiente","src":"EN ISO 13788 + EN 16455"},
+  {"id":"sali_aria","label":"5. Sali + clima interno","src":"EN 16455 + UNI 11087 (ritirata 2016, oggi EN 16455)"},
+  {"id":"diagnosi","label":"6. Triage differenziale","src":"BSC BSD-138 + IICRC S500"}
+];
+const OPERATOR_HUB_IDS = ['rilievo','patologie','ambt','diagnosi'];
+function getActiveSteps(){ return (STATE.mode==='operatore') ? STEPS.filter(s=>OPERATOR_HUB_IDS.includes(s.id)) : STEPS; }
+const STATE={cur:0,finished:false,mode:'tecnico',data:{
+  /* Step 1 Rilievo */ posizione:"",forma:"",efflorescenze:"",correlazionePioggia:"",stagionalita:"",etaEdificio:"",
+  /* Step 2 Patologie */ sintomi:[],tempoIntonaco:"",
+  /* Step 3 Strumenti (BRE 245 + EN 16682) */ strumIgrometro:false,strumGravimetrico:false,strumTermocamera:false,strumDatalogger:false,strumIC:false,strumKarsten:false,strumPiezometro:false,um_materiale_pct:null,hmc_pct:null,free_pct:null,
+  /* Step 4 Ambiente */ tInt:null,urInt:null,tSup:null,tDew:null,ventilazione:"",falda:"",
+  /* Step 5 Sali + clima */ sali_presenza:"",sali_tipo:"",t_aria_outdoor:null,ur_aria_outdoor:null,
+  /* Step 6 Diagnosi */ tipologiaSospetta:"",noteFinali:""
+}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function showToast(m,k){const t=$("toast");t.textContent=m;t.className="toast show"+(k?" "+k:"");clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.className="toast",3200);}
+function persist(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify({ts:Date.now(),state:STATE}));}catch(e){}}
+function restore(){try{const r=localStorage.getItem(DRAFT_KEY);if(!r)return;const d=JSON.parse(r);if(d&&d.state){Object.assign(STATE.data,d.state.data||{});STATE.cur=d.state.cur||0;STATE.finished=!!d.state.finished;}}catch(e){}}
+function setField(k,v){STATE.data[k]=v;persist();if(window._difUpdate)_difUpdate();}
+function loadAna(){let p={},i={};try{p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");}catch(e){}try{const l=JSON.parse(localStorage.getItem("mx2::locali-v1")||"{}");i=l.ana||{};}catch(e){}return{perito:p,immobile:i};}
+function renderAna(){const a=loadAna(),p=a.perito,c=a.immobile;const pe=$("anaPerito"),ce=$("anaCliente");pe.querySelector(".n").textContent=p.nome||"n.d.";pe.querySelector(".m").textContent=[p.titolo,p.tel,p.email].filter(Boolean).join(" · ");ce.querySelector(".n").textContent=c.Nome||"n.d.";ce.querySelector(".m").textContent=[c.Indirizzo,c.DataSopr].filter(Boolean).join(" · ");}
+function renderStepper(){
+  const ACT=getActiveSteps();
+  let h='<div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button type="button" id="hubModeTog" style="appearance:none;border:1px solid var(--mx-accent,#1F4E55);background:#fff;color:var(--mx-accent,#1F4E55);padding:4px 12px;border-radius:14px;font:inherit;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em">'+(STATE.mode==='operatore'?'🔬 Passa a Tecnico (6 step)':'⚡ Passa a Operatore (4 step)')+'</button></div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
+  ACT.forEach((st,i)=>{let c="step-chip";if(i===STATE.cur)c+=" active";else if(i<STATE.cur)c+=" done";h+='<button type="button" class="'+c+'" data-i="'+i+'">'+esc(st.label)+'</button>';});
+  h+='</div>';
+  $("stepper").innerHTML=h;
+  $("stepper").querySelectorAll(".step-chip").forEach(el=>el.addEventListener("click",function(){STATE.cur=+this.dataset.i;persist();render();}));
+  const tog=$("hubModeTog"); if(tog)tog.addEventListener("click",function(){STATE.mode=(STATE.mode==='operatore'?'tecnico':'operatore');if(STATE.cur>=getActiveSteps().length)STATE.cur=0;persist();render();});
+}
+/* 20/11/2026: limiti dei campi numerici. Prima il modulo prendeva per buono qualunque numero (indice VTT 10 su 6,
+   umidità 150 %, superfici negative). I limiti vengono da quello che il campo dichiara: la scala scritta nell'unità
+   («0-6»), le percentuali 0-100, le temperature da -60 a 100 °C, i decibel da -30 a 150, il pH 0-14, l'anno di
+   costruzione fino al 2100; tutte le altre grandezze non negative. Un valore fuori dai limiti non viene preso. */
+var _mxFuoriScala={};
+function _mxLimiti(f,l,u){
+  var s=String(u||""), lab=String(l||""), m=s.match(/^\s*(-?\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)\s*$/);
+  if(m) return [parseFloat(m[1].replace(",",".")), parseFloat(m[2].replace(",","."))];
+  if(/%/.test(s)) return [0,100];
+  if(/°C/.test(s)) return [-60,100];
+  if(/^dB/.test(s)) return [-30,150];
+  if(/\bpH\b/.test(lab)) return [0,14];
+  if(/^Anno /.test(lab)) return [0,2100];
+  return [0,null];
+}
+function _mxNumero(el){
+  var k=el.dataset.fld, box=el.parentNode?el.parentNode.querySelector(".mx-fuori"):null, msg="";
+  var v=(el.value==="")?null:parseFloat(el.value);
+  if(v!=null && isNaN(v)) v=null;
+  if(v!=null){
+    var lo=(el.dataset.min!==undefined&&el.dataset.min!=="")?parseFloat(el.dataset.min):null;
+    var hi=(el.dataset.max!==undefined&&el.dataset.max!=="")?parseFloat(el.dataset.max):null;
+    if((lo!=null&&v<lo)||(hi!=null&&v>hi)){
+      msg=(hi!=null)?("Fuori dai limiti: questo campo va da "+lo+" a "+hi+". Il valore non è stato preso."):("Questo campo non può essere minore di "+lo+". Il valore non è stato preso.");
+      _mxFuoriScala[k]={txt:el.value,msg:msg};
+      v=null;
+    }
+  }
+  if(!msg) delete _mxFuoriScala[k];
+  if(box){ box.textContent=msg; box.style.display=msg?"block":"none"; }
+  el.style.borderColor=msg?"#b3261e":""; el.style.background=msg?"#fdeceb":"";
+  return v;
+}
+/* la scritta resta mentre si scrive nello stesso passo; cambiando passo, azzerando o caricando si riparte puliti */
+function _mxPulisciFuori(){ var a=document.activeElement; if(!(a&&a.getAttribute&&a.getAttribute("data-fld"))) _mxFuoriScala={}; }
+function inpNum(f,l,u,h){const v=STATE.data[f];var L=_mxLimiti(f,l,u),fu=_mxFuoriScala[f];return '<div class="fld"><label>'+esc(l)+(u?' <span class="opz">('+esc(u)+')</span>':"")+'</label><input type="number" step="0.01" value="'+(fu?esc(fu.txt):(v==null?"":v))+'" placeholder="'+esc(h||"")+'" data-fld="'+f+'" data-kind="num"'+(L[0]!=null?' min="'+L[0]+'" data-min="'+L[0]+'"':'')+(L[1]!=null?' max="'+L[1]+'" data-max="'+L[1]+'"':'')+(fu?' style="border-color:#b3261e;background:#fdeceb"':'')+'><small class="mx-fuori" style="display:'+(fu?'block':'none')+';color:#b3261e;font-weight:700;font-size:11.5px;margin-top:3px">'+(fu?esc(fu.msg):'')+'</small></div>';}
+function inpTxt(f,l,h){const v=STATE.data[f]||"";return '<div class="fld"><label>'+esc(l)+'</label><input type="text" value="'+esc(v)+'" placeholder="'+esc(h||"")+'" data-fld="'+f+'" data-kind="txt"></div>';}
+function inpSel(f,l,opts){const v=STATE.data[f]||"";let h='<div class="fld"><label>'+esc(l)+'</label><select data-fld="'+f+'" data-kind="txt"><option value="">seleziona</option>';opts.forEach(o=>h+='<option value="'+esc(o[0])+'"'+(v===o[0]?" selected":"")+'>'+esc(o[1])+'</option>');return h+'</select></div>';}
+function inpRad(f,l,opts){const v=STATE.data[f]||"";let h='<div class="fld"><label>'+esc(l)+'</label><div class="radio-row">';opts.forEach(o=>h+='<label><input type="radio" name="r_'+f+'" value="'+esc(o[0])+'"'+(v===o[0]?" checked":"")+' data-fld="'+f+'" data-kind="txt">'+esc(o[1])+'</label>');return h+'</div></div>';}
+function inpChk(f,l,opts){const v=STATE.data[f]||[];let h='<div class="fld"><label>'+esc(l)+'</label><div class="chkgrp">';opts.forEach(o=>h+='<label><input type="checkbox" value="'+esc(o[0])+'"'+(v.includes(o[0])?" checked":"")+' data-fld="'+f+'" data-kind="chk">'+esc(o[1])+'</label>');return h+'</div></div>';}
+function inpTxA(f,l,h){const v=STATE.data[f]||"";return '<div class="fld"><label>'+esc(l)+'</label><textarea data-fld="'+f+'" data-kind="txt" placeholder="'+esc(h||"")+'">'+esc(v)+'</textarea></div>';}
+
+const panels={
+  rilievo:function(){return '<div class="step-head"><h4>Rilievo iniziale macchia umidità</h4><span class="ref">Decision tree differenziale</span></div>'+
+    '<div class="banner blue"><strong>Hub Umidità:</strong> wizard di triage che indirizza al modulo specifico più appropriato. 1ª passata diagnosi differenziale Risalita / Condensa / Infiltrazione / Sali igroscopici / Costruzione.</div>'+
+    '<div class="grid3">'+inpSel("posizione","Posizione macchia",[["bassa","Parete bassa (0-100 cm)"],["media","Parete media (100-200 cm)"],["alta","Parete alta / soffitto"],["pavimento","Pavimento"],["angolo","Angolo perimetrale"]])+
+      inpSel("forma","Forma macchia",[["fascia_oriz","Fascia orizzontale uniforme"],["fascia_alta","Fascia con limite alto netto"],["a_fiamma","Macchia a fiamma irregolare"],["localizzata","Localizzata / puntiforme"],["scolatura","Scolatura verticale"],["diffusa","Diffusa tutta parete"]])+
+      inpSel("efflorescenze","Efflorescenze saline",[["nessuna","Nessuna"],["bordo_alto","Concentrate al bordo alto"],["diffuse","Diffuse"],["pluristrato","Pluristrato / abbondanti"]])+
+    '</div>'+
+    '<div class="grid3" style="margin-top:10px">'+
+      inpSel("correlazionePioggia","Correlazione con pioggia",[["si_forte","Sì forte (sempre dopo pioggia)"],["si_debole","Sì debole"],["no","No correlazione"],["non_so","Non verificato"]])+
+      inpSel("stagionalita","Stagionalità",[["inverno","Più evidente in inverno (condensa)"],["estate","Più evidente in estate (risalita+sali)"],["tutto_anno","Tutto l\'anno"],["episodica","Episodica"]])+
+      inpSel("etaEdificio","Età edificio",[["meno1","< 1 anno (sospetto costruzione)"],["meno3","1-3 anni"],["da3a20","3-20 anni"],["oltre20","> 20 anni (storico)"]])+
+    '</div>';},
+  patologie:function(){return '<div class="step-head"><h4>Patologie associate</h4></div>'+
+    '<div class="banner blue"><strong>Sintomi tipici:</strong> ogni patologia ha sintomi specifici. La combinazione orienta verso una diagnosi differenziale.</div>'+
+    inpChk("sintomi","Sintomi osservati (multi)",[["distacco_intonaco","Distacco intonaco a fascia bassa"],["polverizzazione","Polverizzazione malta"],["bolle_pittura","Bolle/sfogliatura pittura"],["muffa_alta","Muffa in zona alta (angoli)"],["muffa_bassa","Muffa in zona bassa"],["aloni_seccati","Aloni seccati con bordo netto"],["zona_umida_no_eff","Zona umida senza efflorescenze visibili"],["odore_cantina","Odore di umido/cantina"],["pavimento_freddo","Pavimento freddo / interrato"]])+
+    '<div style="margin-top:10px">'+inpRad("tempoIntonaco","Età intonaco attuale",[["nuovo","Nuovo (<1 anno)"],["medio","1-10 anni"],["vecchio",">10 anni"]])+'</div>';},
+  ambt:function(){return '<div class="step-head"><h4>Condizioni ambiente al rilievo</h4></div>'+
+    '<div class="grid4">'+inpNum("tInt","T interna","°C")+inpNum("urInt","UR interna","%")+inpNum("tSup","T superficie","°C")+inpNum("tDew","Punto rugiada calc","°C")+'</div>'+
+    '<div class="grid2" style="margin-top:10px">'+inpSel("ventilazione","Ventilazione",[["nessuna","Nessuna"],["scarsa","Scarsa"],["normale","Normale"],["buona","Buona"]])+inpSel("falda","Livello falda",[["alta","Alta (<1 m)"],["media","Media (1-3 m)"],["bassa","Bassa (>3 m)"],["non_so","Non noto"]])+'</div>';},
+  strumenti:function(){return '<div class="step-head"><h4>Strumenti rilevati in cantiere</h4><span class="ref">EN 16682:2017 + UNI 11085:2003</span></div>'+
+    '<div class="banner blue"><strong>Standard di riferimento:</strong> il metodo gravimetrico UNI 11085:2003 (essiccazione 105°C a massa costante) è lo standard per la quantificazione del contenuto d\'acqua. Igrometri capacitivi/resistivi danno falsi positivi su sali igroscopici (BRE Digest 245 §A4). Tubo Karsten EN 16302:2013 misura assorbimento.</div>'+
+    '<div style="margin:10px 0"><strong>Strumentazione disponibile in cantiere:</strong></div>'+
+    inpChk("__strum","",[["strumIgrometro","Igrometro capacitivo / WME"],["strumGravimetrico","Gravimetrico HMC (BRE 245, UNI 11085)"],["strumTermocamera","Termocamera IR (esclusione condensa)"],["strumDatalogger","Datalogger T+UR multi-canale"],["strumIC","Cromatografia ionica IC (sali UNI 11087 (ritirata 2016, oggi EN 16455))"],["strumKarsten","Tubo Karsten EN 16302 (assorbimento)"],["strumPiezometro","Piezometro / livello falda"]])+
+    '<div style="margin:14px 0 6px;font-family:var(--ff-serif);font-size:14px;color:var(--ink)">Misure quantitative BRE Digest 245</div>'+
+    '<div class="grid3">'+inpNum("um_materiale_pct","UM materiale (igrometro)","%","es. 6.5")+inpNum("hmc_pct","HMC% (gravimetrico)","%","BRE 245: >5% sali igrosc.")+inpNum("free_pct","Free moisture %","%","soglia operativa lab: >2% acqua libera")+'</div>'+
+    '<div class="banner yellow" style="margin-top:10px"><strong>Soglia BRE Digest 245 (2007):</strong> HMC>5% indica presenza significativa di sali igroscopici. <strong>Soglia operativa di laboratorio:</strong> free moisture >2% indica acqua libera. UNI 11085:2003 (essiccazione 105°C 24h) è il metodo standard. Riferimento RICS Joint Damp 2022.</div>';},
+  sali_aria:function(){return '<div class="step-head"><h4>Sali e clima interno/esterno</h4><span class="ref">EN 16455:2014 + UNI 11087:2003 (rit. 2016)</span></div>'+
+    '<div class="banner blue"><strong>Sali igroscopici:</strong> attirano umidità dall\'aria (deliquescenza) quando UR ambiente supera UR di equilibrio del sale. DRH a 20°C, MgCl₂: 33% (Greenspan 1977); CaCl₂ ~32%, Ca(NO₃)₂ ~55% (valori di letteratura). Diagnosi differenziale: zona umida senza acqua liquida = sali igroscopici, non risalita.</div>'+
+    '<div class="grid2">'+inpSel("sali_presenza","Presenza sali",[["si","Sì - efflorescenze visibili"],["analisi","Sì - confermati IC laboratorio"],["no","No - nessuna efflorescenza"],["incognito","Non analizzati"]])+inpSel("sali_tipo","Tipologia prevalente",[["cloruri","Cloruri (NaCl marino, antigelo)"],["solfati","Solfati (CaSO₄/Na₂SO₄ inquinamento)"],["nitrati","Nitrati (KNO₃/NaNO₃ biologici/agricoli)"],["misti","Misti"],["incognito","Non determinato"]])+'</div>'+
+    '<div style="margin-top:14px;font-family:var(--ff-serif);font-size:14px;color:var(--ink)">Clima esterno (Open-Meteo / sopralluogo)</div>'+
+    '<div class="grid2">'+inpNum("t_aria_outdoor","T aria esterna","°C","es. 12")+inpNum("ur_aria_outdoor","UR aria esterna","% UR","es. 80")+'</div>'+
+    '<div class="banner yellow" style="margin-top:10px"><strong>Soglie EN 16455:2014</strong> (Conservation of cultural heritage - Extraction and determination of soluble salts in natural stone and related materials): UNI 11087:2003 (rit. 2016) + Doehne &amp; Price (2010) per orientamento iniziale.</div>';},
+  diagnosi:function(){const v=calcVerdict();return '<div class="step-head"><h4>Diagnosi differenziale</h4></div>'+
+    '<div class="verdict '+v.kind+'"><div class="lbl">Patologia più probabile</div><div class="v">'+esc(v.verdict)+'</div><div class="s">'+esc(v.summary)+'</div></div>'+
+    '<div style="margin-top:14px"><strong style="font-size:13px;color:var(--ink)">📦 Vai al modulo specifico per approfondire:</strong></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:8px">'+
+      v.suggestedModules.map(m=>'<a href="'+m.url+'" target="_blank" style="display:block;padding:10px 14px;background:'+m.color+';color:#fff;text-decoration:none;border-radius:8px;font-weight:700;text-align:center">'+m.label+'</a>').join("")+
+    '</div>'+
+    '<div style="margin-top:14px">'+inpTxA("noteFinali","Note del tecnico","")+'</div>';}
+};
+window._recalcKeys=["sintomi","correlazionePioggia","posizione"];
+
+
+
+/* === Riferimenti normativi documentati (Hub Umidità v4) ===
+   Tutti i pesi della classificazione sono derivati dalla letteratura tecnica peer-reviewed:
+   - BRE Digest 245 (2007): "Rising damp in walls, diagnosis and treatment"
+   - Massari G. & I. (1985): "Risanamento igienico dei locali umidi" Hoepli
+   - UNI EN ISO 13788:2013: condensa interstiziale (Glaser + 12 mesi)
+   - UNI 11085:2003: metodo gravimetrico per misura umidità murature
+   - UNI EN 16682:2017: misura umidità murature in opera
+   - WHO 2009: "WHO guidelines for indoor air quality: dampness and mould" */
+var HUB_NORMATIVE = {
+  risalita:     { ref:'BRE Digest 245 (2007) + Massari 1985 + RICS Joint Damp 2022', desc:'Profilo MC% decrescente con altezza, picco alla base, sali alla zona di evaporazione' },
+  condensa:     { ref:'UNI EN ISO 13788:2013 §6 + Sedlbauer 2001 + BSC BSD-138', desc:'T superficie < T rugiada locale; pattern angoli/ponti termici' },
+  infiltrazione:{ ref:'BS 6576:2005 + BRE Digest 245 + IICRC S500', desc:'Correlazione temporale con pioggia, scolature a fiamma, aloni con bordi' },
+  sali:         { ref:'UNI 11087:2003 (rit. 2016) + WTA 4-5-99/D + Doehne & Price 2010 + EN 16455:2014', desc:'Cristalli efflorescenze, polverizzazione, umidità senza acqua libera' },
+  costruzione:  { ref:'UNI EN ISO 13788:2013 App.A + WTA 6-2-25/D + DM 26/06/2015 + DM 28/10/2025', desc:'Acqua residua dopo getti/intonaci, asciugatura naturale 12-24 mesi' }
+};
+/* Riferimenti normativi aggiuntivi (Hub v5, 26/05/2026):
+ * - RICS Joint Damp Standard 2022 (Royal Institution of Chartered Surveyors)
+ * - BSC BSD-138 (Building Science Corporation, Moisture and Materials, 2006)
+ * - IICRC S500 (Standard for Professional Water Damage Restoration, 4th ed. 2015)
+ * - EN 16455:2014 (Conservation of cultural heritage - Extraction and determination of soluble salts)
+ * - EN 16682:2017 (Methods for the measurement of moisture content in components of cultural heritage)
+ * - DM 26/06/2015 + DM 28/10/2025 (Linee guida APE, incrocio con umidità interstiziale)
+ * - obblighi documentali per documentazione tecnica probatoria
+ */
+
+/* WARNING strumenti misura (BRE Digest 245 §A4 + manuale ANIT 2021):
+   I MISURATORI CAPACITIVI/RESISTIVI danno FALSI POSITIVI su sali igroscopici cristallizzati
+   (NaCl, CaCl₂, MgCl₂, NaNO₃). Sempre verificare con metodo gravimetrico UNI 11085 (essiccazione 105°C). */
+var HUB_WARN_STRUMENTI = 'I misuratori a contatto (capacitivi/resistivi) possono dare falsi positivi su murature ricche di sali igroscopici. Lo standard di riferimento per la diagnosi è il metodo ponderale gravimetrico UNI 11085:2003 (essiccazione a 105°C fino a massa costante, Δm < 0.1%).';
+
+/* ====== CUORE DATI app4 UMIDITA Hub iniettato 26/05/2026 ======
+ * Estratto verbatim da src/js/plugins/umidita/umidita-tipologie.js + umidita-kit.js
+ * Verifica: 2026-05-02 (vedi data scadenza nei file originali)
+ * ============================================================ */
+
+const HUB_TIPOLOGIE_DB = [
+    {
+      id: 'risalita',
+      nome: 'Umidità di risalita capillare (Rising Damp)',
+      origine: 'Acqua dal terreno (falda freatica, terreno saturo) che risale per capillarità attraverso la muratura. Richiede DPC assente o degradato + sorgente d\'acqua a livello fondazioni.',
+      meccanismo: 'Capillarità nei pori del materiale muratura. Movimento ascensionale lento (mm/giorno). Si arresta quando evaporazione = risalita.',
+      pattern_diagnostico: 'Frangia ascendente con altezza tipica 30-150 cm dal pavimento; mai oltre 1,5 m (BS 6576 §3.2). Distribuzione orizzontale lungo tutta la base della parete.',
+      segni_distintivi: [
+        'Tide-mark (linea di marea) orizzontale',
+        'Efflorescenze saline in cresta (cloruri, nitrati, solfati)',
+        'Distacchi intonaco crescenti dal basso verso l\'alto',
+        'Mai sopra 1,5 m da terra',
+        'Movimento LENTO (mai gocciolamento)',
+        'Continuità orizzontale lungo tutta la base'
+      ],
+      tempi: 'Continua tutto l\'anno. Variazione stagionale lieve (più estesa in stagione umida).',
+      cause_concomitanti: 'DPC assente/degradato + sorgente d\'acqua nel terreno (BRE Digest 245). Senza ENTRAMBI, non c\'è risalita.',
+      storia_ricerche: [
+        { anno: '1844', autore: 'The Builder (rivista UK)', titolo: 'Primo riferimento documentato a "rising damp by capillary attraction"', fonte: 'The Builder 1844 (archivio digitalizzato)' },
+        { anno: '1856-1860', autore: 'UK Patents Office', titolo: 'Primi brevetti DPC (Damp-Proof Course)', fonte: 'UK Patents Office archives storici' },
+        { anno: '2007', autore: 'Hall C. & Hoff W.D.', titolo: 'Rising damp: capillary rise dynamics in walls', fonte: 'Proceedings Royal Society A 463:1871-1884, DOI 10.1098/rspa.2007.1855, modello Sharp Front, equilibrio assorbimento/evaporazione' },
+        { anno: '2010s', autore: 'Rirsch E. & Zhang Z. (Safeguard Europe)', titolo: 'Rising damp in masonry walls and the importance of mortar properties', fonte: 'Ricerche industriali su capillarità in malte storiche' }
+      ],
+      cross_modulo: 'risalita',
+      norme_riferimento: 'BS 6576:2005+A1:2012 + BRE Digest 245 + UNI EN 16682:2017 + WTA 4-5-99/D + RICS Joint Damp Methodology 2022',
+      icon: '\u{1F4A7}'
+    },
+    {
+      id: 'condensa_superficiale',
+      nome: 'Condensa superficiale (Surface Condensation)',
+      origine: 'Vapore acqueo dell\'aria interna che condensa su superfici fredde quando T parete ≤ T rugiada.',
+      meccanismo: 'Quando la T della superficie è inferiore alla T di rugiada dell\'aria a contatto (calcolabile con equazione Magnus-Tetens), il vapore condensa formando rugiada superficiale.',
+      pattern_diagnostico: 'Macchie umide nei punti più freddi della parete (angoli, pareti esposte a Nord, ponti termici, dietro mobili contro parete fredda). Tipicamente in stagione fredda.',
+      segni_distintivi: [
+        'Localizzazione su superfici fredde (angoli, ponti termici, retro mobili)',
+        'Stagionalità INVERNALE (T parete bassa)',
+        'Muffa diffusa frequente (Cladosporium, Penicillium)',
+        'NESSUN sale (acqua condensata = pulita, distillata)',
+        'Condizione: T parete ≤ T rugiada',
+        'Riferimento operativo (clima IT tipico): fRsi ≥ 0,72; fRsi,min va calcolato per caso secondo UNI EN ISO 13788, richiamata da DM 26/06/2015 · DM 28/10/2025'
+      ],
+      tempi: 'Stagionale invernale. Cicli giornalieri (mattino: peggio).',
+      cause_concomitanti: 'UR aria interna alta + ventilazione insufficiente + ponti termici + isolamento inadeguato',
+      storia_ricerche: [
+        { anno: '1818', autore: 'Ernst Ferdinand August', titolo: 'Brevetto del termine "psychrometer" (psicrometro)', fonte: 'Patent Germany 1818, origine dello strumento moderno per misura UR' },
+        { anno: '1844', autore: 'Magnus H.G.', titolo: 'Formula originale pressione vapore saturo', fonte: 'Annalen der Physik, base teorica per Magnus-Tetens' },
+        { anno: '1923', autore: 'Mollier Richard', titolo: 'Diagramma h-x (Mollier diagram) per aria umida', fonte: 'Riferimento europeo per psicrometria, alternativo al psychrometric chart anglosassone' },
+        { anno: '1996', autore: 'Alduchov O.A. & Eskridge R.E.', titolo: 'Improved Magnus form approximation of saturation vapor pressure', fonte: 'Journal of Applied Meteorology 35:601-609, formula ottimizzata oggi standard' }
+      ],
+      cross_modulo: 'termo',
+      norme_riferimento: 'UNI EN ISO 13788:2013 + DM 26/06/2015 · DM 28/10/2025 (rimando UNI EN ISO 13788; 0,72 = riferimento operativo) + BS 5250:2021 + DIN 4108-3:2024',
+      icon: '\u{1F4A7}'
+    },
+    {
+      id: 'condensa_interstiziale',
+      nome: 'Condensa interstiziale (Interstitial Condensation)',
+      origine: 'Vapore acqueo che migra attraverso la stratigrafia della parete e condensa all\'interno (dove la pressione di vapore parziale supera la pressione di saturazione).',
+      meccanismo: 'Trasporto di vapore per diffusione (legge di Fick) attraverso strati a permeabilità diversa. Condensa al confine tra strati con resistenza al vapore disuguale.',
+      pattern_diagnostico: 'Spesso INVISIBILE in superficie. Si rileva con la verifica di Glaser o con una simulazione dinamica (UNI EN 15026). Conseguenze: degrado isolanti, distacchi, muffa nascosta in cavità.',
+      segni_distintivi: [
+        'Spesso non visibile esternamente',
+        'Verifica solo con calcolo Glaser o simulazione HAM',
+        'Degrado isolante (perdita prestazioni termiche)',
+        'Distacchi cartongesso, muffa nascosta in intercapedine',
+        'Tipico in costruzioni con barriera vapore mal posizionata'
+      ],
+      tempi: 'Cumulativa nel tempo. Bilancio annuale (UNI EN ISO 13788).',
+      cause_concomitanti: 'Stratigrafia errata + barriera vapore mal posizionata + ponti termici + isolamento interno mal dimensionato',
+      storia_ricerche: [
+        { anno: '1958-1959', autore: 'Glaser Helmuth', titolo: 'Vereinfachte Berechnung der Wasserdampfdiffusion durch geschichtete Wände', fonte: 'Kältetechnik 11, metodo grafico stazionario, base ISO 13788' },
+        { anno: '1990s', autore: 'Künzel Hartwig (Fraunhofer IBP, Holzkirchen)', titolo: 'Sviluppo software WUFI (Wärme und Feuchte Instationär)', fonte: 'Fraunhofer Institut für Bauphysik, simulazione HAM oraria dinamica' },
+        { anno: '2007', autore: 'CEN', titolo: 'EN 15026 recepisce metodo dinamico Künzel', fonte: 'Norma europea per simulazione numerica HAM' },
+        { anno: '2010s', autore: 'Grunewald J. (TU Dresden)', titolo: 'DELPHIN, software 1D/2D HAM transient', fonte: 'TU Dresden Bauklimatik, alternativa scientifica a WUFI' }
+      ],
+      cross_modulo: 'glaser',
+      norme_riferimento: 'UNI EN ISO 13788:2013 + EN 15026:2023 + ASHRAE 160-2021 + DIN 4108-3:2024 + WTA 6-1-23/D',
+      icon: '\u{1F32B}'
+    },
+    {
+      id: 'meteorica',
+      nome: 'Umidità meteorica / pioggia battente (Penetrating Damp / Wind-Driven Rain)',
+      origine: 'Acqua piovana che penetra dall\'esterno attraverso difetti dell\'involucro (copertura, pareti, serramenti, scossaline).',
+      meccanismo: 'Penetrazione governata da: (1) gravità, (2) pressione del vento, (3) capillarità giunti, (4) tensione superficiale, (5) energia cinetica (driving rain), (6) pressione idrostatica accumulo.',
+      pattern_diagnostico: 'Localizzazione vicino a punti di ingresso (sotto finestra, sotto scossalina, angolo terrazzo). Stagionalità correlata alle piogge. Direzione del fronte umido: dall\'esterno verso l\'interno.',
+      segni_distintivi: [
+        'Macchie correlate a EVENTI PIOVOSI (BRE Digest 245 §E3-E4)',
+        'Localizzazione in punti di ingresso noti (serramenti, scossaline, copertura)',
+        'Direzione fronte umido: ESTERNO → INTERNO',
+        'Esposizione a vento dominante (driving rain)',
+        'Pattern correlato a Driving Rain Index (DRI) ISO 15927-3',
+        'Possibile gocciolamento attivo durante/dopo pioggia'
+      ],
+      tempi: 'Eventi piovosi. Stagionalità autunnale/invernale in Italia tipica.',
+      cause_concomitanti: 'Difetti involucro (membrana, scossalina, serramento, giunti). Esposizione vento (BS 8104, ISO 15927-3).',
+      storia_ricerche: [
+        { anno: '1964', autore: 'Hendry A.W.', titolo: 'Primi studi comparativi su esposizione pareti a pioggia battente', fonte: 'Letteratura UK Building Research Station' },
+        { anno: '1965', autore: 'Lacy R.E.', titolo: 'Driving-rain index (DRI), definizione quantitativa', fonte: 'British Building Research Station, DRI = vento × pioggia [m²/s] base classificazione esposizione' },
+        { anno: '2004', autore: 'Blocken B. & Carmeliet J.', titolo: 'A review of wind-driven rain research in building science', fonte: 'Journal of Wind Engineering and Industrial Aerodynamics 92(13):1079-1130, review mondiale di riferimento' },
+        { anno: '2009', autore: 'CEN', titolo: 'EN ISO 15927-3 sostituisce DRI con metodo aggiornato', fonte: 'Norma europea per Driving Rain Index' },
+        { anno: '2010s', autore: 'Straube J. (Building Science Corporation)', titolo: 'BSC BSD-148: Simplified Driving Rain Prediction for ASHRAE 160P + WUFI 4.0', fonte: 'BSC Digest, semplificazione applicativa WDR' }
+      ],
+      cross_modulo: 'infiltrazioni',
+      norme_riferimento: 'BS 8104:1992 + UNI EN ISO 15927-3:2009 + BRE Digest 245 + UNI 8627-1:2019 + UNI 8627-2:2019 + UNI 8178-2:2019 + ASHRAE 160-2021',
+      icon: '\u{2614}'
+    },
+    {
+      id: 'falda',
+      nome: 'Falda controterra (Below-Ground Water / Hydrostatic)',
+      origine: 'Acqua di falda freatica o terreno saturo che preme orizzontalmente contro pareti contro-terra (interrati, seminterrati).',
+      meccanismo: 'Pressione idrostatica della falda: 1m falda = 1.000 kg/m², 5m = 5.000 kg/m². Penetrazione attraverso microporosità cls, fessurazioni, giunti freddi non sigillati.',
+      pattern_diagnostico: 'Macchie persistenti su pareti contro-terra (interrati). Distribuzione: dal basso (massima pressione idrostatica) verso l\'alto. Continua tutto l\'anno (variazione livello falda).',
+      segni_distintivi: [
+        'Localizzazione su pareti controterra (interrati, seminterrati)',
+        'Permanente, indipendente da stagionalità meteo',
+        'Distribuzione dal basso verso l\'alto in pareti interrate',
+        'Sali igroscopici e efflorescenze',
+        'Possibile gocciolamento se fessurazione strutturale (Type B fragile)',
+        'Verifica con piezometro: livello falda < 1,5 m sotto piano campagna'
+      ],
+      tempi: 'Permanente. Variazioni stagionali del livello di falda.',
+      cause_concomitanti: 'Membrana esterna assente/danno + drenaggio perimetrale assente/intasato + falda alta + fessurazioni cls',
+      storia_ricerche: [
+        { anno: '1990', autore: 'BSI, British Standards Institution', titolo: 'BS 8102 prima edizione, protezione strutture interrate', fonte: 'BSI archives, code of practice cardine UK' },
+        { anno: '2009', autore: 'BSI', titolo: 'BS 8102:2009, consolidamento 4 Grades + Type A/B/C', fonte: 'BSI Knowledge' },
+        { anno: '2022', autore: 'BSI', titolo: 'BS 8102:2022, terza revisione maggiore', fonte: 'BSI Knowledge, focus su qualifica progettisti CSSW + sistemi combinati + manutenzione' },
+        { anno: '2024', autore: 'Newton Waterproofing', titolo: 'Technical Paper aggiornato BS 8102:2022', fonte: 'newtonwaterproofing.co.uk, guida tecnica industria UK' }
+      ],
+      cross_modulo: 'infiltrazioni',
+      norme_riferimento: 'BS 8102:2022 (4 Grades + Type A/B/C) + UNI EN 1992-1-1 (Eurocodice 2) + NTC 2018 Cap. 6',
+      icon: '\u{1F30A}'
+    },
+    {
+      id: 'igroscopica',
+      nome: 'Umidità igroscopica (Hygroscopic, sali deliquescenti + materiali idrofili)',
+      origine: 'Fenomeno INTERNO per cui i sali contenuti nelle murature (e secondariamente i materiali idrofili stessi) assorbono molecole d\'acqua DALL\'ARIA INTERNA dell\'ambiente circostante. La fonte d\'acqua è il VAPORE atmosferico, non un\'acqua libera diretta.',
+      meccanismo: 'DOPPIO MECCANISMO: (1) MATERIALI base idrofili (legno, malta, gesso, cls), adsorbono vapore d\'acqua sui pori secondo isoterme di adsorbimento BSC BSD-138; sopra ~80% RH l\'acqua adsorbita è disponibile per muffe e corrosione. (2) SALI DELIQUESCENTI, quando UR aria ≥ DRH del sale, il sale assorbe vapore acqueo dall\'aria e si dissolve formando soluzione satura. Esempi (DRH a 20°C): NaCl 75%, KNO₃ 94% (Greenspan 1977); CaCl₂ ~32%, Ca(NO₃)₂ ~55% (valori di letteratura). Cicli ripetuti deliquescenza/cristallizzazione → pressione di cristallizzazione → fessure, sfarinamento, distacchi.',
+      pattern_diagnostico: 'Macchie umide su muri INTERNI in cicli legati a UR aria interna (non a meteo esterno). Macchie più scure/umide quando l\'aria è più umida (cucina, bagno, scarsa ventilazione, periodi caldi-umidi). Asciutte con efflorescenze in stagione secca. <b>PERSISTE anche dopo eliminazione fonte originale d\'acqua</b>, caso tipico: muri appena ristrutturati e asciutti che mostrano macchie senza apparente risalita attiva.',
+      segni_distintivi: [
+        'Fenomeno PREVALENTEMENTE INDOOR (driver = UR aria interna, non meteo esterno)',
+        'Cicli legati a UR aria interna: peggio in cucina/bagno/ambienti poco ventilati',
+        '<b>Persiste DOPO la rimozione della fonte originaria d\'acqua</b> (es. dopo installazione DPC, post-deumidificazione)',
+        'Efflorescenze saline visibili in superficie (macchie bianche, cristallizzazioni)',
+        'Distacchi intonaco con sfarinamento (pressione di cristallizzazione > resistenza materiale)',
+        'Igrometri elettrici danno LETTURE FALSAMENTE ALTE su sali, i sali sono conduttori e ingannano lo strumento',
+        'Conferma diagnosi solo con: HMC gravimetrico (BRE Digest 245) + IC (cromatografia ionica)',
+        'Soglia intervento: HMC > 5% (BRE Digest 245)',
+        'Classificazione WTA contaminazione salina: bassa/media/alta secondo % massa secca'
+      ],
+      tempi: 'Cicli giornalieri/stagionali UR-dipendenti. <b>FENOMENO PERMANENTE finché i sali non sono rimossi/desalinizzati</b>. Il sale non evapora come l\'acqua: continua ad attrarla.',
+      cause_concomitanti: 'Sali presenti nella muratura (origine: contatto pregresso con acqua di risalita/falda/mare/fertilizzanti/fognature) + UR aria interna sopra DRH dei sali specifici. Senza UR alta non si manifesta; senza sali igroscopici neanche.',
+      cross_modulo: 'sali',
+      cross_note: 'Per analisi specifica sali usa il modulo Sali (IC + XRD + SEM-EDS). <b>ATTENZIONE:</b> non basta DPC chimico per risolvere igroscopica, i sali vanno desalinizzati separatamente (impacchi, intonaci di sacrificio, sanierputz WTA 2-9). Igroscopica può PERSISTERE in assenza di risalita attuale.',
+      storia_ricerche: [
+        { anno: '2000', autore: 'Charola A.E. (Smithsonian/NPS)', titolo: 'Salts in the Deterioration of Porous Materials: An Overview', fonte: 'NPS publication 2000-25, review fondamentale sui meccanismi di degrado salino' },
+        { anno: '2004-2008', autore: 'Getty Conservation Institute', titolo: 'Salt Research Project (Charola, Bläuer, Steiger)', fonte: 'Getty publications, ricerca sistematica su sali in patrimonio costruito' },
+        { anno: '2008', autore: 'Steiger M. (Univ. Hamburg)', titolo: 'Termodinamica miscele saline multi-ioniche', fonte: 'Construction and Building Materials, comportamento miscele complesse vs sali singoli' },
+        { anno: '2006', autore: 'Straube J. (Building Science Corporation)', titolo: 'BSC BSD-138: Moisture and Materials, 3 regimi storage moisture', fonte: 'buildingscience.com, riferimento mondiale per igroscopico/capillare/sovrasaturazione' },
+        { anno: '2018', autore: 'Springer Earth Sciences', titolo: 'Salt efflorescence as indicator for sources of damaging salts: a statistical approach', fonte: 'Environmental Earth Sciences, origine sali da pattern efflorescenze' },
+        { anno: '2025', autore: 'Nature npj Heritage Science', titolo: 'Dynamic water vapor sorption: a helpful tool for preventive conservation of salt contaminated built heritage', fonte: 'npj Heritage Science DOI 10.1038/s40494-025-01548-7' }
+      ],
+      norme_riferimento: 'WTA 2-9-20/D (sanierputz) + WTA 4-5-99/D (diagnostica) + WTA 2-10-06/D (intonaci di sacrificio) + UNI 11087:2003 (rit. 2016) + EN 16455:2014 + BRE Digest 245 (HMC) + BSC BSD-138 (3 regimi storage moisture) + RILEM TC 271-ASC + Property Care Association, Hygroscopic Salts and Rising Dampness (2020)',
+      icon: '\u{2697}'
+    },
+    {
+      id: 'rimbalzo',
+      nome: 'Umidità di rimbalzo (Rain Splash)',
+      origine: 'Pioggia che rimbalza dal suolo/pavimentazione adiacente alla parete e bagna la fascia inferiore della muratura esterna.',
+      meccanismo: 'Energia cinetica delle gocce (Qin et al. 2014: soglia 0,0674×10⁻³ J per goccia) trasferita al rimbalzo. Distanza media spostamento: 30-50 cm verticali, 50-100 cm orizzontali (van Dijk, Leguédois).',
+      pattern_diagnostico: 'Fascia umida nei primi 30-50 cm della muratura ESTERNA, con pavimentazione dura (cls, asfalto, lastre). Visibile dopo piogge intense. Riconosciuta dal British Medical Journal nel 1872.',
+      segni_distintivi: [
+        'Fascia bassa esterna (0-50 cm da terra)',
+        'Pavimentazione dura sotto (cls, asfalto, lastre)',
+        'Più severa dopo piogge intense con grandi gocce',
+        'Worse where water falls from roof edges without gutters',
+        'Può fare PONTE DEL DPC (DPC bridging) e simulare risalita',
+        'NHBC: distanza minima DPC-terreno 150 mm'
+      ],
+      tempi: 'Eventi piovosi intensi. Esposizione a venti dominanti.',
+      cause_concomitanti: 'Pavimentazione dura adiacente + assenza fascia drenante + DPC troppo basso + caduta acqua da gronda senza canalizzazione',
+      storia_ricerche: [
+        { anno: '1872', autore: 'British Medical Journal', titolo: 'Prima descrizione storica del rimbalzo come causa di degrado murario basso', fonte: 'BMJ 1872, articolo originale ottocentesco, archivio storico medico' },
+        { anno: '2005', autore: 'Leguédois S. et al.', titolo: 'Splash projection distance per aggregati: distanza media 30-50 cm verticali, 50-100 cm orizzontali', fonte: 'ScienceDirect, meccanismo trasferimento gocce su aggregati' },
+        { anno: '2011', autore: 'Scholten T. et al.', titolo: 'Tübingen splash cup (T-cup) per misura energia cinetica pioggia', fonte: 'Journal of Plant Nutrition and Soil Science DOI 10.1002/jpln.201000349' },
+        { anno: '2014', autore: 'Qin Y. et al.', titolo: 'Soglia minima energia cinetica per rimbalzo: 0,0674×10⁻³ J per goccia singola', fonte: 'Journal of Hydrology, soglia operativa per modellazione' },
+        { anno: 'continui', autore: 'NHBC Standards UK + Approved Document C', titolo: 'Distanza minima DPC-terreno 150 mm per evitare rimbalzo', fonte: 'NHBC + UK Building Regulations Sez. 5.5' }
+      ],
+      cross_modulo: null,
+      cross_note: 'Tipologia AUTONOMA non coperta da modulo dedicato. Consultare il manuale tecnico del modulo Umidità per la trattazione completa.',
+      norme_riferimento: 'NHBC Standards UK + Approved Document C UK Sez. 5.5 (DPC ≥ 150 mm) + BMJ 1872 (riferimento storico) + Qin et al. 2014 + Scholten et al. 2011',
+      icon: '\u{1F4A6}'
+    },
+    {
+      id: 'costruzione',
+      nome: 'Umidità di costruzione (Built-in / Construction Moisture)',
+      origine: 'Acqua di impasto e di lavorazione contenuta nei materiali da costruzione (cls, malta, intonaco, legno verde) al momento della messa in opera. Tipica delle costruzioni nuove e ristrutturazioni recenti.',
+      meccanismo: 'Materiali nuovi contengono acqua residua: cls 8-15% UM, malta 12-25%, intonaco 8-15%, legno verde 30-50% MC. Drying time naturale 12-24 mesi (BSC BSD-012). Una casa nuova media contiene ~8.000 litri di acqua residua.',
+      pattern_diagnostico: 'Macchie diffuse in TUTTA la struttura nuova/ristrutturata. UM materiali decrescente nel tempo. Distinguibile dalle altre tipologie perché diminuisce nel tempo (vs persistente).',
+      segni_distintivi: [
+        'TIPICA dei primi 12-24 mesi post-costruzione/ristrutturazione',
+        'UM materiali decrescente nel tempo',
+        'Distribuzione UNIFORME su tutta la struttura (non localizzata)',
+        'Possibile efflorescenza primaria su cls/cocciopesto fresco',
+        'Va MISURATA prima di interventi di finitura (incollaggi, parquet, vernici)',
+        'Drying allowance previsto da ASHRAE 160-2021'
+      ],
+      tempi: 'Decrescente nel primo anno (massima riduzione) fino a 24 mesi. Poi residua minima.',
+      cause_concomitanti: 'Tempi di asciugatura insufficienti + chiusura prematura involucro + posa finiture su supporto umido + clima freddo/umido che rallenta drying',
+      storia_ricerche: [
+        { anno: '1986', autore: 'Lstiburek J. & Straube J.', titolo: 'Fondazione Building Science Corporation (BSC)', fonte: 'buildingscience.com, scuola Building Science USA/Canada' },
+        { anno: '2002', autore: 'Lstiburek J.', titolo: 'Moisture Control for Buildings (year-long ASHRAE Journal series)', fonte: 'ASHRAE Journal Feb 2002, costruzione moisture e gestione asciugatura' },
+        { anno: '2002', autore: 'Straube J.', titolo: 'Moisture in Buildings', fonte: 'ASHRAE Journal Jan 2002, fondamenti scientifici trasporto umidità in involucri' },
+        { anno: '2009', autore: 'ASHRAE', titolo: 'ASHRAE 160 prima edizione, Criteria for Moisture-Control Design Analysis', fonte: 'ASHRAE Standards, performance-based criteria' },
+        { anno: '2021', autore: 'ASHRAE', titolo: 'ASHRAE 160-2021, drying allowance per construction moisture', fonte: 'ANSI/ASHRAE Standard 160-2021, riferimento mondiale aggiornato' },
+        { anno: 'continui', autore: 'BSC BSD-012 (Lstiburek)', titolo: 'Moisture Control for New Residential Buildings, 8.000 litri d\'acqua residua tipici', fonte: 'buildingscience.com BSD-012' }
+      ],
+      cross_modulo: null,
+      cross_note: 'Tipologia AUTONOMA. Per la relazione tecnica su nuove costruzioni con sintomi premature, verificare UM materiali con gravimetrico/CM-meter contro soglie cogenti (cls < 6%, malta < 4%, parquet posa < 12%).',
+      norme_riferimento: 'BSC BSD-012 + ASHRAE 160-2021 (drying allowance) + EPA Moisture Control Guidance + DIN 4108-3:2024',
+      icon: '\u{1F3D7}'
+    },
+    {
+      id: 'accidentale',
+      nome: 'Accidentale / Allagamento / Rotture impianti (Accidental / Flood)',
+      origine: 'Eventi accidentali: rottura tubazioni (acquedotto/scarichi/riscaldamento), allagamento, alluvione, ritorno fognario, sblocco di apparecchi sanitari.',
+      meccanismo: 'Ingresso massivo e localizzato di acqua in tempi brevi. Categoria di pericolosità definita da IICRC S500: Cat. 1 "Clean" (sanitaria), Cat. 2 "Gray" (contaminata), Cat. 3 "Black" (sewage, alluvione, pioggia con vento).',
+      pattern_diagnostico: 'Localizzazione legata al punto di rottura. Volumi importanti in tempo breve. Dopo 24-48h, Cat. 1 può degradare a Cat. 2 o 3 per contatto con materiali contaminati.',
+      segni_distintivi: [
+        'Inizio IMPROVVISO (data identificabile)',
+        'Volumi importanti, localizzazione precisa',
+        'Sintomi: macchie estese, gocciolamento, allagamento pavimento',
+        'Bollette acqua anomale (rottura tubo)',
+        'Necessità ASCIUGATURA RAPIDA (< 48h Cat. 1, immediata Cat. 2/3)',
+        'Categoria IICRC S500: 1/2/3 determina protocollo di restoration'
+      ],
+      tempi: 'Evento puntuale + processo di asciugatura. Senza intervento, degrada in muffe e biodeterioramento.',
+      cause_concomitanti: 'Vetustà tubazioni + gelo + dilatazioni termiche + errata posa + alluvioni + ritorno fognario',
+      storia_ricerche: [
+        { anno: '1972', autore: 'IICRC, Institute of Inspection, Cleaning and Restoration Certification', titolo: 'Fondazione IICRC come autorità certificante per cleaning/restoration USA', fonte: 'iicrc.org, origini disciplina water damage restoration' },
+        { anno: 'anni 1980', autore: 'IICRC', titolo: 'Formalizzazione disciplina water damage restoration: transizione da cleanup empirico a standard tecnici basati su building science', fonte: 'IICRC archives' },
+        { anno: '1999', autore: 'IICRC', titolo: 'IICRC S500-1999 seconda edizione (la prima e S500-94 del 1994), Standard for Professional Water Damage Restoration', fonte: 'IICRC S500-1999' },
+        { anno: '2006', autore: 'IICRC', titolo: 'S500 terza edizione, categorie 1/2/3 consolidate', fonte: 'IICRC S500-2006' },
+        { anno: '2015', autore: 'IICRC', titolo: 'S500 quarta edizione, classi di evaporazione + procedure dettagliate', fonte: 'IICRC S500-2015' },
+        { anno: '2021', autore: 'IICRC', titolo: 'S500-2021, versione aggiornata con tempistiche degradamento Cat. 1 → Cat. 2/3 in 24-48h', fonte: 'IICRC S500-2021 standard corrente' }
+      ],
+      cross_modulo: 'infiltrazioni',
+      cross_note: 'Cross-link parziale al modulo Infiltrazioni (categoria rotture_impianti). Per protocollo restoration completo (water removal, drying, antimicrobial) → IICRC S500.',
+      norme_riferimento: 'IICRC S500-2021 + IICRC S520 (mold remediation) + UNI EN 806 (impianti acqua potabile) + UNI EN 12056 (scarichi) + WHO Dampness Guidelines 2009',
+      icon: '\u{1F6BF}'
+    }
+  ];
+
+const HUB_FONDAMENTI_DB = {
+    titolo: 'Fondamenti termoigrometrici',
+    contenuto: [
+      {
+        sottotitolo: 'Umidità Relativa (UR / RH)',
+        formula: 'RH = (p_v / p_ws) × 100',
+        descrizione: 'Rapporto tra pressione vapore parziale (p_v) e pressione vapore saturo a quella temperatura (p_ws). Espressa in %. Indica quanto vapore l\'aria contiene rispetto al massimo possibile.'
+      },
+      {
+        sottotitolo: 'Umidità Assoluta (UA / AH)',
+        formula: 'AH = m_v / V    [g/m³]',
+        descrizione: 'Massa di vapore acqueo per unità di volume d\'aria. NON dipende dalla temperatura.'
+      },
+      {
+        sottotitolo: 'Equazione di Magnus-Tetens (UNI EN ISO 13788:2013, App. E)',
+        formula: 'p_ws = 610,5 × exp[(17,269 × T) / (237,3 + T)]    [Pa]',
+        descrizione: 'Approssimazione della pressione di vapore saturo in funzione della temperatura, con i coefficienti dell\'Appendice E della norma (sul ghiaccio, sotto 0 °C: 21,875 e 265,5). Forma alternativa di uso meteorologico: Alduchov e Eskridge 1996 (17,625 e 243,04).'
+      },
+      {
+        sottotitolo: 'Punto di Rugiada (T_d / Dew Point)',
+        formula: 'T_d = (243,04 × α) / (17,625 - α)    dove α = ln(RH/100) + (17,625×T)/(243,04+T)',
+        descrizione: 'Temperatura alla quale l\'aria a UR e T date raggiunge la saturazione. Sotto questa T si forma condensa.'
+      },
+      {
+        sottotitolo: 'Fattore fRsi (DM 26/06/2015 · DM 28/10/2025)',
+        formula: 'fRsi = (T_si - T_e) / (T_i - T_e) ≥ 0,72',
+        descrizione: 'Fattore di temperatura della superficie interna. Soglia cogente in Italia per evitare condensa superficiale e crescita muffe (UR_si ≤ 80% media mensile).'
+      }
+    ]
+  };
+
+const HUB_KIT_DB = [
+    {
+      id: 'igrometro_contatto',
+      nome: 'Igrometro a contatto / a infissione',
+      tipo: 'Misura UM materiali (qualitativo + indicativo)',
+      principio: 'Sonde capacitive (a sfera) o resistive (a puntali) misurano UM superficiale o WME (Wood Moisture Equivalent).',
+      applicazione: 'Screening preliminare. Citato dal RICS Joint Damp Methodology 2022 e BS 6576 come strumento di indagine.',
+      norma: 'UNI 11085:2003 + EN 16682:2017 + RICS 2022 + BS 6576:2005',
+      tipologie_correlate: ['risalita', 'meteorica', 'falda', 'igroscopica', 'costruzione', 'accidentale'],
+      obbligatorio: true
+    },
+    {
+      id: 'kit_gravimetrico_hmc',
+      nome: 'Kit gravimetrico per HMC (Hygroscopic Moisture Content)',
+      tipo: 'Analisi laboratoriale quantitativa',
+      principio: 'Procedura BRE Digest 245: prelievo campioni per carotaggio, peso umido (W1), esposizione a 75% RH 20°C 24h, peso (W2), essiccazione 105°C, peso secco (W3). Calcolo: Free moisture = (W1-W2)/W3, Hygroscopic = (W2-W3)/W3.',
+      applicazione: 'GOLD STANDARD per discriminare risalita capillare vs umidità igroscopica vs altre. È IL metodo quantitativo più affidabile.',
+      norma: 'BRE Digest 245 + UNI 11085:2003 + RICS 2022',
+      tipologie_correlate: ['risalita', 'igroscopica'],
+      obbligatorio: false
+    },
+    {
+      id: 'speedy_carbide',
+      nome: 'Igrometro al carburo di calcio (metodo CM)',
+      tipo: 'Misura in campo UM materiali',
+      principio: 'Reazione CaC₂ + H₂O → C₂H₂ + Ca(OH)₂. Pressione gas acetilene generato in container chiuso ∝ UM campione. Risposta in 5-10 min.',
+      applicazione: 'Misura quantitativa in campo, alternativa rapida al gravimetrico. Citato da BRE 245 + BS 6576 + UNI 11121 (ritirata 2025).',
+      norma: 'UNI 11121:2004 (ritirata 2025) + EN 16682:2017 + BRE Digest 245',
+      tipologie_correlate: ['risalita', 'meteorica', 'costruzione', 'accidentale'],
+      obbligatorio: false
+    },
+    {
+      id: 'termoigrometro',
+      nome: 'Termoigrometro datalogger (T + UR aria)',
+      tipo: 'Monitoraggio termoigrometrico continuo',
+      principio: 'Sensore capacitivo UR + termistore T. Logger autonomo per monitoraggio prolungato. Confronto con interno/esterno (delta T e delta UR).',
+      applicazione: 'Indispensabile per: (1) analisi condensa superficiale (T parete vs T rugiada calcolata da T_aria/UR), (2) verifica fRsi, (3) cicli stagionali igroscopica, (4) drying time costruzione.',
+      norma: 'UNI EN ISO 7726:2026 + UNI EN ISO 13788:2013 + DM 26/06/2015 · DM 28/10/2025',
+      tipologie_correlate: ['condensa_superficiale', 'condensa_interstiziale', 'igroscopica', 'costruzione'],
+      obbligatorio: true
+    },
+    {
+      id: 'termocamera_ir',
+      nome: 'Termocamera a infrarossi',
+      tipo: 'Imaging termico (qualitativo)',
+      principio: 'Sensore IR rileva radiazione termica. Acqua = capacità termica diversa → contrasto in immagine termica. Visualizza ponti termici, zone fredde sotto rugiada, zone umide superficiali.',
+      applicazione: 'Strumento jolly: utile per TUTTE le tipologie. WHO 2009 + RICS 2022 + BRE Digest 245 lo citano come "indicative tool" combinato con moisture meter.',
+      norma: 'UNI EN ISO 6781-1:2023 + UNI EN 16714-1:2016 + UNI EN ISO 9712:2022',
+      tipologie_correlate: ['risalita', 'condensa_superficiale', 'condensa_interstiziale', 'meteorica', 'falda', 'accidentale'],
+      obbligatorio: true
+    },
+    {
+      id: 'tubo_karsten',
+      nome: 'Tubo di Karsten (pipe test)',
+      tipo: 'Misura assorbimento acqua in opera',
+      principio: 'Tubo di vetro graduato applicato alla parete con sigillante, riempito d\'acqua. Misura assorbimento idrico in funzione del tempo a pressione costante.',
+      applicazione: 'Valutazione capacità di assorbimento delle finiture esterne (intonaci, pitture). Utile per diagnosi pioggia battente / penetrating damp.',
+      norma: 'RILEM TC 25-PEM (1980) Test Method II.4',
+      tipologie_correlate: ['meteorica', 'rimbalzo', 'igroscopica'],
+      obbligatorio: false
+    },
+    {
+      id: 'ic_cromatografia',
+      nome: 'Cromatografia ionica (IC), analisi sali',
+      tipo: 'Analisi laboratoriale quantitativa sali',
+      principio: 'Cromatografo ionico con colonne anioni/cationi + soppressore + rivelatore conduttimetrico. Identificazione e quantificazione di Cl⁻, SO₄²⁻, NO₃⁻, NO₂⁻, F⁻ + Na⁺, K⁺, Ca²⁺, Mg²⁺, NH₄⁺.',
+      applicazione: 'GOLD STANDARD per discriminare causa origine acqua: rapporto Cl⁻/SO₄²⁻/NO₃⁻ distingue mare/fertilizzanti/fognature/falda. Indispensabile per certificare igroscopica vs risalita.',
+      norma: 'UNI 11087:2003 (rit. 2016) + EN 16455:2014 + RILEM TC 271-ASC + BRE 245',
+      tipologie_correlate: ['igroscopica', 'risalita', 'falda', 'accidentale'],
+      obbligatorio: false
+    },
+    {
+      id: 'piezometro',
+      nome: 'Piezometro / sonda livello falda',
+      tipo: 'Misura livello falda freatica',
+      principio: 'Sonda elettrica calata in foro/pozzo di sondaggio. Suono o LED quando tocca acqua. Misura distanza dal piano di campagna.',
+      applicazione: 'Verifica livello falda, fondamentale per diagnosi falda controterra (BS 8102:2022 §5: Hydrostatic head assessment). Falda < 1,5 m da piano campagna = rischio alto.',
+      norma: 'BS 8102:2022 §5 + UNI EN ISO 22475-1:2021',
+      tipologie_correlate: ['falda', 'risalita'],
+      obbligatorio: false
+    },
+    {
+      id: 'fluoresceina_uv',
+      nome: 'Fluoresceina sodica (tracciante UV)',
+      tipo: 'Tracciante chimico per acqua',
+      principio: 'Fluoresceina sciolta in acqua, immessa in punto sospetto. Sotto luce UV/Wood (365 nm) diventa fluorescente verde brillante.',
+      applicazione: 'Localizzazione PUNTO ESATTO di entrata acqua. Indispensabile per identificare percorsi nascosti (copertura piana, scossaline, infiltrazioni rotture impianti).',
+      norma: 'USGS Water-Supply Paper 1544-A + prassi consolidata',
+      tipologie_correlate: ['meteorica', 'falda', 'accidentale'],
+      obbligatorio: false
+    },
+    {
+      id: 'cm_meter',
+      nome: 'CM-meter elettronico capacitivo',
+      tipo: 'Misura UM materiali non distruttiva',
+      principio: 'Misurazione UM superficiale per induzione elettromagnetica (capacitivo) o assorbimento microonde. Non distruttivo, profondità 5-30 cm.',
+      applicazione: 'Mappatura UM materiali. Per umidità di costruzione: verifica drying time prima di posa finiture (parquet, vernici).',
+      norma: 'UNI 11085:2003 + EN 16682:2017',
+      tipologie_correlate: ['costruzione', 'meteorica', 'falda', 'accidentale'],
+      obbligatorio: false
+    },
+    {
+      id: 'datalogger_continuo',
+      nome: 'Datalogger continuo T/UR (indoor + outdoor)',
+      tipo: 'Monitoraggio prolungato',
+      principio: 'Logger autonomo con sensori indoor + outdoor sincronizzati. Memoria 30k-100k punti. Autonomia 6-12 mesi.',
+      applicazione: 'Indispensabile per analisi cicli stagionali (igroscopica), drying time (costruzione), correlazione meteo-eventi (penetrating). Software dedicato (Climate Notebook IPI) per indici TWPI / Mold germination.',
+      norma: 'UNI EN ISO 7726:2026 + UNI 10829:1999',
+      tipologie_correlate: ['condensa_superficiale', 'condensa_interstiziale', 'igroscopica', 'costruzione'],
+      obbligatorio: false
+    },
+    {
+      id: 'fotocamera_documentazione',
+      nome: 'Fotocamera + documentazione fotografica datata',
+      tipo: 'Documentazione probatoria',
+      principio: 'Foto datate (EXIF + geotag), scale di riferimento, illuminazione adeguata. Combinata con UV (fluoresceina) o luce radente (rilievo macchie).',
+      applicazione: 'Documentazione tecnica probatoria. Confronto pattern in stagioni diverse (per igroscopica). Registrazione condition pre/post.',
+      norma: 'Documentazione tecnica probatoria',
+      tipologie_correlate: ['risalita', 'condensa_superficiale', 'condensa_interstiziale', 'meteorica', 'falda', 'igroscopica', 'rimbalzo', 'costruzione', 'accidentale'],
+      obbligatorio: true
+    },
+    {
+      id: 'metro_laser',
+      nome: 'Distanziometro laser',
+      tipo: 'Misure dimensionali',
+      principio: 'Telemetro laser per distanze, perimetri, aree, altezze.',
+      applicazione: 'Misure quote macchie umide, altezze risalita, distanze DPC-terreno (per rimbalzo), perimetri pareti contro-terra.',
+      norma: 'Strumento non normato; tarature periodiche raccomandate',
+      tipologie_correlate: ['risalita', 'meteorica', 'falda', 'rimbalzo'],
+      obbligatorio: true
+    },
+    {
+      id: 'kit_emergenza',
+      nome: 'Kit emergenza + DPI',
+      tipo: 'Sicurezza sopralluogo',
+      principio: 'Casco, guanti impermeabili, mascherina FFP2 (FFP3 se Cat. 2/3 IICRC), torcia LED, scala telescopica, taccuino.',
+      applicazione: 'Indispensabile per sopralluogo. Per acque accidentali Cat. 2/3 (IICRC S500) servono DPI rinforzati per rischio biologico.',
+      norma: 'D.Lgs 81/2008 art. 75 (DPI) + UNI EN 397:2026 (caschi) + IICRC S500 (acque contaminate)',
+      tipologie_correlate: ['risalita', 'condensa_superficiale', 'condensa_interstiziale', 'meteorica', 'falda', 'igroscopica', 'rimbalzo', 'costruzione', 'accidentale'],
+      obbligatorio: true
+    }
+  ];
+
+
+
+function calcVerdict(){
+  const d=STATE.data;
+  const flags={risalita:0,condensa:0,infiltrazione:0,sali:0,costruzione:0};
+  // Posizione e forma
+  if(d.posizione==="bassa")flags.risalita+=2;
+  if(d.posizione==="alta")flags.condensa+=2;
+  if(d.posizione==="pavimento"&&d.falda==="alta")flags.risalita+=2;
+  if(d.posizione==="angolo")flags.condensa+=1;
+  if(d.forma==="fascia_oriz")flags.risalita+=2;
+  if(d.forma==="fascia_alta")flags.risalita+=1;
+  if(d.forma==="scolatura")flags.infiltrazione+=3;
+  if(d.forma==="a_fiamma")flags.infiltrazione+=2;
+  // Strumenti BRE 245: HMC>5% indica sali igroscopici significativi
+  if(d.hmc_pct!=null && d.hmc_pct>5) flags.sali+=2;
+  if(d.free_pct!=null && d.free_pct>2) flags.infiltrazione+=2;
+  if(d.um_materiale_pct!=null && d.um_materiale_pct>10) flags.risalita+=1;
+  // Sali_tipo: orienta origine
+  if(d.sali_tipo==='cloruri') flags.sali+=1;
+  if(d.sali_tipo==='solfati') flags.sali+=2;
+  if(d.sali_tipo==='nitrati') flags.sali+=2;
+  // Efflorescenze
+  if(d.efflorescenze==="bordo_alto")flags.risalita+=3;
+  if(d.efflorescenze==="diffuse"||d.efflorescenze==="pluristrato")flags.sali+=2;
+  // Correlazione pioggia
+  if(d.correlazionePioggia==="si_forte")flags.infiltrazione+=4;
+  if(d.correlazionePioggia==="si_debole")flags.infiltrazione+=2;
+  if(d.correlazionePioggia==="no")flags.risalita+=1;
+  // Stagionalità
+  if(d.stagionalita==="inverno")flags.condensa+=2;
+  if(d.stagionalita==="estate")flags.risalita+=1;
+  // Età edificio
+  if(d.etaEdificio==="meno1")flags.costruzione+=4;
+  if(d.etaEdificio==="meno3")flags.costruzione+=2;
+  if(d.etaEdificio==="oltre20")flags.risalita+=1;
+  // Sintomi
+  const s=d.sintomi||[];
+  if(s.includes("muffa_alta"))flags.condensa+=3;
+  if(s.includes("muffa_bassa"))flags.risalita+=2;
+  if(s.includes("distacco_intonaco"))flags.risalita+=2;
+  if(s.includes("polverizzazione"))flags.sali+=2;
+  if(s.includes("aloni_seccati"))flags.infiltrazione+=2;
+  if(s.includes("zona_umida_no_eff"))flags.sali+=2;
+  if(s.includes("odore_cantina"))flags.risalita+=1;
+  // T sup vs T rugiada
+  if(d.tSup!=null&&d.tDew!=null&&d.tSup<d.tDew)flags.condensa+=4;
+  // Trova massimo
+  let max=0,best="";
+  Object.keys(flags).forEach(k=>{if(flags[k]>max){max=flags[k];best=k;}});
+  const labels={risalita:"RISALITA CAPILLARE",condensa:"CONDENSA",infiltrazione:"INFILTRAZIONE",sali:"SALI IGROSCOPICI",costruzione:"UMIDITÀ DI COSTRUZIONE"};
+  const modules={
+    risalita:[{label:"💧 Apri Risalita Capillare",url:"risalita.html",color:"linear-gradient(135deg,#42a5f5,#1565c0)"},{label:"🧂 Verifica Sali (correlato)",url:"sali.html",color:"linear-gradient(135deg,#d4564e,#9c1f17)"}],
+    condensa:[{label:"📐 Apri Glaser (condensa interstiziale)",url:"condensa-glaser.html",color:"linear-gradient(135deg,#5a9bd8,#2b579a)"},{label:"🌡 Termoigrometria (condensa superficiale)",url:"termoigrometria.html",color:"linear-gradient(135deg,#ef5350,#c62828)"},{label:"🦠 Verifica Muffe (correlato)",url:"biodeteriogeni.html",color:"linear-gradient(135deg,#66bb6a,#2e7d32)"}],
+    infiltrazione:[{label:"💦 Apri Infiltrazioni",url:"infiltrazioni.html",color:"linear-gradient(135deg,#42a5f5,#1565c0)"}],
+    sali:[{label:"🧂 Apri Sali",url:"sali.html",color:"linear-gradient(135deg,#d4564e,#9c1f17)"},{label:"💧 Verifica Risalita (correlato)",url:"risalita.html",color:"linear-gradient(135deg,#42a5f5,#1565c0)"}],
+    costruzione:[{label:"💨 Apri Asciugatura",url:"asciugatura.html",color:"linear-gradient(135deg,#8d6e63,#5d4037)"}]
+  };
+  if(max===0)return{verdict:"Dati insufficienti",kind:"warn",summary:"Compila sintomi, forma macchia e correlazione pioggia per il triage.",suggestedModules:[]};
+  var norm = HUB_NORMATIVE[best];
+  var sumExt = "Score di triage: "+Object.keys(flags).map(function(k){return k+" "+flags[k];}).join(" · ")+". "+(norm?"Riferimento normativo: "+norm.ref+". "+norm.desc+". ":"")+"Approfondisci nel modulo specifico per la relazione tecnica completa.";
+  return{verdict:labels[best],kind:max>=6?"err":(max>=3?"warn":"ok"),summary:sumExt,suggestedModules:modules[best],best,flags,normativa:norm||null,warningStrumenti:HUB_WARN_STRUMENTI};
+}
+/* === MIXANDO v3 · Ragionamento differenziale dal vivo, riusa il triage calcVerdict (815-874): mostra la classifica COMPLETA delle 5 ipotesi (non solo il vincitore). Niente soglie inventate === */
+function _difHub(){
+  var v=calcVerdict(), H=[];
+  var labels={risalita:'Risalita capillare',condensa:'Condensa',infiltrazione:'Infiltrazione',sali:'Sali igroscopici',costruzione:'Umidità di costruzione'};
+  var order=['risalita','condensa','infiltrazione','sali','costruzione'];
+  var fl=v.flags||{};
+  var ranked=order.slice().sort(function(a,b){ return (fl[b]||0)-(fl[a]||0); });
+  ranked.forEach(function(k){
+    var sc=fl[k]||0;
+    var stato=(sc===0)?'na':(k===v.best?'best':'conc');
+    var norm=HUB_NORMATIVE[k]||{};
+    H.push({nome:labels[k]||k, score:sc, stato:stato, motivo:(norm.desc||''), fonte:(norm.ref||'n.d.'), riga:'calcVerdict 815-874'});
+  });
+  return {v:v, hyps:H};
+}
+function _difEnsureStyle(){
+  if(document.getElementById('difLiveCss')) return;
+  var s=document.createElement('style'); s.id='difLiveCss';
+  s.textContent='#difLive .dif-box{border:1px solid #d8cfba;border-radius:12px;background:linear-gradient(180deg,#fffdf8,#f6f0e4);box-shadow:0 2px 10px rgba(40,30,10,.06);padding:11px 14px;margin:0 0 14px;font-size:12.5px}'
+   +'#difLive .dif-head{font-weight:800;color:#0a5d66;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}'
+   +'#difLive .dif-sub{font-weight:600;font-size:10.5px;color:#8a7f6c}'
+   +'#difLive .dif-verdict{border-left:4px solid;padding:6px 10px;border-radius:6px;background:#fff;margin-bottom:9px}'
+   +'#difLive .dif-summary{font-size:11px;color:#5a4d3f;margin-top:2px}'
+   +'#difLive .dif-hyps{display:flex;flex-direction:column;gap:5px}#difLive .dif-h{border-radius:7px;padding:5px 9px}'
+   +'#difLive .dif-badge{display:inline-block;font-size:10px;font-weight:800;color:#fff;padding:1px 7px;border-radius:20px;margin-right:5px}'
+   +'#difLive .dif-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:800;color:#0a5d66;background:#eef6f6;border:1px solid #d6e7e7;border-radius:5px;padding:0 5px;margin-left:4px}'
+   +'#difLive .dif-mot{font-size:11px;color:#5a4d3f;margin-top:2px}#difLive .dif-fonte{color:#8a7f6c;font-style:italic}'
+   +'#difLive .dif-foot{margin-top:9px;font-size:10px;color:#8a7f6c;border-top:1px solid #efe9dc;padding-top:6px}';
+  document.head.appendChild(s);
+}
+function _difHTML(R){
+  var v=R.v, kc={err:'#c0392b',warn:'#e67e22',ok:'#1b8a4b'}[v.kind]||'#6b5c4c';
+  var h='<div class="dif-box"><div class="dif-head">🔬 Ragionamento differenziale <span class="dif-sub">dal vivo · triage del modulo (calcVerdict)</span></div>';
+  h+='<div class="dif-verdict" style="border-color:'+kc+'"><div class="dif-sub" style="color:'+kc+'">Patologia più probabile</div><div><b style="color:'+kc+';font-size:13px">'+esc(v.verdict)+'</b></div><div class="dif-summary">'+esc(v.summary)+'</div></div>';
+  h+='<div class="dif-sub" style="margin:0 0 6px">Classifica delle ipotesi (punteggio aggiornato sulle risposte):</div>';
+  h+='<div class="dif-hyps">';
+  R.hyps.forEach(function(x){
+    var m={best:['● più probabile','#0e7c87','#e6f4f5'],conc:['concorrente','#b8860b','#fef7e2'],na:['nessun indicatore','#8a7f6c','#f2efe7']}[x.stato]||['n.d.','#888','#eee'];
+    h+='<div class="dif-h" style="background:'+m[2]+'"><span class="dif-badge" style="background:'+m[1]+'">'+m[0]+'</span><b>'+esc(x.nome)+'</b><span class="dif-score">score '+x.score+'</span><div class="dif-mot">'+esc(x.motivo)+' <span class="dif-fonte">['+esc(x.fonte)+' · '+esc(x.riga)+']</span></div></div>';
+  });
+  h+='</div>';
+  h+='<div class="dif-foot">Sintesi del motore di triage (calcVerdict 815-874): 5 ipotesi pesate sugli indicatori (posizione, forma, strumenti BRE 245, sali, efflorescenze, correlazione pioggia, stagione, età, sintomi, T sup vs rugiada). Nessuna soglia inventata: ogni voce riporta norma e riga. Approfondire nel modulo specifico, la conclusione resta del tecnico.</div></div>';
+  return h;
+}
+/* === #1 (sicuro) Evidenze cross-modulo, legge i report salvati per questo immobile e li MOSTRA come ausilio; nessuna esclusione automatica === */
+function _immobileId(){ try{ var l=JSON.parse(localStorage.getItem('mx2::locali-v1')||'{}'); var a=(l&&l.ana)||{}; var raw=((a.Indirizzo||'')+(a.Catasto||'')+(a.Nome||'')).trim(); if(!raw) return ''; return ((a.Indirizzo||'')+'§'+(a.Catasto||'')+'§'+(a.Nome||'')).toLowerCase(); }catch(e){ return ''; } }
+function _evidenzeHTML(){
+  var R=[]; try{ R=JSON.parse(localStorage.getItem('mx2::reports')||'[]'); }catch(e){}
+  if(!Array.isArray(R)||!R.length) return '';
+  var cur=_immobileId();
+  var seen={}, items=[];
+  for(var i=R.length-1;i>=0;i--){ var r=R[i]; if(cur && r.immobile && r.immobile!==cur) continue; var k=r.module||r.moduleId||r.moduleName; if(!k||seen[k]) continue; seen[k]=1; items.push(r); }
+  if(!items.length) return '';
+  var h='<div class="dif-box" style="margin-top:10px"><div class="dif-head">📎 Evidenze da altri moduli <span class="dif-sub">stesso immobile · raccolte nel Report</span></div><div class="dif-hyps">';
+  items.forEach(function(r){ h+='<div class="dif-h" style="background:#eef3f7"><b>'+esc(r.moduleName||r.module||'modulo')+'</b><div class="dif-mot">'+esc(r.summary||r.verdict||'n.d.')+'</div></div>'; });
+  h+='</div><div class="dif-foot">Evidenze raccolte per questo immobile (modulo Report). Valutale per confermare o escludere le cause concorrenti, la decisione resta del tecnico. Nessuna esclusione automatica.</div></div>';
+  return h;
+}
+function _difUpdate(){ var el=document.getElementById('difLive'); if(!el) return; try{ _difEnsureStyle(); el.innerHTML=_difHTML(_difHub())+_evidenzeHTML(); }catch(e){ } }
+/* Stessa classifica differenziale, formattata per il report Word/PDF (riusa _difHub) */
+function _difReport(){
+  try{
+    var R=_difHub();
+    var stLab={best:'Più probabile',conc:'Concorrente',na:'Nessun indicatore'};
+    var x='<h2>Classifica differenziale delle ipotesi</h2>';
+    x+='<p style="font-size:11px;color:#5d4a30;font-style:italic">A supporto del triage: punteggio di tutte le ipotesi (motore calcVerdict, righe 815-874), con riferimento normativo. La conclusione resta del tecnico.</p>';
+    x+='<table><tr><th>Ipotesi</th><th>Punteggio</th><th>Stato</th><th>Pattern diagnostico</th><th>Riferimento</th></tr>';
+    R.hyps.forEach(function(hh){ x+='<tr><td>'+esc(hh.nome)+'</td><td>'+hh.score+'</td><td><strong>'+esc(stLab[hh.stato]||hh.stato)+'</strong></td><td>'+esc(hh.motivo)+'</td><td>'+esc(hh.fonte)+'</td></tr>'; });
+    x+='</table>';
+    return x;
+  }catch(e){ return ''; }
+}
+function buildDocSections(d,v){let h="<h2>1. Rilievo iniziale</h2><table><tr><th>Posizione</th><td>"+esc(mxLab("posizione",d.posizione)||"n.d.")+"</td><th>Forma</th><td>"+esc(mxLab("forma",d.forma)||"n.d.")+"</td></tr><tr><th>Efflorescenze</th><td>"+esc(mxLab("efflorescenze",d.efflorescenze)||"n.d.")+"</td><th>Correlazione pioggia</th><td>"+esc(mxLab("correlazionePioggia",d.correlazionePioggia)||"n.d.")+"</td></tr><tr><th>Stagionalità</th><td>"+esc(mxLab("stagionalita",d.stagionalita)||"n.d.")+"</td><th>Età edificio</th><td>"+esc(mxLab("etaEdificio",d.etaEdificio)||"n.d.")+"</td></tr></table>";if((d.sintomi||[]).length)h+="<h2>2. Sintomi osservati</h2><p>"+esc(mxLab("sintomi",d.sintomi).join(", "))+"</p>";h+="<h2>3. Ambiente</h2><table><tr><th>T int</th><td>"+(d.tInt||"n.d.")+" °C</td><th>UR int</th><td>"+(d.urInt||"n.d.")+" %</td></tr><tr><th>T sup</th><td>"+(d.tSup||"n.d.")+" °C</td><th>T rugiada</th><td>"+(d.tDew||"n.d.")+" °C</td></tr><tr><th>Ventilazione</th><td>"+esc(mxLab("ventilazione",d.ventilazione)||"n.d.")+"</td><th>Falda</th><td>"+esc(mxLab("falda",d.falda)||"n.d.")+"</td></tr></table>";h+="<h2>4. Triage diagnostico</h2><table><tr><th>Patologia più probabile</th><td><strong>"+esc(v.verdict)+"</strong></td></tr><tr><th>Sintesi</th><td>"+esc(v.summary)+"</td></tr>";
+  if(v.normativa)h+="<tr><th>Riferimento normativo</th><td>"+esc(v.normativa.ref)+"</td></tr><tr><th>Pattern diagnostico</th><td><i>"+esc(v.normativa.desc)+"</i></td></tr>";
+  h+="</table>";
+  h+=_difReport();
+  if(v.warningStrumenti)h+="<div style=\"margin:10pt 0;padding:8pt 12pt;background:#fff3e0;border-left:3pt solid #f57c00;border-radius:4pt;font-size:10.5pt;line-height:1.5\"><strong>⚠ Nota tecnica strumenti:</strong> "+esc(v.warningStrumenti)+"</div>";
+  if(d.noteFinali)h+="<p><strong>Note tecnico:</strong> "+esc(d.noteFinali).replace(/\n/g,"<br>")+"</p>";return h;}
+
+function attachInputs(){$("stepPanel").querySelectorAll("[data-fld]").forEach(el=>{const ev=el.type==="checkbox"||el.tagName==="SELECT"||el.type==="radio"?"change":"input";el.addEventListener(ev,function(){const k=this.dataset.fld,kind=this.dataset.kind;let v;if(kind==="num")v=_mxNumero(this);else if(kind==="chk"){const cur=STATE.data[k]||[];if(this.checked){if(!cur.includes(this.value))cur.push(this.value);}else{const i=cur.indexOf(this.value);if(i>=0)cur.splice(i,1);}v=cur;}else v=this.value;setField(k,v);if(window._recalcKeys&&window._recalcKeys.includes(k))renderPanelOnly();});});}
+function render(){_mxPulisciFuori();renderStepper();const ACT=getActiveSteps();if(STATE.cur>=ACT.length)STATE.cur=ACT.length-1;const s=ACT[STATE.cur];$("stepPanel").innerHTML=panels[s.id]();attachInputs();const last=STATE.cur===ACT.length-1;$("btnPrev").disabled=STATE.cur===0;$("btnNext").style.display=last?"none":"";$("btnFinish").style.display=last?"":"none";_difUpdate();}
+function renderPanelOnly(){const ACT=getActiveSteps();const s=ACT[STATE.cur];const f=document.activeElement,fK=f?f.getAttribute("data-fld"):null;$("stepPanel").innerHTML=panels[s.id]();attachInputs();if(fK){const el=$("stepPanel").querySelector('[data-fld="'+fK+'"]');if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length);}catch(_){}}}}
+function next(){if(STATE.cur<getActiveSteps().length-1){STATE.cur++;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function prev(){if(STATE.cur>0){STATE.cur--;persist();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function finish(){STATE.finished=true;persist();render();showToast("Diagnosi completata.","ok");setTimeout(()=>{$("mxToolbar").scrollIntoView({behavior:"smooth",block:"center"});},250);}
+function buildDoc(){const ana=loadAna(),p=ana.perito,c=ana.immobile,d=STATE.data,v=calcVerdict();const today=new Date().toLocaleDateString("it-IT",{day:"2-digit",month:"long",year:"numeric"});let h="<h1>Hub Umidità - Triage Differenziale</h1>";h+='<p style="color:#6b5c4c;font-size:12px"><strong>Data:</strong> '+today+'</p>';h+="<h2>Anagrafica</h2><table><tr><th>Perito</th><td>"+esc(p.nome||"n.d.")+"</td></tr><tr><th>Committente</th><td>"+esc(c.Nome||"n.d.")+"</td></tr>";if(c.Indirizzo)h+="<tr><th>Immobile</th><td>"+esc(c.Indirizzo)+"</td></tr>";h+="</table>";h+=buildDocSections(d,v);h+=_strumReport();h+='<h2>Normative applicate</h2><ul style="font-size:11.5px"><li><strong>BRE Digest 245</strong>, Rising damp in walls: diagnosis.</li><li><strong>UNI EN ISO 13788:2013</strong>, Punto di rugiada per esclusione condensa.</li><li><strong>UNI 11085:2003</strong>, Metodo ponderale per quantificazione MC%.</li><li><strong>WHO 2009</strong>, Damp and mould.</li><li><strong>Massari G. &amp; Massari I.</strong>, Risanamento igienico dei locali umidi (riferimento storico italiano).</li></ul>';return h;}
+/* === #4 Tracciabilità strumentale, lettura registro condiviso mx2::strumentazione (editor nel modulo Risalita) === */
+function _strumGet(){ try{ var a=JSON.parse(localStorage.getItem('mx2::strumentazione')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function _strumReport(){
+  var list=_strumGet();
+  var x='<h2>Strumentazione utilizzata e tracciabilità</h2>';
+  if(!list.length) return x+'<p style="font-size:11.5px;color:#8a7f6c;font-style:italic">Strumentazione non ancora documentata. Compilare modello, matricola ed estremi di taratura nel modulo Risalita (toolbar &rarr; Strumentazione); il dato è condiviso tra i moduli.</p>';
+  x+='<table><tr><th>Strumento</th><th>Modello / marca</th><th>Matricola</th><th>Taratura</th><th>Norma di metodo</th></tr>';
+  list.forEach(function(r){ x+='<tr><td>'+esc(r.strumento||'n.d.')+'</td><td>'+esc(r.modello||'n.d.')+'</td><td>'+esc(r.matricola||'n.d.')+'</td><td>'+esc(r.taratura||'n.d.')+'</td><td>'+esc(r.norma||'n.d.')+'</td></tr>'; });
+  x+='</table>';
+  return x;
+}
+function openDocModal(){$("docBody").innerHTML=buildDoc();$("docModal").classList.add("show");}
+function closeDocModal(){$("docModal").classList.remove("show");}
+function exportWord(){const html='<!doctype html><html><head><meta charset="utf-8"><title>Hub Umidità - Triage Differenziale</title><style>body{font-family:Georgia,serif;font-size:11pt;padding:20px}h1{font-size:18pt;font-style:italic}h2{font-size:13pt;color:#311b92;border-bottom:1pt solid #d8d3c4;padding-bottom:3pt}table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9.5pt}th,td{padding:4pt 6pt;border-bottom:1pt solid #e6e0d2;text-align:left}th{background:#faf8f3;font-weight:700}</style></head><body>'+buildDoc()+'</body></html>';const blob=new Blob([html],{type:"application/msword"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="umidita_hub_"+new Date().toISOString().slice(0,10)+".doc";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500);showToast("Word salvato.","ok");}
+function exportPDF(){window.print();}
+function exportJSON(){const ana=loadAna();const b={schemaVersion:"umidita_hub-v3.0",exportedAt:new Date().toISOString(),perito:ana.perito,immobile:ana.immobile,currentStep:STATE.cur,finished:STATE.finished,data:STATE.data,verdict:calcVerdict()};const blob=new Blob([JSON.stringify(b,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="umidita_hub_"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500);showToast("JSON salvato.","ok");}
+function addToReport(){try{const r=JSON.parse(localStorage.getItem("mx2::reports")||"[]");r.push({id:"um_"+Date.now(),module:"umidita_hub",moduleName:"Hub Umidità - Triage Differenziale",version:"v3.0",createdAt:new Date().toISOString(),immobile:_immobileId(),summary:(calcVerdict().verdict||"OK"),data:STATE.data,htmlSnippet:buildDoc()});localStorage.setItem("mx2::reports",JSON.stringify(r));showToast("Aggiunto al Report.","ok");}catch(e){showToast("Errore: "+e.message,"err");}}
+function listSaves(){try{return JSON.parse(localStorage.getItem(SAVES_KEY)||"[]");}catch(e){return[];}}
+function writeSaves(a){localStorage.setItem(SAVES_KEY,JSON.stringify(a));}
+function fmtTs(iso){try{return new Date(iso).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch(e){return iso;}}
+function openDlg(t,b,a){$("dlgTitle").innerHTML=t;$("dlgBody").innerHTML=b;$("dlgActions").innerHTML=a;$("dlgModal").classList.add("show");}
+function closeDlg(){$("dlgModal").classList.remove("show");}
+function openSaveDialog(){const a=loadAna(),c=a.immobile;const dn=(c.Nome?c.Nome:"Hub Umidità - Triage Differenziale")+" del "+new Date().toLocaleDateString("it-IT");openDlg("💾 Salva",'<div class="fld"><label>Nome</label><input type="text" id="saveName" value="'+esc(dn)+'" maxlength="80"></div>','<button type="button" class="mx-shiny s-gray" id="dlgCancel" style="padding:8px 14px;font-size:12px">Annulla</button><button type="button" class="mx-shiny s-green" id="dlgConfirm" style="padding:8px 14px;font-size:12px">💾 Salva</button>');setTimeout(()=>{$("saveName").focus();$("saveName").select();},60);$("dlgCancel").addEventListener("click",closeDlg);$("dlgConfirm").addEventListener("click",function(){const nm=($("saveName").value||"").trim()||"Senza nome";const arr=listSaves();arr.push({id:"s_"+Date.now(),name:nm,ts:new Date().toISOString(),cur:STATE.cur,finished:STATE.finished,data:JSON.parse(JSON.stringify(STATE.data))});writeSaves(arr);closeDlg();showToast('Salvata: "'+nm+'"',"ok");});}
+function openLoadDialog(){const arr=listSaves().sort((a,b)=>b.ts.localeCompare(a.ts));let body=!arr.length?'<div class="dlg-empty">Archivio vuoto.</div>':'<div class="dlg-list">'+arr.map(s=>'<div class="dlg-item"><div style="flex:1"><div style="font-weight:700">'+esc(s.name)+'</div><div style="font-size:11px;font-family:monospace;color:#8b7355">'+fmtTs(s.ts)+'</div></div><button type="button" class="mx-shiny s-blue" data-load="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px">📥</button><button type="button" class="mx-shiny" data-del="'+esc(s.id)+'" style="padding:6px 11px;font-size:11px;background-image:linear-gradient(135deg,#ef5350,#c62828);box-shadow:0 3px 10px rgba(198,40,40,.42)">🗑</button></div>').join("")+'</div>';openDlg("📁 Carica",body,'<button type="button" class="mx-shiny s-gray" id="dlgClose2" style="padding:8px 14px;font-size:12px">Chiudi</button>');$("dlgClose2").addEventListener("click",closeDlg);$("dlgBody").querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",function(){const s=listSaves().find(x=>x.id===this.dataset.load);if(!s||!confirm('Caricare "'+s.name+'"?'))return;STATE.cur=s.cur||0;STATE.finished=!!s.finished;STATE.data=JSON.parse(JSON.stringify(s.data));persist();render();closeDlg();showToast("Caricata.","ok");}));$("dlgBody").querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",function(){if(!confirm("Eliminare?"))return;writeSaves(listSaves().filter(x=>x.id!==this.dataset.del));openLoadDialog();}));}
+/* === Etichette leggibili delle risposte a scelta (19/11/2026) ===
+   Nel Word, nel PDF e nel Report le risposte a scelta uscivano col valore interno (es. «fascia_oriz», «mattone_pieno»).
+   mxLab() restituisce l'etichetta che si legge a schermo, presa dagli stessi pannelli del modulo. */
+var _MXLAB=null,_MXFLD=null;
+function _mxLabMap(){
+  if(_MXLAB) return _MXLAB; _MXLAB={}; _MXFLD={};
+  try{ var box=document.createElement("div");
+    Object.keys(panels).forEach(function(id){ try{ box.innerHTML=panels[id](); }catch(e){ return; }
+      box.querySelectorAll("[data-fld]").forEach(function(el){ var k=el.getAttribute("data-fld"); var m=_MXLAB[k]=_MXLAB[k]||{};
+        if(el.tagName==="SELECT"){ for(var i=0;i<el.options.length;i++){ if(el.options[i].value) m[el.options[i].value]=el.options[i].textContent; } }
+        else if(el.type==="radio"||el.type==="checkbox"){ var l=el.closest("label"); if(l&&el.value) m[el.value]=l.textContent; }
+        if(!_MXFLD[k]){ var f=el.closest(".fld"); var fl=f&&f.querySelector("label"); if(fl&&!fl.querySelector("input")) _MXFLD[k]=fl.textContent.replace(/\s+/g," ").trim(); else if(el.type==="checkbox"&&el.closest("label")) _MXFLD[k]=el.closest("label").textContent.replace(/^[^0-9A-Za-zÀ-ÿ(]+/,"").replace(/\s+/g," ").trim(); }
+      });
+    });
+  }catch(e){}
+  return _MXLAB;
+}
+function mxLab(campo,valore){
+  if(Array.isArray(valore)) return valore.map(function(x){ return mxLab(campo,x); });
+  if(valore==null||valore==="") return valore;
+  var m=_mxLabMap()[campo], l=m&&m[valore];
+  if(!l) return valore;
+  return String(l).replace(/^[^0-9A-Za-zÀ-ÿ<>≤≥(]+/,"").replace(/\s+/g," ").trim()||valore;
+}
+/* === Confronto fra due diagnosi salvate (19/11/2026) ===
+   Prima il tasto «Confronta» mostrava un avviso e apriva l'archivio di «Carica». Ora si scelgono due salvataggi
+   e una tabella li mette a fianco, con i campi diversi in arancio (come nel modulo Risalita). */
+function _mxFldName(k){ _mxLabMap(); return (_MXFLD&&_MXFLD[k])||String(k).replace(/_/g," ").replace(/([a-z0-9])([A-Z])/g,"$1 $2"); }
+function _mxCmpVal(k,v){
+  if(v===true) return "sì"; if(v===false) return "no";
+  if(v==null||v===""||(Array.isArray(v)&&!v.length)) return "n.d.";
+  if(Array.isArray(v)) return v.map(function(x){ return (x!==null&&typeof x==="object")?JSON.stringify(x):String(mxLab(k,x)); }).join(", ");
+  if(typeof v==="object") return JSON.stringify(v);
+  return String(mxLab(k,v));
+}
+function _mxRenderCmp(a,b){
+  var da=a.data||{}, db=b.data||{}, chiavi=[], righe="", diversi=0, tot=0, st="padding:4px 6px;border-bottom:1px solid #e6e0d2;text-align:left;vertical-align:top";
+  Object.keys(da).concat(Object.keys(db)).forEach(function(k){ if(chiavi.indexOf(k)<0) chiavi.push(k); });
+  chiavi.forEach(function(k){ var va=_mxCmpVal(k,da[k]), vb=_mxCmpVal(k,db[k]); if((va==="n.d."||va==="no")&&(vb==="n.d."||vb==="no")) return; tot++; var dif=(va!==vb); if(dif) diversi++;
+    righe+='<tr'+(dif?' style="background:#fff3e0"':'')+'><th style="'+st+';font-size:11px">'+esc(_mxFldName(k))+'</th><td style="'+st+'">'+esc(va)+'</td><td style="'+st+'">'+esc(vb)+'</td></tr>'; });
+  return '<div style="font-size:12.5px;margin-bottom:6px"><strong>'+(diversi?("Campi diversi: "+diversi+" su "+tot):("Nessuna differenza nei "+tot+" campi compilati"))+'</strong></div><table style="width:100%;border-collapse:collapse;font-size:11.5px"><tr><th style="'+st+'">Campo</th><th style="'+st+'">A · '+esc(a.name)+'<br><span style="font-weight:400">'+fmtTs(a.ts)+'</span></th><th style="'+st+'">B · '+esc(b.name)+'<br><span style="font-weight:400">'+fmtTs(b.ts)+'</span></th></tr>'+righe+'</table>';
+}
+function openCompareDialog(){
+  var arr=listSaves().slice().sort(function(x,y){ return String(y.ts).localeCompare(String(x.ts)); });
+  if(arr.length<2){ openDlg("⚖ Confronto",'<div class="dlg-empty">Servono almeno 2 diagnosi salvate con «Salva». Attualmente: '+arr.length+'.</div>','<button type="button" class="mx-shiny s-gray" id="dlgClose3" style="padding:8px 14px;font-size:12px">Chiudi</button>'); document.getElementById("dlgClose3").addEventListener("click",closeDlg); return; }
+  function opts(sel){ return arr.map(function(s,i){ return '<option value="'+esc(s.id)+'"'+(i===sel?" selected":"")+'>'+esc(s.name)+' · '+fmtTs(s.ts)+'</option>'; }).join(""); }
+  var stile="width:100%;padding:9px 11px;border:1px solid #d8d3c4;border-radius:8px;font:inherit;font-size:13px;background:#fff";
+  openDlg("⚖ Confronto diagnosi",'<div style="font-size:12.5px;margin-bottom:10px">Scegli due diagnosi salvate e premi «Confronta»: i campi diversi escono in arancio.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label style="display:block;font-size:11.5px;font-weight:700;margin-bottom:4px">Diagnosi A</label><select id="cmpA" style="'+stile+'">'+opts(0)+'</select></div><div><label style="display:block;font-size:11.5px;font-weight:700;margin-bottom:4px">Diagnosi B</label><select id="cmpB" style="'+stile+'">'+opts(1)+'</select></div></div><div id="cmpResult" style="margin-top:14px"></div>','<button type="button" class="mx-shiny s-gray" id="dlgClose4" style="padding:8px 14px;font-size:12px">Chiudi</button><button type="button" class="mx-shiny" id="dlgDoCompare" style="padding:8px 14px;font-size:12px;background-image:linear-gradient(135deg,#ffa726 0%,#ef6c00 45%,#bf360c 100%)">⚖ Confronta</button>');
+  document.getElementById("dlgClose4").addEventListener("click",closeDlg);
+  document.getElementById("dlgDoCompare").addEventListener("click",function(){ var all=listSaves(); var a=all.filter(function(s){return s.id===document.getElementById("cmpA").value;})[0], b=all.filter(function(s){return s.id===document.getElementById("cmpB").value;})[0]; if(!a||!b) return; document.getElementById("cmpResult").innerHTML=_mxRenderCmp(a,b); });
+}
+function resetDiagnosis(){if(!confirm("Azzerare la diagnosi corrente?"))return;Object.keys(STATE.data).forEach(k=>{const v=STATE.data[k];if(Array.isArray(v))STATE.data[k]=[];else if(typeof v==="number"||v===null)STATE.data[k]=null;else STATE.data[k]="";});STATE.cur=0;STATE.finished=false;persist();render();showToast("Azzerata.","ok");}
+document.addEventListener("DOMContentLoaded",function(){
+  var $=function(id){return document.getElementById(id)||document.createElement('span');};   /* init resiliente: elemento mancante (drift toolbar) non rompe la catena */
+  $("heroTitle").innerHTML='Hub <em>Umidità Diagnostica</em>';
+  $("heroSub").textContent='Wizard 4 step di triage che indirizza al modulo specifico più appropriato: Risalita, Condensa (Glaser/Termo), Infiltrazione, Sali igroscopici, Umidità di costruzione (Asciugatura).';
+  restore();renderAna();render();
+  $("btnPrev").addEventListener("click",prev);$("btnNext").addEventListener("click",next);$("btnFinish").addEventListener("click",finish);
+  $("btnReloadAna").addEventListener("click",function(){renderAna();showToast("Ricaricata.","ok");});
+  $("btnSave").addEventListener("click",openSaveDialog);$("btnLoad").addEventListener("click",openLoadDialog);$("btnCompare").addEventListener("click",openCompareDialog);$("btnReset").addEventListener("click",resetDiagnosis);
+  $("dlgCloseBtn").addEventListener("click",closeDlg);$("dlgModal").addEventListener("click",function(e){if(e.target===this)closeDlg();});
+  $("btnWord").addEventListener("click",openDocModal);$("btnPDF").addEventListener("click",function(){openDocModal();setTimeout(exportPDF,300);});$("btnReport").addEventListener("click",addToReport);$("btnJSON").addEventListener("click",exportJSON);
+  $("modalCloseBtn").addEventListener("click",closeDocModal);$("btnCloseModal").addEventListener("click",closeDocModal);
+  $("btnDoExportWord").addEventListener("click",exportWord);$("btnDoExportPDF").addEventListener("click",exportPDF);$("btnDoExportJSON").addEventListener("click",exportJSON);
+  $("docModal").addEventListener("click",function(e){if(e.target===this)closeDocModal();});
+});
+window.MX_HUB={STATE,STEPS,calcVerdict};
+</script>
+<script>
+/* === MX SNAPSHOT IMPORTER (auto-install, Mixando v3) ===
+ * Aggiunge bottone "Apri snapshot" accanto al "JSON" della toolbar.
+ * Importa .json esportato dallo stesso modulo, ricarica la pagina.
+ * Riconosce pattern lite (STATE.cur/finished/data → *-draft) e
+ * pattern rich (state diretto → *-vN). NON modifica codice esistente.
+ * ====================================================== */
+(function(){
+  'use strict';
+  if (window.__mxSnapImportInstalled) return;
+  window.__mxSnapImportInstalled = true;
+  function findHostBtn(){
+    return document.querySelector('button[data-act="export-json"]')
+        || document.getElementById('btnJSON')
+        || document.getElementById('btnExportJSON')
+        || document.querySelector('.mx-tb-btn.tb-save');
+  }
+  function makeBtn(){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mx-tb-btn tb-load';
+    b.id = 'btnOpenSnap';
+    b.title = 'Apri uno snapshot .json esportato in precedenza da questo modulo (sostituirà i dati correnti).';
+    b.innerHTML = '<span class="ico">\u{1F4C2}</span><span class="label">Apri snapshot</span>';
+    return b;
+  }
+  function detectModuleKeys(){
+    /* 19/11/2026: solo le chiavi di QUESTO modulo, cioè quelle che il modulo nomina nel suo codice.
+       Prima prendeva le chiavi di tutti i moduli e lo snapshot finiva nella bozza del primo trovato
+       (un file dei Sali, aperto dal modulo Sali, sovrascriveva la bozza della Risalita). */
+    var src = '';
+    try { [].forEach.call(document.scripts, function(s){ if (!s.src) src += s.textContent; }); } catch(_){}
+    var condivise = {'mx2::perito':1,'mx2::periti-v2':1,'mx2::locali-v1':1,'mx2::reports':1,'mx2::indagini':1,'mx2::strumentazione':1,'mx2::chartTheme':1,'mx2::showPhysicalScale':1,'mx2::report-meta':1,'mx2::last-backup':1};
+    var mie = {}, re = /mx2::[A-Za-z0-9_-]+/g, m;
+    while ((m = re.exec(src))) { if (!condivise[m[0]]) mie[m[0]] = 1; }
+    return Object.keys(mie);
+  }
+  /* 20/11/2026: nomi con cui un file dichiara di venire da questo modulo (in «moduleId», in «module» o nella
+     sigla di «schemaVersion», per esempio 'sali-v3.1'). Servono a non aprire qui il file di un altro modulo. */
+  var _MX_MIEI = ['umidita-hub'];
+  function _mxFileDiAltroModulo(obj){
+    if (!obj || typeof obj !== 'object') return '';
+    if (typeof obj._format === 'string' && obj._format.indexOf('mixando-backup') === 0) return 'Questo file è un backup generale di Mixando: si ripristina dalla pagina «Backup tecnico», non da qui.';
+    var d = obj.moduleId || obj.module || (typeof obj.schemaVersion === 'string' ? obj.schemaVersion : '');
+    if (typeof d !== 'string' || !d) return '';   /* il file non dice da dove viene: lo giudicano i controlli più sotto */
+    var n = d.toLowerCase().replace(/-v[\d.]+$/, '').replace(/_/g, '-');
+    if (_MX_MIEI.indexOf(n) >= 0) return '';
+    return 'Questo file viene da un altro modulo (' + (obj.moduleName || d) + ').';
+  }
+  function pickTargetKey(keys, payload){
+    var draftKeys = keys.filter(function(k){ return /-draft$/.test(k); });
+    var liteHint = payload && (payload.currentStep !== undefined || payload.data !== undefined);
+    if (liteHint && draftKeys.length){ return { key: draftKeys[0], kind: 'lite' }; }
+    var primaryKeys = keys.filter(function(k){ return !/-(saves|draft|prefs)$/.test(k); });
+    if (primaryKeys.length === 1) return { key: primaryKeys[0], kind: 'rich' };
+    if (primaryKeys.length > 1){
+      var sortable = primaryKeys.map(function(k){ try { return [k, (localStorage.getItem(k)||'').length]; } catch(_){ return [k, 0]; } });
+      sortable.sort(function(a,b){ return b[1] - a[1]; });
+      return { key: sortable[0][0], kind: 'rich' };
+    }
+    if (draftKeys.length) return { key: draftKeys[0], kind: 'lite' };
+    return null;
+  }
+  function openImportDialog(){
+    var f = document.createElement('input');
+    f.type = 'file'; f.accept = 'application/json';
+    f.style.display = 'none';
+    f.addEventListener('change', function(e){
+      var file = e.target.files && e.target.files[0]; if (!file) return;
+      var rd = new FileReader();
+      rd.onload = function(ev){
+        try {
+          var obj = JSON.parse(ev.target.result);
+          /* 20/11/2026: il tasto riapre solo i file di QUESTO modulo. Prima accettava, dopo una conferma, anche il file
+             di un altro modulo o il backup generale, e il lavoro del modulo aperto andava perso (provato: file dei Sali
+             nel Radon, file del Radon e della Risalita nei Sali). */
+          var _altro = _mxFileDiAltroModulo(obj);
+          if (_altro){ alert(_altro + '\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          /* 19/11/2026: file esportato da un modulo con la barra nuova (Glaser, Termoigrometria, Radon). Porta i dati
+             d'ingresso in «input», in una forma diversa da quella tenuta in memoria: scriverlo in memoria azzerava
+             il modulo. Qui si usa la stessa strada del tasto «Carica». */
+          if (obj && obj.input && window.MX && typeof window.MX.applyData === 'function'){
+            if (!confirm('Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.moduleName || obj.moduleId || '?') + '\n\nI dati correnti del modulo verranno SOSTITUITI.')) return;
+            var _esito = window.MX.applyData(obj.input, obj.moduleId);
+            if (_esito === 'ok') alert('Snapshot importato.');
+            else if (_esito === 'altro') alert('Questo file viene da un altro modulo (' + (obj.moduleName || obj.moduleId) + '): non importato.');
+            else alert('Il modulo non sa ricaricare questo file.');
+            return;
+          }
+          /* 20/11/2026: nei moduli con la barra nuova il solo file che si sa riaprire è quello con la voce «input».
+             Un file diverso, scritto in memoria così com'era, azzerava il modulo. */
+          if (window.MX && typeof window.MX.applyData === 'function'){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var keys = detectModuleKeys();
+          if (!keys.length){
+            alert('Nessuna chiave di lavoro trovata per questo modulo nello storage corrente.\nSuggerimento: apri il modulo, fai almeno un\'interazione, poi riprova.');
+            return;
+          }
+          var target = pickTargetKey(keys, obj);
+          if (!target){ alert('Non sono riuscito a individuare la chiave di salvataggio. Snapshot non importato.'); return; }
+          /* 20/11/2026: un file senza i dati dei passi svuotava la bozza */
+          if (target.kind === 'lite' && !(obj && (obj.data || obj.state))){ alert('Questo file non contiene i dati di questo modulo.\n\nNon importato: i dati di questo modulo non sono stati toccati.'); return; }
+          var msg = 'Importare lo snapshot?\n\n• File: ' + file.name + '\n• Modulo dichiarato: ' + (obj.module || obj.schemaVersion || '?') + '\n• Destinazione: ' + target.key + ' (' + target.kind + ')\n\nI dati correnti del modulo verranno SOSTITUITI.\nConsiglio: prima fai "JSON" per backup di sicurezza.\n\nProcedere?';
+          if (!confirm(msg)) return;
+          var toWrite;
+          if (target.kind === 'lite'){
+            toWrite = { ts: Date.now(), state: { cur: (obj.currentStep !== undefined ? obj.currentStep : 0), finished: !!obj.finished, data: (obj.data || obj.state || {}) } };
+          } else {
+            toWrite = obj.state || obj;
+          }
+          try { localStorage.setItem(target.key, JSON.stringify(toWrite)); }
+          catch (err) { alert('Errore scrittura storage: ' + (err.message || err)); return; }
+          alert('Snapshot importato in "' + target.key + '". Pagina in ricaricamento…');
+          location.reload();
+        } catch (err) { alert('Errore lettura JSON: ' + err.message); }
+      };
+      rd.readAsText(file);
+    });
+    document.body.appendChild(f); f.click(); setTimeout(function(){ try{ document.body.removeChild(f); }catch(_){} }, 1500);
+  }
+  function install(){
+    if (document.getElementById('btnOpenSnap')) return;
+    if (!detectModuleKeys().length) return;   /* 19/11/2026: il modulo non tiene dati in memoria, il tasto non potrebbe funzionare */
+    var host = findHostBtn();
+    if (!host || !host.parentNode){ return setTimeout(install, 250); }
+    var btn = makeBtn();
+    host.parentNode.insertBefore(btn, host.nextSibling);
+    btn.addEventListener('click', openImportDialog);
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(install, 150); });
+  } else {
+    setTimeout(install, 150);
+  }
+})();
+</script>
+
+<script>
+/* === Render Biblioteca Patologie + Kit strumenti (auto-install) === */
+(function(){
+  'use strict';
+  if (!window.HUB_TIPOLOGIE_DB || !window.HUB_KIT_DB) {
+    /* Esposiamo i dati come globali se non lo erano già */
+    try { window.HUB_TIPOLOGIE_DB = (typeof HUB_TIPOLOGIE_DB !== 'undefined') ? HUB_TIPOLOGIE_DB : []; } catch(_){ window.HUB_TIPOLOGIE_DB = []; }
+    try { window.HUB_KIT_DB = (typeof HUB_KIT_DB !== 'undefined') ? HUB_KIT_DB : []; } catch(_){ window.HUB_KIT_DB = []; }
+    try { window.HUB_FONDAMENTI_DB = (typeof HUB_FONDAMENTI_DB !== 'undefined') ? HUB_FONDAMENTI_DB : {}; } catch(_){ window.HUB_FONDAMENTI_DB = {}; }
+  }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function _hubAddPatologiaToReport(tipologiaId){
+    var t = (window.HUB_TIPOLOGIE_DB||[]).find(function(x){return x.id===tipologiaId;});
+    if(!t){ alert('Patologia non trovata'); return; }
+    var segni = (t.segni_distintivi||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('');
+    var storia = (t.storia_ricerche||[]).map(function(r){return '<li><strong>'+esc(r.anno||'')+'</strong> &middot; '+esc(r.autore||'')+', <em>'+esc(r.titolo||'')+'</em><br><small>'+esc(r.fonte||'')+'</small></li>';}).join('');
+    var html = '<div style="font-family:Georgia,serif;line-height:1.55">';
+    html += '<h3 style="color:#1F4E55;font-style:italic;margin:0 0 8px;border-bottom:2px solid #1F4E55;padding-bottom:4px">'+(t.icon||'💧')+' '+esc(t.nome)+'</h3>';
+    html += '<p style="margin:6px 0"><strong>Origine:</strong> '+esc(t.origine)+'</p>';
+    html += '<p style="margin:6px 0"><strong>Meccanismo:</strong> '+esc(t.meccanismo)+'</p>';
+    html += '<p style="margin:6px 0"><strong>Pattern diagnostico:</strong> '+esc(t.pattern_diagnostico||'')+'</p>';
+    if(segni) html += '<p style="margin:6px 0"><strong>Segni distintivi:</strong></p><ul style="margin:0 0 8px 18px">'+segni+'</ul>';
+    if(t.tempi) html += '<p style="margin:6px 0"><strong>Tempi:</strong> '+esc(t.tempi)+'</p>';
+    if(t.cause_concomitanti) html += '<p style="margin:6px 0"><strong>Cause concomitanti:</strong> '+esc(t.cause_concomitanti)+'</p>';
+    if(storia) html += '<p style="margin:8px 0 4px"><strong>Storia ricerche peer-reviewed:</strong></p><ul style="margin:0 0 8px 18px;font-size:11pt">'+storia+'</ul>';
+    if(t.norme_riferimento) html += '<p style="margin:8px 0;padding:6px 10px;background:#eef5f6;color:#1F4E55;border-radius:6px;font-size:10.5pt"><strong>Norme di riferimento:</strong> '+esc(t.norme_riferimento)+'</p>';
+    html += '</div>';
+    var snapshot = {
+      id: 'hub_pat_'+tipologiaId+'_'+Date.now(),
+      timestamp: new Date().toISOString(),
+      moduleId: 'umidita-hub',
+      moduleName: 'Hub Umidità, Biblioteca: ' + (t.nome||tipologiaId),
+      note: 'Patologia: ' + (t.nome||tipologiaId) + ' (cuore app4 verificato 2026-05-02)',
+      patologiaId: tipologiaId,
+      htmlSnippet: html
+    };
+    try {
+      var reports = JSON.parse(localStorage.getItem('mx2::reports') || '[]');
+      reports.push(snapshot);
+      localStorage.setItem('mx2::reports', JSON.stringify(reports));
+      if(typeof showToast === 'function') showToast('Patologia "' + t.nome + '" aggiunta al Report Finale.', 'ok');
+      else alert('Patologia "' + t.nome + '" aggiunta al Report Finale.');
+    } catch(err){ alert('Errore: ' + err.message); }
+  }
+  window._hubAddPatologiaToReport = _hubAddPatologiaToReport;
+  function mxCrossModuloUrl(id){
+    var map = { risalita:'risalita.html', condensa:'condensa-glaser.html', glaser:'condensa-glaser.html', termo:'termoigrometria.html', infiltrazione:'infiltrazioni.html', infiltrazioni:'infiltrazioni.html', sali:'sali.html', costruzione:'asciugatura.html', asciugatura:'asciugatura.html', biodet:'biodeteriogeni.html', biodeteriogeni:'biodeteriogeni.html' };
+    return map[id] || '';
+  }
+  function renderTipologia(t){
+    var url = mxCrossModuloUrl(t.cross_modulo);
+    var crossHtml = url ? '<a href="'+url+'" target="_blank" style="display:inline-block;margin:6px 6px 0 0;padding:5px 12px;background:#1F4E55;color:#fff;text-decoration:none;border-radius:7px;font-weight:700;font-size:11.5px">→ Apri modulo '+esc(t.cross_modulo)+'</a>' : '';
+    var reportBtn = '<button type="button" onclick="window._hubAddPatologiaToReport(\''+esc(t.id)+'\')" style="display:inline-block;margin:6px 0 0 0;padding:5px 12px;background:#d4a017;color:#fff;border:0;border-radius:7px;font-weight:700;font-size:11.5px;cursor:pointer">📥 Aggiungi al Report</button>';
+    var segni = (t.segni_distintivi||[]).map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('');
+    var storia = (t.storia_ricerche||[]).map(function(r){
+      return '<li><strong>'+esc(r.anno)+'</strong> · '+esc(r.autore)+', <em>'+esc(r.titolo)+'</em><br><small style="color:#6b5c4c">'+esc(r.fonte)+'</small></li>';
+    }).join('');
+    return '<details class="bib-tipo" style="margin-bottom:8px;border:1px solid #e6e0d2;border-left:4px solid #1F4E55;border-radius:8px;background:#fff" data-id="'+esc(t.id)+'">'+
+      '<summary style="padding:10px 13px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px"><span style="font-size:18px">'+(t.icon||'💧')+'</span><strong style="flex:1;font-size:13.5px;color:#2c1810">'+esc(t.nome)+'</strong><span style="font-size:10.5px;color:#8b7355">▼</span></summary>'+
+      '<div style="padding:0 14px 14px 14px;font-size:12.5px;line-height:1.55">'+
+        '<div style="color:#6b5c4c;margin-bottom:8px"><strong>Origine:</strong> '+esc(t.origine)+'</div>'+
+        '<div style="color:#6b5c4c;margin-bottom:8px"><strong>Meccanismo:</strong> '+esc(t.meccanismo)+'</div>'+
+        '<div style="color:#6b5c4c;margin-bottom:8px"><strong>Pattern diagnostico:</strong> '+esc(t.pattern_diagnostico)+'</div>'+
+        (segni ? '<div style="color:#2c1810;margin-bottom:8px"><strong>Segni distintivi:</strong><ul style="margin:4px 0 0 18px">'+segni+'</ul></div>' : '')+
+        (t.tempi ? '<div style="color:#6b5c4c;margin-bottom:8px"><strong>Tempi:</strong> '+esc(t.tempi)+'</div>' : '')+
+        (t.cause_concomitanti ? '<div style="color:#6b5c4c;margin-bottom:8px"><strong>Cause concomitanti:</strong> '+esc(t.cause_concomitanti)+'</div>' : '')+
+        (storia ? '<div style="color:#2c1810;margin-bottom:8px"><strong>Storia ricerche peer-reviewed:</strong><ul style="margin:4px 0 0 18px;font-size:11.5px">'+storia+'</ul></div>' : '')+
+        (t.norme_riferimento ? '<div style="color:#1F4E55;background:#eef5f6;padding:7px 10px;border-radius:6px;font-size:11.5px;margin-top:8px"><strong>📜 Norme di riferimento:</strong> '+esc(t.norme_riferimento)+'</div>' : '')+
+        '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px dashed #e6e0d2;padding-top:10px">'+
+        crossHtml+
+        reportBtn+
+        '</div>'+
+      '</div></details>';
+  }
+  function renderBibPat(filter){
+    var f = (filter||'').toLowerCase().trim();
+    var list = window.HUB_TIPOLOGIE_DB || [];
+    if(f) list = list.filter(function(t){
+      return (t.nome+' '+t.origine+' '+t.meccanismo+' '+(t.pattern_diagnostico||'')).toLowerCase().indexOf(f) >= 0;
+    });
+    var host = document.getElementById('bibPatList');
+    if(!host) return;
+    if(!list.length){ host.innerHTML = '<div style="padding:20px;text-align:center;color:#8b7355">Nessuna tipologia trovata.</div>'; return; }
+    host.innerHTML = list.map(renderTipologia).join('');
+  }
+  function renderKit(){
+    var list = window.HUB_KIT_DB || [];
+    var host = document.getElementById('kitStrumentiList');
+    if(!host) return;
+    if(!list.length){ host.innerHTML = '<div style="padding:14px;color:#8b7355">Nessuno strumento.</div>'; return; }
+    host.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px">'+
+      list.map(function(k){
+        return '<details style="border:1px solid #e6e0d2;border-radius:8px;background:#fff;font-size:12.5px">'+
+          '<summary style="padding:9px 12px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px"><span style="font-size:16px">'+(k.icona||'🔧')+'</span><strong style="flex:1;color:#2c1810">'+esc(k.nome||k.id)+'</strong></summary>'+
+          '<div style="padding:0 12px 12px 12px;color:#6b5c4c;line-height:1.5">'+
+            (k.descrizione ? '<div style="margin-bottom:6px">'+esc(k.descrizione)+'</div>' : '')+
+            (k.range ? '<div><strong>Range:</strong> '+esc(k.range)+'</div>' : '')+
+            (k.accuratezza ? '<div><strong>Accuratezza:</strong> '+esc(k.accuratezza)+'</div>' : '')+
+            (k.norma ? '<div style="margin-top:6px;background:#eef5f6;padding:5px 8px;border-radius:5px;color:#1F4E55;font-size:11px"><strong>Norma:</strong> '+esc(k.norma)+'</div>' : '')+
+          '</div></details>';
+      }).join('')+'</div>';
+  }
+  function init(){
+    if(typeof HUB_TIPOLOGIE_DB === 'undefined') return setTimeout(init, 100);
+    window.HUB_TIPOLOGIE_DB = HUB_TIPOLOGIE_DB;
+    window.HUB_KIT_DB = (typeof HUB_KIT_DB !== 'undefined') ? HUB_KIT_DB : [];
+    window.HUB_FONDAMENTI_DB = (typeof HUB_FONDAMENTI_DB !== 'undefined') ? HUB_FONDAMENTI_DB : {};
+    renderBibPat('');
+    renderKit();
+    var srch = document.getElementById('bibPatSearch');
+    if(srch) srch.addEventListener('input', function(){ renderBibPat(this.value); });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(init, 100); });
+  else setTimeout(init, 100);
+})();
+
+/* === Integrazione mappa-indagini (aggancio bidirezionale) === */
+function _mxIndaginiList(){
+  try{ var raw=localStorage.getItem('mx2::indagini'); if(!raw) return []; var a=JSON.parse(raw); return Array.isArray(a)?a:[]; }
+  catch(e){ return []; }
+}
+function _mxIndaginiSaveAll(list){
+  try{ localStorage.setItem('mx2::indagini', JSON.stringify(list||[])); return true; }
+  catch(e){ return false; }
+}
+function _mxIndaginiNewId(){
+  return 'ind_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+}
+
+// Mapping STATE.data → dati indagine per categoria 'umidita'
+function _mxBuildDati_umidita(d){
+  // Costruisce un sottoinsieme compatibile con il modal probe + preserva STATE intero
+  // I campi standard tInt, urInt, tSup vengono estratti se presenti, altrimenti restano in schedaCompleta
+  var out = {
+    schedaCompleta: JSON.parse(JSON.stringify(d || {}))
+  };
+  // Estrazione opportunistica di campi standard (se presenti con quei nomi)
+  ['tInt','urInt','tSup','tempC','urPerc','co2_ppm','pm25','pm10','tvoc','hcho','co','no2',
+   'co2','tempC2','tempInt'].forEach(function(k){
+    if(d && d[k] != null) out[k] = d[k];
+  });
+  // Eventuali sintomi/note/categoria sospetta
+  if(d){
+    if(d.sintomi) out.sintomi = d.sintomi;
+    if(d.note) out.note = d.note;
+    if(d.noteFinali) out.note = d.noteFinali;
+    if(d.tipologiaSospetta) out.tipologiaSospetta = d.tipologiaSospetta;
+    if(d.categoriaIaq) out.categoria_target = d.categoriaIaq;
+  }
+  return out;
+}
+
+/* 20/11/2026: le domande si fanno in una finestra dentro la pagina (window.mxChiedi, nel file condiviso
+   _shared/mx-switcher.js) e non più nelle finestrelle del browser. Se quel file non fosse stato caricato si torna
+   alle finestrelle di prima. _mxChiedi risponde con una promessa; _mxTesto chiede un solo testo. */
+function _mxChiedi(titolo, cfg){
+  if(window.mxChiedi) return window.mxChiedi(titolo, cfg);
+  cfg = cfg || {};
+  if(cfg.scelte){
+    var buone = cfg.scelte.filter(function(s){ return !s[2]; });
+    var r = prompt(titolo + '\n\n' + buone.map(function(s, i){ return (i+1) + '. ' + s[1]; }).join('\n') + '\n\nScrivi il numero:', '1');
+    var k = parseInt(r, 10) - 1;
+    return Promise.resolve(buone[k] ? buone[k][0] : null);
+  }
+  var out = [], campi = cfg.campi || [];
+  for(var i = 0; i < campi.length; i++){
+    var v = prompt(titolo + (campi[i][0] ? ('\n' + campi[i][0]) : ''), campi[i][1] == null ? '' : campi[i][1]);
+    if(v === null) return Promise.resolve(null);
+    out.push(v);
+  }
+  return Promise.resolve(out);
+}
+function _mxTesto(titolo, pre){ return _mxChiedi(titolo, {campi:[['', pre]]}).then(function(r){ return r ? r[0] : null; }); }
+async function _mxAggancialMappa(){
+  var cat = 'umidita';
+  var moduloFile = 'umidita-hub.html';
+  var fileLabel = 'Umidità n.q.';
+  // Pre-save scheda
+  try{ if(typeof persist === 'function') persist(); }catch(e){}
+  var d = STATE && STATE.data ? STATE.data : {};
+  var dati = _mxBuildDati_umidita(d);
+
+  var lista = _mxIndaginiList();
+  var stessoCat = lista.filter(function(r){ return r.categoria === cat; });
+
+  /* 20/11/2026: scelta dentro la pagina (prima si scriveva 1, 2 o 3 in una finestrella del browser) */
+  var mode = await _mxChiedi('Aggancia la scheda '+fileLabel.toUpperCase()+' alla Mappa Indagini', {scelte:[['1','Nuovo punto sulla mappa'],['2','Aggiorna un punto esistente ('+(stessoCat.length?(stessoCat.length+' disponibili'):'nessuno disponibile')+')', !stessoCat.length]]});
+  if(!mode) return;
+
+  if(mode === '1'){
+    var _nn = await _mxChiedi('Nuovo punto sulla mappa', {campi:[['Nome del punto', fileLabel+' '+new Date().toLocaleDateString('it-IT')],['Stanza (facoltativa)','']], conferma:'Crea il punto'});
+    if(!_nn || !String(_nn[0]).trim()) return;
+    var nome = String(_nn[0]).trim(), stanza = String(_nn[1]||'').trim();
+    var rec = {
+      id: _mxIndaginiNewId(),
+      schemaVer: 1,
+      categoria: cat,
+      piano: 0,
+      x: 0.5, y: 0.5,
+      stanza: stanza || '',
+      nome: nome,
+      posizione: 'Da posizionare sulla mappa (apri Mappa Indagini e trascina il pin)',
+      dataCreazione: new Date().toISOString(),
+      dataModifica: new Date().toISOString(),
+      dati: dati,
+      note: 'Rilievo creato da scheda '+moduloFile,
+      foto: [],
+      termogrammi: [],
+      linkScheda: moduloFile+':'+Date.now(),
+      layerId: ''
+    };
+    lista.push(rec);
+    _mxIndaginiSaveAll(lista);
+    if(typeof showToast === 'function') showToast('✓ Punto "'+nome+'" creato sulla mappa indagini','ok');
+    setTimeout(function(){
+      if(confirm('Punto "'+nome+'" creato sulla Mappa Indagini.\nVuoi aprire ora la Mappa per posizionarlo?')){
+        window.location.href = 'mappa-indagini.html';
+      }
+    }, 500);
+  } else if(mode === '2'){
+    if(!stessoCat.length){ alert('Nessun punto di categoria '+fileLabel+' esistente sulla mappa.'); return; }
+    var ch = await _mxChiedi('Quale punto vuoi aggiornare?', {scelte: stessoCat.map(function(r, i){ return [String(i+1), r.nome+' ('+(r.stanza||'senza stanza')+')']; })});
+    if(!ch) return;
+    var idx = parseInt(ch)-1;
+    if(isNaN(idx) || idx<0 || idx>=stessoCat.length){ alert('Selezione non valida'); return; }
+    var target = stessoCat[idx];
+    target.dati = dati;
+    target.dataModifica = new Date().toISOString();
+    target.linkScheda = moduloFile+':'+Date.now();
+    target.note = (target.note || '') + (target.note ? ' · ':'') + 'Aggiornato da '+moduloFile+' il '+new Date().toLocaleDateString('it-IT');
+    for(var i=0;i<lista.length;i++){
+      if(lista[i].id === target.id){ lista[i] = target; break; }
+    }
+    _mxIndaginiSaveAll(lista);
+    if(typeof showToast === 'function') showToast('✓ Punto "'+target.nome+'" aggiornato','ok');
+  }
+}
+
+</script>
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>

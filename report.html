@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mixando Lab &middot; Relazione finale (Report Builder)</title>
+<style>
+:root{
+  --mx-accent:#f9a825; --mx-accent-soft:rgba(249,168,37,.12); --mx-accent-strong:#e65100; --mx-accent-glow:rgba(249,168,37,.30);
+  --bg:#f5f1e8; --bg-grad:linear-gradient(135deg,#f5f1e8 0%,#ede5d0 100%);
+  --paper:#fff;
+  --ink:#2c1810; --ink-soft:#6b5c4c; --ink-mute:#8b7355;
+  --line:#e6e0d2; --ok:#1f7a4d; --warn:#b07820; --err:#a83232;
+  --r:14px;
+  --ff-serif:Georgia,"Cambria","Times New Roman",serif;
+  --ff-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg-grad);background-attachment:fixed;color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.5}
+body{padding-top:48px}
+.mx-bar{position:fixed;top:0;left:0;right:0;z-index:50;height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;background:linear-gradient(180deg,#fff,#fdfbf4);border-bottom:3px solid var(--mx-accent);box-shadow:0 2px 10px rgba(20,20,40,.06)}
+.mx-bar .em{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;background:radial-gradient(circle at 30% 30%,#ffd54f,var(--mx-accent) 70%);color:#3e2e00;box-shadow:0 2px 6px var(--mx-accent-glow)}
+.mx-bar .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.mx-bar .tag{font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mx-accent-strong);line-height:1}
+.mx-bar .ti{font-family:var(--ff-serif);font-weight:700;font-style:italic;font-size:14px;color:var(--ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 19/11/2026: il titolo non deve finire sotto il logo al centro della barra (succedeva coi titoli lunghi e con le finestre strette) */
+.mx-bar .ti{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:max(120px,calc(50vw - 300px))}
+.mx-bar a.back{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mx-accent-strong);text-decoration:none;padding:6px 12px;border:1px solid var(--mx-accent);border-radius:8px}
+.mx-bar a.back:hover{background:var(--mx-accent);color:#3e2e00}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+.hero{padding:8px 6px 14px;text-align:center}
+.hero h2{margin:0 0 4px;font-family:var(--ff-serif);font-size:clamp(22px,4.4vw,30px);color:var(--ink);font-weight:700}
+.hero h2 em{color:var(--mx-accent-strong);font-style:italic}
+.hero p{margin:6px auto 0;max-width:680px;color:var(--ink-soft);font-size:13.5px;line-height:1.55}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,20,40,.04),0 6px 18px rgba(20,20,40,.06);margin-bottom:14px;overflow:hidden}
+.card>h3{margin:0;padding:13px 18px;font-family:var(--ff-serif);font-size:15px;color:var(--ink);font-weight:700;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--mx-accent-soft),var(--paper));display:flex;align-items:center;gap:10px}
+.card>h3 .num{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--mx-accent);color:#3e2e00;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+.card .body{padding:16px 18px}
+.info-box{background:#fffbef;border:1px solid #f0e0c4;border-left:4px solid var(--mx-accent);border-radius:8px;padding:12px 14px;font-size:13px;color:#5d4400;line-height:1.55}
+.info-box b{color:#3e2e00}
+.warn-box{background:#fbf0f0;border:1px solid #e6c8c8;border-left:4px solid var(--err);border-radius:8px;padding:12px 14px;font-size:13px;color:#7a1a1a;line-height:1.55}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:680px){ .row2{grid-template-columns:1fr} }
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em}
+.fld input,.fld textarea{padding:10px 12px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:14px;color:var(--ink);background:#fff;outline:none;width:100%}
+.fld textarea{min-height:80px;resize:vertical;font-family:inherit}
+.fld input:focus,.fld textarea:focus{border-color:var(--mx-accent-strong);box-shadow:0 0 0 3px var(--mx-accent-soft)}
+
+.persona-card{background:#faf8f3;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.persona-card .h{font-size:11px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;color:var(--mx-accent-strong);margin-bottom:4px}
+.persona-card .nome{font-weight:700;color:var(--ink);font-size:15px}
+.persona-card .meta{font-size:12.5px;color:var(--ink-soft);margin-top:2px;line-height:1.55}
+.persona-card .meta div{margin:2px 0}
+.persona-card .ed{margin-top:8px}
+.persona-card.empty{background:#fbf0f0;border-color:#e6c8c8;color:#7a1a1a}
+
+.snap-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.snap{display:grid;grid-template-columns:24px 1fr auto;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;align-items:center;transition:.15s}
+.snap.is-on{background:linear-gradient(180deg,#fffbef,#fff);border-color:var(--mx-accent)}
+.snap input[type=checkbox]{width:20px;height:20px;accent-color:var(--mx-accent-strong);cursor:pointer}
+.snap .info{min-width:0}
+.snap .info .nm{font-weight:700;color:var(--ink);font-size:14px}
+.snap .info .meta{font-size:11.5px;color:var(--ink-mute);font-family:monospace;letter-spacing:.02em}
+.snap .info .ver{font-size:12px;color:var(--ink-soft);margin-top:3px;font-style:italic}
+.snap .acts{display:flex;gap:6px;align-items:center}
+.snap .acts button{appearance:none;border:0;cursor:pointer;font:inherit;font-size:11px;font-weight:700;letter-spacing:.04em;padding:8px 12px;border-radius:8px;display:inline-flex;align-items:center;gap:5px;transition:all .15s;color:#fff;background:linear-gradient(135deg,#e57373,#c62828);box-shadow:0 2px 5px rgba(198,40,40,.30)}
+.snap .acts button:hover{transform:translateY(-1px);filter:brightness(1.08);box-shadow:0 3px 8px rgba(198,40,40,.45)}
+.snap .acts button:active{transform:translateY(0)}
+.snap .acts button.rm .ico{font-size:14px;font-weight:800;line-height:1}
+.snap-empty{padding:24px;text-align:center;color:var(--ink-mute);font-style:italic;font-size:13px;background:#faf8f3;border:1px dashed var(--line);border-radius:10px}
+/* === FASE 4: sezioni granulari per snapshot === */
+.snap-sections{grid-column:1 / -1;display:flex;flex-direction:column;gap:4px;margin-top:8px;padding:10px 12px 8px;background:#faf8f3;border-radius:8px;border:1px dashed var(--line)}
+.snap-sections-head{font-size:10.5px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.snap-sections-head .all-toggle{margin-left:auto;font-size:10px;background:var(--mx-accent-soft);border:1px solid var(--mx-accent);color:var(--mx-accent-strong);padding:2px 8px;border-radius:10px;cursor:pointer;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.snap-sections-head .all-toggle:hover{background:var(--mx-accent);color:#fff}
+.snap-sec-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;font-size:12.5px;cursor:pointer;transition:background .15s}
+.snap-sec-row:hover{background:#fff}
+.snap-sec-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--mx-accent-strong);cursor:pointer;flex-shrink:0}
+.snap-sec-row label{cursor:pointer;flex:1;display:flex;align-items:center;gap:6px;color:var(--ink-soft)}
+.snap-sec-row.is-on label{color:var(--ink);font-weight:600}
+.snap-sec-row .sec-ico{display:inline-block;width:18px;text-align:center}
+.snap-sec-row .sec-count{font-size:10.5px;color:var(--ink-mute);background:#fff;padding:1px 7px;border-radius:8px;font-family:monospace;border:1px solid var(--line)}
+.snap.is-off .snap-sections{opacity:.4;pointer-events:none}
+.snap{grid-template-columns:32px 1fr auto;display:grid;column-gap:12px}
+
+.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.btn{appearance:none;border:0;color:#fff;font:inherit;font-size:13px;font-weight:700;letter-spacing:.02em;padding:12px 18px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.20);box-shadow:0 3px 8px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.12);transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap}
+.btn::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.btn:hover{transform:translateY(-2px) scale(1.03);background-position:100% 100%;filter:brightness(1.08) saturate(1.15)}
+.btn:hover::before{transform:translateX(130%)}
+.btn:active{transform:translateY(0) scale(.98);transition-duration:.05s}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.6)}
+.btn .ico{font-size:16px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.btn-word{background-image:linear-gradient(135deg,#5a9bd8 0%,#2b579a 45%,#0c2e5e 100%);box-shadow:0 3px 10px rgba(43,87,154,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.btn-pdf{background-image:linear-gradient(135deg,#ef5350 0%,#c62828 45%,#7f0000 100%);box-shadow:0 3px 10px rgba(198,40,40,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.btn-json{background-image:linear-gradient(135deg,#64b5f6 0%,#1976d2 45%,#0d47a1 100%);box-shadow:0 3px 10px rgba(25,118,210,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+.btn-clear{background-image:linear-gradient(135deg,#9e9e9e 0%,#616161 45%,#212121 100%);box-shadow:0 3px 10px rgba(97,97,97,.42),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.18)}
+
+/* === Mini shiny buttons (Ricarica / Sel-Desel) === */
+.mx-mini-shiny{appearance:none;border:0;color:#fff;font:inherit;font-weight:700;font-size:12px;letter-spacing:.02em;padding:8px 14px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.18);transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s ease;background-size:180% 180%;background-position:0% 0%;white-space:nowrap;vertical-align:middle}
+.mx-mini-shiny::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.40) 48%,rgba(255,255,255,.40) 52%,transparent 75%);transform:translateX(-130%);transition:transform .6s ease}
+.mx-mini-shiny:hover{transform:translateY(-2px) scale(1.04);background-position:100% 100%;filter:brightness(1.10) saturate(1.15)}
+.mx-mini-shiny:hover::before{transform:translateX(130%)}
+.mx-mini-shiny:active{transform:translateY(0) scale(.97);transition-duration:.05s}
+#btnReload{background-image:linear-gradient(135deg,#66bb6a 0%,#2e7d32 45%,#1b5e20 100%);box-shadow:0 3px 8px rgba(46,125,50,.40),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 3px rgba(0,0,0,.15)}
+#btnSelAll{background-image:linear-gradient(135deg,#42a5f5 0%,#1565c0 45%,#0d47a1 100%);box-shadow:0 3px 8px rgba(21,101,192,.40),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 3px rgba(0,0,0,.15)}
+#btnDeselAll{background-image:linear-gradient(135deg,#bdbdbd 0%,#757575 45%,#424242 100%);box-shadow:0 3px 8px rgba(97,97,97,.40),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 3px rgba(0,0,0,.15)}
+
+footer.ft{margin-top:30px;text-align:center;font-size:11px;color:var(--ink-mute);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+footer.ft strong{color:var(--ink)}
+
+/* Print/PDF styling */
+@media print {
+  body * { visibility:hidden !important }
+  .mx-print, .mx-print * { visibility:visible !important }
+  .mx-print{ position:absolute; left:0; top:0; width:100%; padding:24px; box-shadow:none !important; max-width:none !important }
+}
+.preview-zone{display:none}
+.preview-zone.is-active{display:block;background:#ece9df;padding:24px;margin:14px 0;border-radius:10px}
+.preview-paper{background:#fff;max-width:780px;margin:0 auto;padding:42px 48px 56px;box-shadow:0 4px 14px rgba(0,0,0,.12);font-family:Georgia,serif;color:#2c1810;font-size:13px;line-height:1.55;word-wrap:break-word;overflow-wrap:break-word}
+.preview-paper h1{font-size:22px;margin:14px 0 14px;color:#2c1810;font-weight:700;font-style:italic;line-height:1.25}
+.preview-paper h2{font-size:16px;margin:26px 0 10px;color:#2c5d7c;border-bottom:1px solid #d8d3c4;padding-bottom:5px;line-height:1.3}
+.preview-paper h3{font-size:14px;margin:18px 0 8px;color:#2c1810}
+.preview-paper table{width:100%;border-collapse:collapse;margin:12px 0;font-size:11.5px}
+.preview-paper table th,.preview-paper table td{padding:6px 8px;border-bottom:1px solid #e6e0d2;text-align:left;vertical-align:top;line-height:1.45}
+.preview-paper table th{background:#faf8f3;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#6b5c4c}
+.mx-logo-mini{height:32px;width:32px;border-radius:8px;background:#fff;padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.12);object-fit:contain;flex-shrink:0;display:none;border:1px solid var(--line,#e6e0d2)}
+.mx-bar.has-logo .em{display:none}
+
+.mx-bar{position:relative}
+.mx-logo-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:38px;max-width:160px;object-fit:contain;pointer-events:none;z-index:1;background:transparent;border:0;padding:0;box-shadow:none}
+@media (max-width:600px){.mx-logo-center{height:26px;max-width:90px}}
+
+/* === RESTYLE mx-bar: look professionale uniforme === */
+.mx-bar{height:56px !important;background:linear-gradient(180deg,#fff 0%,#fbf8ef 100%) !important;box-shadow:0 2px 12px rgba(20,20,40,.08),inset 0 -1px 0 rgba(20,20,40,.04) !important;backdrop-filter:saturate(1.15);padding:0 20px !important;gap:14px !important}
+.mx-bar .em{width:38px !important;height:38px !important;border-radius:10px !important;font-size:20px !important;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45) 0%,transparent 55%),linear-gradient(135deg,var(--mx-accent) 0%,var(--mx-accent-strong,var(--mx-accent)) 100%) !important;color:#fff !important;box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.12) !important;text-shadow:0 1px 2px rgba(0,0,0,.20);font-weight:800;letter-spacing:0;flex-shrink:0;position:relative}
+.mx-bar .em::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%);pointer-events:none}
+.mx-bar .meta{gap:2px !important}
+.mx-bar .tag{font-size:9.5px !important;font-weight:800 !important;letter-spacing:.22em !important;text-transform:uppercase !important;color:var(--mx-accent-strong,var(--mx-accent)) !important;display:inline-flex;align-items:center;gap:6px;padding:1px 0;line-height:1.2}
+.mx-bar .tag::before{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .tag::after{content:"";display:inline-block;width:14px;height:1.5px;background:currentColor;opacity:.55;border-radius:1px}
+.mx-bar .ti{font-family:Georgia,"Cambria","Times New Roman",serif !important;font-weight:700 !important;font-style:italic !important;font-size:16px !important;color:#1a1410 !important;letter-spacing:.01em !important;line-height:1.15 !important;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.mx-bar a.back{font-size:11px !important;font-weight:800 !important;letter-spacing:.14em !important;padding:7px 14px !important;border-radius:9px !important;border:1.5px solid var(--mx-accent) !important;background:rgba(255,255,255,.65);transition:all .2s;text-transform:uppercase}
+.mx-bar a.back:hover{background:linear-gradient(135deg,var(--mx-accent),var(--mx-accent-strong,var(--mx-accent))) !important;color:#fff !important;box-shadow:0 3px 10px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.30) !important;transform:translateY(-1px)}
+body{padding-top:0 !important}
+@media (max-width:600px){
+  .mx-bar{height:50px !important;padding:0 14px !important;gap:10px !important}
+  body{padding-top:50px !important}
+  .mx-bar .em{width:32px !important;height:32px !important;font-size:17px !important}
+  .mx-bar .ti{font-size:13.5px !important}
+  .mx-bar .tag{font-size:8.5px !important;letter-spacing:.18em !important}
+  .mx-bar .tag::before,.mx-bar .tag::after{width:8px}
+}
+
+/* === RESTYLE pills checkbox/radio: gradient + shimmer + ombra accent === */
+.chkgrp label,.radio-row label{position:relative !important;overflow:hidden !important;padding:9px 16px !important;background:linear-gradient(180deg,#fff 0%,#faf8f3 100%) !important;border:1.5px solid #e6e0d2 !important;border-radius:22px !important;font-weight:700 !important;font-size:12px !important;color:#5a4a3a !important;cursor:pointer !important;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .15s ease,background .25s,border-color .25s !important;box-shadow:0 1px 3px rgba(20,20,40,.04),inset 0 1px 0 rgba(255,255,255,.6) !important}
+.chkgrp label::before,.radio-row label::before{content:"" !important;position:absolute !important;inset:0 !important;pointer-events:none !important;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.50) 48%,rgba(255,255,255,.50) 52%,transparent 75%) !important;transform:translateX(-140%) !important;transition:transform .65s ease !important;z-index:1}
+.chkgrp label > *,.radio-row label > *{position:relative;z-index:2}
+.chkgrp label:hover,.radio-row label:hover{transform:translateY(-2px) scale(1.02) !important;border-color:var(--mx-accent,#1976d2) !important;background:linear-gradient(180deg,#fff 0%,var(--mx-accent-soft,rgba(25,118,210,.10)) 100%) !important;box-shadow:0 4px 12px rgba(20,20,40,.10),inset 0 1px 0 rgba(255,255,255,.6) !important;color:var(--mx-accent-strong,var(--mx-accent,#1976d2)) !important}
+.chkgrp label:hover::before,.radio-row label:hover::before{transform:translateX(140%) !important}
+.chkgrp label:has(input:checked),.radio-row label:has(input:checked){background:linear-gradient(135deg,var(--mx-accent,#1976d2) 0%,var(--mx-accent-strong,#0d47a1) 100%) !important;color:#fff !important;border-color:var(--mx-accent-strong,#0d47a1) !important;box-shadow:0 5px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -2px 4px rgba(0,0,0,.15) !important;text-shadow:0 1px 2px rgba(0,0,0,.25) !important;transform:translateY(-1px) scale(1.04) !important;font-weight:800 !important}
+.chkgrp label:has(input:checked):hover,.radio-row label:has(input:checked):hover{filter:brightness(1.08) saturate(1.15)}
+.chkgrp label:active,.radio-row label:active{transform:translateY(0) scale(.98) !important;transition-duration:.05s !important}
+.chkgrp input,.radio-row input{accent-color:var(--mx-accent,#1976d2);cursor:pointer}
+/* Gap migliorato fra pills */
+.chkgrp{gap:8px !important;margin-top:6px !important}
+.radio-row{gap:8px !important}
+</style>
+<style>/* Mixando Lab + Renzo-ArtHome (barra) */
+.mx-logo-lab{height:38px;width:auto;max-width:176px;object-fit:contain;flex-shrink:0;display:block}
+.mx-logo-center{display:flex;align-items:center;gap:9px;height:auto;max-width:none}
+.mx-logo-center img{height:40px;width:auto;object-fit:contain;display:block}
+.mx-logo-center .rn{font-family:Georgia,"Cambria",serif;font-weight:700;font-size:16px;color:#5d4924;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:600px){.mx-logo-lab{height:28px;max-width:130px}.mx-logo-center img{height:30px}.mx-logo-center .rn{font-size:12.5px}}
+</style>
+<link rel="icon" type="image/png" href="logo_renzo-arthome_trasparente.png">
+</head>
+<body>
+
+<header class="mx-bar"><div class="mx-logo-center"><img src="logo_renzo-arthome_trasparente.png" alt="Renzo-ArtHome"><span class="rn">Renzo-ArtHome</span></div>
+  <img class="mx-logo-lab" src="mixando_lab_lockup.png" alt="Mixando Lab"><img id="mxLogoPerito" class="mx-logo-mini" alt="Logo perito">
+  <div class="meta">
+    <span class="tag">Sistema</span>
+    <h1 class="ti">Relazione finale, Report Builder</h1>
+  </div>
+  <a class="back" href="suite.html">&larr; Suite</a>
+</header>
+
+<main>
+  <section class="hero">
+    <h2>Relazione tecnica <em>aggregata</em></h2>
+    <p>Combina le analisi raccolte dai singoli moduli (Glaser &middot; Termoigrometria &middot; Radon &middot; futuri) in <strong>una sola relazione tecnica Word/PDF</strong> intestata a perito e cliente. Ogni modulo invia il proprio snapshot tramite il pulsante <em>&#128230; Al report</em>.</p>
+  </section>
+
+  <!-- 1. ANAGRAFICA RIASSUNTIVA -->
+  <article class="card">
+    <h3><span class="num">1</span> Anagrafica perito e cliente</h3>
+    <div class="body">
+      <div class="row2">
+        <div class="persona-card" id="peritoCard">
+          <div class="h">Perito / tecnico</div>
+          <div class="nome" id="pNome">n.d.</div>
+          <div class="meta" id="pMeta"></div>
+        </div>
+        <div class="persona-card" id="clienteCard">
+          <div class="h">Committente / immobile</div>
+          <div class="nome" id="cNome">n.d.</div>
+          <div class="meta" id="cMeta"></div>
+        </div>
+      </div>
+      <div style="margin-top:10px;text-align:center">
+        <a href="locali-cantiere.html" target="_blank" style="font-size:12.5px;color:var(--mx-accent-strong);font-weight:700;text-decoration:none;border:1px solid var(--mx-accent);padding:7px 14px;border-radius:8px;display:inline-block">&#9881; Modifica anagrafica in Locali-Cantiere</a>
+        <button type="button" id="btnReload" class="mx-mini-shiny" style="margin-left:6px">&#8635; Ricarica</button>
+      </div>
+    </div>
+  </article>
+
+  <!-- 2. DATI RELAZIONE -->
+  <article class="card">
+    <h3><span class="num">2</span> Dati della relazione</h3>
+    <div class="body">
+      <div class="row2">
+        <div class="fld">
+          <label>Data emissione</label>
+          <input type="date" id="dataEmiss">
+        </div>
+        <div class="fld">
+          <label>Numero / riferimento incarico</label>
+          <input type="text" id="rifIncarico" placeholder="es. Prot. 2026/045">
+        </div>
+      </div>
+      <div class="fld" style="margin-top:12px">
+        <label>Oggetto della relazione tecnica</label>
+        <input type="text" id="oggetto" placeholder="es. Verifica condensa e radon abitazione via Verdi 12">
+      </div>
+    </div>
+  </article>
+
+  <!-- 3. SNAPSHOT RACCOLTI -->
+  <article class="card">
+    <h3><span class="num">3</span> Analisi raccolte (snapshot da moduli)</h3>
+    <div class="body">
+      <div class="info-box" id="snapHint" style="margin-bottom:12px">
+        <b>Come funziona:</b> ogni modulo (Glaser, Termoigrometria, Radon&hellip;) ha un pulsante <em>&#128230; Al report</em>. Click per inviare l'analisi qui. Spunta le analisi da includere nella relazione tecnica finale.
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;font-size:12px">
+        <button type="button" id="btnSelAll" class="mx-mini-shiny" style="font-size:11.5px;padding:6px 12px">&#10003; Seleziona tutte</button>
+        <button type="button" id="btnDeselAll" class="mx-mini-shiny" style="font-size:11.5px;padding:6px 12px">&#9744; Deseleziona tutte</button>
+      </div>
+      <div class="snap-list" id="snapList"></div>
+      <div class="actions" style="justify-content:space-between">
+        <button type="button" class="btn btn-clear" id="btnClearAll"><span class="ico">&#128465;</span><span>Svuota report</span></button>
+        <div style="font-size:12px;color:var(--ink-mute);align-self:center"><span id="snapCount">0</span> analisi raccolte</div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 4. CONCLUSIONI -->
+  <article class="card">
+    <h3><span class="num">4</span> Conclusioni e raccomandazioni</h3>
+    <div class="body">
+      <div class="fld">
+        <label>Note conclusive del perito (testo libero)</label>
+        <textarea id="conclusioni" placeholder="Sintesi delle problematiche riscontrate, ipotesi di intervento, raccomandazioni..."></textarea>
+      </div>
+    </div>
+  </article>
+
+  <!-- 5. AZIONI -->
+  <article class="card">
+    <h3><span class="num">5</span> Genera relazione finale</h3>
+    <div class="body">
+      <div class="info-box" style="background:#e8f2fa;border-color:#c2d5e3;border-left-color:#2c5d7c;color:#1a3d52">
+        <b>Anteprima:</b> rivedi qui sotto la relazione tecnica che verr&agrave; generata. Modifica i campi sopra (anagrafica, oggetto, conclusioni) e ricarica con il bottone <em>&#8635; Aggiorna anteprima</em>.
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-clear" id="btnRefresh" style="background-image:linear-gradient(135deg,#90a4ae,#546e7a 45%,#263238)"><span class="ico">&#8635;</span><span>Aggiorna anteprima</span></button>
+        <button type="button" class="btn btn-word" id="btnWord"><span class="ico">&#128221;</span><span>Word relazione unica</span></button>
+        <button type="button" class="btn btn-pdf" id="btnPDF"><span class="ico">&#128196;</span><span>Stampa / PDF</span></button>
+        <button type="button" class="btn btn-json" id="btnJSON"><span class="ico">&#128190;</span><span>JSON backup</span></button>
+      </div>
+      <div class="preview-zone is-active" id="previewZone">
+        <div class="preview-paper mx-print" id="previewPaper"></div>
+      </div>
+    </div>
+  </article>
+
+  <footer class="ft">
+    <strong>Mixando &middot; Report Builder v1.0</strong> &middot; aggregatore relazione tecnica Word/PDF &middot; legge da <code>mx2::reports</code> + <code>mx2::perito</code> + <code>mx2::locali-v1</code>
+  </footer>
+</main>
+
+<script>
+(function(){
+'use strict';
+/* Mini-logo perito da mx2::perito.logoData */
+(function(){
+  function loadLg(){
+    try{
+      var p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");
+      var img=document.getElementById("mxLogoPerito");
+      var bar=document.querySelector(".mx-bar");
+      if(img && p && p.logoData){ img.src=p.logoData; img.style.display="block"; if(bar)bar.classList.add("has-logo"); }
+      else { if(img)img.style.display="none"; if(bar)bar.classList.remove("has-logo"); }
+    }catch(e){}
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",loadLg);
+  else loadLg();
+})();
+
+
+var KEY_REPORTS = 'mx2::reports';
+var KEY_PERITO  = 'mx2::perito';
+var KEY_LOCALI  = 'mx2::locali-v1';
+var KEY_REPMETA = 'mx2::report-meta';
+
+function loadJSON(k, def){ try{ var s=JSON.parse(localStorage.getItem(k)); return s!=null?s:def; }catch(_){ return def; } }
+function saveJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(_){} }
+function esc(s){ if(s==null) return ''; return String(s).replace(/[&<>"']/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];}); }
+function fmtDate(d){
+  if(!d) return '';
+  if(typeof d==='string' && d.length===10){ var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  var dt=new Date(d); return dt.getDate().toString().padStart(2,'0')+'/'+(dt.getMonth()+1).toString().padStart(2,'0')+'/'+dt.getFullYear();
+}
+function fmtDateTime(iso){
+  if(!iso) return '';
+  var dt=new Date(iso);
+  if(isNaN(dt.getTime())) return String(iso);   /* 19/11/2026: niente più «NaN/NaN/NaN» */
+  return dt.getDate().toString().padStart(2,'0')+'/'+(dt.getMonth()+1).toString().padStart(2,'0')+'/'+dt.getFullYear()+' '+
+    dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0');
+}
+
+/* 19/11/2026: le analisi arrivano dai moduli in tre forme (vedi sopra le chiavi): qui si portano tutte alla stessa,
+   senza toccare quello che è salvato. _key è la chiave unica della voce, la stessa per l'elenco e per la relazione. */
+function loadReports(){
+  var arr = loadJSON(KEY_REPORTS, []);
+  if (!Array.isArray(arr)) return [];
+  return arr.map(function(r, i){
+    var n = {}; r = r || {};
+    for (var k in r) n[k] = r[k];
+    var id = String(r.moduleId || r.module || '');
+    n.moduleId = id.replace(/-v\d+$/, '');                       /* «mappa-indagini-v3» → «mappa-indagini» */
+    n.moduleName = r.moduleName || r.title || id || 'Analisi';
+    n.timestamp = r.timestamp || r.createdAt || r.date || '';
+    n.docHtml = r.docHtml || r.htmlSnippet || r.html || '';
+    n._key = String(r.timestamp || r.createdAt || r.date || r.id || ('voce-' + i));
+    if (r.summary){ var d = document.createElement('div'); d.innerHTML = String(r.summary); n._sommario = (d.textContent || '').replace(/\s+/g, ' ').trim(); }
+    return n;
+  });
+}
+
+/* === RENDER ANAGRAFICA === */
+function renderAnagrafica(){
+  var p = loadJSON(KEY_PERITO, {});
+  var imm = loadJSON(KEY_LOCALI, {ana:{}});
+  var ana = imm.ana || {};
+
+  var pCard = document.getElementById('peritoCard');
+  var pNomeEl = document.getElementById('pNome');
+  var pMetaEl = document.getElementById('pMeta');
+  if (p.nome){
+    pCard.classList.remove('empty');
+    pNomeEl.innerHTML = esc(p.titolo||'')+' '+esc(p.nome);
+    var meta = '';
+    if (p.studio) meta += '<div>'+esc(p.studio)+'</div>';
+    if (p.albo) meta += '<div>'+esc(p.albo)+(p.numAlbo?' n. '+esc(p.numAlbo):'')+'</div>';
+    if (p.piva) meta += '<div>P.IVA/C.F.: '+esc(p.piva)+'</div>';
+    if (p.tel) meta += '<div>Tel.: '+esc(p.tel)+'</div>';
+    if (p.email) meta += '<div>'+esc(p.email)+'</div>';
+    pMetaEl.innerHTML = meta;
+  } else {
+    pCard.classList.add('empty');
+    pNomeEl.innerHTML = '&#9888; Anagrafica perito non compilata';
+    pMetaEl.innerHTML = '<div style="font-style:italic">Compila in &laquo;Locali-Cantiere&raquo; per intestare il documento</div>';
+  }
+
+  var cCard = document.getElementById('clienteCard');
+  var cNomeEl = document.getElementById('cNome');
+  var cMetaEl = document.getElementById('cMeta');
+  if (ana.Nome){
+    cCard.classList.remove('empty');
+    cNomeEl.innerHTML = esc(ana.Nome);
+    var meta = '';
+    if (ana.CF) meta += '<div>C.F./P.IVA: '+esc(ana.CF)+'</div>';
+    if (ana.Indirizzo) meta += '<div>'+esc(ana.Indirizzo)+'</div>';
+    if (ana.Catasto) meta += '<div>Catasto: '+esc(ana.Catasto)+'</div>';
+    if (ana.Anno) meta += '<div>Anno costruzione: '+esc(ana.Anno)+'</div>';
+    if (ana.Oggetto) meta += '<div><b>Oggetto:</b> '+esc(ana.Oggetto)+'</div>';
+    if (ana.DataSopr) meta += '<div><b>Sopralluogo:</b> '+fmtDate(ana.DataSopr)+'</div>';
+    cMetaEl.innerHTML = meta;
+  } else {
+    cCard.classList.add('empty');
+    cNomeEl.innerHTML = '&#9888; Committente / immobile non compilato';
+    cMetaEl.innerHTML = '<div style="font-style:italic">Compila in &laquo;Locali-Cantiere&raquo;</div>';
+  }
+}
+
+/* === RENDER SNAPSHOT === */
+
+/* === FASE 4: Label leggibili per data-sec + parser HTML === */
+var SEC_LABELS = {
+  'risanamento':        { ico:'🛠', lab:'Risanamento consigliato' },
+  'risanamento-blocco': { ico:'⚠',  lab:'Avviso diagnosi non valida' },
+  'risanamento-avvisi': { ico:'⚠',  lab:'Avvisi diagnosi' },
+  'verdetto-summary':   { ico:'📊', lab:'Verdetto riepilogo' },
+  'dpi':                { ico:'🦺', lab:'DPI e sicurezza' },
+  'strumenti':          { ico:'🔬', lab:'Strumenti diagnostici' },
+  'strumenti-a-norma':  { ico:'⭐', lab:'Strumenti a norma' },
+  'strumenti-complementari': { ico:'○', lab:'Strumenti complementari' },
+  'norme':              { ico:'📜', lab:'Norme tecniche' },
+  'norme-aggregate':    { ico:'📜', lab:'Norme aggregate' },
+  'note-operative':     { ico:'📝', lab:'Note operative' },
+  'solutions':          { ico:'🛠', lab:'Soluzioni' }
+};
+function _sectionLabel(secKey){
+  var info = SEC_LABELS[secKey];
+  if (info) return info;
+  // Fallback: stringa decapitalizzata
+  return { ico:'📂', lab: secKey.replace(/-/g,' ').replace(/^\w/,function(c){return c.toUpperCase();}) };
+}
+function _extractSections(htmlSnippet){
+  if (!htmlSnippet) return [];
+  // Regex robusto: estrae tutti i <section data-pat="..." data-sec="...">
+  var pattern = /<(section|div)[^>]*data-sec=["']([^"']+)["']/gi;
+  var found = [];
+  var seen = {};
+  var m;
+  while ((m = pattern.exec(htmlSnippet)) !== null){
+    var sec = m[2];
+    if (!seen[sec]){
+      seen[sec] = (seen[sec]||0);
+      found.push({key: sec, count: 1});
+      seen[sec] = found.length;
+    } else {
+      found[seen[sec]-1].count++;
+    }
+  }
+  return found;
+}
+function _stripExcludedSections(htmlSnippet, excludedSecs){
+  if (!htmlSnippet || !excludedSecs || excludedSecs.length === 0) return htmlSnippet;
+  var html = htmlSnippet;
+  excludedSecs.forEach(function(sec){
+    // Rimuovo tutti i <section data-sec="sec">...</section> o <div data-sec="sec">...</div>
+    var pattern = new RegExp('<(section|div)[^>]*data-sec=["\']'+sec.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')+'["\'][^>]*>[\\s\\S]*?</\\1>', 'gi');
+    html = html.replace(pattern, '');
+  });
+  return html;
+}
+
+function renderSnaps(){
+  var reports = loadReports();
+  var meta = loadJSON(KEY_REPMETA, {});
+  var sel = meta.selected || {};
+  var host = document.getElementById('snapList');
+  var cnt = document.getElementById('snapCount');
+  cnt.textContent = reports.length;
+  if (reports.length === 0){
+    host.innerHTML = '<div class="snap-empty">Nessuna analisi raccolta. Apri un modulo, completa l\'analisi e clicca &laquo;&#128230; Al report&raquo;.</div>';
+    return;
+  }
+  /* Default: tutti spuntati la prima volta */
+  reports.forEach(function(r, i){
+    var k = r._key;
+    if (sel[k] == null) sel[k] = true;
+  });
+  meta.selected = sel; saveJSON(KEY_REPMETA, meta);
+
+  // Inizializzo selezione sezioni (default: tutte spuntate)
+  if (!meta.selectedSecs) meta.selectedSecs = {};
+  var selSecs = meta.selectedSecs;
+
+  host.innerHTML = reports.map(function(r, i){
+    var k = r._key;
+    var checked = sel[k] !== false;
+    var ver = '';
+    if (r.output){
+      try {
+        if (r.moduleId === 'glaser'){
+          ver = r.output.hasCondensation ? 'Condensa rilevata' : 'Nessuna condensa';
+          ver += ' &middot; fRsi = ' + (r.output.fRsi != null ? Number(r.output.fRsi).toFixed(3) : '?');
+        } else if (r.moduleId === 'termo'){
+          ver = 'UR sup = ' + (r.output.UR_surf_perc != null ? Number(r.output.UR_surf_perc).toFixed(0)+'%' : '?');
+          if (r.output.fRsi != null) ver += ' &middot; fRsi = ' + Number(r.output.fRsi).toFixed(3);
+        } else if (r.moduleId === 'radon'){
+          ver = 'Media = ' + (r.output.media_Bq_m3 != null ? Math.round(r.output.media_Bq_m3)+' Bq/m³' : '?');
+        }
+      } catch(_e){}
+    }
+    if (!ver && r._sommario) ver = esc(r._sommario.slice(0, 180));   /* 19/11/2026: sintesi mandata dal modulo */
+    // Estraggo sezioni dallo snapshot HTML (docHtml o htmlSnippet)
+    var snapHtml = r.docHtml || r.htmlSnippet || '';
+    var sections = _extractSections(snapHtml);
+    if (!selSecs[k]) selSecs[k] = {};
+    // Default sezioni: tutte spuntate (true) la prima volta
+    sections.forEach(function(s){ if (selSecs[k][s.key] == null) selSecs[k][s.key] = true; });
+
+    var sectionsHtml = '';
+    if (sections.length > 0){
+      var nOn = sections.filter(function(s){ return selSecs[k][s.key] !== false; }).length;
+      sectionsHtml = '<div class="snap-sections">'+
+        '<div class="snap-sections-head">📑 Sezioni dello snapshot <strong>('+nOn+'/'+sections.length+' incluse)</strong>' +
+        '<button type="button" class="all-toggle" data-allkey="'+esc(k)+'">'+(nOn===sections.length?'Deseleziona tutte':'Seleziona tutte')+'</button>' +
+        '</div>';
+      sections.forEach(function(s){
+        var on = selSecs[k][s.key] !== false;
+        var info = _sectionLabel(s.key);
+        sectionsHtml += '<div class="snap-sec-row'+(on?' is-on':'')+'" data-key="'+esc(k)+'" data-sec="'+esc(s.key)+'">'+
+          '<input type="checkbox" data-key="'+esc(k)+'" data-sec="'+esc(s.key)+'" '+(on?'checked':'')+'>'+
+          '<label><span class="sec-ico">'+info.ico+'</span>'+esc(info.lab)+'</label>'+
+          (s.count>1?'<span class="sec-count">×'+s.count+'</span>':'')+
+        '</div>';
+      });
+      sectionsHtml += '</div>';
+    }
+
+    return '<div class="snap '+(checked?'is-on':'is-off')+'" data-key="'+esc(k)+'">'+
+      '<input type="checkbox" data-key="'+esc(k)+'" '+(checked?'checked':'')+'>'+
+      '<div class="info">'+
+        '<div class="nm">'+esc(r.moduleName || r.moduleId)+'</div>'+
+        '<div class="meta">'+fmtDateTime(r.timestamp)+(r.note ? ' &middot; <em style="color:var(--ink-soft);font-style:italic">'+esc(r.note.substring(0,80))+'</em>' : '')+'</div>'+
+        (ver ? '<div class="ver">'+ver+'</div>' : '')+
+      '</div>'+
+      '<div class="acts">'+
+        '<button type="button" data-act="rm" data-i="'+i+'" class="rm" title="Rimuovi questa analisi dal report"><span class="ico">&times;</span><span>Rimuovi</span></button>'+
+      '</div>'+
+      sectionsHtml +
+    '</div>';
+  }).join('');
+
+  // Salvo eventuali nuove sezioni inizializzate
+  meta.selectedSecs = selSecs; saveJSON(KEY_REPMETA, meta);
+
+  // Checkbox SNAPSHOT INTERO (livello 1)
+  host.querySelectorAll('input[type=checkbox]:not([data-sec])').forEach(function(cb){
+    cb.addEventListener('change', function(){
+      var k = cb.dataset.key;
+      sel[k] = cb.checked;
+      meta.selected = sel; saveJSON(KEY_REPMETA, meta);
+      var snapEl = cb.closest('.snap');
+      snapEl.classList.toggle('is-on', cb.checked);
+      snapEl.classList.toggle('is-off', !cb.checked);
+      refreshPreview();
+    });
+  });
+  // Checkbox SEZIONE (livello 2 - granulare)
+  host.querySelectorAll('input[type=checkbox][data-sec]').forEach(function(cb){
+    cb.addEventListener('change', function(){
+      var k = cb.dataset.key;
+      var s = cb.dataset.sec;
+      if (!selSecs[k]) selSecs[k] = {};
+      selSecs[k][s] = cb.checked;
+      meta.selectedSecs = selSecs; saveJSON(KEY_REPMETA, meta);
+      cb.closest('.snap-sec-row').classList.toggle('is-on', cb.checked);
+      // Aggiorno counter sezioni nell'header
+      var sectionsEl = cb.closest('.snap-sections');
+      if (sectionsEl){
+        var cbs = sectionsEl.querySelectorAll('input[type=checkbox][data-sec]');
+        var tot = cbs.length;
+        var on = sectionsEl.querySelectorAll('input[type=checkbox][data-sec]:checked').length;
+        var head = sectionsEl.querySelector('.snap-sections-head');
+        if (head){
+          head.firstChild.nodeValue = '📑 Sezioni dello snapshot ';
+          head.querySelector('strong').textContent = '('+on+'/'+tot+' incluse)';
+          var btn = head.querySelector('.all-toggle');
+          if (btn) btn.textContent = (on===tot?'Deseleziona tutte':'Seleziona tutte');
+        }
+      }
+      refreshPreview();
+    });
+  });
+  // Bottone "Seleziona/Deseleziona tutte le sezioni"
+  host.querySelectorAll('.all-toggle').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var k = btn.dataset.allkey;
+      var sectionsEl = btn.closest('.snap-sections');
+      var cbs = sectionsEl.querySelectorAll('input[type=checkbox][data-sec]');
+      var allOn = sectionsEl.querySelectorAll('input[type=checkbox][data-sec]:checked').length === cbs.length;
+      var newState = !allOn;
+      cbs.forEach(function(cb){
+        cb.checked = newState;
+        var s = cb.dataset.sec;
+        if (!selSecs[k]) selSecs[k] = {};
+        selSecs[k][s] = newState;
+        cb.closest('.snap-sec-row').classList.toggle('is-on', newState);
+      });
+      meta.selectedSecs = selSecs; saveJSON(KEY_REPMETA, meta);
+      // Aggiorno counter
+      btn.textContent = newState ? 'Deseleziona tutte' : 'Seleziona tutte';
+      var head = sectionsEl.querySelector('.snap-sections-head strong');
+      if (head) head.textContent = '('+(newState?cbs.length:0)+'/'+cbs.length+' incluse)';
+      refreshPreview();
+    });
+  });
+  host.querySelectorAll('button[data-act=rm]').forEach(function(b){
+    b.addEventListener('click', function(){
+      if (!confirm('Rimuovere questa analisi dal report?')) return;
+      var i = parseInt(b.dataset.i,10);
+      var arr = loadJSON(KEY_REPORTS, []);
+      arr.splice(i,1);
+      saveJSON(KEY_REPORTS, arr);
+      renderSnaps(); refreshPreview();
+    });
+  });
+}
+
+/* === BIND DATI RELAZIONE === */
+function bindMeta(){
+  var meta = loadJSON(KEY_REPMETA, {});
+  ['dataEmiss','rifIncarico','oggetto','conclusioni'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (meta[id]) el.value = meta[id];
+    el.addEventListener('input', function(){
+      meta[id] = el.value; saveJSON(KEY_REPMETA, meta);
+    });
+    el.addEventListener('change', refreshPreview);
+    el.addEventListener('blur', refreshPreview);
+  });
+}
+
+/* === BUILD DOCUMENTO === */
+function buildFullReport(){
+  var p = loadJSON(KEY_PERITO, {});
+  var imm = loadJSON(KEY_LOCALI, {ana:{}});
+  var ana = imm.ana || {};
+  var meta = loadJSON(KEY_REPMETA, {});
+  var reports = loadReports();
+  var sel = meta.selected || {};
+  var oggetto = meta.oggetto || ana.Oggetto || 'Relazione tecnica';
+  var dataEmiss = meta.dataEmiss || new Date().toISOString().slice(0,10);
+  var rif = meta.rifIncarico || '';
+  var conclusioni = meta.conclusioni || '';
+
+  var html = '<div class="mx-doc">';
+
+  /* COPERTINA */
+  html += '<div style="text-align:center;border-bottom:3px solid #2c1810;padding-bottom:18px;margin-bottom:24px">';
+  if (p.logoData) html += '<img src="'+esc(p.logoData)+'" style="max-height:90px;max-width:200px;margin-bottom:12px"><br>';
+  html += '<div style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#6b5c4c;margin-bottom:8px">Relazione tecnica</div>';
+  html += '<div style="font-family:Georgia,serif;font-style:italic;font-size:24px;font-weight:700;color:#2c1810;line-height:1.3">'+esc(oggetto)+'</div>';
+  if (rif) html += '<div style="margin-top:14px;font-size:12px;color:#6b5c4c">Riferimento incarico: <b>'+esc(rif)+'</b></div>';
+  html += '<div style="margin-top:6px;font-size:12px;color:#6b5c4c">Data emissione: <b>'+fmtDate(dataEmiss)+'</b></div>';
+  html += '</div>';
+
+  /* INTESTAZIONE PERITO + CLIENTE */
+  html += '<table style="width:100%;margin-bottom:18px"><tr style="vertical-align:top">';
+  html += '<td style="width:50%;padding-right:14px;border-right:1px solid #e6e0d2"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.10em;color:#6b5c4c;font-weight:700;margin-bottom:6px">Perito</div>';
+  if (p.nome){
+    html += '<div style="font-size:13px;font-weight:700;color:#2c1810">'+esc(p.titolo||'')+' '+esc(p.nome)+'</div>';
+    if (p.studio) html += '<div style="font-size:11.5px;color:#6b5c4c;margin-top:3px">'+esc(p.studio)+'</div>';
+    if (p.albo) html += '<div style="font-size:11.5px;color:#6b5c4c">'+esc(p.albo)+(p.numAlbo?' n. '+esc(p.numAlbo):'')+'</div>';
+    if (p.piva) html += '<div style="font-size:11.5px;color:#6b5c4c">P.IVA/C.F.: '+esc(p.piva)+'</div>';
+    if (p.tel || p.email) html += '<div style="font-size:11.5px;color:#6b5c4c">'+(p.tel?'Tel.: '+esc(p.tel):'')+(p.tel&&p.email?' &middot; ':'')+(p.email?esc(p.email):'')+'</div>';
+  } else {
+    html += '<div style="color:#a83232;font-style:italic">Anagrafica perito non compilata</div>';
+  }
+  html += '</td>';
+  html += '<td style="width:50%;padding-left:14px"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.10em;color:#6b5c4c;font-weight:700;margin-bottom:6px">Committente / immobile</div>';
+  if (ana.Nome){
+    html += '<div style="font-size:13px;font-weight:700;color:#2c1810">'+esc(ana.Nome)+'</div>';
+    if (ana.CF) html += '<div style="font-size:11.5px;color:#6b5c4c;margin-top:3px">C.F./P.IVA: '+esc(ana.CF)+'</div>';
+    if (ana.Indirizzo) html += '<div style="font-size:11.5px;color:#6b5c4c">'+esc(ana.Indirizzo)+'</div>';
+    if (ana.Catasto) html += '<div style="font-size:11.5px;color:#6b5c4c">Catasto: '+esc(ana.Catasto)+'</div>';
+    if (ana.Anno) html += '<div style="font-size:11.5px;color:#6b5c4c">Anno costruzione: '+esc(ana.Anno)+'</div>';
+    if (ana.DataSopr) html += '<div style="font-size:11.5px;color:#6b5c4c">Data sopralluogo: '+fmtDate(ana.DataSopr)+'</div>';
+  } else {
+    html += '<div style="color:#a83232;font-style:italic">Committente non compilato</div>';
+  }
+  html += '</td></tr></table>';
+
+  /* INDICE */
+  var selectedReports = reports.filter(function(r){
+    var k = r._key;
+    return sel[k] !== false;
+  });
+  if (selectedReports.length === 0){
+    html += '<div style="background:#fbf0f0;border-left:4px solid #a83232;padding:12px 16px;color:#7a1a1a"><b>Nessuna analisi selezionata.</b> Spunta almeno un\'analisi dalla lista per generare la relazione.</div>';
+    html += '</div>';
+    return html;
+  }
+  html += '<h2 style="font-size:16px;color:#2c5d7c;border-bottom:1px solid #d8d3c4;padding-bottom:5px;margin:26px 0 10px">Indice delle analisi</h2>';
+  html += '<ol style="padding-left:24px;line-height:1.7;font-size:12.5px">';
+  selectedReports.forEach(function(r){
+    html += '<li><b>'+esc(r.moduleName||r.moduleId)+'</b>, '+fmtDateTime(r.timestamp)+(r.note ? ' &middot; <em>'+esc(r.note)+'</em>' : '')+'</li>';
+  });
+  html += '</ol>';
+
+  /* === Colori per modulo (banner separatori) === */
+  /* Mappa colore/icona per moduleId. Include ALIAS per nomi alternativi underscore/long-form */
+  var _glaser_col = { primary:'#2c5d7c', soft:'#e8f2fa', dark:'#1a3d52', icon:'\ud83c\udfe0' };
+  var _termo_col  = { primary:'#c0392b', soft:'#fbf0f0', dark:'#922a1f', icon:'\ud83c\udf21' };
+  var _hub_col    = { primary:'#5e35b1', soft:'#ede7f6', dark:'#311b92', icon:'\u2753' };
+  var _micro_col  = { primary:'#8e44ad', soft:'#f5edf9', dark:'#5d2c75', icon:'\ud83c\udfa8' };
+  var moduleColors = {
+    'umidita-hub':                _hub_col,
+    'umidita_hub':                _hub_col,
+    'risalita':                   { primary:'#2980b9', soft:'#e8f2fa', dark:'#1f5980', icon:'\ud83d\udca7' },
+    'infiltrazioni':              { primary:'#1f4e79', soft:'#e6ecf2', dark:'#143552', icon:'\ud83d\udca6' },
+    'sali':                       { primary:'#d4a017', soft:'#fdf6e3', dark:'#8c6a0f', icon:'\ud83e\uddc2' },
+    'biodeteriogeni':             { primary:'#558b2f', soft:'#f0f8e8', dark:'#33691e', icon:'\ud83c\udf41' },
+    'glaser':                     _glaser_col,
+    'glaser-condensa-interstiziale': _glaser_col,
+    'condensa-glaser':            _glaser_col,
+    'termo':                      _termo_col,
+    'termoigrometria':            _termo_col,
+    'radon':                      { primary:'#7b1fa2', soft:'#f5e6f9', dark:'#4a148c', icon:'\u2622' },
+    'iaq':                        { primary:'#16a085', soft:'#e0f5f0', dark:'#0e7060', icon:'\ud83c\udf2c' },
+    'vespai':                     { primary:'#34495e', soft:'#ecedee', dark:'#1a242f', icon:'\ud83c\udfd7' },
+    'microclima-bc':              _micro_col,
+    'microclima_bc':              _micro_col,
+    'termo-neon':                 { primary:'#00aaff', soft:'#e6f7ff', dark:'#006baa', icon:'\u2600' },
+    'asciugatura':                { primary:'#e67e22', soft:'#fdf2e6', dark:'#a85c11', icon:'\u2600' },
+    'locali-cantiere':            { primary:'#27ae60', soft:'#eafaf1', dark:'#1b6c3a', icon:'\ud83c\udfd7' },
+    'cantieri':                   { primary:'#8e44ad', soft:'#f5edf9', dark:'#5d2c75', icon:'\ud83d\udccb' },
+    'foto-triage':                { primary:'#e67e22', soft:'#fdf2e6', dark:'#a85c11', icon:'\ud83d\udcf7' },
+    'mappa-indagini':             { primary:'#0e7c87', soft:'#e3f3f5', dark:'#075863', icon:'\ud83c\udfd7' },
+    'mappa-indagini-v2':          { primary:'#0e7c87', soft:'#e3f3f5', dark:'#075863', icon:'\ud83d\uddfa' },
+    'strumenti-diagnostici':      { primary:'#0e7c87', soft:'#e3f3f5', dark:'#075863', icon:'\ud83d\udd2c' },
+    'soluzioni-risanamento':      { primary:'#2e7d52', soft:'#eef9f1', dark:'#1b5532', icon:'\ud83d\udee0' }
+  };
+
+  /* ANALISI INCLUSE, banner colorato + separatore netto per ogni modulo */
+  selectedReports.forEach(function(r, idx){
+    var col = moduleColors[r.moduleId] || { primary:'#6b5c4c', soft:'#faf8f3', dark:'#2c1810', icon:'\ud83d\udcc4' };
+    /* Separatore di pagina + banda colorata superiore */
+    html += '<div style="page-break-before:always;margin-top:40px;border-top:6px solid '+col.primary+';padding-top:0">';
+    /* Banner identitario grande con icona + colore modulo */
+    html += '<div style="background:linear-gradient(135deg,'+col.soft+' 0%,#fff 100%);border:2px solid '+col.primary+';border-left:8px solid '+col.primary+';border-radius:0 12px 12px 0;padding:18px 22px;margin-bottom:18px;position:relative">';
+    html += '<div style="display:flex;align-items:center;gap:14px">';
+    html += '<div style="font-size:42px;line-height:1;flex-shrink:0">'+col.icon+'</div>';
+    html += '<div style="flex:1">';
+    html += '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:'+col.dark+';font-weight:800">Analisi '+(idx+1)+' di '+selectedReports.length+'</div>';
+    html += '<div style="font-size:22px;font-style:italic;font-family:Georgia,serif;color:'+col.dark+';margin-top:4px;font-weight:700;line-height:1.2">'+esc(r.moduleName||r.moduleId)+'</div>';
+    html += '<div style="font-size:11.5px;color:'+col.dark+';font-family:monospace;margin-top:4px;opacity:.85">Eseguita: '+fmtDateTime(r.timestamp)+'</div>';
+    if (r.note) html += '<div style="font-size:12.5px;font-style:italic;color:'+col.dark+';margin-top:8px;padding-top:8px;border-top:1px dashed '+col.primary+'">Note del perito: '+esc(r.note)+'</div>';
+    html += '</div></div>';
+    html += '</div>';
+    /* Stile globale per le sezioni del modulo (colore tema sezione h2/h3) */
+    html += '<style>.report-analysis-'+idx+' h2{color:'+col.dark+' !important;border-bottom-color:'+col.primary+' !important;border-left:4px solid '+col.primary+' !important;padding-left:10px !important;background:'+col.soft+' !important;padding:6px 10px !important;border-radius:0 6px 6px 0 !important}.report-analysis-'+idx+' h3{color:'+col.dark+' !important}</style>';
+    html += '<div class="report-analysis-'+idx+'">';
+    /* Inserisco il docHtml originale dello snapshot (già contiene sezioni del modulo) */
+    if (r.docHtml){
+      /* Rimuovo eventuale mx-doc wrapper interno e doc-head per evitare doppia intestazione */
+      var inner = r.docHtml.replace(/<button[\s\S]*?<\/button>/gi, '');   /* 19/11/2026: niente tasti dell'interfaccia nella relazione */
+      if (/<div class="mx-doc">/.test(inner)) inner = inner.replace(/<div class="mx-doc">/g, '').replace(/<\/div>\s*$/m, '');   /* 19/11/2026 */
+      /* Rimuovo i doc-head (l'intestazione perito già nel report finale) */
+      inner = inner.replace(/<div class="mx-doc-head">[\s\S]*?<\/div>\s*(?=<h1)/, '');
+      /* Rimuovo h1 con titolo del modulo (già fatto sopra) */
+      inner = inner.replace(/<h1[\s\S]*?<\/h1>/, '');
+      /* Rimuovo footer del modulo */
+      inner = inner.replace(/<div class="mx-doc-footer">[\s\S]*?<\/div>\s*$/m, '');
+      /* FASE 4: Applico esclusioni granulari per sezione */
+      var snapKey = r._key;
+      var snapSecs = (meta.selectedSecs && meta.selectedSecs[snapKey]) || {};
+      var excludedSecs = Object.keys(snapSecs).filter(function(s){ return snapSecs[s] === false; });
+      if (excludedSecs.length > 0){
+        inner = _stripExcludedSections(inner, excludedSecs);
+      }
+      html += inner;
+    } else {
+      html += '<p style="font-style:italic;color:#6b5c4c">Snapshot senza documento HTML pre-compilato.</p>';
+    }
+    html += '</div></div>';  /* chiude .report-analysis e wrapper */
+    /* Linea finale doppia per chiudere la sezione visivamente */
+    html += '<div style="margin-top:20px;height:4px;background:linear-gradient(90deg,transparent,'+col.primary+',transparent);border-radius:2px"></div>';
+  });
+
+  /* CONCLUSIONI */
+  if (conclusioni){
+    html += '<h2 style="page-break-before:always;font-size:16px;color:#2c5d7c;border-bottom:1px solid #d8d3c4;padding-bottom:5px;margin:36px 0 10px">Conclusioni e raccomandazioni</h2>';
+    html += '<div style="white-space:pre-wrap;font-size:13px;line-height:1.6">'+esc(conclusioni)+'</div>';
+  }
+
+  /* FOOTER */
+  html += '<div style="margin-top:36px;padding-top:14px;border-top:1px solid #d8d3c4;font-size:10.5px;color:#8b7355;text-align:center;line-height:1.6">';
+  html += 'Relazione generata da <b>Mixando · Report Builder</b> &middot; '+fmtDateTime(new Date().toISOString())+' &middot; '+selectedReports.length+' analisi incluse';
+  html += '</div>';
+
+  html += '</div>';
+  return html;
+}
+
+function refreshPreview(){
+  document.getElementById('previewPaper').innerHTML = buildFullReport();
+}
+
+/* === EXPORT === */
+/* 19/11/2026: aperto con Word, il documento usciva di cento pagine (quasi una riga per pagina) e senza grafici.
+   Due cause: Word applica il «salto pagina» scritto su un riquadro a ogni riga che il riquadro contiene, e non disegna
+   i grafici SVG (ne stampa le scritte alla rinfusa). Prima di scaricare, quindi: il salto pagina diventa un salto vero
+   fra un'analisi e l'altra, e ogni grafico diventa un'immagine. La stampa/PDF dal browser non cambia. */
+function exportWord(){
+  _svgInImmagini(buildFullReport(), function(h){
+    _exportWordCon(h.replace(/<div style="page-break-before:always;/g, '<br clear="all" style="page-break-before:always;mso-break-type:page-break"><div style="'));
+  });
+}
+function _svgInImmagini(html, fatto){
+  var host = document.createElement('div'); host.innerHTML = html;
+  var svgs = [].slice.call(host.querySelectorAll('svg'));
+  var restano = svgs.length;
+  if (!restano){ fatto(html); return; }
+  var chiudi = function(){ if (--restano === 0) fatto(host.innerHTML); };
+  svgs.forEach(function(svg){
+    try {
+      var vb = (svg.getAttribute('viewBox') || '').split(/[ ,]+/).map(Number);
+      var w = parseFloat(svg.getAttribute('width')) || vb[2] || 800;
+      var h = parseFloat(svg.getAttribute('height')) || vb[3] || 400;
+      svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      svg.setAttribute('width', w); svg.setAttribute('height', h);
+      /* le curve nascono trasparenti e compaiono con un'animazione: nell'immagine fissa va messo il valore finale */
+      [].slice.call(svg.querySelectorAll('animate,set,animateTransform,animateMotion')).forEach(function(a){
+        try { var an = a.getAttribute('attributeName'), to = a.getAttribute('to'); if (an && to != null && a.parentNode && !/transform|motion/i.test(a.tagName)) a.parentNode.setAttribute(an, to); } catch(e){}
+        if (a.parentNode) a.parentNode.removeChild(a);
+      });
+      var xml = new XMLSerializer().serializeToString(svg);
+      var img = new Image();
+      img.onload = function(){
+        try {
+          var sc = Math.min(2, 1800 / w); if (w < 64) sc = 4;
+          var c = document.createElement('canvas'); c.width = Math.round(w * sc); c.height = Math.round(h * sc);
+          var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+          var out = document.createElement('img'); out.src = c.toDataURL('image/png');
+          var lw = (w < 64) ? 14 : Math.min(600, w); out.setAttribute('width', Math.round(lw)); out.setAttribute('height', Math.round(h * lw / w));
+          svg.parentNode.replaceChild(out, svg);
+        } catch(e){}
+        chiudi();
+      };
+      img.onerror = chiudi;
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+    } catch(e){ chiudi(); }
+  });
+}
+function _exportWordCon(bodyHtml){
+  var docHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'+
+    '<head><meta charset="utf-8"><title>Relazione finale</title>'+
+    '<style>body{font-family:Georgia,serif;color:#2c1810;font-size:12pt;line-height:1.5}h1{font-size:20pt;color:#2c1810;font-style:italic;border-bottom:3px solid #2c1810;padding-bottom:8pt}h2{font-size:14pt;color:#2c5d7c;border-bottom:1px solid #d8d3c4;padding-bottom:3pt;margin-top:18pt}h3{font-size:12pt;color:#2c1810;margin-top:12pt}table{border-collapse:collapse;width:100%;margin:6pt 0;font-size:10pt}th,td{border:1px solid #999;padding:4pt 6pt;text-align:left;vertical-align:top}th{background:#f0eada;font-weight:700}svg{max-width:100%;height:auto;display:block;margin:8pt auto}</style>'+
+    '</head><body>'+bodyHtml+'</body></html>';
+  var blob = new Blob(['﻿', docHtml], {type:'application/msword;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var imm = loadJSON(KEY_LOCALI, {ana:{}});
+  var slug = (imm && imm.ana && imm.ana.Nome ? imm.ana.Nome.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : 'relazione-tecnica');
+  var a = document.createElement('a');
+  a.href = url; a.download = 'relazione-'+slug+'-'+new Date().toISOString().slice(0,10)+'.doc';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 300);
+}
+
+function exportPDF(){ window.print(); }
+
+function exportJSON(){
+  var bundle = {
+    schemaVersion: 1,
+    type: 'mixando-report-bundle',
+    exportedAt: new Date().toISOString(),
+    perito: loadJSON(KEY_PERITO, {}),
+    immobile: loadJSON(KEY_LOCALI, {ana:{}}),
+    meta: loadJSON(KEY_REPMETA, {}),
+    reports: loadJSON(KEY_REPORTS, [])
+  };
+  var blob = new Blob([JSON.stringify(bundle, null, 2)], {type:'application/json;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var imm = bundle.immobile || {ana:{}};
+  var slug = (imm.ana && imm.ana.Nome ? imm.ana.Nome.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : 'relazione-tecnica');
+  var a = document.createElement('a');
+  a.href = url; a.download = 'report-bundle-'+slug+'-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 300);
+}
+
+function clearAll(){
+  if (!confirm('Eliminare TUTTI gli snapshot raccolti? (l\'anagrafica e i moduli singoli NON saranno toccati)')) return;
+  localStorage.removeItem(KEY_REPORTS);
+  localStorage.removeItem(KEY_REPMETA);
+  renderSnaps(); refreshPreview();
+}
+
+/* === INIT === */
+document.getElementById('btnReload').addEventListener('click', function(){ renderAnagrafica(); refreshPreview(); });
+document.getElementById('btnSelAll').addEventListener('click', function(){
+  var reports = loadReports();
+  var meta = loadJSON(KEY_REPMETA, {});
+  meta.selected = {};
+  reports.forEach(function(r,i){ var k = r._key; meta.selected[k] = true; });
+  saveJSON(KEY_REPMETA, meta);
+  renderSnaps(); refreshPreview();
+});
+document.getElementById('btnDeselAll').addEventListener('click', function(){
+  var reports = loadReports();
+  var meta = loadJSON(KEY_REPMETA, {});
+  meta.selected = {};
+  reports.forEach(function(r,i){ var k = r._key; meta.selected[k] = false; });
+  saveJSON(KEY_REPMETA, meta);
+  renderSnaps(); refreshPreview();
+});
+document.getElementById('btnClearAll').addEventListener('click', clearAll);
+document.getElementById('btnRefresh').addEventListener('click', refreshPreview);
+document.getElementById('btnWord').addEventListener('click', exportWord);
+document.getElementById('btnPDF').addEventListener('click', exportPDF);
+document.getElementById('btnJSON').addEventListener('click', exportJSON);
+
+/* Inizializza data emissione a oggi se non già impostata */
+var defaultMeta = loadJSON(KEY_REPMETA, {});
+if (!defaultMeta.dataEmiss){
+  defaultMeta.dataEmiss = new Date().toISOString().slice(0,10);
+  saveJSON(KEY_REPMETA, defaultMeta);
+}
+
+renderAnagrafica();
+bindMeta();
+renderSnaps();
+refreshPreview();
+
+})();
+</script>
+<!-- MX-BUILD: 2026-05-24-report-builder-v1.2 Rimuovi visibile + Selez/Deselez tutte aggregatore Word/PDF/JSON da mx2::reports -->
+<script src="_shared/mx-switcher.js" defer></script>
+<!-- 20/11/2026: recapiti dell'autore in fondo a ogni pagina (non si stampano) -->
+<style>@media print{.mx-contatti{display:none !important}}</style>
+<div class="mx-contatti" style="clear:both;text-align:center;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.85;padding:10px 12px 18px">Renzo-ArtHome &middot; cell. <a href="tel:+393358442978" style="color:inherit;text-decoration:none;white-space:nowrap">+39 335 844 2978</a> &middot; <a href="mailto:renzoarthome@gmail.com" style="color:inherit;text-decoration:none;white-space:nowrap">renzoarthome@gmail.com</a></div>
+<!-- 20/11/2026: avviso per chi arriva dal sito, sotto i recapiti (non si stampa) -->
+<style>@media print{.mx-avviso{display:none !important}}</style>
+<div class="mx-avviso" style="clear:both;text-align:center;font:500 11.5px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:inherit;opacity:.8;max-width:760px;margin:-10px auto 0;padding:0 14px 18px">Mixando aiuta a ragionare su quello che si è misurato. La diagnosi la fa chi misura sul posto.<br>Quello che scrivi resta sul tuo computer o sul tuo telefono.</div>
+</body>
+</html>
