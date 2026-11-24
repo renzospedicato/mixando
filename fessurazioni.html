@@ -484,7 +484,7 @@ function _difFess(){
   if(v.ti){
     add("Tipo di lesione","id",v.ti.tipo+", cinematismo: "+v.ti.cin,v.ti.fonte);
     add("Causa probabile",(v.livello==="ok"?"ok":"conc"),v.ti.causa,v.ti.fonte);
-  } else add("Tipo di lesione","na","indica l'orientamento (Step 2)","INFO");
+  } else add("Tipo di lesione","na","indica l'orientamento (Step 2)","n.d.");
   if(v.bc){
     var bst=(v.bc.liv==="ok"?"ok":(v.bc.liv==="warn"?"mid":"risk"));
     add("Gravità per ampiezza",bst,"cat. "+v.bc.cat+" · "+v.bc.grado+" ("+v.bc.rng+")","BRE Digest 251 (1995)");
@@ -508,7 +508,7 @@ function _difHTML(R){
   });
   h+='</div>';
   if(v.flags&&v.flags.length)h+='<div class="dif-foot"><b>Segnali:</b> '+v.flags.map(function(f){return esc(f);}).join(' · ')+'</div>';
-  h+='<div class="dif-foot">Screening basato su fonti consultabili (VERIFICA-FONTI-FESSURAZIONI). Nessuna soglia inventata. La valutazione strutturale resta del tecnico strutturista.</div></div>';
+  h+='<div class="dif-foot">Screening basato su fonti consultabili. Nessuna soglia inventata. La valutazione strutturale resta del tecnico strutturista.</div></div>';
   return h;
 }
 function _difUpdate(){var el=document.getElementById('difLive');if(!el)return;try{_difEnsureStyle();el.innerHTML=_difHTML(_difFess())+_evidenzeHTML();}catch(e){}}

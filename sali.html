@@ -549,26 +549,26 @@ function _difSali(){
   var cats=[['cloruri','Cloruri','Cl⁻',d.cl,'372'],['solfati','Solfati','SO₄²⁻',d.so4,'374'],['nitrati','Nitrati','NO₃⁻',d.no3,'373'],['carbonati','Carbonati','CO₃²⁻',d.co3,'375']];
   cats.forEach(function(c){
     var n=cands(c[0]), val=c[3], st, msg;
-    if(val>0){ st='pres'; msg='anione rilevato ('+val+' mg/kg) → '+n+' sali compatibili nel DB'; }
+    if(val>0){ st='pres'; msg='anione rilevato ('+val+' mg/kg) → '+n+' sali compatibili nell’elenco del modulo'; }
     else if(val===0){ st='escl'; msg='test negativo (0 mg/kg) → categoria esclusa'; }
     else { st='na'; msg='anione non ancora testato (Step 3)'; }
-    add(c[1]+' ('+c[2]+')', st, msg, 'SALI_DB ionTest · Doehne&Price 2010', 'panelSale '+c[4]);
+    add(c[1]+' ('+c[2]+')', st, msg, 'Doehne&Price 2010', 'panelSale '+c[4]);
   });
   /* Sale prevalente selezionato (Step 4) + coerenza con gli anioni misurati */
   var sp=d.salePrevalente?SALI_DB.filter(function(s){return s.id===d.salePrevalente;})[0]:null;
   if(sp){
     var it=sp.ionTest||{}, coerente=(d.cl>0&&it.cloruri)||(d.so4>0&&it.solfati)||(d.no3>0&&it.nitrati)||(d.co3>0&&it.carbonati);
     var anyIon=(d.cl>0||d.so4>0||d.no3>0||d.co3>0);
-    if(anyIon && !coerente) add('Sale prevalente: '+sp.name,'warn','selezionato ma il suo anione non risulta tra i test positivi → verificare Step 3/4','SALI_DB · UNI 11087:2003 (ritirata 2016, oggi EN 16455)','panelSale 389');
-    else add('Sale prevalente: '+sp.name,'id',(sp.formula||'')+' · '+(sp.mineral||'')+' · distruttività '+(sp.destructive||'n.d.'),'SALI_DB · Doehne&Price 2010','panelSale 388-399');
-  } else add('Sale prevalente','na','non ancora selezionato (Step 4)','SALI_DB','panelSale 389');
+    if(anyIon && !coerente) add('Sale prevalente: '+sp.name,'warn','selezionato ma il suo anione non risulta tra i test positivi → verificare Step 3/4','UNI 11087:2003 (ritirata 2016, oggi EN 16455)','panelSale 389');
+    else add('Sale prevalente: '+sp.name,'id',(sp.formula||'')+' · '+(sp.mineral||'')+' · distruttività '+(sp.destructive||'n.d.'),'Doehne&Price 2010','panelSale 388-399');
+  } else add('Sale prevalente','na','non ancora selezionato (Step 4)','elenco dei sali del modulo','panelSale 389');
   /* Igroscopicità / deliquescenza del sale prevalente: rhEq (DB) vs UR interna misurata (Step 1) */
   if(sp && sp.rhEq!=null){
     if(d.urInt!=null){
-      if(d.urInt>=sp.rhEq) add('Igroscopicità (deliquescenza)','risk','UR interna '+d.urInt+'% ≥ UR equilibrio '+sp.rhEq+'% → sale in regime deliquescente alle condizioni rilevate: assorbe umidità ambientale e perpetua il degrado a prescindere dalla fonte liquida','UR eq. (SALI_DB) · UNI 11087:2003 (ritirata 2016, oggi EN 16455) · Doehne&Price 2010','Step1 332');
-      else add('Igroscopicità (deliquescenza)','escl','UR interna '+d.urInt+'% < UR equilibrio '+sp.rhEq+'% → sotto soglia: non deliquescente alle condizioni rilevate','UR eq. (SALI_DB)','Step1 332');
-    } else add('Igroscopicità (deliquescenza)','na','manca UR interna (Step 1) per il confronto con UR equilibrio '+sp.rhEq+'%','UR eq. (SALI_DB)','Step1 332');
-  } else add('Igroscopicità (deliquescenza)','na','seleziona il sale prevalente (Step 4) per valutare la deliquescenza','UR eq. (SALI_DB)','n.d.');
+      if(d.urInt>=sp.rhEq) add('Igroscopicità (deliquescenza)','risk','UR interna '+d.urInt+'% ≥ UR equilibrio '+sp.rhEq+'% → sale in regime deliquescente alle condizioni rilevate: assorbe umidità ambientale e perpetua il degrado a prescindere dalla fonte liquida','UR di equilibrio dei sali · UNI 11087:2003 (ritirata 2016, oggi EN 16455) · Doehne&Price 2010','Step1 332');
+      else add('Igroscopicità (deliquescenza)','escl','UR interna '+d.urInt+'% < UR equilibrio '+sp.rhEq+'% → sotto soglia: non deliquescente alle condizioni rilevate','UR di equilibrio dei sali','Step1 332');
+    } else add('Igroscopicità (deliquescenza)','na','manca UR interna (Step 1) per il confronto con UR equilibrio '+sp.rhEq+'%','UR di equilibrio dei sali','Step1 332');
+  } else add('Igroscopicità (deliquescenza)','na','seleziona il sale prevalente (Step 4) per valutare la deliquescenza','UR di equilibrio dei sali','n.d.');
   return {v:v, hyps:H};
 }
 function _difEnsureStyle(){
@@ -598,7 +598,7 @@ function _difHTML(R){
     h+='<div class="dif-h" style="background:'+m[2]+'"><span class="dif-badge" style="background:'+m[1]+'">'+m[0]+'</span><b>'+esc(x.nome)+'</b><div class="dif-mot">'+esc(x.motivo)+' <span class="dif-fonte">['+esc(x.fonte)+']</span></div></div>';
   });
   h+='</div>';
-  h+='<div class="dif-foot">I sali sono una <b>manifestazione</b>: la fonte d’acqua (risalita / infiltrazione / condensa) va diagnosticata nei moduli dedicati. Sintesi della logica del modulo (calcVerdict 474 + filtro ionsPos 372-381 + UR equilibrio del DB). Nessuna soglia inventata: ogni voce riporta norma e riga. La conclusione resta del tecnico.</div></div>';
+  h+='<div class="dif-foot">I sali sono una <b>manifestazione</b>: la fonte d’acqua (risalita / infiltrazione / condensa) va diagnosticata nei moduli dedicati. Sintesi della logica del modulo (verdetto automatico + filtro ionico + UR di equilibrio dei sali). Nessuna soglia inventata: ogni voce riporta la norma di riferimento. La conclusione resta del tecnico.</div></div>';
   return h;
 }
 function _immobileId(){ try{ var l=JSON.parse(localStorage.getItem('mx2::locali-v1')||'{}'); var a=(l&&l.ana)||{}; var raw=((a.Indirizzo||'')+(a.Catasto||'')+(a.Nome||'')).trim(); if(!raw) return ''; return ((a.Indirizzo||'')+'§'+(a.Catasto||'')+'§'+(a.Nome||'')).toLowerCase(); }catch(e){ return ''; } }

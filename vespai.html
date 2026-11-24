@@ -392,7 +392,7 @@ function _difHTML(R){
     h+='<div class="dif-h" style="background:'+m[2]+'"><span class="dif-badge" style="background:'+m[1]+'">'+m[0]+'</span><b>'+esc(x.nome)+'</b><div class="dif-mot">'+esc(x.motivo)+' <span class="dif-fonte">['+esc(x.fonte)+']</span></div></div>';
   });
   h+='</div>';
-  h+='<div class="dif-foot">Sintesi della logica del modulo (calcVerdict 296: il vespaio è conforme solo se aerazione ∧ radon ∧ altezza ∧ microclima sono tutti conformi). Nessuna soglia inventata: ogni voce riporta norma e riga. La conclusione resta del tecnico.</div></div>';
+  h+='<div class="dif-foot">Sintesi della logica del modulo (il vespaio è conforme solo se aerazione ∧ radon ∧ altezza ∧ microclima sono tutti conformi). Nessuna soglia inventata: ogni voce riporta la norma di riferimento. La conclusione resta del tecnico.</div></div>';
   return h;
 }
 function _immobileId(){ try{ var l=JSON.parse(localStorage.getItem('mx2::locali-v1')||'{}'); var a=(l&&l.ana)||{}; var raw=((a.Indirizzo||'')+(a.Catasto||'')+(a.Nome||'')).trim(); if(!raw) return ''; return ((a.Indirizzo||'')+'§'+(a.Catasto||'')+'§'+(a.Nome||'')).toLowerCase(); }catch(e){ return ''; } }

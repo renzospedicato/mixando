@@ -823,7 +823,7 @@ function _difHTML(R){
     h+='</div>';
   }
   if(v.flags && v.flags.length) h+='<div class="dif-flags"><b>Segnali rilevati:</b> '+v.flags.map(function(f){return '<span class="dif-flag">'+esc(f)+'</span>';}).join(' ')+'</div>';
-  h+='<div class="dif-foot">Sintesi della logica del modulo (calcVerdict, righe 621-701 + rugiada UNI EN ISO 13788). Nessuna soglia inventata: ogni voce riporta norma e riga. La conclusione finale resta del tecnico.</div></div>';
+  h+='<div class="dif-foot">Sintesi della logica del modulo (verdetto automatico + rugiada UNI EN ISO 13788). Nessuna soglia inventata: ogni voce riporta la norma di riferimento. La conclusione finale resta del tecnico.</div></div>';
   return h;
 }
 function _immobileId(){ try{ var l=JSON.parse(localStorage.getItem('mx2::locali-v1')||'{}'); var a=(l&&l.ana)||{}; var raw=((a.Indirizzo||'')+(a.Catasto||'')+(a.Nome||'')).trim(); if(!raw) return ''; return ((a.Indirizzo||'')+'§'+(a.Catasto||'')+'§'+(a.Nome||'')).toLowerCase(); }catch(e){ return ''; } }

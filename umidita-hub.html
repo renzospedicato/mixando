@@ -943,10 +943,10 @@ function _difHTML(R){
   h+='<div class="dif-hyps">';
   R.hyps.forEach(function(x){
     var m={best:['● più probabile','#0e7c87','#e6f4f5'],conc:['concorrente','#b8860b','#fef7e2'],na:['nessun indicatore','#8a7f6c','#f2efe7']}[x.stato]||['n.d.','#888','#eee'];
-    h+='<div class="dif-h" style="background:'+m[2]+'"><span class="dif-badge" style="background:'+m[1]+'">'+m[0]+'</span><b>'+esc(x.nome)+'</b><span class="dif-score">score '+x.score+'</span><div class="dif-mot">'+esc(x.motivo)+' <span class="dif-fonte">['+esc(x.fonte)+' · '+esc(x.riga)+']</span></div></div>';
+    h+='<div class="dif-h" style="background:'+m[2]+'"><span class="dif-badge" style="background:'+m[1]+'">'+m[0]+'</span><b>'+esc(x.nome)+'</b><span class="dif-score">score '+x.score+'</span><div class="dif-mot">'+esc(x.motivo)+' <span class="dif-fonte">['+esc(x.fonte)+']</span></div></div>';
   });
   h+='</div>';
-  h+='<div class="dif-foot">Sintesi del motore di triage (calcVerdict 815-874): 5 ipotesi pesate sugli indicatori (posizione, forma, strumenti BRE 245, sali, efflorescenze, correlazione pioggia, stagione, età, sintomi, T sup vs rugiada). Nessuna soglia inventata: ogni voce riporta norma e riga. Approfondire nel modulo specifico, la conclusione resta del tecnico.</div></div>';
+  h+='<div class="dif-foot">Sintesi del motore di triage: 5 ipotesi pesate sugli indicatori (posizione, forma, strumenti BRE 245, sali, efflorescenze, correlazione pioggia, stagione, età, sintomi, T sup vs rugiada). Nessuna soglia inventata: ogni voce riporta la norma di riferimento. Approfondire nel modulo specifico, la conclusione resta del tecnico.</div></div>';
   return h;
 }
 /* === #1 (sicuro) Evidenze cross-modulo, legge i report salvati per questo immobile e li MOSTRA come ausilio; nessuna esclusione automatica === */
@@ -970,7 +970,7 @@ function _difReport(){
     var R=_difHub();
     var stLab={best:'Più probabile',conc:'Concorrente',na:'Nessun indicatore'};
     var x='<h2>Classifica differenziale delle ipotesi</h2>';
-    x+='<p style="font-size:11px;color:#5d4a30;font-style:italic">A supporto del triage: punteggio di tutte le ipotesi (motore calcVerdict, righe 815-874), con riferimento normativo. La conclusione resta del tecnico.</p>';
+    x+='<p style="font-size:11px;color:#5d4a30;font-style:italic">A supporto del triage: punteggio di tutte le ipotesi, con riferimento normativo. La conclusione resta del tecnico.</p>';
     x+='<table><tr><th>Ipotesi</th><th>Punteggio</th><th>Stato</th><th>Pattern diagnostico</th><th>Riferimento</th></tr>';
     R.hyps.forEach(function(hh){ x+='<tr><td>'+esc(hh.nome)+'</td><td>'+hh.score+'</td><td><strong>'+esc(stLab[hh.stato]||hh.stato)+'</strong></td><td>'+esc(hh.motivo)+'</td><td>'+esc(hh.fonte)+'</td></tr>'; });
     x+='</table>';
