@@ -1136,8 +1136,21 @@ function attachInputs(){
       // re-render condizionato
       if(["tInt","urInt","esclCondensa","barrieraPresente","annoCostruzione"].includes(k))renderPanelOnly();
       if(["metodoScelto"].includes(k))renderPanelOnly();
+      if(/^mc(0|30|60|90|120|150)$/.test(k))_risalGraficoVivo();
     });
   });
+}
+/* Il grafico «Profilo MC% vs altezza» segue le misure mentre si scrivono (24/11/2026). Si ridisegna solo la scheda
+   del grafico, presa da panelGrav(): il campo in cui si sta scrivendo non viene toccato. */
+var _risalGrafT=null;
+function _risalGraficoVivo(){
+  clearTimeout(_risalGrafT);
+  _risalGrafT=setTimeout(function(){
+    if(!STEPS[STATE.cur]||STEPS[STATE.cur].id!=="grav")return;
+    var c=$("stepPanel").querySelector(".svg-card"); if(!c)return;
+    var t=document.createElement("div"); t.innerHTML=panelGrav();
+    var n=t.querySelector(".svg-card"); if(n)c.innerHTML=n.innerHTML;
+  },150);
 }
 function render(){_mxPulisciFuori();
   renderStepper();
