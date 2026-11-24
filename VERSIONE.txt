@@ -1,7 +1,7 @@
 MIXANDO LAB, VERSIONE DI QUESTA COPIA
 =====================================
-Copia dichiarata il 24/11/2026 alle 13:21 (controllo modulo per modulo del 19-20/11/2026, ripulitura dai nomi commerciali e dai prezzi, sistemazione per il telefono, avviso in fondo alle pagine; 24/11/2026: tolti i nomi delle funzioni e i numeri di riga dal riquadro del ragionamento differenziale in otto moduli).
-Firma dell'impronta: a6fa6c1fa0a1
+Copia dichiarata il 24/11/2026 alle 18:45 (controllo modulo per modulo del 19-20/11/2026, ripulitura dai nomi commerciali e dai prezzi, sistemazione per il telefono, avviso in fondo alle pagine; 24/11/2026: tolti i nomi delle funzioni e i numeri di riga dal riquadro del ragionamento differenziale in otto moduli, e la nota per chi programma dal piede della suite).
+Firma dell'impronta: 0737ffffea6e
 File: 52 (elenco con gli hash in _impronta.txt)
 
 Come sapere se una copia è aggiornata
