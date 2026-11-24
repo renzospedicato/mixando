@@ -612,7 +612,7 @@ function _difHTML(R){
   var v=R.v, kk={basso:'ok',medio:'warn',alto:'warn',critico:'err'}[v.level]||'warn';
   var kc={ok:'#1b8a4b',warn:'#e67e22',err:'#c0392b'}[kk]||'#6b5c4c';
   var lvl=(v.level||'').toUpperCase();
-  var h='<div class="dif-box"><div class="dif-head">🔬 Ragionamento differenziale <span class="dif-sub">dal vivo · sintesi del motore del modulo (calcVerdict)</span></div>';
+  var h='<div class="dif-box"><div class="dif-head">🔬 Ragionamento differenziale <span class="dif-sub">dal vivo · sintesi del motore del modulo</span></div>';
   h+='<div class="dif-verdict" style="border-color:'+kc+'"><div><b style="color:'+kc+'">Rischio '+esc(lvl)+'</b><span class="dif-pct">score '+(v.score==null?'n.d.':v.score)+'/7</span></div><div class="dif-summary">'+esc(v.summary)+'</div></div>';
   h+='<div class="dif-sub" style="margin:0 0 6px">Indicatori che il motore valuta sulle risposte (UNI 11182 · WHO 2009 · IICRC S520-2024):</div>';
   h+='<div class="dif-hyps">';

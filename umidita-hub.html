@@ -937,7 +937,7 @@ function _difEnsureStyle(){
 }
 function _difHTML(R){
   var v=R.v, kc={err:'#c0392b',warn:'#e67e22',ok:'#1b8a4b'}[v.kind]||'#6b5c4c';
-  var h='<div class="dif-box"><div class="dif-head">🔬 Ragionamento differenziale <span class="dif-sub">dal vivo · triage del modulo (calcVerdict)</span></div>';
+  var h='<div class="dif-box"><div class="dif-head">🔬 Ragionamento differenziale <span class="dif-sub">dal vivo · triage del modulo</span></div>';
   h+='<div class="dif-verdict" style="border-color:'+kc+'"><div class="dif-sub" style="color:'+kc+'">Patologia più probabile</div><div><b style="color:'+kc+';font-size:13px">'+esc(v.verdict)+'</b></div><div class="dif-summary">'+esc(v.summary)+'</div></div>';
   h+='<div class="dif-sub" style="margin:0 0 6px">Classifica delle ipotesi (punteggio aggiornato sulle risposte):</div>';
   h+='<div class="dif-hyps">';

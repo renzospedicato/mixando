@@ -383,7 +383,7 @@ function _difEnsureStyle(){
 function _difHTML(R){
   var v=R.v, kc={ok:'#1b8a4b',warn:'#e67e22',err:'#c0392b'}[v.kind]||'#6b5c4c';
   var naz=(v.azioni&&v.azioni.length)?v.azioni.length+(v.azioni.length===1?' azione':' azioni'):'';
-  var h='<div class="dif-box"><div class="dif-head">🔬 Ragionamento differenziale <span class="dif-sub">dal vivo · sintesi del motore del modulo (calcVerdict)</span></div>';
+  var h='<div class="dif-box"><div class="dif-head">🔬 Ragionamento differenziale <span class="dif-sub">dal vivo · sintesi del motore del modulo</span></div>';
   h+='<div class="dif-verdict" style="border-color:'+kc+'"><div><b style="color:'+kc+'">'+esc(v.verdict)+'</b>'+(naz?'<span class="dif-pct">'+naz+'</span>':'')+'</div><div class="dif-summary">'+esc(v.summary)+'</div></div>';
   h+='<div class="dif-sub" style="margin:0 0 6px">Criteri di conformità valutati sulle risposte (il verdetto richiede tutti conformi):</div>';
   h+='<div class="dif-hyps">';

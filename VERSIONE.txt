@@ -1,7 +1,7 @@
 MIXANDO LAB, VERSIONE DI QUESTA COPIA
 =====================================
-Copia dichiarata il 20/11/2026 alle 16:49 (controllo modulo per modulo del 19-20/11/2026, ripulitura dai nomi commerciali e dai prezzi, sistemazione per il telefono, avviso in fondo alle pagine).
-Firma dell'impronta: e24831cee08d
+Copia dichiarata il 24/11/2026 alle 07:25 (controllo modulo per modulo del 19-20/11/2026, ripulitura dai nomi commerciali e dai prezzi, sistemazione per il telefono, avviso in fondo alle pagine; 24/11/2026: tolto il nome di una funzione dal sottotitolo del ragionamento differenziale in otto moduli).
+Firma dell'impronta: a88f7f79143c
 File: 52 (elenco con gli hash in _impronta.txt)
 
 Come sapere se una copia è aggiornata

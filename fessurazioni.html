@@ -499,7 +499,7 @@ function _difFess(){
 }
 function _difHTML(R){
   var v=R.v,kc={err:'#c0392b',warn:'#e67e22',ok:'#1b8a4b'}[v.kind]||'#6b5c4c';
-  var h='<div class="dif-box"><div class="dif-head">🔬 Screening differenziale <span class="dif-sub">dal vivo · sintesi del motore (calcVerdict)</span></div>';
+  var h='<div class="dif-box"><div class="dif-head">🔬 Screening differenziale <span class="dif-sub">dal vivo · sintesi del motore</span></div>';
   h+='<div class="dif-verdict" style="border-color:'+kc+'"><div><b style="color:'+kc+'">'+esc(v.verdict)+'</b></div><div class="dif-summary">'+esc(v.summary)+'</div></div>';
   h+='<div class="dif-sub" style="margin:0 0 6px">Valutazione sulle risposte (BRE 251 · NTC 2018 · Cusmano · Tona):</div><div class="dif-hyps">';
   R.hyps.forEach(function(x){
