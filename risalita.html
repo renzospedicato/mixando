@@ -353,7 +353,7 @@ const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").rep
 function showToast(m,k){const t=$("toast");t.textContent=m;t.className="toast show"+(k?" "+k:"");clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.className="toast",3200);}
 function persist(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify({ts:Date.now(),state:STATE}));}catch(e){}}
 function restore(){try{const r=localStorage.getItem(DRAFT_KEY);if(!r)return;const d=JSON.parse(r);if(d&&d.state){Object.assign(STATE.data,d.state.data||{});STATE.cur=d.state.cur||0;STATE.finished=!!d.state.finished;}}catch(e){}}
-function setField(k,v){STATE.data[k]=v;persist();}
+function setField(k,v){STATE.data[k]=v;persist();if(window._difUpdate)_difUpdate();}
 function loadAna(){let p={},i={};try{p=JSON.parse(localStorage.getItem("mx2::perito")||"{}");}catch(e){}try{const l=JSON.parse(localStorage.getItem("mx2::locali-v1")||"{}");i=l.ana||{};}catch(e){}return{perito:p,immobile:i};}
 function renderAna(){const a=loadAna(),p=a.perito,c=a.immobile;
   const pN=p.nome||"n.d.",pM=[p.titolo,p.albo&&(p.albo+(p.numAlbo?" n. "+p.numAlbo:"")),p.tel,p.email].filter(Boolean).join(" · ");
