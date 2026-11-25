@@ -125,6 +125,14 @@ footer.ft strong{color:var(--ink)}
 .preview-paper table{width:100%;border-collapse:collapse;margin:12px 0;font-size:11.5px}
 .preview-paper table th,.preview-paper table td{padding:6px 8px;border-bottom:1px solid #e6e0d2;text-align:left;vertical-align:top;line-height:1.45}
 .preview-paper table th{background:#faf8f3;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#6b5c4c}
+/* Schermi stretti (25/11/2026): sul telefono dentro il foglio restavano 176 px e le tabelle uscivano a destra senza
+   poter scorrere. Solo a schermo: margini più piccoli, e quello che non ci sta scorre di lato (ogni tabella per conto
+   suo; il foglio intero per il resto). Stampa/PDF e Word non cambiano. */
+@media screen and (max-width:700px){
+  .preview-zone.is-active{padding:10px 6px}
+  .preview-paper{padding:22px 14px 30px;overflow-x:auto}
+  .preview-paper table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
 .mx-logo-mini{height:32px;width:32px;border-radius:8px;background:#fff;padding:2px;box-shadow:0 1px 3px rgba(0,0,0,.12);object-fit:contain;flex-shrink:0;display:none;border:1px solid var(--line,#e6e0d2)}
 .mx-bar.has-logo .em{display:none}
 
